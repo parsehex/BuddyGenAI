@@ -33,13 +33,16 @@ const options = {
   directories: {
     output: 'electron-dist'
   },
+  extraResources: ['./llama.cpp/build/bin/**/server*', './llama.cpp/build/bin/**/main*', './stable-diffusion.cpp/build/bin/**/*', './whisper.cpp/**/*'],
+
   win: {
     // eslint-disable-next-line no-template-curly-in-string
     artifactName: '${productName}-Setup-${version}.${ext}',
     target: [
       {
         target: 'nsis',
-        arch: ['x64', 'ia32']
+        arch: ['x64']
+        // arch: ['x64', 'ia32']
       }
     ]
   },

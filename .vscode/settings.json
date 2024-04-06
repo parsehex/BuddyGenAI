@@ -1,7 +1,17 @@
 {
   "search.exclude": {
     "**/.git": true,
-    "**/__extensions": true
+    "**/__extensions": true,
+    "***.cpp": true,
+    "**/*dist": true,
+    "**/.output": true,
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/__extensions": true,
+    "***.cpp": true,
+    "**/*dist": true,
+    "**/.output": true,
   },
   "scss.lint.unknownAtRules": "ignore",
   "css.lint.unknownAtRules": "ignore"
