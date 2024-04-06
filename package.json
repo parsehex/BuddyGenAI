@@ -1,8 +1,8 @@
 {
-  "name": "electron-nuxt3",
-  "author": "EternalC0DER",
-  "email": "s.eternalcoder@gmail.com",
-  "description": "Nuxt3 + Electron & More",
+  "name": "ai-persona-electron-nuxt3",
+  "author": "parsehex",
+  "email": "",
+  "description": "Talk to AI-powered personas that you can customize.",
   "version": "1.0.0",
   "private": true,
   "main": ".output/electron/background.js",

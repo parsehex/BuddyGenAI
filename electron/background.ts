@@ -38,7 +38,7 @@ function createWindow() {
     // frame: platform === 'darwin',
     frame: true, // <= Remove this line if you wanted to implement your own title bar
     titleBarOverlay: platform === 'darwin' && { height: headerSize },
-    title: 'electron-nuxt3'
+    title: 'AI Persona'
   })
 
   // Lock app to single instance
