@@ -17,6 +17,8 @@
 
 # ⚙️ Setup
 
+Node v18 is recommended.
+
 ```bash
 # Clone the repository
 git clone https://github.com/EternalC0der/electron-nuxt3.git

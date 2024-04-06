@@ -64,11 +64,12 @@ const options = {
       Encoding: 'UTF-8',
       MimeType: 'x-scheme-handler/deeplink'
     },
-    target: ['AppImage', 'rpm', 'deb']
+    target: ['AppImage']
+    // target: ['AppImage', 'rpm', 'deb']
   }
 }
 
-const platform = 'WINDOWS' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
+const platform = 'LINUX' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
 builder
   .build({
     targets: Platform[platform].createTarget(),
