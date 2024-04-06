@@ -4,18 +4,18 @@
 
 ## ✅ Features
 
--   Perfect structure for parallel development of electron and nuxt 🏢
--   Deploy with or without electron! 🚀
--   Typescript (you can use javascript too) 📍
--   electron-updater 🎉
--   custom electron-builder config 🎩
--   Latest versions of `electron` and `nuxt` ✨
--   Great DX and Extensibility 🍕
--   Parallel transpilation and hot-reloading 🧪
--   `useElectron` composable for easy access to electron APIs and IPC 🎨
--   Vue-Devtools support, ESLint & Prettier, and more! 🔥
+- Perfect structure for parallel development of electron and nuxt 🏢
+- Deploy with or without electron! 🚀
+- Typescript (you can use javascript too) 📍
+- electron-updater 🎉
+- custom electron-builder config 🎩
+- Latest versions of `electron` and `nuxt` ✨
+- Great DX and Extensibility 🍕
+- Parallel transpilation and hot-reloading 🧪
+- `useElectron` composable for easy access to electron APIs and IPC 🎨
+- Vue-Devtools support, ESLint & Prettier, and more! 🔥
 
-# ⚙️ Setup 
+# ⚙️ Setup
 
 ```bash
 # Clone the repository
@@ -50,7 +50,7 @@ npm run dev
 ### Build
 
 ```bash
-# Generate static build
+# Generate Nuxt static build
 npm run build
 
 # Build electron app for production
