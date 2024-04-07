@@ -33,7 +33,13 @@ const options = {
   directories: {
     output: 'electron-dist'
   },
-  extraResources: ['./llama.cpp/build/bin/**/server*', './llama.cpp/build/bin/**/main*', './stable-diffusion.cpp/build/bin/**/*', './whisper.cpp/**/*'],
+  extraResources: [
+    './llama.cpp/build/bin/**/main*',
+    './llama.cpp/build/bin/**/server*',
+    './stable-diffusion.cpp/build/bin/**/*',
+    './whisper.cpp/**/main*',
+    './whisper.cpp/**/server*'
+  ],
 
   win: {
     // eslint-disable-next-line no-template-curly-in-string
