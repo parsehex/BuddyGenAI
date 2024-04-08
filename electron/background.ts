@@ -26,7 +26,6 @@ function createWindow() {
     height: 1024,
     minWidth: 1024,
     minHeight: 676,
-    backgroundColor: '#000',
     webPreferences: {
       devTools: !isProduction,
       nodeIntegration: true,
@@ -88,6 +87,8 @@ app.whenReady().then(async () => {
     // if (BrowserWindow.getAllWindows().length === 0) createWindow()
     mainWindow.show()
   })
+
+  await import('./ai/llamacpp')
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
