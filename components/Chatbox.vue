@@ -7,55 +7,50 @@ import { Input } from './ui/input';
 import { useAppStore } from '../stores/main';
 
 const store = useAppStore();
-console.log(store);
-
-const initMsgs = ref([] as any[]); // TODO
 
 const threadTitle = ref('');
-
-const fetchThreads = async () => {
-	const res = await fetch('/api/threads');
-	const threads = await res.json();
-	return threads;
-};
+const api = computed(() => `/api/message?threadId=${store.selectedThreadId}`);
 
 const fetchMessages = async () => {
 	if (!store.selectedThreadId) return;
 
 	const res = await fetch(`/api/messages?threadId=${store.selectedThreadId}`);
-	initMsgs.value = await res.json();
+	let msgs = await res.json();
 
-	if (initMsgs.value.length === 0) {
-		initMsgs.value = [{ id: 1, role: 'assistant', content: 'Hello! How can I help you today?' }];
-	}
+	// server creates first message on thread create, don't need this now
+	// if (msgs.length === 0) {
+	// 	msgs = [{ id: 1, role: 'assistant', content: 'Hello! How can I help you today?' }];
+	// }
+
+	return msgs;
 };
 const updateThreadTitle = async () => {
 	if (!store.selectedThreadId) return;
 	const res = await fetch(`/api/thread?id=${store.selectedThreadId}`);
 	const thread = await res.json();
-	console.log(thread);
 	threadTitle.value = thread.name;
 };
 
-const { messages, input, handleSubmit, setMessages, reload } = useChat({ api: `/api/message?threadId=${store.selectedThreadId}`, initialMessages: initMsgs.value });
-
-await fetchMessages();
 await updateThreadTitle();
-watch(
-	() => store.selectedThreadId,
-	async () => {
-		await fetchMessages();
-		await updateThreadTitle();
-		setMessages(initMsgs.value);
-	}
-);
+const msgs = await fetchMessages();
 
-if (store.selectedThreadId === '') {
-	const threads = await fetchThreads();
-	if (threads.length > 0) {
-		store.selectedThreadId = threads[0].id;
+const { messages, input, handleSubmit, setMessages, reload, isLoading } = useChat({ api: api.value, initialMessages: msgs });
+
+const doSubmit = async (e: Event) => {
+	if (input.value === '') return;
+	if (isLoading.value) {
+		e.preventDefault();
+		console.log('prevented submit');
+		return;
 	}
-}
+	handleSubmit(e);
+};
+const doReload = async () => {
+	if (isLoading.value) {
+		return;
+	}
+	reload();
+};
 </script>
 
 <template>
@@ -66,10 +61,10 @@ if (store.selectedThreadId === '') {
 			<CardContent>{{ m.content }}</CardContent>
 		</Card>
 
-		<form @submit="handleSubmit" class="w-full fixed bottom-0 flex gap-1.5">
-			<Input class="p-2 mb-8 border border-gray-300 rounded shadow-xl" v-model="input" placeholder="Say something..." />
-			<!-- <RefreshCcwDot /> -->
-			<Button size="sm" @click="reload"><RefreshCcwDot /> </Button>
+		<form class="w-full fixed bottom-0 flex gap-1.5">
+			<Input class="p-2 mb-8 border border-gray-300 rounded shadow-xl" v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" />
+			<Button type="button" size="sm" @click="doSubmit">Send</Button>
+			<Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button>
 		</form>
 	</div>
 </template>
