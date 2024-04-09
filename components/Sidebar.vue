@@ -21,17 +21,20 @@ const selectThread = (threadId: string) => {
 
 const createThread = async () => {
 	if (newThreadName.value) {
-		await fetch('/api/thread', {
+		const newThreadRes = await fetch('/api/thread', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({ name: newThreadName.value, mode: 'custom' }),
 		});
+		const newThread = await newThreadRes.json();
 		newThreadName.value = '';
 
 		const threadsRes = await fetch('/api/threads');
 		threads.value = await threadsRes.json();
+
+		selectThread(newThread.id);
 	}
 };
 
@@ -50,15 +53,14 @@ const deleteThread = async (threadId: string) => {
 </script>
 
 <template>
-	<Tabs default-value="threads">
-		<TabsList>
+	<Tabs default-value="threads" class="fixed">
+		<TabsList class="w-full">
 			<TabsTrigger value="threads">Threads</TabsTrigger>
 			<TabsTrigger value="personas">Personas</TabsTrigger>
 		</TabsList>
 		<TabsContent value="threads">
 			<div class="sidebar">
 				<div class="flex w-full mb-4">
-					<!-- mb-4 = margin-bottom: 4px -->
 					<Input v-model="newThreadName" placeholder="Thread name" @keyup.enter="createThread" />
 					<Button @click="createThread">+</Button>
 				</div>
@@ -76,7 +78,15 @@ const deleteThread = async (threadId: string) => {
 			</div>
 		</TabsContent>
 		<TabsContent value="personas">
-			<!--  -->
+			<div class="sidebar">
+				<div class="flex w-full mb-4">
+					<Input placeholder="Persona name" />
+					<Button>+</Button>
+				</div>
+				<ul>
+					<li :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded']"> Persona Name </li>
+				</ul>
+			</div>
 		</TabsContent>
 	</Tabs>
 </template>
