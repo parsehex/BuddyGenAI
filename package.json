@@ -18,7 +18,10 @@
     "llamacpp:linux": "./scripts/linux/start_llamacpp_server.sh",
     "llamacpp:win": "scripts/windows/start_llamacpp_server.ps1",
     "whispercpp:linux": "./scripts/linux/start_whispercpp_server.sh",
-    "whispercpp:win": "scripts/windows/start_whispercpp_server.ps1"
+    "whispercpp:win": "scripts/windows/start_whispercpp_server.ps1",
+    "db:make-migration": "npx knex migrate:make $1",
+    "db:migrate-latest": "npx knex migrate:latest",
+    "rebuild": "npx electron-builder node-gyp-rebuild"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.0.0",
