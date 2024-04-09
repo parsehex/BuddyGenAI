@@ -1,6 +1,22 @@
 <script setup lang="ts">
 import Chatbox from './components/Chatbox.vue';
 import Sidebar from './components/Sidebar.vue';
+import { useAppStore } from './stores/main';
+
+const store = useAppStore();
+
+const fetchThreads = async () => {
+	const res = await fetch('/api/threads');
+	const threads = await res.json();
+	return threads;
+};
+
+if (store.selectedThreadId === '') {
+	const threads = await fetchThreads();
+	if (threads.length > 0) {
+		store.selectedThreadId = threads[0].id;
+	}
+}
 </script>
 
 <template>
@@ -8,7 +24,7 @@ import Sidebar from './components/Sidebar.vue';
 		<div class="container flex">
 			<!-- <p id="electron-status">isElectron: {{ useElectron().isElectron }}</p> -->
 			<Sidebar />
-			<Chatbox />
+			<Chatbox v-if="store.selectedThreadId" />
 		</div>
 	</Suspense>
 </template>
