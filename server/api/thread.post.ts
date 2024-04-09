@@ -18,9 +18,19 @@ export default defineEventHandler(async (event) => {
 			created: new Date(),
 			name,
 			persona_id,
-			mode
+			mode,
 		})
 		.returning('*');
+
+	// also add a default message if mode is custom
+	if (mode === 'custom') {
+		await db('chat_message').insert({
+			created: new Date(),
+			role: 'assistant',
+			content: 'Hello! How can I help you today?',
+			thread_id: thread.id,
+		});
+	}
 
 	return thread;
 });
