@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { BrowserWindow } from 'electron';
 import express, { static as serveStatic } from 'express';
-import { initDB } from './db';
 
 // Internals
 // =========
