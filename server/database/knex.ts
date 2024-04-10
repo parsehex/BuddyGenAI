@@ -14,7 +14,10 @@
 
 import knex from 'knex';
 import type { Knex } from 'knex';
+import fs from 'fs/promises';
+import path from 'path';
 
+const RESET_DB_EVERY_RUN = false;
 // TODO
 const dir = '/home/user/.config/Electron';
 const filename = 'db.sqlite';
@@ -49,8 +52,8 @@ export async function getDB() {
 	if (!db) {
 		db = knex({
 			client: 'sqlite3',
-			connection: { filename },
-			useNullAsDefault: true
+			connection: { filename: path.join(dir, filename) },
+			useNullAsDefault: true,
 		});
 		await db.migrate.latest();
 	}
