@@ -213,7 +213,7 @@ watch(
 </script>
 
 <template>
-	<div class="flex flex-col w-full py-4 mx-auto stretch" v-if="store.selectedThreadId !== ''">
+	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
 		<div class="flex items-end justify-between">
 			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
 			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
@@ -263,13 +263,13 @@ watch(
 			<ContextMenu>
 				<ContextMenuTrigger>
 					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id">
-						<CardHeader v-if="threadMode === 'persona'">
+						<CardHeader class="p-3" v-if="threadMode === 'persona'">
 							{{ m.role === 'user' ? 'User' : currentPersona?.name }}
 						</CardHeader>
-						<CardHeader v-else>
+						<CardHeader class="p-3" v-else>
 							{{ m.role === 'user' ? 'User' : 'AI' }}
 						</CardHeader>
-						<CardContent>{{ m.content }}</CardContent>
+						<CardContent class="p-3 pl-6 pt-0">{{ m.content }}</CardContent>
 					</Card>
 				</ContextMenuTrigger>
 				<ContextMenuContent>
