@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 import { useAppStore } from '../stores/main';
 
 const store = useAppStore();
@@ -45,7 +46,7 @@ const updateThreadTitle = async () => {
 await updateThreadTitle();
 const msgs = await fetchMessages();
 
-const { messages, input, handleSubmit, setMessages, reload, isLoading } = useChat({
+const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
 	initialMessages: msgs,
 	onFinish: async () => {
@@ -53,12 +54,14 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading } = useCha
 		setMessages(newMessages);
 	},
 });
+const uiMessages = computed(() => messages.value.filter((m: any) => m.role !== 'system'));
 
 const doSubmit = async (e: Event) => {
 	if (input.value === '') return;
 	if (isLoading.value) {
 		e.preventDefault();
-		console.log('prevented submit');
+		stop();
+		console.log('prevented submit & stopped');
 		return;
 	}
 	handleSubmit(e);
@@ -91,15 +94,43 @@ const didRightClickUser = computed(() => {
 	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
 	return msg && msg.role === 'user';
 });
+
+const editingMessageTitle = ref('');
+const editingMessage = ref('');
+const triggerEdit = async () => {
+	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	if (msg) {
+		const role = msg.role === 'user' ? 'User' : 'AI';
+		editingMessageTitle.value = `Editing ${role}'s Message`;
+		editingMessage.value = msg.content;
+	}
+	console.log('triggerEdit', msg);
+};
+const handleEdit = async () => {
+	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	if (!currentRightClickedMessageId.value || !msg) return;
+	await fetch(`/api/message`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ id: msg.id, content: editingMessage.value }),
+	});
+
+	const newMessages = await fetchMessages();
+	setMessages(newMessages);
+
+	editingMessage.value = '';
+};
 </script>
 
 <template>
 	<div class="flex flex-col w-full py-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
 		<h2 class="text-2xl font-bold mb-4">{{ threadTitle }}</h2>
-		<Dialog>
+		<Dialog :modal="true">
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<Card v-for="m in messages" :key="m.id" class="whitespace -pre-wrap" @contextmenu="currentRightClickedMessageId = m.id">
+					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id">
 						<CardHeader>{{ m.role === 'user' ? 'User' : 'AI' }}</CardHeader>
 						<CardContent>{{ m.content }}</CardContent>
 					</Card>
@@ -107,16 +138,38 @@ const didRightClickUser = computed(() => {
 				<ContextMenuContent>
 					<ContextMenuLabel>Message Options</ContextMenuLabel>
 					<ContextMenuSeparator />
-					<ContextMenuItem @click="console.log('edit')">Edit</ContextMenuItem>
+					<!-- <ContextMenuItem @click="console.log('edit')">Edit</ContextMenuItem> -->
+					<DialogTrigger asChild>
+						<ContextMenuItem>
+							<span @click="triggerEdit">Edit</span>
+						</ContextMenuItem>
+					</DialogTrigger>
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>
 			<!-- TODO: Edit message textarea -->
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>{{ editingMessageTitle }}</DialogTitle>
+				</DialogHeader>
+				<DialogDescription>
+					<Textarea v-model="editingMessage" placeholder="Message content..." />
+					<p class="py-1 text-sm text-muted-foreground"
+						><b>Warning</b>: Clicking outside to cancel is broken -- <b><u>use the X button above instead</u></b
+						>.</p
+					>
+				</DialogDescription>
+				<DialogFooter>
+					<DialogClose as-child>
+						<Button @click="handleEdit" type="button">Confirm</Button>
+					</DialogClose>
+				</DialogFooter>
+			</DialogContent>
 		</Dialog>
 
 		<form class="w-full fixed bottom-0 flex gap-1.5">
 			<Input class="p-2 mb-8 border border-gray-300 rounded shadow-xl" tabindex="1" v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" />
-			<Button type="button" size="sm" @click="doSubmit">Send</Button>
+			<Button type="button" size="sm" @click="doSubmit">{{ isLoading ? 'Stop' : 'Send' }}</Button>
 			<Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button>
 		</form>
 	</div>
