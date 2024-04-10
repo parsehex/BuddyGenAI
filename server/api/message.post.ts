@@ -34,7 +34,7 @@ export default defineLazyEventHandler(async () => {
 		await db('chat_message').insert({
 			created: new Date(),
 			role: 'user',
-			content: userMessage.content,
+			content: userMessage.content as string,
 			thread_id: thread.id,
 		});
 
