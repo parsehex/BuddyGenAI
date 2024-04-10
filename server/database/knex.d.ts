@@ -20,7 +20,7 @@ export interface ChatThread {
 export interface ChatMessage {
 	id: number;
 	created: Date;
-	role: 'user' | 'assistant';
+	role: 'user' | 'assistant' | 'system';
 	content: string;
 	thread_id: number;
 	thread_index: number;
