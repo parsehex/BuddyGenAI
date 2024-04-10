@@ -50,9 +50,12 @@ const updateThreadTitle = async () => {
 await updateThreadTitle();
 const msgs = await fetchMessages();
 
+const apiPartialBody = { threadId: store.selectedThreadId };
+
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
 	initialMessages: msgs,
+	body: apiPartialBody,
 	onFinish: async () => {
 		const newMessages = await fetchMessages();
 		setMessages(newMessages);
@@ -201,9 +204,9 @@ watch(selectedPersona, handlePersonaChange);
 watch(
 	() => [props.threadId],
 	async () => {
-		if (!store.selectedThreadId) return;
+		if (!store.selectedThreadId || !props.threadId) return;
 		refreshed.value = true;
-		api.value = `/api/message?threadId=${props.threadId}`;
+		apiPartialBody.threadId = props.threadId;
 		await updateThreadTitle();
 		const thread = await getThread();
 		selectedPersona.value = thread.persona_id + '';
@@ -329,7 +332,9 @@ const doClearThread = async () => {
 		<form class="w-full fixed bottom-0 flex gap-1.5">
 			<Input class="p-2 mb-8 border border-gray-300 rounded shadow-xl" tabindex="1" v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" />
 			<Button type="button" size="sm" @click="doSubmit">{{ isLoading ? 'Stop' : 'Send' }}</Button>
-			<Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button>
+			<!-- TODO fix -->
+			<!-- the reload method calls same api endpoint with same messaages -->
+			<!-- <Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button> -->
 		</form>
 	</div>
 </template>

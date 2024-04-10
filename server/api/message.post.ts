@@ -4,10 +4,6 @@ import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { getDB } from '../database/knex';
 
-const querySchema = z.object({
-	threadId: z.string(),
-});
-
 export default defineLazyEventHandler(async () => {
 	const openai = new OpenAI({
 		apiKey: 'sk-1234',
@@ -16,7 +12,7 @@ export default defineLazyEventHandler(async () => {
 
 	return defineEventHandler(async (event) => {
 		const db = await getDB();
-		const { threadId } = await getValidatedQuery(event, (query) => querySchema.parse(query));
+		const { threadId } = await readBody(event);
 
 		const thread = await db('chat_thread').where({ id: +threadId }).first();
 		if (!thread) {
