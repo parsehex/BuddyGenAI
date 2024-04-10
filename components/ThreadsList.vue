@@ -1,4 +1,19 @@
 <script setup lang="ts">
+import {
+	ContextMenu,
+	ContextMenuCheckboxItem,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuRadioGroup,
+	ContextMenuRadioItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuSub,
+	ContextMenuSubContent,
+	ContextMenuSubTrigger,
+	ContextMenuTrigger,
+} from './ui/context-menu';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
@@ -10,11 +25,8 @@ let threads = ref(await threadsRes.json());
 
 const newThreadName = ref('');
 
-const emit = defineEmits(['selectThread', 'createThread', 'deleteThread']);
-
 const selectThread = (threadId: string) => {
 	store.selectedThreadId = threadId;
-	emit('selectThread', threadId);
 };
 
 const createThread = async () => {
