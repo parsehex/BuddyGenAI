@@ -8,7 +8,10 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useAppStore } from '../stores/main';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Label } from './ui/label';
+import { getPersonas } from '@/lib/api/persona';
 
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
@@ -28,10 +31,14 @@ const fetchMessages = async () => {
 
 	return msgs;
 };
-const updateThreadTitle = async () => {
+const getThread = async () => {
 	if (!store.selectedThreadId) return;
 	const res = await fetch(`/api/thread?id=${store.selectedThreadId}`);
 	const thread = await res.json();
+	return thread;
+};
+const updateThreadTitle = async () => {
+	const thread = await getThread();
 	threadTitle.value = thread.name;
 };
 
@@ -135,12 +142,78 @@ const updateSysMessage = async () => {
 		newSysMessage.value = newSys.content;
 	}
 };
+
+const mode = (await getThread()).mode;
+const threadMode = ref(mode as 'custom' | 'persona');
+const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
+	if (!store.selectedThreadId) return;
+	if (uiMessages.value.length) {
+		// TODO allow but clear messages
+		console.log('changing mode with messages is not supported yet');
+		return;
+	}
+	await fetch(`/api/thread`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ id: store.selectedThreadId, mode: newMode }),
+	});
+
+	const newMessages = await fetchMessages();
+	setMessages(newMessages);
+};
+watch(threadMode, handleThreadModeChange);
+
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+const personas = ref(await getPersonas());
+
+const selectedPersona = ref(threadMode.value === 'persona' ? (await getThread()).persona_id + '' : '');
+const handlePersonaChange = async () => {
+	if (!store.selectedThreadId) return;
+	await fetch(`/api/thread`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ id: store.selectedThreadId, persona_id: +selectedPersona.value }),
+	});
+
+	const newMessages = await fetchMessages();
+	setMessages(newMessages);
+};
+watch(selectedPersona, handlePersonaChange);
 </script>
 
 <template>
 	<div class="flex flex-col w-full py-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
-		<h2 class="text-2xl font-bold mb-4">{{ threadTitle }}</h2>
-		<Collapsible v-if="hasSysMessage" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
+		<div class="flex items-center justify-between">
+			<h2 class="text-2xl font-bold mb-4">{{ threadTitle }}</h2>
+			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
+		</div>
+		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
+			<Label
+				>Thread Mode<br /><i><b>Warning</b>: Changing this is destructive -- the system message will be reset</i>.</Label
+			>
+			<div class="flex items-center space-x-2">
+				<RadioGroupItem id="option-custom" value="custom" />
+				<Label for="option-custom">Custom</Label>
+				<RadioGroupItem id="option-persona" value="persona" />
+				<Label for="option-persona">Persona</Label>
+			</div>
+		</RadioGroup>
+		<Select v-if="threadMode === 'persona' && !uiMessages.length" v-model:model-value="selectedPersona" class="my-2">
+			<SelectTrigger>
+				<SelectValue placeholder="Persona" />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectLabel>Personas</SelectLabel>
+				<SelectGroup>
+					<SelectItem v-for="persona in personas" :key="persona.id" :value="persona.id + ''">{{ persona.name }}</SelectItem>
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+		<Collapsible v-if="hasSysMessage && threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
 			<CollapsibleTrigger @click="handleSysMessageOpen">
 				<Button type="button" size="sm">{{ sysIsOpen ? 'Hide' : 'Show' }} System Message</Button>
 			</CollapsibleTrigger>
