@@ -22,6 +22,14 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useAppStore } from '../stores/main';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+const sysMessageTrigger = ref(null);
+
+const sysIsOpen = ref(false);
+const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
+const sysMessage = computed(() => messages.value.find((m: any) => m.role === 'system'));
+const newSysMessage = ref('');
 
 const store = useAppStore();
 
@@ -122,11 +130,46 @@ const handleEdit = async () => {
 
 	editingMessage.value = '';
 };
+
+const handleSysMessageOpen = async () => {
+	if (!sysMessage.value) return;
+	newSysMessage.value = sysMessage.value.content;
+};
+const updateSysMessage = async () => {
+	if (!sysMessage.value) return;
+	await fetch(`/api/message`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ id: sysMessage.value.id, content: newSysMessage.value }),
+	});
+	const newMessages = await fetchMessages();
+	setMessages(newMessages);
+	const newSys = newMessages.find((m: any) => m.role === 'system');
+	if (newSys) {
+		newSysMessage.value = newSys.content;
+	}
+};
 </script>
 
 <template>
 	<div class="flex flex-col w-full py-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
 		<h2 class="text-2xl font-bold mb-4">{{ threadTitle }}</h2>
+		<Collapsible v-if="hasSysMessage" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
+			<CollapsibleTrigger @click="handleSysMessageOpen">
+				<Button type="button" size="sm">{{ sysIsOpen ? 'Hide' : 'Show' }} System Message</Button>
+			</CollapsibleTrigger>
+			<CollapsibleContent>
+				<Card class="whitespace-pre-wrap">
+					<CardHeader>System</CardHeader>
+					<CardContent><Textarea v-model="newSysMessage" /></CardContent>
+					<CardFooter>
+						<Button type="button" @click="updateSysMessage">Update</Button>
+					</CardFooter>
+				</Card>
+			</CollapsibleContent>
+		</Collapsible>
 		<Dialog :modal="true">
 			<ContextMenu>
 				<ContextMenuTrigger>
@@ -138,7 +181,6 @@ const handleEdit = async () => {
 				<ContextMenuContent>
 					<ContextMenuLabel>Message Options</ContextMenuLabel>
 					<ContextMenuSeparator />
-					<!-- <ContextMenuItem @click="console.log('edit')">Edit</ContextMenuItem> -->
 					<DialogTrigger asChild>
 						<ContextMenuItem>
 							<span @click="triggerEdit">Edit</span>
