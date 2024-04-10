@@ -25,19 +25,19 @@ const newSysMessage = ref('');
 const store = useAppStore();
 
 const threadTitle = ref('');
-const api = computed(() => `/api/message?threadId=${props.threadId}`);
+const api = ref(`/api/message?threadId=${props.threadId}`);
 
 const fetchMessages = async () => {
 	if (!store.selectedThreadId) return;
 
-	const res = await fetch(`/api/messages?threadId=${store.selectedThreadId}`);
+	const res = await fetch(`/api/messages?threadId=${props.threadId}`);
 	let msgs = await res.json();
 
 	return msgs;
 };
 const getThread = async () => {
 	if (!store.selectedThreadId) return;
-	const res = await fetch(`/api/thread?id=${store.selectedThreadId}`);
+	const res = await fetch(`/api/thread?id=${props.threadId}`);
 	const thread = await res.json();
 	return thread;
 };
@@ -151,7 +151,7 @@ const refreshed = ref(false);
 const mode = (await getThread()).mode;
 const threadMode = ref(mode as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
-	if (!store.selectedThreadId) return;
+	if (!props.threadId) return;
 	if (refreshed.value) {
 		setTimeout(() => {
 			refreshed.value = false;
@@ -168,7 +168,7 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ id: store.selectedThreadId, mode: newMode }),
+		body: JSON.stringify({ id: props.threadId, mode: newMode }),
 	});
 
 	const newMessages = await fetchMessages();
@@ -188,7 +188,7 @@ const handlePersonaChange = async () => {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ id: store.selectedThreadId, persona_id: +selectedPersona.value }),
+		body: JSON.stringify({ id: props.threadId, persona_id: +selectedPersona.value }),
 	});
 
 	const newMessages = await fetchMessages();
@@ -202,6 +202,7 @@ watch(
 	async () => {
 		if (!store.selectedThreadId) return;
 		refreshed.value = true;
+		api.value = `/api/message?threadId=${props.threadId}`;
 		await updateThreadTitle();
 		const thread = await getThread();
 		selectedPersona.value = thread.persona_id + '';
@@ -213,7 +214,7 @@ watch(
 </script>
 
 <template>
-	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
+	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="props.threadId !== ''">
 		<div class="flex items-end justify-between">
 			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
 			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
