@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import ThreadsList from './ThreadsList.vue';
+import PersonaList from './PersonaList.vue';
 </script>
 
 <template>
@@ -16,15 +17,7 @@ import ThreadsList from './ThreadsList.vue';
 			<ThreadsList />
 		</TabsContent>
 		<TabsContent value="personas">
-			<div class="sidebar">
-				<div class="flex w-full mb-4">
-					<Input placeholder="Persona name" />
-					<Button>+</Button>
-				</div>
-				<ul>
-					<li :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded']"> Persona Name </li>
-				</ul>
-			</div>
+			<PersonaList />
 		</TabsContent>
 	</Tabs>
 </template>
