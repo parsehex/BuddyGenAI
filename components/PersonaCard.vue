@@ -32,7 +32,14 @@ onMounted(async () => {
 <template>
 	<HoverCard>
 		<HoverCardTrigger as-child>
-			<Button variant="link" size="lg">{{ persona.name }}</Button>
+			<div class="flex items-center bg-primary-foreground p-2 rounded-lg">
+				<Avatar>
+					<!-- TODO -->
+					<AvatarImage src="https://github.com/vuejs.png" />
+					<AvatarFallback>VC</AvatarFallback>
+				</Avatar>
+				<Button variant="link" size="lg">{{ persona.name }}</Button>
+			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-80">
 			<div class="flex justify-between space-x-4">
