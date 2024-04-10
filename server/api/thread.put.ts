@@ -15,6 +15,12 @@ export default defineEventHandler(async (event) => {
 	const { id, name, persona_id, mode } = data;
 
 	const db = await getDB();
+	const currentThread = await db('chat_thread').where({ id }).first();
+
+	if (!currentThread) {
+		throw new Error('Thread not found');
+	}
+
 	const [thread] = await db('chat_thread')
 		.where({ id })
 		.update({
@@ -23,6 +29,53 @@ export default defineEventHandler(async (event) => {
 			mode,
 		})
 		.returning('*');
+
+	const changedMode = mode && mode !== currentThread.mode;
+	if (changedMode) {
+		console.log('Mode changed, deleting first message');
+		await db('chat_message').where({ thread_id: id }).delete();
+		if (mode === 'custom') {
+			await db('chat_message').insert({
+				created: new Date(),
+				role: 'system',
+				content: 'The following is a chat between a human User and an embodied AI Assistant.',
+				thread_id: id,
+				thread_index: 0,
+			});
+		} else if (mode === 'persona') {
+			// use persona's description for the system message
+			const personaId = persona_id || currentThread.persona_id;
+			const persona = await db('persona').where({ id: personaId }).first();
+			if (persona) {
+				await db('chat_message').insert({
+					created: new Date(),
+					role: 'system',
+					content: persona.description,
+					thread_id: id,
+					thread_index: 0,
+				});
+			} else {
+				console.error(`Persona ID-${personaId} not found (was it deleted?)`);
+			}
+		}
+	}
+	const changedPersona = persona_id && persona_id !== currentThread.persona_id;
+	if (changedPersona) {
+		console.log('Persona changed, deleting first message');
+		await db('chat_message').where({ thread_id: id }).delete();
+		const persona = await db('persona').where({ id: persona_id }).first();
+		if (persona) {
+			await db('chat_message').insert({
+				created: new Date(),
+				role: 'system',
+				content: persona.description,
+				thread_id: id,
+				thread_index: 0,
+			});
+		} else {
+			console.error(`Persona ID-${persona_id} not found (was it deleted?)`);
+		}
+	}
 
 	return thread;
 });
