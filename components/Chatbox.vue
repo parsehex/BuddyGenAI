@@ -1,21 +1,7 @@
 <script setup lang="ts">
 import { useChat } from 'ai/vue';
 import { RefreshCcwDot } from 'lucide-vue-next';
-import {
-	ContextMenu,
-	ContextMenuCheckboxItem,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuLabel,
-	ContextMenuRadioGroup,
-	ContextMenuRadioItem,
-	ContextMenuSeparator,
-	ContextMenuShortcut,
-	ContextMenuSub,
-	ContextMenuSubContent,
-	ContextMenuSubTrigger,
-	ContextMenuTrigger,
-} from './ui/context-menu';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
@@ -23,8 +9,6 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useAppStore } from '../stores/main';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
-const sysMessageTrigger = ref(null);
 
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
@@ -179,8 +163,6 @@ const updateSysMessage = async () => {
 					</Card>
 				</ContextMenuTrigger>
 				<ContextMenuContent>
-					<ContextMenuLabel>Message Options</ContextMenuLabel>
-					<ContextMenuSeparator />
 					<DialogTrigger asChild>
 						<ContextMenuItem>
 							<span @click="triggerEdit">Edit</span>
@@ -189,7 +171,6 @@ const updateSysMessage = async () => {
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>
-			<!-- TODO: Edit message textarea -->
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{{ editingMessageTitle }}</DialogTitle>
