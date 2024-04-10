@@ -8,7 +8,7 @@ const querySchema = z.object({
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
 		const db = await getDB();
-		const { id } = await getValidatedQuery(event, (body) => querySchema.parse(body));
+		const { id } = await getValidatedQuery(event, (query) => querySchema.parse(query));
 		const message = await db('chat_message').where({ id: +id }).first();
 		if (!message) {
 			throw createError({ statusCode: 404, statusMessage: 'Message not found' });

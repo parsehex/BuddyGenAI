@@ -1,15 +1,16 @@
 import { getDB } from '../database/knex';
+import z from 'zod';
 
 // Create New Thread
 
-interface DataShape {
-	name: string;
-	persona_id?: number;
-	mode: 'persona' | 'custom';
-}
+const bodySchema = z.object({
+	name: z.string(),
+	persona_id: z.number().optional(),
+	mode: z.literal('persona').or(z.literal('custom')),
+});
 
 export default defineEventHandler(async (event) => {
-	const data = (await readBody(event)) as DataShape;
+	const data = await readValidatedBody(event, (body) => bodySchema.parse(body));
 	const { name, persona_id, mode } = data;
 
 	const db = await getDB();
