@@ -4,12 +4,9 @@
  */
 exports.up = async function(knex) {
 	// add profile_pic_use_prompt bool to persona table
-	knex.schema.table('persona', (table) => {
+	await knex.schema.alterTable('persona', (table) => {
 		table.boolean('profile_pic_use_prompt').notNullable();
 	});
-
-	// set profile_pic_use_prompt to true for all existing personas
-	knex('persona').update({ profile_pic_use_prompt: true });
 };
 
 /**
@@ -17,7 +14,7 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-	knex.schema.table('persona', (table) => {
+	knex.schema.alterTable('persona', (table) => {
 		table.dropColumn('profile_pic_use_prompt');
 	});
 };

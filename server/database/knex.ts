@@ -52,7 +52,8 @@ export async function getDB() {
 	if (!db) {
 		db = knex({
 			client: 'sqlite3',
-			connection: { filename: path.join(dir, filename) },
+			connection: { filename },
+			// connection: { filename: path.join(dir, filename) },
 			useNullAsDefault: true,
 		});
 		await db.migrate.latest();
