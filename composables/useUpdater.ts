@@ -1,4 +1,4 @@
-import { ProgressInfo } from 'electron-updater'
+import type { ProgressInfo } from 'electron-updater'
 
 type UpdaterStatus = 'idle' | 'check-for-update' | 'update-available' | 'update-not-available' | 'update-error' | 'downloading' | 'update-downloaded'
 
