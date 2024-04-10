@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
+exports.up = async function(knex) {
 	// add profile_pic_use_prompt bool to persona table
 	knex.schema.table('persona', (table) => {
 		table.boolean('profile_pic_use_prompt').notNullable();
@@ -16,7 +16,7 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = async function(knex) {
 	knex.schema.table('persona', (table) => {
 		table.dropColumn('profile_pic_use_prompt');
 	});

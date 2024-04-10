@@ -23,6 +23,7 @@ export interface ChatMessage {
 	role: 'user' | 'assistant';
 	content: string;
 	thread_id: number;
+	thread_index: number;
 }
 
 declare module 'knex/types/tables' {
