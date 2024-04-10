@@ -221,7 +221,7 @@ watch(
 		</div>
 		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
 			<Label
-				>Thread Mode<br /><i><b>Warning</b>: Changing this is destructive -- the system message will be reset</i>.</Label
+				>Thread Mode<br /><i><b>Warning</b>: Changing this is destructive -- all messages except the first/system message will be lost</i>.</Label
 			>
 			<div class="flex items-center space-x-5">
 				<Label class="cursor-pointer">
@@ -288,9 +288,10 @@ watch(
 				</DialogHeader>
 				<DialogDescription>
 					<Textarea v-model="editingMessage" placeholder="Message content..." />
-					<p class="py-1 text-sm text-muted-foreground"
-						><b>Warning</b>: Clicking outside to cancel is broken -- <b><u>use the X button above instead</u></b
-						>.</p
+					<p class="py-1 text-sm text-muted-foreground">
+						<b>Warning</b>: Clicking outside to cancel is broken -- <u>use the X button above instead</u>.
+						<br />
+						(If the textarea is empty then click Close above and try again)</p
 					>
 				</DialogDescription>
 				<DialogFooter>
