@@ -24,7 +24,7 @@ if (store.selectedThreadId === '') {
 		<div class="container flex">
 			<!-- <p id="electron-status">isElectron: {{ useElectron().isElectron }}</p> -->
 			<Sidebar />
-			<Chatbox v-if="store.selectedThreadId" />
+			<Chatbox v-if="store.selectedThreadId" :threadId="store.selectedThreadId + ''" />
 		</div>
 	</Suspense>
 </template>

@@ -13,6 +13,10 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { getPersonas } from '@/lib/api/persona';
 
+const props = defineProps<{
+	threadId: string;
+}>();
+
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
 const sysMessage = computed(() => messages.value.find((m: any) => m.role === 'system'));
@@ -21,7 +25,7 @@ const newSysMessage = ref('');
 const store = useAppStore();
 
 const threadTitle = ref('');
-const api = computed(() => `/api/message?threadId=${store.selectedThreadId}`);
+const api = computed(() => `/api/message?threadId=${props.threadId}`);
 
 const fetchMessages = async () => {
 	if (!store.selectedThreadId) return;
@@ -143,10 +147,17 @@ const updateSysMessage = async () => {
 	}
 };
 
+const refreshed = ref(false);
 const mode = (await getThread()).mode;
 const threadMode = ref(mode as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	if (!store.selectedThreadId) return;
+	if (refreshed.value) {
+		setTimeout(() => {
+			refreshed.value = false;
+		}, 10);
+		return;
+	}
 	if (uiMessages.value.length) {
 		// TODO allow but clear messages
 		console.log('changing mode with messages is not supported yet');
@@ -171,6 +182,7 @@ const personas = ref(await getPersonas());
 const selectedPersona = ref(threadMode.value === 'persona' ? (await getThread()).persona_id + '' : '');
 const handlePersonaChange = async () => {
 	if (!store.selectedThreadId) return;
+	if (refreshed.value) return;
 	await fetch(`/api/thread`, {
 		method: 'PUT',
 		headers: {
@@ -182,7 +194,22 @@ const handlePersonaChange = async () => {
 	const newMessages = await fetchMessages();
 	setMessages(newMessages);
 };
+const currentPersona = computed(() => personas.value.find((p: any) => p.id === +selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);
+
+watch(
+	() => [props.threadId],
+	async () => {
+		if (!store.selectedThreadId) return;
+		refreshed.value = true;
+		await updateThreadTitle();
+		const thread = await getThread();
+		selectedPersona.value = thread.persona_id + '';
+		threadMode.value = thread.mode;
+		const newMessages = await fetchMessages();
+		setMessages(newMessages);
+	}
+);
 </script>
 
 <template>
@@ -223,6 +250,7 @@ watch(selectedPersona, handlePersonaChange);
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<Card class="whitespace-pre-wrap">
+					<!-- TODO add system presets (add to header) -->
 					<CardHeader>System</CardHeader>
 					<CardContent><Textarea v-model="newSysMessage" /></CardContent>
 					<CardFooter>
@@ -235,7 +263,12 @@ watch(selectedPersona, handlePersonaChange);
 			<ContextMenu>
 				<ContextMenuTrigger>
 					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id">
-						<CardHeader>{{ m.role === 'user' ? 'User' : 'AI' }}</CardHeader>
+						<CardHeader v-if="threadMode === 'persona'">
+							{{ m.role === 'user' ? 'User' : currentPersona?.name }}
+						</CardHeader>
+						<CardHeader v-else>
+							{{ m.role === 'user' ? 'User' : 'AI' }}
+						</CardHeader>
 						<CardContent>{{ m.content }}</CardContent>
 					</Card>
 				</ContextMenuTrigger>
