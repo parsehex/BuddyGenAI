@@ -186,20 +186,24 @@ watch(selectedPersona, handlePersonaChange);
 </script>
 
 <template>
-	<div class="flex flex-col w-full py-24 mx-auto stretch" v-if="store.selectedThreadId !== ''">
-		<div class="flex items-center justify-between">
-			<h2 class="text-2xl font-bold mb-4">{{ threadTitle }}</h2>
+	<div class="flex flex-col w-full py-4 mx-auto stretch" v-if="store.selectedThreadId !== ''">
+		<div class="flex items-end justify-between">
+			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
 			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
 		</div>
 		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
 			<Label
 				>Thread Mode<br /><i><b>Warning</b>: Changing this is destructive -- the system message will be reset</i>.</Label
 			>
-			<div class="flex items-center space-x-2">
-				<RadioGroupItem id="option-custom" value="custom" />
-				<Label for="option-custom">Custom</Label>
-				<RadioGroupItem id="option-persona" value="persona" />
-				<Label for="option-persona">Persona</Label>
+			<div class="flex items-center space-x-5">
+				<Label class="cursor-pointer">
+					<RadioGroupItem class="px-1" value="custom" />
+					Custom
+				</Label>
+				<Label class="cursor-pointer">
+					<RadioGroupItem class="px-1" value="persona" />
+					Persona
+				</Label>
 			</div>
 		</RadioGroup>
 		<Select v-if="threadMode === 'persona' && !uiMessages.length" v-model:model-value="selectedPersona" class="my-2">
