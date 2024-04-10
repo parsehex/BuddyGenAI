@@ -23,12 +23,14 @@ export default defineEventHandler(async (event) => {
 		.returning('*');
 
 	// also add a default message if mode is custom
+	// TODO add system message instead
 	if (mode === 'custom') {
 		await db('chat_message').insert({
 			created: new Date(),
 			role: 'assistant',
 			content: 'Hello! How can I help you today?',
 			thread_id: thread.id,
+			thread_index: 0,
 		});
 	}
 

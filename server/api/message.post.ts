@@ -31,11 +31,14 @@ export default defineLazyEventHandler(async () => {
 			throw createError({ statusCode: 400, statusMessage: 'Expected user message in last place' });
 		}
 
+		const userMsgIndex = messages.length - 1;
+
 		await db('chat_message').insert({
 			created: new Date(),
 			role: 'user',
 			content: userMessage.content as string,
 			thread_id: thread.id,
+			thread_index: userMsgIndex,
 		});
 
 		const response = await openai.chat.completions.create({
@@ -54,6 +57,7 @@ export default defineLazyEventHandler(async () => {
 					role: 'assistant',
 					content: completion,
 					thread_id: thread.id,
+					thread_index: userMsgIndex + 1,
 				});
 			},
 		});
