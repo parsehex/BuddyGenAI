@@ -211,6 +211,19 @@ watch(
 		setMessages(newMessages);
 	}
 );
+
+const doClearThread = async () => {
+	if (!props.threadId) return;
+	await fetch(`/api/messages?threadId=${props.threadId}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	const newMessages = await fetchMessages();
+	setMessages(newMessages);
+};
 </script>
 
 <template>
@@ -280,6 +293,8 @@ watch(
 						</ContextMenuItem>
 					</DialogTrigger>
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
+					<ContextMenuSeparator />
+					<ContextMenuItem @click="doClearThread">Delete All Messages</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>
 			<DialogContent>
