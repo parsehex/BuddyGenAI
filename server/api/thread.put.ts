@@ -1,4 +1,5 @@
 import { getDB } from '../database/knex';
+import type { Persona } from '../database/knex.d';
 import z from 'zod';
 
 // Update Existing Thread
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
 		await db('chat_message').where({ thread_id: id }).delete();
 		if (mode === 'custom') {
 			await db('chat_message').insert({
-				created: new Date(),
+				created: new Date().getTime(),
 				role: 'system',
 				content: 'The following is a chat between a human User and an embodied AI Assistant.',
 				thread_id: id,
@@ -44,13 +45,13 @@ export default defineEventHandler(async (event) => {
 			});
 		} else if (mode === 'persona') {
 			// use persona's description for the system message
-			const personaId = persona_id || currentThread.persona_id;
-			const persona = await db('persona').where({ id: personaId }).first();
+			const personaId = (persona_id || currentThread.persona_id) as number;
+			const persona = (await db('persona').where({ id: personaId }).first()) as Persona;
 			if (persona) {
 				await db('chat_message').insert({
-					created: new Date(),
+					created: new Date().getTime(),
 					role: 'system',
-					content: persona.description,
+					content: persona.description as string,
 					thread_id: id,
 					thread_index: 0,
 				});
@@ -59,6 +60,7 @@ export default defineEventHandler(async (event) => {
 			}
 		}
 	}
+
 	const changedPersona = persona_id && persona_id !== currentThread.persona_id;
 	if (changedPersona) {
 		console.log('Persona changed, deleting first message');
@@ -66,9 +68,9 @@ export default defineEventHandler(async (event) => {
 		const persona = await db('persona').where({ id: persona_id }).first();
 		if (persona) {
 			await db('chat_message').insert({
-				created: new Date(),
+				created: new Date().getTime(),
 				role: 'system',
-				content: persona.description,
+				content: persona.description as string,
 				thread_id: id,
 				thread_index: 0,
 			});

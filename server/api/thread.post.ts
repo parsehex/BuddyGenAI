@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 	const db = await getDB();
 	const [thread] = await db('chat_thread')
 		.insert({
-			created: new Date(),
+			created: new Date().getTime(),
 			name,
 			persona_id,
 			mode,
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
 	if (mode === 'custom') {
 		await db('chat_message').insert({
-			created: new Date(),
+			created: new Date().getTime(),
 			role: 'system',
 			content: 'The following is a chat between a human User and an embodied AI Assistant.',
 			thread_id: thread.id,

@@ -34,7 +34,7 @@ export default defineLazyEventHandler(async () => {
 		const userMsgIndex = messages.length - 1;
 
 		await db('chat_message').insert({
-			created: new Date(),
+			created: new Date().getTime(),
 			role: 'user',
 			content: userMessage.content as string,
 			thread_id: thread.id,
@@ -53,7 +53,7 @@ export default defineLazyEventHandler(async () => {
 		return OpenAIStream(response, {
 			onCompletion: async (completion) => {
 				await db('chat_message').insert({
-					created: new Date(),
+					created: new Date().getTime(),
 					role: 'assistant',
 					content: completion,
 					thread_id: thread.id,

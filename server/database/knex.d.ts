@@ -2,24 +2,25 @@ import { knex } from 'knex';
 
 export interface Persona {
 	id: number;
-	created: Date;
-	updated?: Date;
+	created: number;
+	updated: number | null;
 	name: string;
-	description?: string;
-	profile_pic?: string;
-	profile_pic_prompt?: string;
+	description: string | null;
+	profile_pic: string | null;
+	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
 }
 export interface ChatThread {
 	id: number;
-	created: Date;
+	created: number;
 	name: string;
-	persona_id?: number;
+	persona_id: number | null;
 	mode: 'persona' | 'custom';
 }
 export interface ChatMessage {
 	id: number;
-	created: Date;
+	created: number;
+	updated: number | null;
 	role: 'user' | 'assistant' | 'system';
 	content: string;
 	thread_id: number;

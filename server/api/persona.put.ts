@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
 	const [thread] = await db('persona')
 		.where({ id })
 		.update({
+			updated: new Date().getTime(),
 			name,
 			description,
 			profile_pic,
