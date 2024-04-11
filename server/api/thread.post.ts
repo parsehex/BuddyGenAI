@@ -1,5 +1,7 @@
+import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 import { getDB } from '../database/knex';
 import z from 'zod';
+import type { Persona } from '../database/knex.d';
 
 // Create New Thread
 
@@ -31,6 +33,19 @@ export default defineEventHandler(async (event) => {
 			thread_id: thread.id,
 			thread_index: 0,
 		});
+	} else if (mode === 'persona') {
+		const persona = (await db('persona').where({ id: persona_id }).first()) as Persona;
+		if (persona) {
+			await db('chat_message').insert({
+				created: new Date().getTime(),
+				role: 'system',
+				content: promptFromPersonaDescription(persona.name, persona.description || ''),
+				thread_id: thread.id,
+				thread_index: 0,
+			});
+		} else {
+			console.error(`Persona ID-${persona_id} not found (was it deleted?)`);
+		}
 	}
 
 	return thread;

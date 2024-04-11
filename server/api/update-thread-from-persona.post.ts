@@ -1,3 +1,4 @@
+import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 import { getDB } from '../database/knex';
 import z from 'zod';
 
@@ -26,7 +27,7 @@ export default defineEventHandler(async (event) => {
 		throw new Error('Persona not found');
 	}
 
-	const content = `The following is a chat between a human User and an Assistant playing the role of ${persona.name}. Description of ${persona.name} that Assistant follows faithfully:\n${persona.description}`;
+	const content = promptFromPersonaDescription(persona.name, persona.description || '');
 	const [firstMessage] = await db('chat_message').where({ thread_id: thread.id, thread_index: 0 }).update({ content }).returning('*');
 
 	return firstMessage;

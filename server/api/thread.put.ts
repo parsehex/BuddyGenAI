@@ -1,3 +1,4 @@
+import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 import { getDB } from '../database/knex';
 import type { Persona } from '../database/knex.d';
 import z from 'zod';
@@ -44,17 +45,13 @@ export default defineEventHandler(async (event) => {
 				thread_index: 0,
 			});
 		} else if (mode === 'persona') {
-			// use persona's description for the system message
 			const personaId = (persona_id || currentThread.persona_id) as number;
 			const persona = (await db('persona').where({ id: personaId }).first()) as Persona;
 			if (persona) {
-				// TODO make this a function
-				const prompt = `
-The following is a chat between a human User and an Assistant playing the role of ${persona.name}. Description of ${persona.name} that Assistant follows faithfully:\n${persona.description}`;
 				await db('chat_message').insert({
 					created: new Date().getTime(),
 					role: 'system',
-					content: prompt.trim(),
+					content: promptFromPersonaDescription(persona.name, persona.description || ''),
 					thread_id: id,
 					thread_index: 0,
 				});
