@@ -48,6 +48,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = 
 	onFinish: async () => {
 		const { value: newMessages } = await getMessages(threadId.value);
 		setMessages(apiMsgsToOpenai(newMessages));
+
+		setTimeout(() => {
+			const lastMessage = document.getElementById(`message-${newMessages[newMessages.length - 1].id}`);
+			if (lastMessage) {
+				lastMessage.scrollIntoView();
+			}
+		}, 10);
 	},
 });
 const uiMessages = computed(() => messages.value.filter((m: any) => m.role !== 'system'));
@@ -243,7 +250,7 @@ const doClearThread = async () => {
 		<Dialog :modal="true">
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id">
+					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id" :id="'message-' + m.id">
 						<CardHeader class="p-3" v-if="threadMode === 'persona'">
 							{{ m.role === 'user' ? 'User' : currentPersona?.name }}
 						</CardHeader>
