@@ -1,19 +1,11 @@
 <script setup lang="ts">
-// TODO add Persona tab
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
 import ThreadsList from './ThreadsList.vue';
 import PersonaList from './PersonaList.vue';
 
 const route = useRoute();
 
-const initialTab = ref('threads');
-if (route.path.includes('/persona')) {
-	initialTab.value = 'personas';
-}
-
-const modelValue = ref(initialTab.value);
+const modelValue = ref(route.path.includes('/persona') ? 'personas' : 'threads');
 
 watch(
 	() => route.path,
@@ -28,7 +20,7 @@ watch(
 </script>
 
 <template>
-	<Tabs :default-value="initialTab" v-model:model-value="modelValue" class="fixed">
+	<Tabs v-model:model-value="modelValue" class="fixed">
 		<TabsList class="w-full">
 			<TabsTrigger value="threads">Threads</TabsTrigger>
 			<TabsTrigger value="personas">Personas</TabsTrigger>
