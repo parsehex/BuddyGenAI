@@ -13,7 +13,7 @@ import Sidebar from '@/components/Sidebar.vue';
 </template>
 
 <style>
-#page-container {
+/* #page-container {
 	padding-left: 15%;
-}
+} */
 </style>
