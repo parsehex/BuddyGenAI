@@ -5,10 +5,30 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import ThreadsList from './ThreadsList.vue';
 import PersonaList from './PersonaList.vue';
+
+const route = useRoute();
+
+const initialTab = ref('threads');
+if (route.path.includes('/persona')) {
+	initialTab.value = 'personas';
+}
+
+const modelValue = ref(initialTab.value);
+
+watch(
+	() => route.path,
+	(path) => {
+		if (path.includes('/persona')) {
+			modelValue.value = 'personas';
+		} else {
+			modelValue.value = 'threads';
+		}
+	}
+);
 </script>
 
 <template>
-	<Tabs default-value="threads" class="fixed">
+	<Tabs :default-value="initialTab" v-model:model-value="modelValue" class="fixed">
 		<TabsList class="w-full">
 			<TabsTrigger value="threads">Threads</TabsTrigger>
 			<TabsTrigger value="personas">Personas</TabsTrigger>
