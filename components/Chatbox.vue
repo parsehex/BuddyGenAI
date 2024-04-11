@@ -179,6 +179,8 @@ const handlePersonaChange = async () => {
 
 	const { value: newMessages } = await getMessages(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
+
+	// FIX need to refresh to see change in personacard
 };
 const currentPersona = computed(() => personas.value.find((p: any) => p.id === +selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);

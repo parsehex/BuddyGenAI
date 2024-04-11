@@ -1,6 +1,8 @@
 import { getDB } from '../database/knex';
 import z from 'zod';
 
+// TODO add batching
+
 const querySchema = z.object({
 	threadId: z.string(),
 });

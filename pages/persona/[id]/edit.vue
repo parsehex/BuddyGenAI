@@ -45,6 +45,7 @@ const handleSave = async () => {
 				<Textarea v-model="descriptionValue" placeholder="Persona description" />
 			</CardContent>
 		</Card>
+		<!-- TODO add option whether to update all threads with this persona -->
 		<Button @click="handleSave">Save</Button>
 	</div>
 </template>
