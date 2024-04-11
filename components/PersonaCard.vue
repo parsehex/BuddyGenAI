@@ -17,7 +17,7 @@ const persona = ref({} as Persona);
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
-onMounted(async () => {
+onBeforeMount(async () => {
 	persona.value = (await getPersona(props.personaId)).value;
 	if (persona.value.updated) {
 		time_label.value = 'Updated';
