@@ -11,10 +11,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collap
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getPersonas } from '@/lib/api/persona';
+import { getThread, updateThread } from '@/lib/api/thread';
+import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
 
-const route = useRoute();
-const threadId = route.params.id as string;
+const props = defineProps<{
+	threadId: string;
+}>();
+const { threadId } = toRefs(props);
 
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
@@ -24,37 +29,23 @@ const newSysMessage = ref('');
 const threadTitle = ref('');
 const api = ref(`/api/message?threadId=${threadId}`);
 
-const fetchMessages = async () => {
-	if (!threadId) return;
-
-	const res = await fetch(`/api/messages?threadId=${threadId}`);
-	let msgs = await res.json();
-
-	return msgs;
-};
-const getThread = async () => {
-	if (!threadId) return;
-	const res = await fetch(`/api/thread?id=${threadId}`);
-	const thread = await res.json();
-	return thread;
-};
 const updateThreadTitle = async () => {
-	const thread = await getThread();
+	const { value: thread } = await getThread(threadId.value);
 	threadTitle.value = thread.name;
 };
 
 await updateThreadTitle();
-const msgs = await fetchMessages();
+const { value: msgs } = await getMessages(threadId.value);
 
 const apiPartialBody = { threadId };
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
-	initialMessages: msgs,
+	initialMessages: apiMsgsToOpenai(msgs),
 	body: apiPartialBody,
 	onFinish: async () => {
-		const newMessages = await fetchMessages();
-		setMessages(newMessages);
+		const { value: newMessages } = await getMessages(threadId.value);
+		setMessages(apiMsgsToOpenai(newMessages));
 	},
 });
 const uiMessages = computed(() => messages.value.filter((m: any) => m.role !== 'system'));
@@ -83,13 +74,11 @@ const doDelete = async () => {
 		console.log('only user messages can be deleted');
 		return;
 	}
-	await fetch(`/api/message?id=${currentRightClickedMessageId.value}`, {
-		method: 'DELETE',
-	});
+	await deleteMessage(currentRightClickedMessageId.value);
 
-	const newMessages = await fetchMessages();
+	const { value: newMessages } = await getMessages(threadId.value);
 	console.log('newMessages', newMessages);
-	setMessages(newMessages);
+	setMessages(apiMsgsToOpenai(newMessages));
 };
 
 const currentRightClickedMessageId = ref(null as any);
@@ -112,16 +101,13 @@ const triggerEdit = async () => {
 const handleEdit = async () => {
 	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
 	if (!currentRightClickedMessageId.value || !msg) return;
-	await fetch(`/api/message`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ id: msg.id, content: editingMessage.value }),
+	await updateMessage({
+		id: msg.id,
+		content: editingMessage.value,
 	});
 
-	const newMessages = await fetchMessages();
-	setMessages(newMessages);
+	const { value: newMessages } = await getMessages(threadId.value);
+	setMessages(apiMsgsToOpenai(newMessages));
 
 	editingMessage.value = '';
 };
@@ -132,15 +118,12 @@ const handleSysMessageOpen = async () => {
 };
 const updateSysMessage = async () => {
 	if (!sysMessage.value) return;
-	await fetch(`/api/message`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ id: sysMessage.value.id, content: newSysMessage.value }),
+	await updateMessage({
+		id: sysMessage.value.id,
+		content: newSysMessage.value,
 	});
-	const newMessages = await fetchMessages();
-	setMessages(newMessages);
+	const { value: newMessages } = await getMessages(threadId.value);
+	setMessages(apiMsgsToOpenai(newMessages));
 	const newSys = newMessages.find((m: any) => m.role === 'system');
 	if (newSys) {
 		newSysMessage.value = newSys.content;
@@ -148,7 +131,8 @@ const updateSysMessage = async () => {
 };
 
 const refreshed = ref(false);
-const mode = (await getThread()).mode;
+const thread = await getThread(threadId.value);
+const mode = thread.value.mode;
 const threadMode = ref(mode as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	if (!threadId) return;
@@ -163,66 +147,39 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		console.log('changing mode with messages is not supported yet');
 		return;
 	}
-	await fetch(`/api/thread`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ id: threadId, mode: newMode }),
+	await updateThread({
+		id: threadId.value,
+		mode: newMode,
 	});
 
-	const newMessages = await fetchMessages();
-	setMessages(newMessages);
+	const { value: newMessages } = await getMessages(threadId.value);
+	setMessages(apiMsgsToOpenai(newMessages));
 };
 watch(threadMode, handleThreadModeChange);
 
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 const personas = ref(await getPersonas());
 
-const selectedPersona = ref(threadMode.value === 'persona' ? (await getThread()).persona_id + '' : '');
+const selectedPersona = ref(threadMode.value === 'persona' ? thread.value.persona_id + '' : '');
 const handlePersonaChange = async () => {
 	if (!threadId) return;
 	if (refreshed.value) return;
-	await fetch(`/api/thread`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ id: threadId, persona_id: +selectedPersona.value }),
+	await updateThread({
+		id: threadId.value,
+		persona_id: +selectedPersona.value,
 	});
 
-	const newMessages = await fetchMessages();
-	setMessages(newMessages);
+	const { value: newMessages } = await getMessages(threadId.value);
+	setMessages(apiMsgsToOpenai(newMessages));
 };
 const currentPersona = computed(() => personas.value.find((p: any) => p.id === +selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);
 
-watch(
-	() => [threadId],
-	async () => {
-		if (!!threadId) return;
-		refreshed.value = true;
-		apiPartialBody.threadId = threadId;
-		await updateThreadTitle();
-		const thread = await getThread();
-		selectedPersona.value = thread.persona_id + '';
-		threadMode.value = thread.mode;
-		const newMessages = await fetchMessages();
-		setMessages(newMessages);
-	}
-);
-
 const doClearThread = async () => {
 	if (!threadId) return;
-	await fetch(`/api/messages?threadId=${threadId}`, {
-		method: 'DELETE',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await deleteMessages(threadId.value);
 
-	const newMessages = await fetchMessages();
-	setMessages(newMessages);
+	const { value: newMessages } = await getMessages(threadId.value);
+	setMessages(apiMsgsToOpenai(newMessages));
 };
 </script>
 

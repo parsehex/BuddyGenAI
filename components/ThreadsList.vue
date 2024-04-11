@@ -1,74 +1,67 @@
 <script setup lang="ts">
-const route = useRoute();
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
+import { getThread, getThreads, createThread, updateThread, deleteThread } from '@/lib/api/thread';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
+import type { ChatThread } from '~/server/database/knex.d';
+
+const route = useRoute();
+const isThreadSelected = (threadId: string | number) => route.params.id == threadId;
 
 const store = useAppStore();
 
-const threadsRes = await fetch('/api/threads');
-let threads = ref(await threadsRes.json());
-
 const newThreadName = ref('');
-
 const editingThreadName = ref('');
 
+const threads = ref([] as ChatThread[]);
+
+onMounted(async () => {
+	threads.value = (await getThreads()).value;
+});
+
 const renameClicked = (threadId: string) => {
-	editingThreadName.value = threads.value.find((thread: any) => thread.id === threadId).name;
+	const thread = threads.value.find((thread: any) => thread.id === threadId);
+	if (thread) {
+		editingThreadName.value = thread.name;
+	} else {
+		console.error(`Couldn't find thread with id ${threadId} to rename`);
+		editingThreadName.value = '';
+	}
 };
 const handleRename = async () => {
 	if (editingThreadName.value) {
-		const newThreadRes = await fetch('/api/thread', {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ id: store.selectedThreadId, name: editingThreadName.value }),
+		await updateThread({
+			id: store.selectedThreadId,
+			name: editingThreadName.value,
 		});
-		const newThread = await newThreadRes.json();
 		editingThreadName.value = '';
 
-		const threadsRes = await fetch('/api/threads');
-		threads.value = await threadsRes.json();
+		const threads = await getThreads();
+		threads.value = threads.value;
 	}
 };
 
-const selectThread = (threadId: string) => {
-	store.selectedThreadId = threadId;
-};
-
-const createThread = async () => {
+const doCreateThread = async () => {
 	if (newThreadName.value) {
-		const newThreadRes = await fetch('/api/thread', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ name: newThreadName.value, mode: 'custom' }),
+		const { value: newThread } = await createThread({
+			name: newThreadName.value,
+			mode: 'custom',
 		});
-		const newThread = await newThreadRes.json();
-		newThreadName.value = '';
 
-		const threadsRes = await fetch('/api/threads');
-		threads.value = await threadsRes.json();
-
-		selectThread(newThread.id);
+		threads.value = (await getThreads()).value;
+		navigateTo(`/chat/${newThread.id}`);
 	}
 };
 
-const deleteThread = async (threadId: string) => {
-	await fetch(`/api/thread?id=${threadId}`, {
-		method: 'DELETE',
-	});
+const doDeleteThread = async (threadId: string) => {
+	await deleteThread(threadId);
 
-	const threadsRes = await fetch('/api/threads');
-	threads.value = await threadsRes.json();
+	threads.value = (await getThreads()).value;
 
-	if (store.selectedThreadId === threadId) {
-		store.selectedThreadId = '';
+	if (isThreadSelected(threadId)) {
+		navigateTo(`/chat/${threads.value[0].id}`);
 	}
 };
 </script>
@@ -77,13 +70,13 @@ const deleteThread = async (threadId: string) => {
 	<div class="sidebar">
 		<div class="flex w-full mb-4">
 			<Input v-model="newThreadName" placeholder="Thread name" @keyup.enter="createThread" />
-			<Button @click="createThread">+</Button>
+			<Button @click="doCreateThread">+</Button>
 		</div>
 		<ul>
 			<Dialog>
 				<ContextMenu>
 					<ContextMenuTrigger>
-						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', route.params.id == thread.id ? 'font-bold' : '']">
+						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold' : '']">
 							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
 								{{ thread.name }}
 							</NuxtLink>
@@ -96,7 +89,7 @@ const deleteThread = async (threadId: string) => {
 								<span @click="renameClicked(store.selectedThreadId)">Rename</span>
 							</ContextMenuItem>
 						</DialogTrigger>
-						<ContextMenuItem @click="deleteThread(store.selectedThreadId)">Delete</ContextMenuItem>
+						<ContextMenuItem @click="doDeleteThread(store.selectedThreadId)">Delete</ContextMenuItem>
 					</ContextMenuContent>
 				</ContextMenu>
 				<DialogContent>

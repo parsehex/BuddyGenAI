@@ -16,6 +16,6 @@ export default defineLazyEventHandler(async () => {
 		}
 
 		const messages = await db('chat_message').where({ thread_id: +threadId }).select();
-		return messages;
+		return messages || [];
 	});
 });

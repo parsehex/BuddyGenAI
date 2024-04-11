@@ -18,7 +18,7 @@ const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
 onMounted(async () => {
-	persona.value = await getPersona(props.personaId);
+	persona.value = (await getPersona(props.personaId)).value;
 	if (persona.value.updated) {
 		time_label.value = 'Updated';
 		time_at.value = formatDistanceToNow(new Date(persona.value.updated), { addSuffix: true });

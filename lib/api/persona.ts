@@ -1,10 +1,11 @@
-import type { Persona } from '~/server/database/knex.d';
+import type { Persona } from '@/server/database/knex.d';
 
-export async function getPersonas(): Promise<Persona[]> {
-	const res = await fetch('/api/personas');
-	return await res.json();
+export async function getPersonas() {
+	return (await useFetch('/api/personas')).data as Ref<Persona[]>;
 }
-export async function getPersona(id: string | number): Promise<Persona> {
-	const res = await fetch(`/api/persona?id=${id}`);
-	return await res.json();
+export async function getPersona(id: string | number) {
+	if (!id) {
+		console.error('No persona id provided, expect errors');
+	}
+	return (await useFetch(`/api/persona?id=${id}`)).data as Ref<Persona>;
 }

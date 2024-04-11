@@ -4,16 +4,20 @@ import type { Persona } from '~/server/database/knex.d';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import Textarea from './ui/textarea/Textarea.vue';
+import { getPersonas } from '@/lib/api/persona';
 
 const personas = ref([] as Persona[]);
 const newPersona = ref({ name: '', description: '' });
 
-const fetchPersonas = async (): Promise<Persona[]> => {
-	const response = await fetch('/api/personas');
-	return await response.json();
-};
+// const fetchPersonas = async (): Promise<Persona[]> => {
+// 	const response = await fetch('/api/personas');
+// 	return await response.json();
+// };
 
-personas.value = await fetchPersonas();
+// personas.value = (await getPersonas()).value;
+onMounted(async () => {
+	personas.value = (await getPersonas()).value;
+});
 
 const createPersona = async () => {
 	await fetch('/api/persona', {
@@ -23,7 +27,7 @@ const createPersona = async () => {
 		},
 		body: JSON.stringify(newPersona.value),
 	});
-	personas.value = await fetchPersonas();
+	personas.value = (await getPersonas()).value;
 	newPersona.value = { name: '', description: '' };
 };
 </script>

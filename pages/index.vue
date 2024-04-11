@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { fetchThreads } from '@/lib/api/thread';
-const threads = await fetchThreads();
+import { getThreads } from '@/lib/api/thread';
+const { value: threads } = await getThreads();
 await navigateTo(`/chat/${threads[0].id}`);
 </script>
 

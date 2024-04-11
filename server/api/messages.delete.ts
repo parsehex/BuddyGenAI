@@ -17,5 +17,6 @@ export default defineLazyEventHandler(async () => {
 
 		// delete all but the first message
 		await db('chat_message').where({ thread_id: +threadId }).andWhere('thread_index', '>', 0).delete();
+		return { success: true };
 	});
 });

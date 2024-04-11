@@ -6,11 +6,9 @@ const id = route.params.id as string;
 </script>
 
 <template>
-	<Suspense>
-		<div class="container flex">
-			<Chatbox :threadId="id" />
-		</div>
-	</Suspense>
+	<div class="container flex">
+		<Chatbox :threadId="id" />
+	</div>
 </template>
 
 <style lang="scss"></style>
