@@ -8,7 +8,7 @@ import { useAppStore } from '../stores/main';
 import type { ChatThread } from '~/server/database/knex.d';
 
 const route = useRoute();
-const isThreadSelected = (threadId: string | number) => route.params.id == threadId;
+const isThreadSelected = (threadId: string | number) => route.path.includes(`/chat`) && route.params.id == threadId;
 
 const store = useAppStore();
 
@@ -76,7 +76,7 @@ const doDeleteThread = async (threadId: string) => {
 			<Dialog>
 				<ContextMenu>
 					<ContextMenuTrigger>
-						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold' : '']">
+						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '']">
 							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
 								{{ thread.name }}
 							</NuxtLink>
