@@ -48,10 +48,13 @@ export default defineEventHandler(async (event) => {
 			const personaId = (persona_id || currentThread.persona_id) as number;
 			const persona = (await db('persona').where({ id: personaId }).first()) as Persona;
 			if (persona) {
+				// TODO make this a function
+				const prompt = `
+The following is a chat between a human User and an Assistant playing the role of ${persona.name}. Description of ${persona.name} that Assistant follows faithfully:\n${persona.description}`;
 				await db('chat_message').insert({
 					created: new Date().getTime(),
 					role: 'system',
-					content: persona.description as string,
+					content: prompt.trim(),
 					thread_id: id,
 					thread_index: 0,
 				});
@@ -67,10 +70,12 @@ export default defineEventHandler(async (event) => {
 		await db('chat_message').where({ thread_id: id }).delete();
 		const persona = await db('persona').where({ id: persona_id }).first();
 		if (persona) {
+			const prompt = `
+The following is a chat between a human User and an Assistant playing the role of ${persona.name}. Description of ${persona.name} that Assistant follows faithfully:\n${persona.description}`;
 			await db('chat_message').insert({
 				created: new Date().getTime(),
 				role: 'system',
-				content: persona.description as string,
+				content: prompt.trim(),
 				thread_id: id,
 				thread_index: 0,
 			});
