@@ -30,6 +30,8 @@ const threadTitle = ref('');
 const api = ref(`/api/message?threadId=${threadId}`);
 
 const updateThreadTitle = async () => {
+	// TODO remove this -- how to get updates to thread title?
+	// idea: only allow rename from sidebar + save to store, watch store from here
 	const { value: thread } = await getThread(threadId.value);
 	threadTitle.value = thread.name;
 };
@@ -37,7 +39,7 @@ const updateThreadTitle = async () => {
 await updateThreadTitle();
 const { value: msgs } = await getMessages(threadId.value);
 
-const apiPartialBody = { threadId };
+const apiPartialBody = { threadId: threadId.value };
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
