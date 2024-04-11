@@ -17,7 +17,7 @@ const editingThreadName = ref('');
 
 const threads = ref([] as ChatThread[]);
 
-onMounted(async () => {
+onBeforeMount(async () => {
 	threads.value = (await getThreads()).value;
 });
 

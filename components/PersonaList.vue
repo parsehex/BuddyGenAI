@@ -9,7 +9,7 @@ import { getPersonas, createPersona } from '@/lib/api/persona';
 const personas = ref([] as Persona[]);
 const newPersona = ref({ name: '', description: '' });
 
-onMounted(async () => {
+onBeforeMount(async () => {
 	personas.value = (await getPersonas()).value;
 });
 
