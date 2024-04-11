@@ -15,6 +15,8 @@ export default function (mainWindow: BrowserWindow) {
 	if (!isProduction) return mainWindow.loadURL('http://localhost:3000/');
 	const app = express();
 	app.use('/', serveStatic(path.join(__dirname, '../public')));
+	// TODO! we need to pass userData path to Nuxt to load DB
+	// maybe just pick somewhere to store data per-platform?
 	const listener = app.listen(8079, 'localhost', () => {
 		const port = (listener.address() as any).port;
 		console.log('Dynamic-Renderer Listening on', port);

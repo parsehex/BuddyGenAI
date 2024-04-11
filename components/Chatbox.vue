@@ -306,6 +306,7 @@ const doClearThread = async () => {
 					</DialogTrigger>
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
 					<ContextMenuSeparator />
+					<!-- TODO confirm -->
 					<ContextMenuItem @click="doClearThread">Delete All Messages</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>

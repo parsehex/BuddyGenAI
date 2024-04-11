@@ -92,6 +92,7 @@ const deleteThread = async (threadId: string) => {
 						</li>
 					</ContextMenuTrigger>
 					<ContextMenuContent>
+						<!-- TODO fix to not use selected thread -->
 						<DialogTrigger asChild>
 							<ContextMenuItem>
 								<span @click="renameClicked(store.selectedThreadId)">Rename</span>
