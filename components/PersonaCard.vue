@@ -49,7 +49,10 @@ onMounted(async () => {
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>
 				<div class="space-y-1">
-					<h4 class="text-sm font-semibold">{{ persona.name }}</h4>
+					<div class="flex justify-around">
+						<NuxtLink :to="`/persona/${persona.id}/edit`">Edit</NuxtLink>
+						<NuxtLink :to="`/persona/${persona.id}/view`">View</NuxtLink>
+					</div>
 					<p class="text-sm">{{ persona.description }}</p>
 					<div class="flex items-center pt-2">
 						<span class="text-xs text-muted-foreground"> {{ time_label }} {{ time_at }} </span>

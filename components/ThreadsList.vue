@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const route = useRoute();
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -82,13 +83,10 @@ const deleteThread = async (threadId: string) => {
 			<Dialog>
 				<ContextMenu>
 					<ContextMenuTrigger>
-						<li
-							v-for="thread in threads"
-							:key="thread.id"
-							@click="selectThread(thread.id)"
-							:class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', store.selectedThreadId === thread.id ? 'font-bold' : '']"
-						>
-							{{ thread.name }}
+						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', route.params.id == thread.id ? 'font-bold' : '']">
+							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
+								{{ thread.name }}
+							</NuxtLink>
 						</li>
 					</ContextMenuTrigger>
 					<ContextMenuContent>

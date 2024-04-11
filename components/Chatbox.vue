@@ -7,38 +7,34 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { useAppStore } from '../stores/main';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getPersonas } from '@/lib/api/persona';
 
-const props = defineProps<{
-	threadId: string;
-}>();
+const route = useRoute();
+const threadId = route.params.id as string;
 
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
 const sysMessage = computed(() => messages.value.find((m: any) => m.role === 'system'));
 const newSysMessage = ref('');
 
-const store = useAppStore();
-
 const threadTitle = ref('');
-const api = ref(`/api/message?threadId=${props.threadId}`);
+const api = ref(`/api/message?threadId=${threadId}`);
 
 const fetchMessages = async () => {
-	if (!store.selectedThreadId) return;
+	if (!threadId) return;
 
-	const res = await fetch(`/api/messages?threadId=${props.threadId}`);
+	const res = await fetch(`/api/messages?threadId=${threadId}`);
 	let msgs = await res.json();
 
 	return msgs;
 };
 const getThread = async () => {
-	if (!store.selectedThreadId) return;
-	const res = await fetch(`/api/thread?id=${props.threadId}`);
+	if (!threadId) return;
+	const res = await fetch(`/api/thread?id=${threadId}`);
 	const thread = await res.json();
 	return thread;
 };
@@ -50,7 +46,7 @@ const updateThreadTitle = async () => {
 await updateThreadTitle();
 const msgs = await fetchMessages();
 
-const apiPartialBody = { threadId: store.selectedThreadId };
+const apiPartialBody = { threadId };
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
@@ -155,7 +151,7 @@ const refreshed = ref(false);
 const mode = (await getThread()).mode;
 const threadMode = ref(mode as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
-	if (!props.threadId) return;
+	if (!threadId) return;
 	if (refreshed.value) {
 		setTimeout(() => {
 			refreshed.value = false;
@@ -172,7 +168,7 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ id: props.threadId, mode: newMode }),
+		body: JSON.stringify({ id: threadId, mode: newMode }),
 	});
 
 	const newMessages = await fetchMessages();
@@ -185,14 +181,14 @@ const personas = ref(await getPersonas());
 
 const selectedPersona = ref(threadMode.value === 'persona' ? (await getThread()).persona_id + '' : '');
 const handlePersonaChange = async () => {
-	if (!store.selectedThreadId) return;
+	if (!threadId) return;
 	if (refreshed.value) return;
 	await fetch(`/api/thread`, {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ id: props.threadId, persona_id: +selectedPersona.value }),
+		body: JSON.stringify({ id: threadId, persona_id: +selectedPersona.value }),
 	});
 
 	const newMessages = await fetchMessages();
@@ -202,11 +198,11 @@ const currentPersona = computed(() => personas.value.find((p: any) => p.id === +
 watch(selectedPersona, handlePersonaChange);
 
 watch(
-	() => [props.threadId],
+	() => [threadId],
 	async () => {
-		if (!store.selectedThreadId || !props.threadId) return;
+		if (!!threadId) return;
 		refreshed.value = true;
-		apiPartialBody.threadId = props.threadId;
+		apiPartialBody.threadId = threadId;
 		await updateThreadTitle();
 		const thread = await getThread();
 		selectedPersona.value = thread.persona_id + '';
@@ -217,8 +213,8 @@ watch(
 );
 
 const doClearThread = async () => {
-	if (!props.threadId) return;
-	await fetch(`/api/messages?threadId=${props.threadId}`, {
+	if (!threadId) return;
+	await fetch(`/api/messages?threadId=${threadId}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
@@ -231,7 +227,7 @@ const doClearThread = async () => {
 </script>
 
 <template>
-	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="props.threadId !== ''">
+	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="threadId !== ''">
 		<div class="flex items-end justify-between">
 			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
 			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
