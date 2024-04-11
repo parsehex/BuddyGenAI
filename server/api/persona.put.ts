@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const db = await getDB();
-	const [thread] = await db('persona')
+	const [persona] = await db('persona')
 		.where({ id })
 		.update({
 			updated: new Date().getTime(),
@@ -33,5 +33,5 @@ export default defineEventHandler(async (event) => {
 		})
 		.returning('*');
 
-	return thread;
+	return persona;
 });

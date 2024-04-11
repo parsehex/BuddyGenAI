@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const db = await getDB();
-	const [thread] = await db('persona')
+	const [persona] = await db('persona')
 		.insert({
 			created: new Date().getTime(),
 			name,
@@ -31,5 +31,5 @@ export default defineEventHandler(async (event) => {
 		})
 		.returning('*');
 
-	return thread;
+	return persona;
 });
