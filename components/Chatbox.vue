@@ -11,7 +11,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collap
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getPersonas } from '@/lib/api/persona';
 import { getThread, updateThread } from '@/lib/api/thread';
 import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
@@ -224,17 +223,7 @@ const doClearThread = async () => {
 				</TooltipProvider>
 			</div>
 		</RadioGroup>
-		<Select v-if="threadMode === 'persona' && !uiMessages.length" v-model:model-value="selectedPersona" class="my-2">
-			<SelectTrigger>
-				<SelectValue placeholder="Persona" />
-			</SelectTrigger>
-			<SelectContent>
-				<SelectLabel>Personas</SelectLabel>
-				<SelectGroup>
-					<SelectItem v-for="persona in personas" :key="persona.id" :value="persona.id + ''">{{ persona.name }}</SelectItem>
-				</SelectGroup>
-			</SelectContent>
-		</Select>
+		<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
 		<Collapsible v-if="hasSysMessage && threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
 			<CollapsibleTrigger @click="handleSysMessageOpen">
 				<Button type="button" size="sm">{{ sysIsOpen ? 'Hide' : 'Show' }} System Message</Button>
