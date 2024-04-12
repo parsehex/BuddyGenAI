@@ -246,23 +246,32 @@ const updateSysFromPersona = async () => {
 			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
 		</div>
 		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
-			<Label>Thread Mode</Label>
-			<div class="flex items-center space-x-5">
+			<TooltipProvider :delay-duration="100">
+				<Tooltip>
+					<TooltipTrigger>
+						<Label>Thread Mode</Label>
+					</TooltipTrigger>
+					<TooltipContent>
+						<h2 class="text-lg text-center font-bold">Warning</h2>
+						<p>Changing this is destructive -- all messages except the first/system message will be lost.</p>
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+			<div class="flex items-center space-x-5 justify-center">
+				<Label class="cursor-pointer">
+					<RadioGroupItem class="px-1" value="custom" />
+					Custom
+				</Label>
 				<TooltipProvider :delay-duration="100">
 					<Tooltip>
 						<TooltipTrigger>
 							<Label class="cursor-pointer">
-								<RadioGroupItem class="px-1" value="custom" />
-								Custom
-							</Label>
-							<Label class="cursor-pointer">
-								<RadioGroupItem class="px-1" value="persona" />
+								<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
 								Persona
 							</Label>
 						</TooltipTrigger>
 						<TooltipContent>
-							<h2 class="text-lg text-center font-bold">Warning</h2>
-							<p>Changing this is destructive -- all messages except the first/system message will be lost.</p>
+							<p v-if="!personas.length">No personas available.<br />Go to the Personas tab to create one, then come back here.</p>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
