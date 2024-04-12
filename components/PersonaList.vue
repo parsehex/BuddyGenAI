@@ -16,8 +16,12 @@ onBeforeMount(async () => {
 });
 
 const doCreatePersona = async () => {
-	await createPersona(newPersona.value);
-	personas.value = (await getPersonas()).value;
+	await $fetch('/api/persona', {
+		method: 'POST',
+		body: JSON.stringify(newPersona.value),
+	});
+	const p = await $fetch('/api/personas');
+	personas.value = p;
 	newPersona.value = { name: '', description: '' };
 };
 </script>
@@ -25,7 +29,7 @@ const doCreatePersona = async () => {
 <template>
 	<div class="sidebar">
 		<div class="flex flex-col w-full mb-4">
-			<Input v-model="newPersona.name" placeholder="Persona name" />
+			<Input v-model="newPersona.name" placeholder="Persona name" @keydown.enter="doCreatePersona" />
 			<Button @click="doCreatePersona">Create</Button>
 		</div>
 		<ul>

@@ -45,7 +45,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = 
 	api: api.value,
 	body: apiPartialBody,
 	onFinish: async () => {
-		const { value: newMessages } = await getMessages(threadId.value);
+		// const { value: newMessages } = await getMessages(threadId.value);
+		const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 		setMessages(apiMsgsToOpenai(newMessages));
 
 		setTimeout(() => {
@@ -177,13 +178,22 @@ const handlePersonaChange = async () => {
 		}, 10);
 		return;
 	}
-	await updateThread({
-		id: threadId.value,
-		persona_id: +selectedPersona.value,
+	await $fetch('/api/thread', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id: threadId.value,
+			persona_id: selectedPersona.value,
+		}),
 	});
 
 	const { value: newMessages } = await getMessages(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
+
+	const p = await $fetch(`/api/personas`);
+	personas.value = p;
 };
 const currentPersona = computed(() => personas.value.find((p) => p.id === selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);
