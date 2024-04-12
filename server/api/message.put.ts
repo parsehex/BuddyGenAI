@@ -2,7 +2,7 @@ import z from 'zod';
 import { getDB } from '../database/knex';
 
 const bodySchema = z.object({
-	id: z.number(),
+	id: z.string(),
 	content: z.string(),
 });
 

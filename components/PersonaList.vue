@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { Persona } from '~/server/database/knex.d';
+import type { Persona } from '~/server/database/types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import Textarea from './ui/textarea/Textarea.vue';

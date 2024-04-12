@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Button from '~/components/ui/button/Button.vue';
 import { getPersona } from '~/lib/api/persona';
-import type { Persona } from '~/server/database/knex.d';
+import type { Persona } from '~/server/database/types';
 
 const route = useRoute();
 const id = route.params.id as string;

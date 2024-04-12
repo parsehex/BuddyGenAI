@@ -1,13 +1,14 @@
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 import { getDB } from '../database/knex';
 import z from 'zod';
-import type { Persona } from '../database/knex.d';
+import type { Persona } from '../database/types';
+import { v4 as uuidv4 } from 'uuid';
 
 // Create New Thread
 
 const bodySchema = z.object({
 	name: z.string(),
-	persona_id: z.number().optional(),
+	persona_id: z.string().optional(),
 	mode: z.literal('persona').or(z.literal('custom')),
 });
 
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
 	const db = await getDB();
 	const [thread] = await db('chat_thread')
 		.insert({
+			id: uuidv4(),
 			created: new Date().getTime(),
 			name,
 			persona_id,
@@ -27,6 +29,7 @@ export default defineEventHandler(async (event) => {
 
 	if (mode === 'custom') {
 		await db('chat_message').insert({
+			id: uuidv4(),
 			created: new Date().getTime(),
 			role: 'system',
 			content: 'The following is a chat between a human User and an embodied AI Assistant.',
@@ -37,6 +40,7 @@ export default defineEventHandler(async (event) => {
 		const persona = (await db('persona').where({ id: persona_id }).first()) as Persona;
 		if (persona) {
 			await db('chat_message').insert({
+				id: uuidv4(),
 				created: new Date().getTime(),
 				role: 'system',
 				content: promptFromPersonaDescription(persona.name, persona.description || ''),

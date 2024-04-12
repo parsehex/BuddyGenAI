@@ -10,12 +10,12 @@ export default defineLazyEventHandler(async () => {
 		const db = await getDB();
 		const { threadId } = await getValidatedQuery(event, (query) => querySchema.parse(query));
 
-		const thread = await db('chat_thread').where({ id: +threadId }).first();
+		const thread = await db('chat_thread').where({ id: threadId }).first();
 		if (!thread) {
 			throw createError({ statusCode: 404, statusMessage: 'Thread not found' });
 		}
 
-		const messages = await db('chat_message').where({ thread_id: +threadId }).select();
+		const messages = await db('chat_message').where({ thread_id: threadId }).select();
 		return messages || [];
 	});
 });

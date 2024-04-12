@@ -1,4 +1,4 @@
-import type { ChatThread } from '@/server/database/knex.d';
+import type { ChatThread } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
 export async function getThreads() {

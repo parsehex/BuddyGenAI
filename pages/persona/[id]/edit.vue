@@ -4,7 +4,7 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
 import { getPersona, updatePersona } from '~/lib/api/persona';
-import type { Persona } from '~/server/database/knex.d';
+import type { Persona } from '~/server/database/types';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -22,7 +22,7 @@ onBeforeMount(async () => {
 
 const handleSave = async () => {
 	await updatePersona({
-		id: +id,
+		id,
 		name: nameValue.value,
 		description: descriptionValue.value,
 	});

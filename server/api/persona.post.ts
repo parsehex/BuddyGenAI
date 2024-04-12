@@ -1,4 +1,5 @@
 import z from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 import { getDB } from '../database/knex';
 
 // Create New Persona
@@ -22,6 +23,7 @@ export default defineEventHandler(async (event) => {
 	const db = await getDB();
 	const [persona] = await db('persona')
 		.insert({
+			id: uuidv4(),
 			created: new Date().getTime(),
 			name,
 			description,

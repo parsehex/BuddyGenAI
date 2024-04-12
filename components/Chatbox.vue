@@ -22,8 +22,8 @@ const props = defineProps<{
 const { threadId } = toRefs(props);
 
 const sysIsOpen = ref(false);
-const hasSysMessage = computed(() => messages.value.some((m: any) => m.role === 'system'));
-const sysMessage = computed(() => messages.value.find((m: any) => m.role === 'system'));
+const hasSysMessage = computed(() => messages.value.some((m) => m.role === 'system'));
+const sysMessage = computed(() => messages.value.find((m) => m.role === 'system'));
 const newSysMessage = ref('');
 
 const threadTitle = ref('');
@@ -57,7 +57,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = 
 		}, 10);
 	},
 });
-const uiMessages = computed(() => messages.value.filter((m: any) => m.role !== 'system'));
+
+const uiMessages = computed(() => messages.value.filter((m) => m.role !== 'system'));
 
 const doSubmit = async (e: Event) => {
 	if (input.value === '') return;
@@ -75,9 +76,10 @@ const doReload = async () => {
 	}
 	reload();
 };
+const currentRightClickedMessageId = ref('' as string);
 const doDelete = async () => {
 	if (!currentRightClickedMessageId.value) return;
-	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	const msg = messages.value.find((m) => m.id === currentRightClickedMessageId.value);
 	console.log('deleting message', msg);
 	if (msg && msg.role !== 'user') {
 		console.log('only user messages can be deleted');
@@ -90,16 +92,15 @@ const doDelete = async () => {
 	setMessages(apiMsgsToOpenai(newMessages));
 };
 
-const currentRightClickedMessageId = ref(null as any);
 const didRightClickUser = computed(() => {
-	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	const msg = messages.value.find((m) => m.id === currentRightClickedMessageId.value);
 	return msg && msg.role === 'user';
 });
 
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
 const triggerEdit = async () => {
-	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	const msg = messages.value.find((m) => m.id === currentRightClickedMessageId.value);
 	if (msg) {
 		const role = msg.role === 'user' ? 'User' : 'AI';
 		editingMessageTitle.value = `Editing ${role}'s Message`;
@@ -108,7 +109,7 @@ const triggerEdit = async () => {
 	console.log('triggerEdit', msg);
 };
 const handleEdit = async () => {
-	const msg = messages.value.find((m: any) => m.id === currentRightClickedMessageId.value);
+	const msg = messages.value.find((m) => m.id === currentRightClickedMessageId.value);
 	if (!currentRightClickedMessageId.value || !msg) return;
 	await updateMessage({
 		id: msg.id,
@@ -133,7 +134,7 @@ const updateSysMessage = async () => {
 	});
 	const { value: newMessages } = await getMessages(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
-	const newSys = newMessages.find((m: any) => m.role === 'system');
+	const newSys = newMessages.find((m) => m.role === 'system');
 	if (newSys) {
 		newSysMessage.value = newSys.content;
 	}
@@ -168,7 +169,7 @@ watch(threadMode, handleThreadModeChange);
 
 const personas = ref(await getPersonas());
 
-const selectedPersona = ref(threadMode.value === 'persona' ? thread.value.persona_id + '' : '');
+const selectedPersona = ref('');
 const handlePersonaChange = async () => {
 	if (!threadId) return;
 	if (refreshed.value) return;
@@ -182,7 +183,7 @@ const handlePersonaChange = async () => {
 
 	// FIX need to refresh to see change in personacard
 };
-const currentPersona = computed(() => personas.value.find((p: any) => p.id === +selectedPersona.value));
+const currentPersona = computed(() => personas.value.find((p) => p.id === selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);
 
 const doClearThread = async () => {

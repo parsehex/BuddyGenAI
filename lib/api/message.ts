@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@/server/database/knex.d';
+import type { ChatMessage } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
 interface UpdateMessageOptions {
@@ -42,7 +42,7 @@ export async function updateMessage(options: UpdateMessageOptions) {
 // util:
 export function apiMsgsToOpenai(messages: ChatMessage[]) {
 	return messages.map((message) => ({
-		id: message.id + '',
+		id: message.id,
 		role: message.role,
 		content: message.content,
 	}));

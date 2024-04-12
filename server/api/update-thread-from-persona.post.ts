@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 	const data = await getValidatedQuery(event, (body) => querySchema.parse(body));
 
 	const db = await getDB();
-	const thread = await db('chat_thread').where({ id: +data.threadId }).first();
+	const thread = await db('chat_thread').where({ id: data.threadId }).first();
 
 	if (thread?.mode !== 'persona') {
 		throw new Error('Thread is not a persona thread');

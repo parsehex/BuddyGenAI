@@ -1,13 +1,6 @@
-import type { Persona } from '@/server/database/knex.d';
+import type { Persona } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
-// const bodySchema = z.object({
-// 	name: z.string(),
-// 	description: z.string().optional(),
-// 	profile_pic: z.string().optional(),
-// 	profile_pic_prompt: z.string().optional(),
-// 	profile_pic_use_prompt: z.boolean().default(true),
-// });
 interface CreatePersonaOptions {
 	name: string;
 	description?: string;
@@ -16,13 +9,13 @@ interface CreatePersonaOptions {
 	profile_pic_use_prompt?: boolean;
 }
 interface UpdatePersonaOptions extends Partial<CreatePersonaOptions> {
-	id: number;
+	id: string;
 }
 
 export async function getPersonas() {
 	return (await useFetch('/api/personas')).data as Ref<Persona[]>;
 }
-export async function getPersona(id: string | number) {
+export async function getPersona(id: string) {
 	if (!id) {
 		console.error('No persona id provided, expect errors');
 	}
@@ -45,7 +38,7 @@ export async function updatePersona(options: UpdatePersonaOptions) {
 		})
 	).data as Ref<Persona>;
 }
-export async function deletePersona(id: string | number) {
+export async function deletePersona(id: string) {
 	return (
 		await useFetch('/api/persona?id=' + id, {
 			method: 'DELETE',

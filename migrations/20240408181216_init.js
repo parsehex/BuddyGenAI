@@ -4,7 +4,7 @@
  */
 exports.up = async function (knex) {
 	await knex.schema.createTable('persona', (table) => {
-		table.increments('id').primary();
+		table.string('id', 50).primary();
 		table.timestamp('created').notNullable(); // sqlite doesn't support default
 		table.timestamp('updated');
 		table.string('name').notNullable();
@@ -13,7 +13,7 @@ exports.up = async function (knex) {
 		table.string('profile_pic_prompt');
 	});
 	await knex.schema.createTable('chat_thread', (table) => {
-		table.increments('id').primary();
+		table.string('id', 50).primary();
 		table.timestamp('created').notNullable();
 		table.string('name').notNullable();
 		table.integer('persona_id').unsigned();
@@ -21,7 +21,7 @@ exports.up = async function (knex) {
 		table.enum('mode', ['persona', 'custom']).notNullable();
 	});
 	await knex.schema.createTable('chat_message', (table) => {
-		table.increments('id').primary();
+		table.string('id', 50).primary();
 		table.timestamp('created').notNullable();
 		table.timestamp('updated');
 		table.enum('role', ['user', 'assistant', 'system']).notNullable();

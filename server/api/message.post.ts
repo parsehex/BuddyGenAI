@@ -1,4 +1,5 @@
 import z from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
 import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
@@ -14,7 +15,7 @@ export default defineLazyEventHandler(async () => {
 		const db = await getDB();
 		const { threadId } = await readBody(event);
 
-		const thread = await db('chat_thread').where({ id: +threadId }).first();
+		const thread = await db('chat_thread').where({ id: threadId }).first();
 		if (!thread) {
 			throw createError({ statusCode: 404, statusMessage: 'Thread not found' });
 		}
@@ -30,6 +31,7 @@ export default defineLazyEventHandler(async () => {
 		const userMsgIndex = messages.length - 1;
 
 		await db('chat_message').insert({
+			id: uuidv4(),
 			created: new Date().getTime(),
 			role: 'user',
 			content: userMessage.content as string,
@@ -49,6 +51,7 @@ export default defineLazyEventHandler(async () => {
 		return OpenAIStream(response, {
 			onCompletion: async (completion) => {
 				await db('chat_message').insert({
+					id: uuidv4(),
 					created: new Date().getTime(),
 					role: 'assistant',
 					content: completion,

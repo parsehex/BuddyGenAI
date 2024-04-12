@@ -4,7 +4,7 @@ import { getDB } from '../database/knex';
 // Update persona
 
 const bodySchema = z.object({
-	id: z.number(),
+	id: z.string(),
 	name: z.string().optional(),
 	description: z.string().optional(),
 	profile_pic: z.string().optional(),

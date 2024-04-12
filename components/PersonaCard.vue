@@ -4,7 +4,7 @@ import { CalendarDays } from 'lucide-vue-next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import type { Persona } from '~/server/database/knex.d';
+import type { Persona } from '~/server/database/types';
 import { getPersona } from '~/lib/api/persona';
 import { formatDistanceToNow, format } from 'date-fns';
 

@@ -5,10 +5,10 @@ import { getThread, getThreads, createThread, updateThread, deleteThread } from 
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
-import type { ChatThread } from '~/server/database/knex.d';
+import type { ChatThread } from '~/server/database/types';
 
 const route = useRoute();
-const isThreadSelected = (threadId: string | number) => route.path.includes(`/chat`) && route.params.id == threadId;
+const isThreadSelected = (threadId: string) => route.path.includes(`/chat`) && route.params.id === threadId;
 
 const store = useAppStore();
 
@@ -22,7 +22,7 @@ onBeforeMount(async () => {
 });
 
 const renameClicked = (threadId: string) => {
-	const thread = threads.value.find((thread: any) => thread.id === threadId);
+	const thread = threads.value.find((thread) => thread.id === threadId);
 	if (thread) {
 		editingThreadName.value = thread.name;
 	} else {

@@ -11,11 +11,11 @@ export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
 		const db = await getDB();
 		const { id } = await getValidatedQuery(event, (query) => querySchema.parse(query));
-		const persona = await db('persona').where({ id: +id }).first();
+		const persona = await db('persona').where({ id }).first();
 		if (!persona) {
 			throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
 		}
-		await db('persona').where({ id: +id }).delete();
+		await db('persona').where({ id }).delete();
 		return { success: true };
 	});
 });
