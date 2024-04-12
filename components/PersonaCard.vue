@@ -17,8 +17,10 @@ const persona = ref({} as Persona);
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
-onBeforeMount(async () => {
-	persona.value = (await getPersona(props.personaId)).value;
+const updatePersona = async () => {
+	// persona.value = (await getPersona(props.personaId)).value;
+	const p = await $fetch(`/api/persona?id=${props.personaId}`);
+	persona.value = p;
 	if (persona.value.updated) {
 		time_label.value = 'Updated';
 		time_at.value = formatDistanceToNow(new Date(persona.value.updated), { addSuffix: true });
@@ -26,7 +28,18 @@ onBeforeMount(async () => {
 		time_label.value = 'Created';
 		time_at.value = formatDistanceToNow(new Date(persona.value.created), { addSuffix: true });
 	}
+};
+
+onBeforeMount(async () => {
+	await updatePersona();
 });
+
+watch(
+	() => props.personaId,
+	async () => {
+		await updatePersona();
+	}
+);
 </script>
 
 <template>

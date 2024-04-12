@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 export const useAppStore = defineStore('app', () => {
-	const selectedThreadId = ref<string>('');
+	const selectedPersonaId = ref<string>('');
 
 	return {
-		selectedThreadId,
+		selectedPersonaId,
 	};
 });

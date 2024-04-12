@@ -14,6 +14,7 @@ const store = useAppStore();
 
 const newThreadName = ref('');
 const editingThreadName = ref('');
+const rightClickedId = ref('');
 
 const threads = ref([] as ChatThread[]);
 
@@ -33,7 +34,7 @@ const renameClicked = (threadId: string) => {
 const handleRename = async () => {
 	if (editingThreadName.value) {
 		await updateThread({
-			id: store.selectedThreadId,
+			id: rightClickedId.value,
 			name: editingThreadName.value,
 		});
 		editingThreadName.value = '';
@@ -76,7 +77,12 @@ const doDeleteThread = async (threadId: string) => {
 			<Dialog>
 				<ContextMenu>
 					<ContextMenuTrigger>
-						<li v-for="thread in threads" :key="thread.id" :class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '']">
+						<li
+							v-for="thread in threads"
+							:key="thread.id"
+							:class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '']"
+							@contextmenu="rightClickedId = thread.id"
+						>
 							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
 								{{ thread.name }}
 							</NuxtLink>
@@ -86,10 +92,10 @@ const doDeleteThread = async (threadId: string) => {
 						<!-- TODO fix to not use selected thread -->
 						<DialogTrigger asChild>
 							<ContextMenuItem>
-								<span @click="renameClicked(store.selectedThreadId)">Rename</span>
+								<span @click="renameClicked(rightClickedId)">Rename</span>
 							</ContextMenuItem>
 						</DialogTrigger>
-						<ContextMenuItem @click="doDeleteThread(store.selectedThreadId)">Delete</ContextMenuItem>
+						<ContextMenuItem @click="doDeleteThread(rightClickedId)">Delete</ContextMenuItem>
 					</ContextMenuContent>
 				</ContextMenu>
 				<DialogContent>

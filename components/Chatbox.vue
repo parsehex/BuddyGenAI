@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useChat } from 'ai/vue';
+import type { Message } from 'ai/vue';
 import { RefreshCcwDot } from 'lucide-vue-next';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,9 +12,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collap
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { getPersonas } from '@/lib/api/persona';
 import { getThread, updateThread } from '@/lib/api/thread';
 import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
+import type { ChatMessage, ChatThread, Persona } from '~/server/database/types';
 
 const props = defineProps<{
 	threadId: string;
@@ -36,13 +37,12 @@ const updateThreadTitle = async () => {
 };
 
 await updateThreadTitle();
-const { value: msgs } = await getMessages(threadId.value);
+const msgs = ref([] as ChatMessage[]);
 
 const apiPartialBody = { threadId: threadId.value };
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: api.value,
-	initialMessages: apiMsgsToOpenai(msgs),
 	body: apiPartialBody,
 	onFinish: async () => {
 		const { value: newMessages } = await getMessages(threadId.value);
@@ -140,14 +140,14 @@ const updateSysMessage = async () => {
 };
 
 const refreshed = ref(false);
-const thread = await getThread(threadId.value);
-const mode = thread.value.mode;
-const threadMode = ref(mode as 'custom' | 'persona');
+const thread = ref({} as ChatThread);
+const threadMode = ref('custom' as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	if (!threadId) return;
 	if (refreshed.value) {
 		setTimeout(() => {
 			refreshed.value = false;
+			console.log('refreshed');
 		}, 10);
 		return;
 	}
@@ -166,12 +166,17 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 };
 watch(threadMode, handleThreadModeChange);
 
-const personas = ref(await getPersonas());
+const personas = ref([] as Persona[]);
 
 const selectedPersona = ref('');
 const handlePersonaChange = async () => {
 	if (!threadId) return;
-	if (refreshed.value) return;
+	if (refreshed.value) {
+		setTimeout(() => {
+			refreshed.value = false;
+		}, 10);
+		return;
+	}
 	await updateThread({
 		id: threadId.value,
 		persona_id: +selectedPersona.value,
@@ -179,8 +184,6 @@ const handlePersonaChange = async () => {
 
 	const { value: newMessages } = await getMessages(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
-
-	// FIX need to refresh to see change in personacard
 };
 const currentPersona = computed(() => personas.value.find((p) => p.id === selectedPersona.value));
 watch(selectedPersona, handlePersonaChange);
@@ -191,6 +194,38 @@ const doClearThread = async () => {
 
 	const { value: newMessages } = await getMessages(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
+};
+
+onBeforeMount(async () => {
+	const p = await $fetch('/api/personas');
+	personas.value = p;
+
+	const t = await $fetch(`/api/thread?id=${threadId.value}`);
+	thread.value = t;
+
+	refreshed.value = true;
+	threadMode.value = t.mode;
+	threadMode.value === 'persona' ? thread.value.persona_id : '';
+
+	refreshed.value = true;
+	selectedPersona.value = t.persona_id || '';
+
+	const m = await $fetch(`/api/messages?threadId=${threadId.value}`);
+	msgs.value = m;
+	setMessages(apiMsgsToOpenai(m));
+});
+
+const updateSysFromPersona = async () => {
+	if (!threadId) return;
+	await $fetch(`/api/update-thread-from-persona?threadId=${threadId.value}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	const m = await $fetch(`/api/messages?threadId=${threadId.value}`);
+	msgs.value = m;
 };
 </script>
 
@@ -261,6 +296,7 @@ const doClearThread = async () => {
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
 					<ContextMenuSeparator />
 					<!-- TODO confirm -->
+					<ContextMenuItem v-if="threadMode === 'persona'" @click="updateSysFromPersona">Update System Message</ContextMenuItem>
 					<ContextMenuItem @click="doClearThread">Delete All Messages</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>

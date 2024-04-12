@@ -6,7 +6,9 @@ const id = route.params.id as string;
 </script>
 
 <template>
-	<Chatbox :threadId="id" />
+	<div>
+		<Chatbox v-if="id" :threadId="id" />
+	</div>
 </template>
 
 <style lang="scss"></style>
