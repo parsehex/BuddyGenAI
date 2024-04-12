@@ -249,7 +249,7 @@ const updateSysFromPersona = async () => {
 	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="threadId !== ''">
 		<div class="flex items-end justify-between">
 			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
-			<PersonaCard v-if="threadMode === 'persona'" :personaId="selectedPersona" />
+			<PersonaCard v-if="threadMode === 'persona' && selectedPersona" :personaId="selectedPersona" />
 		</div>
 		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
 			<TooltipProvider :delay-duration="100">
@@ -276,8 +276,8 @@ const updateSysFromPersona = async () => {
 								Persona
 							</Label>
 						</TooltipTrigger>
-						<TooltipContent>
-							<p v-if="!personas.length">No personas available.<br />Go to the Personas tab to create one, then come back here.</p>
+						<TooltipContent v-if="!personas.length">
+							<p>No personas available.<br />Go to the Personas tab to create one, then come back here.</p>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>

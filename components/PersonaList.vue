@@ -16,13 +16,17 @@ onBeforeMount(async () => {
 });
 
 const doCreatePersona = async () => {
-	await $fetch('/api/persona', {
-		method: 'POST',
-		body: JSON.stringify(newPersona.value),
-	});
+	const newId = (
+		await $fetch('/api/persona', {
+			method: 'POST',
+			body: JSON.stringify(newPersona.value),
+		})
+	).id;
 	const p = await $fetch('/api/personas');
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
+
+	await navigateTo(`/persona/${newId}/edit`);
 };
 </script>
 

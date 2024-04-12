@@ -18,7 +18,7 @@ const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
 const updatePersona = async () => {
-	// persona.value = (await getPersona(props.personaId)).value;
+	if (!props.personaId) return;
 	const p = await $fetch(`/api/persona?id=${props.personaId}`);
 	persona.value = p;
 	if (persona.value.updated) {
