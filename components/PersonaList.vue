@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import type { Persona } from '~/server/database/types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import Textarea from './ui/textarea/Textarea.vue';
 import { getPersonas, createPersona } from '@/lib/api/persona';
 
 const route = useRoute();
@@ -27,11 +26,9 @@ const doCreatePersona = async () => {
 	<div class="sidebar">
 		<div class="flex flex-col w-full mb-4">
 			<Input v-model="newPersona.name" placeholder="Persona name" />
-			<Textarea v-model="newPersona.description" placeholder="Persona description" />
 			<Button @click="doCreatePersona">Create</Button>
 		</div>
 		<ul>
-			<!-- cursor-pointer hover:bg-gray-200 p-1 rounded -->
 			<li v-for="persona in personas" :key="persona.id" :class="{ 'bg-gray-200 font-bold': isPersonaSelected(persona.id), 'p-1': true, rounded: true, 'cursor-pointer': true }">
 				<NuxtLink class="block" :to="`/persona/${persona.id}/view`">{{ persona.name }}</NuxtLink>
 			</li>
