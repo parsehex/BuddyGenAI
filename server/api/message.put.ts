@@ -17,6 +17,7 @@ export default defineLazyEventHandler(async () => {
 		}
 
 		await db('chat_message').where({ id }).update({
+			updated: new Date().getTime(),
 			content: content,
 		});
 
