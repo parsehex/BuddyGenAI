@@ -157,9 +157,15 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		console.log('changing mode with messages is not supported yet');
 		return;
 	}
-	await updateThread({
-		id: threadId.value,
-		mode: newMode,
+	await $fetch('/api/thread', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id: threadId.value,
+			mode: newMode,
+		}),
 	});
 
 	const { value: newMessages } = await getMessages(threadId.value);
@@ -189,7 +195,7 @@ const handlePersonaChange = async () => {
 		}),
 	});
 
-	const { value: newMessages } = await getMessages(threadId.value);
+	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 	setMessages(apiMsgsToOpenai(newMessages));
 
 	const p = await $fetch(`/api/personas`);
