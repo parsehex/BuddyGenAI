@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useChat } from 'ai/vue';
 import type { Message } from 'ai/vue';
-import { RefreshCcwDot } from 'lucide-vue-next';
+import { RefreshCcwDot, RefreshCw } from 'lucide-vue-next';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from './ui/button';
@@ -309,10 +309,19 @@ const updateSysFromPersona = async () => {
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
-				<Label class="cursor-pointer">
+				<Label class="cursor-pointer flex items-center">
 					<Switch v-if="threadMode === 'persona'" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
 					Use current version
 				</Label>
+				<Button
+					type="button"
+					size="xs"
+					itle="Update system message from current Persona version"
+					v-if="threadMode === 'persona' && !personaModeUseCurrent"
+					@click="updateSysFromPersona"
+				>
+					<RefreshCw />
+				</Button>
 			</div>
 		</RadioGroup>
 		<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
@@ -353,7 +362,6 @@ const updateSysFromPersona = async () => {
 					<ContextMenuItem @click="doDelete" v-if="didRightClickUser">Delete</ContextMenuItem>
 					<ContextMenuSeparator />
 					<!-- TODO confirm -->
-					<ContextMenuItem v-if="threadMode === 'persona'" @click="updateSysFromPersona">Update System Message</ContextMenuItem>
 					<ContextMenuItem @click="doClearThread">Delete All Messages</ContextMenuItem>
 				</ContextMenuContent>
 			</ContextMenu>
