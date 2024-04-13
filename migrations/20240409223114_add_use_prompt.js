@@ -4,9 +4,9 @@
  */
 exports.up = async function(knex) {
 	// add profile_pic_use_prompt bool to persona table
-	await knex.schema.alterTable('persona', (table) => {
-		table.boolean('profile_pic_use_prompt').notNullable();
-	});
+	// await knex.schema.alterTable('persona', (table) => {
+
+	// });
 };
 
 /**

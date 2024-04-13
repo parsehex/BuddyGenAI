@@ -4,9 +4,9 @@
  */
 exports.up = async function(knex) {
   // add thread_index to chat_message table
-	await knex.schema.alterTable('chat_message', (table) => {
-		table.integer('thread_index').notNullable();
-	});
+	// await knex.schema.alterTable('chat_message', (table) => {
+
+	// });
 };
 
 /**
