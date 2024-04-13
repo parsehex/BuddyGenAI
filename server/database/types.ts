@@ -33,8 +33,9 @@ export interface ChatThread {
 	id: string;
 	created: number;
 	name: string;
-	persona_id: string | null;
 	mode: 'persona' | 'custom';
+	persona_id: string | null;
+	// TODO add current persona version (exclusive with persona_mode_use_current -- only one should be set)
 	persona_mode_use_current: boolean | null;
 }
 export interface ChatMessage {

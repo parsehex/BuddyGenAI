@@ -38,10 +38,11 @@ const handleSave = async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold">
-			Edit Persona
+		<h1 class="text-2xl font-bold"> Edit Persona </h1>
+		<div>
 			<NuxtLink class="ml-4" to="./view">View</NuxtLink>
-		</h1>
+			<NuxtLink class="ml-4" to="./history">Version History</NuxtLink>
+		</div>
 		<div class="w-full md:w-1/2 mb-4">
 			<Input v-model="nameValue" placeholder="Persona name" />
 		</div>
