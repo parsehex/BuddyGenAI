@@ -46,15 +46,6 @@ export default defineLazyEventHandler(async () => {
 
 		const userMsgIndex = messages.length - 1;
 
-		await db('chat_message').insert({
-			id: uuidv4(),
-			created: new Date().getTime(),
-			role: 'user',
-			content: userMessage.content as string,
-			thread_id: thread.id,
-			thread_index: userMsgIndex,
-		});
-
 		const response = await openai.chat.completions.create({
 			model: 'gpt-3.5-turbo',
 			stream: true,
@@ -66,6 +57,14 @@ export default defineLazyEventHandler(async () => {
 
 		return OpenAIStream(response, {
 			onCompletion: async (completion) => {
+				await db('chat_message').insert({
+					id: uuidv4(),
+					created: new Date().getTime(),
+					role: 'user',
+					content: userMessage.content as string,
+					thread_id: thread.id,
+					thread_index: userMsgIndex,
+				});
 				await db('chat_message').insert({
 					id: uuidv4(),
 					created: new Date().getTime(),

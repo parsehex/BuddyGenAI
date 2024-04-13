@@ -2,15 +2,15 @@ import z from 'zod';
 import { getDB } from '../database/knex';
 
 const querySchema = z.object({
-	personaId: z.string().optional(),
+	persona_id: z.string().optional(),
 });
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
-		const { personaId } = await getValidatedQuery(event, (query) => querySchema.parse(query));
+		const { persona_id } = await getValidatedQuery(event, (query) => querySchema.parse(query));
 		const db = await getDB();
-		if (personaId) {
-			const threads = await db('chat_thread').where({ persona_id: personaId }).select();
+		if (persona_id) {
+			const threads = await db('chat_thread').where({ persona_id: persona_id }).select();
 			return threads || [];
 		}
 

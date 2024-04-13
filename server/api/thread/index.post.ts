@@ -14,9 +14,22 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
 	const data = await readValidatedBody(event, (body) => bodySchema.parse(body));
-	const { name, persona_id, mode } = data;
-
+	let { name } = data;
+	const { persona_id, mode } = data;
 	const db = await getDB();
+
+	// check for a thread with the same name (add an ext with number if exists)
+	// theres a unique constraint on the name column
+	const [existingThread] = await db('chat_thread').where({ name }).select('id');
+	if (existingThread) {
+		const hasExt = name.match(/ - \d+$/);
+		if (hasExt) {
+			name = name.replace(/ - \d+$/, ` - ${parseInt(hasExt[0].slice(3)) + 1}`);
+		} else {
+			name += ' - 1';
+		}
+	}
+
 	const [thread] = await db('chat_thread')
 		.insert({
 			id: uuidv4(),

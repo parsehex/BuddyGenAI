@@ -20,6 +20,7 @@ export interface PersonaVersion {
 export interface PersonaVersionMerged {
 	id: string;
 	created: number;
+	updated: number | null;
 	persona_id: string;
 	version: number;
 	name: string;

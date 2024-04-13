@@ -1,32 +1,45 @@
 <script setup lang="ts">
-import { CalendarDays } from 'lucide-vue-next';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import type { Persona } from '~/server/database/types';
-import { getPersona } from '~/lib/api/persona';
-import { formatDistanceToNow, format } from 'date-fns';
+import type { PersonaVersionMerged } from '~/server/database/types';
+import { formatDistanceToNow } from 'date-fns';
 
 const props = defineProps<{
 	personaId: string;
 }>();
 
-const persona = ref({} as Persona);
+const id = ref('');
+const name = ref('');
+const description = ref('');
+const created = ref(null as number | null);
+const updated = ref(null as number | null);
 
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
+const descLimit = 250;
+
 const updatePersona = async () => {
 	if (!props.personaId) return;
 	const p = await $fetch(`/api/persona?id=${props.personaId}`);
-	persona.value = p;
-	if (persona.value.updated) {
+	id.value = p.id;
+	name.value = p.name;
+	if (p.description) {
+		if (p.description.length > descLimit) {
+			description.value = p.description.slice(0, descLimit) + '...';
+		} else {
+			description.value = p.description;
+		}
+	}
+	created.value = p.created;
+	updated.value = p.updated;
+	if (updated.value) {
 		time_label.value = 'Updated';
-		time_at.value = formatDistanceToNow(new Date(persona.value.updated), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(updated.value), { addSuffix: true });
 	} else {
 		time_label.value = 'Created';
-		time_at.value = formatDistanceToNow(new Date(persona.value.created), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
 	}
 };
 
@@ -51,11 +64,11 @@ watch(
 					<AvatarImage src="https://github.com/vuejs.png" />
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>
-				<Button variant="link" size="lg">{{ persona.name }}</Button>
+				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-80">
-			<div class="flex justify-between space-x-4">
+			<div class="flex items-center space-x-4">
 				<Avatar>
 					<!-- TODO -->
 					<AvatarImage src="https://github.com/vuejs.png" />
@@ -63,10 +76,10 @@ watch(
 				</Avatar>
 				<div class="space-y-1">
 					<div class="flex justify-around">
-						<NuxtLink :to="`/persona/${persona.id}/edit`">Edit</NuxtLink>
-						<NuxtLink :to="`/persona/${persona.id}/view`">View</NuxtLink>
+						<NuxtLink :to="`/persona/${id}/edit`">Edit</NuxtLink>
+						<NuxtLink :to="`/persona/${id}/view`">View</NuxtLink>
 					</div>
-					<p class="text-sm">{{ persona.description }}</p>
+					<p class="text-sm">{{ description }}</p>
 					<div class="flex items-center pt-2">
 						<span class="text-xs text-muted-foreground"> {{ time_label }} {{ time_at }} </span>
 					</div>

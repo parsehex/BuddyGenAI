@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import type { Persona } from '~/server/database/types';
+import { ref } from 'vue';
+import type { PersonaVersionMerged } from '~/server/database/types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { getPersonas, createPersona } from '@/lib/api/persona';
+import { getPersonas } from '@/lib/api/persona';
 
 const route = useRoute();
-const personas = ref([] as Persona[]);
+const personas = ref([] as PersonaVersionMerged[]);
 const newPersona = ref({ name: '', description: '' });
 
 const isPersonaSelected = (id: string | number) => route.path.includes(`/persona`) && route.params.id == id;
@@ -26,7 +26,7 @@ const doCreatePersona = async () => {
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
 
-	await navigateTo(`/persona/${newId}/edit`);
+	await navigateTo(`/persona/${newId}/view`);
 };
 </script>
 

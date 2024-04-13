@@ -146,6 +146,7 @@ const refreshed = ref(false);
 const thread = ref({} as ChatThread);
 const threadMode = ref('custom' as 'custom' | 'persona');
 const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
+	console.log('handleThreadModeChange', newMode);
 	if (!threadId) return;
 	if (refreshed.value) {
 		setTimeout(() => {
@@ -154,12 +155,10 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}, 10);
 		return;
 	}
-	if (uiMessages.value.length) {
-		console.log('deleting all messages in thread...');
-		await $fetch(`/api/messages?threadId=${threadId.value}`, {
-			method: 'DELETE',
-		});
-	}
+	await $fetch(`/api/messages?threadId=${threadId.value}`, {
+		method: 'DELETE',
+	});
+
 	await $fetch('/api/thread', {
 		method: 'PUT',
 		headers: {
@@ -311,7 +310,8 @@ const updateSysFromPersona = async () => {
 				<TooltipProvider :delay-duration="100">
 					<Tooltip>
 						<TooltipTrigger>
-							<Label class="cursor-pointer">
+							<!-- <Label class="cursor-pointer"> -->
+							<Label :class="{ 'cursor-pointer': personas.length, 'cursor-not-allowed': !personas.length }">
 								<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
 								Persona
 							</Label>
@@ -323,7 +323,7 @@ const updateSysFromPersona = async () => {
 				</TooltipProvider>
 				<Label v-if="threadMode === 'persona' && personas.length" class="cursor-pointer flex items-center">
 					<Switch :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
-					Use current version
+					Keep in sync
 				</Label>
 				<Button
 					type="button"
@@ -343,9 +343,9 @@ const updateSysFromPersona = async () => {
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<Card class="whitespace-pre-wrap">
-					<!-- TODO add system presets (add to header) -->
-					<CardHeader>System</CardHeader>
+					<CardHeader>Custom Instructions</CardHeader>
 					<CardContent><Textarea v-model="newSysMessage" /></CardContent>
+					<!-- TODO add system presets-->
 					<CardFooter>
 						<Button type="button" @click="updateSysMessage">Update</Button>
 					</CardFooter>

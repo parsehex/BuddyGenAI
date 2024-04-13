@@ -1,4 +1,4 @@
-import type { Persona, PersonaVersionMerged } from '@/server/database/types';
+import type { PersonaVersionMerged } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
 interface CreatePersonaOptions {
@@ -13,7 +13,7 @@ interface UpdatePersonaOptions extends Partial<CreatePersonaOptions> {
 }
 
 export async function getPersonas() {
-	return (await useFetch('/api/personas')).data as Ref<Persona[]>;
+	return (await useFetch('/api/personas')).data as Ref<PersonaVersionMerged[]>;
 }
 export async function getPersona(id: string) {
 	if (!id) {
