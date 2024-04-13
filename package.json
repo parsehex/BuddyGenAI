@@ -8,7 +8,7 @@
   "main": ".output/electron/background.js",
   "scripts": {
     "dev": "nuxt dev -o",
-    "build": "nuxt generate",
+    "build": "nuxt build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && electron-builder install-app-deps",
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",

@@ -38,8 +38,12 @@ const options = {
     './llama.cpp/build/bin/**/server*',
     './stable-diffusion.cpp/build/bin/**/*',
     './whisper.cpp/**/main*',
-    './whisper.cpp/**/server*'
+    './whisper.cpp/**/server*',
+    './.output/server/**/*',
+    './.output/public/**/*',
+    './migrations/**/*',
   ],
+  // asar: false,
 
   win: {
     // eslint-disable-next-line no-template-curly-in-string
@@ -73,7 +77,8 @@ const options = {
       Encoding: 'UTF-8',
       MimeType: 'x-scheme-handler/deeplink'
     },
-    target: ['AppImage']
+    target: ['dir']
+    // target: ['AppImage']
     // target: ['AppImage', 'rpm', 'deb']
   }
 }

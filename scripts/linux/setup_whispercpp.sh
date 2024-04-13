@@ -13,3 +13,5 @@ cd build
 # build
 cmake .. -DWHISPER_CUDA=ON
 cmake --build . -j --config Release
+
+# TODO re-create symlinks to be actual copies (breaks electron-builder otherwise)
