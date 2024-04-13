@@ -312,8 +312,8 @@ const updateSysFromPersona = async () => {
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
-				<Label class="cursor-pointer flex items-center">
-					<Switch v-if="threadMode === 'persona'" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
+				<Label v-if="threadMode === 'persona' && personas.length" class="cursor-pointer flex items-center">
+					<Switch :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
 					Use current version
 				</Label>
 				<Button
