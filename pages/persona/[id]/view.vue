@@ -23,8 +23,8 @@ onBeforeMount(async () => {
 			Persona - <span class="text-blue-500">{{ persona?.name }}</span>
 		</h1>
 		<div>
-			<NuxtLink class="ml-4" to="./edit">Edit</NuxtLink>
-			<NuxtLink class="ml-4" to="./history">Version History</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
 		</div>
 		<Card class="w-full md:w-1/2">
 			<CardHeader class="text-lg"> Description </CardHeader>

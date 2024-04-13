@@ -29,8 +29,8 @@ onBeforeMount(async () => {
 	<div class="container flex flex-col items-center">
 		<h1 class="text-2xl font-bold"> Persona Version History </h1>
 		<div>
-			<NuxtLink class="ml-4" to="./view">View</NuxtLink>
-			<NuxtLink class="ml-4" to="./edit">Edit</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
 		</div>
 	</div>
 </template>
