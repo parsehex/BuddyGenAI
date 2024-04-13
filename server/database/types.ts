@@ -2,12 +2,33 @@ export interface Persona {
 	id: string;
 	created: number;
 	updated: number | null;
+	// name: string;
+	// description: string | null;
+	profile_pic: string | null;
+	profile_pic_prompt: string | null;
+	profile_pic_use_prompt: boolean;
+	current_version_id: string;
+}
+export interface PersonaVersion {
+	id: string;
+	created: number;
+	persona_id: string;
+	version: number;
+	name: string;
+	description: string | null;
+}
+export interface PersonaVersionMerged {
+	id: string;
+	created: number;
+	persona_id: string;
+	version: number;
 	name: string;
 	description: string | null;
 	profile_pic: string | null;
 	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
 }
+
 export interface ChatThread {
 	id: string;
 	created: number;

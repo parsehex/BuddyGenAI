@@ -20,9 +20,9 @@ export default defineLazyEventHandler(async () => {
 			.where({ thread_id: message.thread_id, thread_index: message.thread_index + 1 })
 			.first();
 		console.log('nextMessage', nextMessage?.content);
-		if (!nextMessage) {
-			throw createError({ statusCode: 400, statusMessage: 'Cannot delete last message' });
-		}
+		// if (!nextMessage) {
+		// 	throw createError({ statusCode: 400, statusMessage: 'Cannot delete last message' });
+		// }
 		await db('chat_message').where({ id }).delete();
 		await db('chat_message').where({ id: nextMessage.id }).delete();
 		return { success: true };

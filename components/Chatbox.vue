@@ -14,7 +14,7 @@ import { Label } from './ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getThread, updateThread } from '@/lib/api/thread';
 import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
-import type { ChatMessage, ChatThread, Persona } from '~/server/database/types';
+import type { ChatMessage, ChatThread, Persona, PersonaVersionMerged } from '~/server/database/types';
 
 const props = defineProps<{
 	threadId: string;
@@ -27,7 +27,6 @@ const sysMessage = computed(() => messages.value.find((m) => m.role === 'system'
 const newSysMessage = ref('');
 
 const threadTitle = ref('');
-const api = ref(`/api/message?threadId=${threadId}`);
 
 const updateThreadTitle = async () => {
 	// TODO remove this -- how to get updates to thread title?
@@ -39,13 +38,12 @@ const updateThreadTitle = async () => {
 await updateThreadTitle();
 const msgs = ref([] as ChatMessage[]);
 
-const apiPartialBody = { threadId: threadId.value };
+const apiPartialBody = ref({ threadId: threadId.value });
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
-	api: api.value,
-	body: apiPartialBody,
+	api: '/api/message',
+	body: apiPartialBody.value,
 	onFinish: async () => {
-		// const { value: newMessages } = await getMessages(threadId.value);
 		const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 		setMessages(apiMsgsToOpenai(newMessages));
 
@@ -153,9 +151,10 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		return;
 	}
 	if (uiMessages.value.length) {
-		// TODO allow but clear messages
-		console.log('changing mode with messages is not supported yet');
-		return;
+		console.log('deleting all messages in thread...');
+		await $fetch(`/api/messages?threadId=${threadId.value}`, {
+			method: 'DELETE',
+		});
 	}
 	await $fetch('/api/thread', {
 		method: 'PUT',
@@ -168,12 +167,12 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}),
 	});
 
-	const { value: newMessages } = await getMessages(threadId.value);
+	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 	setMessages(apiMsgsToOpenai(newMessages));
 };
 watch(threadMode, handleThreadModeChange);
 
-const personas = ref([] as Persona[]);
+const personas = ref([] as PersonaVersionMerged[]);
 
 const selectedPersona = ref('');
 const handlePersonaChange = async () => {
@@ -206,9 +205,13 @@ watch(selectedPersona, handlePersonaChange);
 
 const doClearThread = async () => {
 	if (!threadId) return;
-	await deleteMessages(threadId.value);
+	// await deleteMessages(threadId.value);
+	await $fetch(`/api/messages?threadId=${threadId.value}`, {
+		method: 'DELETE',
+	});
 
-	const { value: newMessages } = await getMessages(threadId.value);
+	// const { value: newMessages } = await getMessages(threadId.value);
+	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 	setMessages(apiMsgsToOpenai(newMessages));
 };
 

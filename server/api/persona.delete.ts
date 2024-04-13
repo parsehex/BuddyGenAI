@@ -16,6 +16,8 @@ export default defineLazyEventHandler(async () => {
 			throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
 		}
 		await db('persona').where({ id }).delete();
+		// delete all versions of persona
+		await db('persona_version').where({ persona_id: id }).delete();
 		return { success: true };
 	});
 });

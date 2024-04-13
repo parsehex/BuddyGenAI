@@ -4,12 +4,12 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
 import { getPersona, updatePersona } from '~/lib/api/persona';
-import type { Persona } from '~/server/database/types';
+import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as Persona | null);
+const persona = ref(null as PersonaVersionMerged | null);
 
 const nameValue = ref('');
 const descriptionValue = ref('');
@@ -21,10 +21,16 @@ onBeforeMount(async () => {
 });
 
 const handleSave = async () => {
-	await updatePersona({
-		id,
-		name: nameValue.value,
-		description: descriptionValue.value,
+	await $fetch(`/api/persona`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id,
+			name: nameValue.value,
+			description: descriptionValue.value,
+		}),
 	});
 	await navigateTo(`./view`);
 };

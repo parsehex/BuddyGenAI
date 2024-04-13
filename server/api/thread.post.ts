@@ -39,11 +39,15 @@ export default defineEventHandler(async (event) => {
 	} else if (mode === 'persona') {
 		const persona = (await db('persona').where({ id: persona_id }).first()) as Persona;
 		if (persona) {
+			const personaVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
+			if (!personaVersion) {
+				throw new Error('Current version of persona not found');
+			}
 			await db('chat_message').insert({
 				id: uuidv4(),
 				created: new Date().getTime(),
 				role: 'system',
-				content: promptFromPersonaDescription(persona.name, persona.description || ''),
+				content: promptFromPersonaDescription(personaVersion.name, personaVersion.description || ''),
 				thread_id: thread.id,
 				thread_index: 0,
 			});

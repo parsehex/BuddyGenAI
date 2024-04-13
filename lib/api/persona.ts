@@ -1,4 +1,4 @@
-import type { Persona } from '@/server/database/types';
+import type { Persona, PersonaVersionMerged } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
 interface CreatePersonaOptions {
@@ -19,7 +19,7 @@ export async function getPersona(id: string) {
 	if (!id) {
 		console.error('No persona id provided, expect errors');
 	}
-	return (await useFetch(`/api/persona?id=${id}`)).data as Ref<Persona>;
+	return (await useFetch(`/api/persona?id=${id}`)).data as Ref<PersonaVersionMerged>;
 }
 
 export async function createPersona(options: CreatePersonaOptions) {
@@ -28,7 +28,7 @@ export async function createPersona(options: CreatePersonaOptions) {
 			method: 'POST',
 			body: JSON.stringify(options),
 		})
-	).data as Ref<Persona>;
+	).data as Ref<PersonaVersionMerged>;
 }
 export async function updatePersona(options: UpdatePersonaOptions) {
 	return (
@@ -36,7 +36,7 @@ export async function updatePersona(options: UpdatePersonaOptions) {
 			method: 'PUT',
 			body: JSON.stringify(options),
 		})
-	).data as Ref<Persona>;
+	).data as Ref<PersonaVersionMerged>;
 }
 export async function deletePersona(id: string) {
 	return (

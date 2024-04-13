@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { getDB } from '../database/knex';
+import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 
 export default defineLazyEventHandler(async () => {
 	const openai = new OpenAI({
@@ -23,6 +24,21 @@ export default defineLazyEventHandler(async () => {
 		const { messages } = (await readBody(event)) as {
 			messages: ChatCompletionMessageParam[];
 		};
+
+		if (thread.mode === 'persona' && thread.persona_mode_use_current) {
+			const persona = await db('persona').where({ id: thread.persona_id }).first();
+			if (!persona) {
+				throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
+			}
+
+			const personaVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
+			if (!personaVersion) {
+				throw createError({ statusCode: 404, statusMessage: 'Persona version not found' });
+			}
+
+			messages[0].content = promptFromPersonaDescription(personaVersion.name, personaVersion.description);
+		}
+
 		const userMessage = messages[messages.length - 1];
 		if (userMessage.role !== 'user') {
 			throw createError({ statusCode: 400, statusMessage: 'Expected user message in last place' });

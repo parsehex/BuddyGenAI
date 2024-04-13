@@ -26,8 +26,12 @@ export default defineEventHandler(async (event) => {
 	if (!persona) {
 		throw new Error('Persona not found');
 	}
+	const personaVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
+	if (!personaVersion) {
+		throw new Error('Current version of persona not found');
+	}
 
-	const content = promptFromPersonaDescription(persona.name, persona.description || '');
+	const content = promptFromPersonaDescription(personaVersion.name, personaVersion.description || '');
 	const [firstMessage] = await db('chat_message').where({ thread_id: thread.id, thread_index: 0 }).update({ content }).returning('*');
 
 	return firstMessage;
