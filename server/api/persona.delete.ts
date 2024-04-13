@@ -6,6 +6,7 @@ const querySchema = z.object({
 });
 
 // delete persona
+// TODO if we delete persona, should remove from threads (+ reset mode to custom)
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
