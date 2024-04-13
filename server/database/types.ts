@@ -35,6 +35,7 @@ export interface ChatThread {
 	name: string;
 	persona_id: string | null;
 	mode: 'persona' | 'custom';
+	persona_mode_use_current: boolean | null;
 }
 export interface ChatMessage {
 	id: string;

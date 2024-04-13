@@ -11,12 +11,12 @@ const bodySchema = z.object({
 	name: z.string().optional(),
 	persona_id: z.string().optional(),
 	mode: z.literal('persona').or(z.literal('custom')).optional(),
-	personaModeUseCurrent: z.boolean().optional(),
+	persona_mode_use_current: z.boolean().optional(),
 });
 
 export default defineEventHandler(async (event) => {
 	const data = await readValidatedBody(event, (body) => bodySchema.parse(body));
-	const { id, name, persona_id, mode, personaModeUseCurrent } = data;
+	const { id, name, persona_id, mode, persona_mode_use_current } = data;
 
 	const db = await getDB();
 	const currentThread = await db('chat_thread').where({ id }).first();
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 		throw new Error('Thread not found');
 	}
 
-	// NOTE: if personaModeUseCurrent is true, then every new message gets a fresh system message from the current persona version
+	// NOTE: if persona_mode_use_current is true, then every new message gets a fresh system message from the current persona version
 
 	const [thread] = await db('chat_thread')
 		.where({ id })
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 			name,
 			persona_id,
 			mode,
-			persona_mode_use_current: personaModeUseCurrent,
+			persona_mode_use_current: persona_mode_use_current,
 		})
 		.returning('*');
 

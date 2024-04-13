@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
+import { Switch } from './ui/switch';
 import { Textarea } from './ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
@@ -172,6 +173,26 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 };
 watch(threadMode, handleThreadModeChange);
 
+const personaModeUseCurrent = ref(false);
+const handlePersonaModeUseCurrentChange = async () => {
+	if (!threadId) return;
+	const newValue = !personaModeUseCurrent.value;
+	personaModeUseCurrent.value = newValue;
+	await $fetch('/api/thread', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id: threadId.value,
+			persona_mode_use_current: newValue,
+		}),
+	});
+
+	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
+	setMessages(apiMsgsToOpenai(newMessages));
+};
+
 const personas = ref([] as PersonaVersionMerged[]);
 
 const selectedPersona = ref('');
@@ -223,8 +244,12 @@ onBeforeMount(async () => {
 	thread.value = t;
 
 	refreshed.value = true;
-	threadMode.value = t.mode;
+	threadMode.value = thread.value.mode;
 	threadMode.value === 'persona' ? thread.value.persona_id : '';
+
+	if (threadMode.value === 'persona' && thread.value.persona_mode_use_current) {
+		personaModeUseCurrent.value = true;
+	}
 
 	refreshed.value = true;
 	selectedPersona.value = t.persona_id || '';
@@ -284,6 +309,7 @@ const updateSysFromPersona = async () => {
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
+				<Switch v-if="threadMode === 'persona'" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
 			</div>
 		</RadioGroup>
 		<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
