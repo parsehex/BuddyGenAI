@@ -16,6 +16,9 @@ import { getThread, updateThread } from '@/lib/api/thread';
 import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
 import type { ChatMessage, ChatThread, Persona, PersonaVersionMerged } from '~/server/database/types';
 import Message from './ChatMessage.vue';
+import useElectron from '~/composables/useElectron';
+
+const { copyToClipboard } = useElectron();
 
 const props = defineProps<{
 	threadId: string;
@@ -280,6 +283,14 @@ const updateSysFromPersona = async () => {
 	const m = await $fetch(`/api/messages?threadId=${threadId.value}`);
 	msgs.value = m;
 };
+
+const doCopyMessage = (id: string) => {
+	const msg = messages.value.find((m) => m.id === id);
+	if (msg?.content && copyToClipboard) {
+		copyToClipboard(msg.content);
+		return true;
+	}
+};
 </script>
 
 <template>
@@ -367,6 +378,7 @@ const updateSysFromPersona = async () => {
 					/>
 				</ContextMenuTrigger>
 				<ContextMenuContent>
+					<ContextMenuItem @click="doCopyMessage(currentRightClickedMessageId)">Copy</ContextMenuItem>
 					<DialogTrigger asChild>
 						<ContextMenuItem>
 							<span @click="triggerEdit">Edit</span>
