@@ -309,7 +309,10 @@ const updateSysFromPersona = async () => {
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
-				<Switch v-if="threadMode === 'persona'" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
+				<Label class="cursor-pointer">
+					<Switch v-if="threadMode === 'persona'" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
+					Use current version
+				</Label>
 			</div>
 		</RadioGroup>
 		<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
