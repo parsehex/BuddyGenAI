@@ -171,6 +171,13 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}),
 	});
 
+	const p = await $fetch('/api/personas');
+	personas.value = p;
+
+	if (personas.value.length === 1) {
+		selectedPersona.value = personas.value[0].id;
+	}
+
 	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 	setMessages(apiMsgsToOpenai(newMessages));
 };
@@ -287,6 +294,8 @@ const updateSysFromPersona = async () => {
 				<Tooltip>
 					<TooltipTrigger>
 						<Label>Thread Mode</Label>
+						<!-- TODO organize for one -->
+						<!-- TODO when there are messages already and user changes the mode, confirm that doing so will delete all messages before continuing -->
 					</TooltipTrigger>
 					<TooltipContent>
 						<h2 class="text-lg text-center font-bold">Warning</h2>
