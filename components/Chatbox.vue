@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useChat } from 'ai/vue';
-import type { Message } from 'ai/vue';
 import { RefreshCcwDot, RefreshCw } from 'lucide-vue-next';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -16,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getThread, updateThread } from '@/lib/api/thread';
 import { getMessages, deleteMessages, updateMessage, deleteMessage, apiMsgsToOpenai } from '@/lib/api/message';
 import type { ChatMessage, ChatThread, Persona, PersonaVersionMerged } from '~/server/database/types';
+import Message from './ChatMessage.vue';
 
 const props = defineProps<{
 	threadId: string;
@@ -355,15 +355,16 @@ const updateSysFromPersona = async () => {
 		<Dialog :modal="true">
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<Card v-for="m in uiMessages" :key="m.id" class="chat-message whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id" :id="'message-' + m.id">
-						<CardHeader class="p-3" v-if="threadMode === 'persona'">
-							{{ m.role === 'user' ? 'User' : currentPersona?.name }}
-						</CardHeader>
-						<CardHeader class="p-3" v-else>
-							{{ m.role === 'user' ? 'User' : 'AI' }}
-						</CardHeader>
-						<CardContent class="p-3 pl-6 pt-0">{{ m.content }}</CardContent>
-					</Card>
+					<Message
+						v-for="m in uiMessages"
+						:key="m.id"
+						@contextmenu="currentRightClickedMessageId = m.id"
+						:id="'message-' + m.id"
+						class="chat-message whitespace-pre-wrap"
+						:thread-mode="threadMode"
+						:current-persona="currentPersona"
+						:message="m"
+					/>
 				</ContextMenuTrigger>
 				<ContextMenuContent>
 					<DialogTrigger asChild>
