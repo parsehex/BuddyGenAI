@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
 import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 
 export default defineLazyEventHandler(async () => {

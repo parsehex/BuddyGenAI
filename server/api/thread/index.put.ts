@@ -1,8 +1,8 @@
 import z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
-import { getDB } from '../database/knex';
-import type { Persona } from '../database/types';
+import { getDB } from '../../database/knex';
+import type { Persona } from '../../database/types';
 
 // Update Existing Thread
 

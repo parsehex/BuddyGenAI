@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { getDB } from '../database/knex';
-import type { PersonaVersionMerged } from '../database/types';
+import { getDB } from '../../database/knex';
+import type { PersonaVersionMerged } from '../../database/types';
 
 // TODO allow specifying version (latest or specific)
 const querySchema = z.object({

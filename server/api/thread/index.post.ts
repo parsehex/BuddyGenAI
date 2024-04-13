@@ -1,7 +1,7 @@
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 import z from 'zod';
-import type { Persona } from '../database/types';
+import type { Persona } from '../../database/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Create New Thread

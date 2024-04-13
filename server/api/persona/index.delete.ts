@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 
 const querySchema = z.object({
 	id: z.string(),

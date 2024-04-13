@@ -1,7 +1,7 @@
 import z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { getDB } from '../database/knex';
-import type { PersonaVersionMerged } from '../database/types';
+import { getDB } from '../../database/knex';
+import type { PersonaVersionMerged } from '../../database/types';
 
 // Create New Persona
 

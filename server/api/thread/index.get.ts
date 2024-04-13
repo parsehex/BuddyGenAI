@@ -1,11 +1,9 @@
 import { z } from 'zod';
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 
 const querySchema = z.object({
 	id: z.string(),
 });
-
-// delete thread
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
@@ -15,7 +13,6 @@ export default defineLazyEventHandler(async () => {
 		if (!thread) {
 			throw createError({ statusCode: 404, statusMessage: 'Thread not found' });
 		}
-		await db('chat_thread').where({ id }).delete();
-		return { success: true };
+		return thread;
 	});
 });
