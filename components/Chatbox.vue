@@ -41,6 +41,13 @@ const msgs = ref([] as ChatMessage[]);
 
 const apiPartialBody = ref({ threadId: threadId.value });
 
+const scrollToBottom = () => {
+	const lastMessage = document.querySelector('.chat-message:last-child');
+	if (lastMessage) {
+		lastMessage.scrollIntoView();
+	}
+};
+
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
 	api: '/api/message',
 	body: apiPartialBody.value,
@@ -48,12 +55,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = 
 		const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
 		setMessages(apiMsgsToOpenai(newMessages));
 
-		setTimeout(() => {
-			const lastMessage = document.getElementById(`message-${newMessages[newMessages.length - 1].id}`);
-			if (lastMessage) {
-				lastMessage.scrollIntoView();
-			}
-		}, 10);
+		setTimeout(scrollToBottom, 5);
 	},
 });
 
@@ -68,6 +70,7 @@ const doSubmit = async (e: Event) => {
 		return;
 	}
 	handleSubmit(e);
+	setTimeout(scrollToBottom, 5);
 };
 const doReload = async () => {
 	if (isLoading.value) {
@@ -343,7 +346,7 @@ const updateSysFromPersona = async () => {
 		<Dialog :modal="true">
 			<ContextMenu>
 				<ContextMenuTrigger>
-					<Card v-for="m in uiMessages" :key="m.id" class="whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id" :id="'message-' + m.id">
+					<Card v-for="m in uiMessages" :key="m.id" class="chat-message whitespace-pre-wrap" @contextmenu="currentRightClickedMessageId = m.id" :id="'message-' + m.id">
 						<CardHeader class="p-3" v-if="threadMode === 'persona'">
 							{{ m.role === 'user' ? 'User' : currentPersona?.name }}
 						</CardHeader>
