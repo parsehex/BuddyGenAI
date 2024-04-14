@@ -27,7 +27,7 @@ export async function findResourcesPath() {
 	if (process.env.NODE_ENV === 'development') {
 		let dir = await getDirname();
 		let p = await findDirectoryInPath('.nuxt', dir);
-		if (p) return path.resolve(p, '../..');
+		if (p) return path.resolve(p, '..');
 	}
 
 	const dir = await getDirname();

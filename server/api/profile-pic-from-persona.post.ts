@@ -6,14 +6,19 @@ import fs from 'fs/promises';
 import { spawn } from 'child_process';
 
 const querySchema = z.object({
-	personaId: z.string(),
+	persona_id: z.string(),
+	cache: z.string().optional(),
 });
 
-async function runSD(model: string, prompt: string, output: string) {
+const sdModel = '/media/user/ML/StabilityMatrix/Models/StableDiffusion/realisticVisionV60B1_v51VAE.safetensors';
+
+async function runSD(model: string, pos: string, output: string, neg?: string) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
 	return new Promise((resolve, reject) => {
-		const args = ['-m', model, '-p', prompt, '-o', output, '--seed', '-1'];
-		console.log('args', args);
+		const args = ['-m', model, '-p', pos, '-o', output, '--seed', '-1'];
+		if (neg) {
+			args.push('-n', neg);
+		}
 		const command = spawn(sdPath, args, { stdio: 'inherit' });
 
 		command.on('error', (error) => {
@@ -39,13 +44,18 @@ export default defineEventHandler(async (event) => {
 	const data = await getValidatedQuery(event, (body) => querySchema.parse(body));
 
 	const db = await getDB();
-	const persona = await db('persona').where({ id: data.personaId }).first();
+	const persona = await db('persona').where({ id: data.persona_id }).first();
 
 	if (!persona) {
 		throw new Error('Persona not found');
 	}
 
-	const description = persona.description || persona.name;
+	let posPrompt = persona.description;
+	if (!posPrompt) {
+		posPrompt = `profile picture of ${persona.name}`;
+	}
+
+	const negPrompt = `drawing, disfigured, distorted`;
 
 	// find path to save image
 	let dataPath = getDataPath();
@@ -62,9 +72,9 @@ export default defineEventHandler(async (event) => {
 		await fs.unlink(output);
 	}
 
-	await runSD('/media/user/ML/StabilityMatrix/Models/StableDiffusion/realisticVisionV60B1_v51VAE.safetensors', description, output);
+	await runSD(sdModel, posPrompt, output, negPrompt);
 
-	await db('persona').where({ id: data.personaId }).update({ profile_pic: output });
+	await db('persona').where({ id: data.persona_id }).update({ profile_pic: output });
 
 	return { output };
 });
