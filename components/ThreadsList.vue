@@ -24,43 +24,41 @@ onBeforeMount(async () => {
 
 const renameClicked = (threadId: string) => {
 	const thread = threads.value.find((thread) => thread.id === threadId);
-	if (thread) {
-		editingThreadName.value = thread.name;
-	} else {
+	if (!thread) {
 		console.error(`Couldn't find thread with id ${threadId} to rename`);
 		editingThreadName.value = '';
+		return;
 	}
+	editingThreadName.value = thread.name;
 };
 const handleRename = async () => {
-	if (editingThreadName.value) {
-		await updateThread({
-			id: rightClickedId.value,
-			name: editingThreadName.value,
-		});
-		editingThreadName.value = '';
+	if (!editingThreadName.value) return;
 
-		const threads = await getThreads();
-		threads.value = threads.value;
-	}
+	await updateThread({
+		id: rightClickedId.value,
+		name: editingThreadName.value,
+	});
+	editingThreadName.value = '';
+
+	const threads = await getThreads();
+	threads.value = threads.value;
 };
 
 const doCreateThread = async () => {
-	if (newThreadName.value) {
-		const { value: newThread } = await createThread({
-			name: newThreadName.value,
-			mode: 'custom',
-		});
+	if (!newThreadName.value) return;
 
-		threads.value = (await getThreads()).value;
-		navigateTo(`/chat/${newThread.id}`);
-	}
+	const { value: newThread } = await createThread({
+		name: newThreadName.value,
+		mode: 'custom',
+	});
+	threads.value = (await getThreads()).value;
+	navigateTo(`/chat/${newThread.id}`);
 };
 
 const doDeleteThread = async (threadId: string) => {
 	await deleteThread(threadId);
 
 	threads.value = (await getThreads()).value;
-
 	if (threads.value.length > 0) {
 		navigateTo(`/chat/${threads.value[0].id}`);
 	} else {
