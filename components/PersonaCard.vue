@@ -64,17 +64,12 @@ watch(
 	<HoverCard>
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground p-2 rounded-lg">
-				<Avatar>
-					<AvatarImage :src="profilePic" />
-					<AvatarFallback>VC</AvatarFallback>
-				</Avatar>
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-80">
 			<div class="flex items-center space-x-4">
-				<Avatar>
-					<!-- TODO -->
+				<Avatar size="base">
 					<AvatarImage :src="profilePic" />
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>

@@ -10,7 +10,7 @@ const querySchema = z.object({
 	cache: z.string().optional(),
 });
 
-const sdModel = '/media/user/ML/StabilityMatrix/Models/StableDiffusion/realisticVisionV60B1_v51VAE.safetensors';
+const sdModel = '/media/user/ML/StabilityMatrix/Models/StableDiffusion/juggernaut_reborn.safetensors';
 
 async function runSD(model: string, pos: string, output: string, neg?: string) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
@@ -50,9 +50,11 @@ export default defineEventHandler(async (event) => {
 		throw new Error('Persona not found');
 	}
 
-	let posPrompt = persona.description;
-	if (!posPrompt) {
-		posPrompt = `profile picture of ${persona.name}`;
+	const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
+
+	let posPrompt = currentVersion.description;
+	if (!posPrompt || posPrompt.length === 0) {
+		posPrompt = `picture of ${currentVersion.name}, facing the viewer`;
 	}
 
 	const negPrompt = `drawing, disfigured, distorted`;

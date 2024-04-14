@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Message } from 'ai/vue';
 import type { PersonaVersionMerged } from '~/server/database/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useElectron from '~/composables/useElectron';
 const { copyToClipboard } = useElectron();
 
@@ -60,8 +61,12 @@ const doClearThread = async () => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
-					<CardHeader class="p-3" v-if="threadMode === 'persona'">
-						{{ message.role === 'user' ? 'User' : currentPersona?.name }}
+					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
+						<Avatar v-if="message.role !== 'user'">
+							<AvatarImage :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
+							<AvatarFallback>VC</AvatarFallback>
+						</Avatar>
+						<span>{{ message.role === 'user' ? 'User' : currentPersona?.name }}</span>
 					</CardHeader>
 					<CardHeader class="p-3" v-else>
 						{{ message.role === 'user' ? 'User' : 'AI' }}
