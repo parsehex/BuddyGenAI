@@ -45,10 +45,12 @@ exports.up = async function (knex) {
 		table.string('persona_id').notNullable();
 		table.foreign('persona_id').references('persona.id');
 
-		table.increments('version').notNullable();
+		table.integer('version').notNullable();
 		table.timestamp('created').notNullable();
 		table.string('name').notNullable();
 		table.string('description').notNullable();
+
+		table.unique(['persona_id', 'version']);
 	});
 	console.log('Tables created');
 };
@@ -61,4 +63,5 @@ exports.down = async function (knex) {
 	await knex.schema.dropTable('chat_message');
 	await knex.schema.dropTable('chat_thread');
 	await knex.schema.dropTable('persona');
+	await knex.schema.dropTable('persona_version');
 };
