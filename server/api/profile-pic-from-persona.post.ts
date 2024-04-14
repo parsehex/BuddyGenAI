@@ -52,11 +52,7 @@ export default defineEventHandler(async (event) => {
 
 	const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
 
-	let posPrompt = currentVersion.description;
-	if (!posPrompt || posPrompt.length === 0) {
-		posPrompt = `picture of ${currentVersion.name}, facing the viewer`;
-	}
-
+	const posPrompt = `picture of ${currentVersion.name}, facing the viewer, centered`;
 	const negPrompt = `drawing, disfigured, distorted`;
 
 	// find path to save image
