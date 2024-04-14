@@ -61,8 +61,10 @@ const doDeleteThread = async (threadId: string) => {
 
 	threads.value = (await getThreads()).value;
 
-	if (isThreadSelected(threadId)) {
+	if (threads.value.length > 0) {
 		navigateTo(`/chat/${threads.value[0].id}`);
+	} else {
+		navigateTo(`/`);
 	}
 };
 </script>
