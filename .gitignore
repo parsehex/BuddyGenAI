@@ -20,3 +20,4 @@ errors.json
 /*.cpp
 *.sqlite
 build/config.gypi
+/data

@@ -2,7 +2,8 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Button from '~/components/ui/button/Button.vue';
 import { Plus } from 'lucide-vue-next';
-import type { ChatThread, Persona, PersonaVersionMerged } from '~/server/database/types';
+import type { ChatThread, PersonaVersionMerged } from '~/server/database/types';
+import { formatDistanceToNow } from 'date-fns';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -12,8 +13,12 @@ const name = ref('');
 const description = ref('');
 const created = ref(null as number | null);
 const updated = ref(null as number | null);
+const profilePic = ref('');
 
 const threads = ref([] as ChatThread[]);
+
+const time_label = ref('Created' as 'Created' | 'Updated');
+const time_at = ref('');
 
 onBeforeMount(async () => {
 	const p = await $fetch(`/api/persona?id=${id}`);
@@ -22,6 +27,18 @@ onBeforeMount(async () => {
 	description.value = p.description || '';
 	created.value = p.created;
 	updated.value = p.updated;
+	if (p.profile_pic) {
+		profilePic.value = `/api/profile-pic?persona_id=${p.id}`;
+	} else {
+		profilePic.value = 'https://github.com/vuejs.png';
+	}
+	if (updated.value) {
+		time_label.value = 'Updated';
+		time_at.value = formatDistanceToNow(new Date(updated.value), { addSuffix: true });
+	} else {
+		time_label.value = 'Created';
+		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
+	}
 	const t = await $fetch(`/api/threads?persona_id=${id}`);
 	threads.value = t;
 });
@@ -41,15 +58,20 @@ const createThread = async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold">
-			Persona - <span class="text-blue-500">{{ name }}</span>
-		</h1>
+		<h1 class="text-2xl font-bold"> Persona </h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
 		</div>
 		<Card class="w-full md:w-1/2">
-			<CardHeader class="text-lg"> Description </CardHeader>
+			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
+				<Avatar>
+					<AvatarImage :src="profilePic" />
+					<AvatarFallback>VC</AvatarFallback>
+				</Avatar>
+				<span class="text-blue-500">{{ name }}</span>
+				<span class="text-xs text-muted-foreground italic">{{ time_label }} {{ time_at }}</span>
+			</CardHeader>
 			<CardContent>
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
@@ -59,7 +81,7 @@ const createThread = async () => {
 			</CardContent>
 		</Card>
 		<h2 class="text-xl font-bold mt-4 flex items-center">
-			Threads Using Persona
+			Chats with {{ name }}
 			<Button type="button" size="sm" class="ml-4" @click="createThread">
 				<Plus />
 			</Button>

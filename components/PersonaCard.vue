@@ -2,7 +2,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import type { PersonaVersionMerged } from '~/server/database/types';
 import { formatDistanceToNow } from 'date-fns';
 
 const props = defineProps<{
@@ -14,6 +13,7 @@ const name = ref('');
 const description = ref('');
 const created = ref(null as number | null);
 const updated = ref(null as number | null);
+const profilePic = ref('');
 
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
@@ -34,6 +34,11 @@ const updatePersona = async () => {
 	}
 	created.value = p.created;
 	updated.value = p.updated;
+	if (p.profile_pic) {
+		profilePic.value = `/api/profile-pic?persona_id=${p.id}`;
+	} else {
+		profilePic.value = 'https://github.com/vuejs.png';
+	}
 	if (updated.value) {
 		time_label.value = 'Updated';
 		time_at.value = formatDistanceToNow(new Date(updated.value), { addSuffix: true });
@@ -60,8 +65,7 @@ watch(
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground p-2 rounded-lg">
 				<Avatar>
-					<!-- TODO -->
-					<AvatarImage src="https://github.com/vuejs.png" />
+					<AvatarImage :src="profilePic" />
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>
 				<Button variant="link" size="lg">{{ name }}</Button>
@@ -71,7 +75,7 @@ watch(
 			<div class="flex items-center space-x-4">
 				<Avatar>
 					<!-- TODO -->
-					<AvatarImage src="https://github.com/vuejs.png" />
+					<AvatarImage :src="profilePic" />
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>
 				<div class="space-y-1">

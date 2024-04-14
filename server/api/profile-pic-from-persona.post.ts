@@ -1,0 +1,70 @@
+import { getDB, getDataPath } from '../database/knex';
+import z from 'zod';
+import { findBinaryPath } from '~/lib/fs';
+import path from 'path';
+import fs from 'fs/promises';
+import { spawn } from 'child_process';
+
+const querySchema = z.object({
+	personaId: z.string(),
+});
+
+async function runSD(model: string, prompt: string, output: string) {
+	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
+	return new Promise((resolve, reject) => {
+		const args = ['-m', model, '-p', prompt, '-o', output, '--seed', '-1'];
+		console.log('args', args);
+		const command = spawn(sdPath, args, { stdio: 'inherit' });
+
+		command.on('error', (error) => {
+			console.error(`Error: ${error.message}`);
+			reject(error);
+		});
+
+		command.on('exit', (code, signal) => {
+			if (code) console.log(`Process exited with code: ${code}`);
+			if (signal) console.log(`Process killed with signal: ${signal}`);
+			resolve(output);
+		});
+
+		// Prevent the script from exiting until the child process exits
+		process.on('exit', () => {
+			command.kill();
+			resolve(output);
+		});
+	});
+}
+
+export default defineEventHandler(async (event) => {
+	const data = await getValidatedQuery(event, (body) => querySchema.parse(body));
+
+	const db = await getDB();
+	const persona = await db('persona').where({ id: data.personaId }).first();
+
+	if (!persona) {
+		throw new Error('Persona not found');
+	}
+
+	const description = persona.description || persona.name;
+
+	// find path to save image
+	let dataPath = getDataPath();
+	dataPath = path.join(dataPath, 'images');
+	await fs.mkdir(dataPath, { recursive: true });
+
+	const output = path.join(dataPath, `${persona.id}.png`);
+	let outputExists = false;
+	try {
+		await fs.access(output);
+		outputExists = true;
+	} catch (e) {}
+	if (outputExists) {
+		await fs.unlink(output);
+	}
+
+	await runSD('/media/user/ML/StabilityMatrix/Models/StableDiffusion/realisticVisionV60B1_v51VAE.safetensors', description, output);
+
+	await db('persona').where({ id: data.personaId }).update({ profile_pic: output });
+
+	return { output };
+});

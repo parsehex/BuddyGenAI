@@ -1,5 +1,4 @@
 export function promptFromPersonaDescription(name: string, description: string) {
-	console.log('promptFromPersonaDescription', name, description);
 	if (!description) {
 		return `The following is a chat between a User and an Assistant dilligantly playing the role of ${name}.`;
 	}

@@ -1,6 +1,7 @@
 import knex from 'knex';
 import type { Knex } from 'knex';
 import path from 'path';
+import fs from 'fs/promises';
 import { findDirectoryInPath, getDirname } from '~/lib/fs';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -18,7 +19,7 @@ const dir = dbLocations[platform];
 const filename = 'db.sqlite';
 let dbPath = '';
 if (isDev) {
-	dbPath = filename;
+	dbPath = path.join('data', 'db.sqlite');
 } else {
 	dbPath = path.join(dir, filename);
 	if (platform === 'win32') {
@@ -32,6 +33,11 @@ if (isDev) {
 	} else if (platform === 'darwin') {
 		dbPath = dbPath.replace('~', '/Users/' + process.env.USER);
 	}
+}
+
+export function getDataPath() {
+	// TODO break out
+	return dbPath.replace('db.sqlite', '');
 }
 
 async function getMigrationsDir() {
@@ -50,6 +56,7 @@ async function getMigrationsDir() {
 
 let db: Knex | null = null;
 export async function getDB() {
+	if (isDev) await fs.mkdir('data', { recursive: true });
 	if (!db) {
 		db = knex({
 			client: 'sqlite3',
