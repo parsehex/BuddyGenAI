@@ -75,9 +75,11 @@ const refreshProfilePicture = async () => {
 				<Card class="whitespace-pre-wrap">
 					<CardContent>
 						<div>
-							<img v-if="profilePictureValue" :src="profilePictureValue" alt="Profile Picture" class="w-1/2" />
+							<img v-if="profilePictureValue" :src="profilePictureValue" alt="Profile Picture" class="w-1/2 mx-auto" />
 							<div class="flex items-center justify-center">
-								<Button type="button" @click="refreshProfilePicture">Refresh</Button>
+								<Button type="button" @click="refreshProfilePicture">
+									{{ profilePictureValue ? 'Refresh' : 'Create' }}
+								</Button>
 								<Spinner v-if="updatingProfilePicture" />
 							</div>
 						</div>

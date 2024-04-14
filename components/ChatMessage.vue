@@ -62,11 +62,15 @@ const doClearThread = async () => {
 			<ContextMenuTrigger>
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
 					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
-						<Avatar v-if="message.role !== 'user'">
+						<Avatar v-if="!isUser">
 							<AvatarImage :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
 							<AvatarFallback>VC</AvatarFallback>
 						</Avatar>
-						<span>{{ message.role === 'user' ? 'User' : currentPersona?.name }}</span>
+
+						<span v-if="isUser"> User </span>
+						<span v-else>
+							<NuxtLink :to="`/persona/${currentPersona?.id}/view`">{{ currentPersona?.name }}</NuxtLink>
+						</span>
 					</CardHeader>
 					<CardHeader class="p-3" v-else>
 						{{ message.role === 'user' ? 'User' : 'AI' }}

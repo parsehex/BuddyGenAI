@@ -28,7 +28,8 @@ onBeforeMount(async () => {
 	created.value = p.created;
 	updated.value = p.updated;
 	if (p.profile_pic) {
-		profilePic.value = `/api/profile-pic?persona_id=${p.id}`;
+		const cacheVal = Math.random() * 1000;
+		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
 	} else {
 		profilePic.value = 'https://github.com/vuejs.png';
 	}
@@ -70,25 +71,28 @@ const createThread = async () => {
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>
 				<span class="text-blue-500">{{ name }}</span>
-				<span class="text-xs text-muted-foreground italic">{{ time_label }} {{ time_at }}</span>
 			</CardHeader>
 			<CardContent>
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
-					No description. &nbsp;&mdash;&nbsp;
+					No description &nbsp;&mdash;&nbsp;
 					<NuxtLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">Add description</NuxtLink>
 				</span>
+				<br />
+				<br />
+				<span class="text-xs text-muted-foreground italic">{{ time_label }} {{ time_at }}</span>
 			</CardContent>
 		</Card>
 		<h2 class="text-xl font-bold mt-4 flex items-center">
 			Chats with {{ name }}
-			<Button type="button" size="sm" class="ml-4" @click="createThread">
+			<Button type="button" size="sm" class="ml-4" @click="createThread" v-if="threads.length > 0">
 				<Plus />
 			</Button>
 		</h2>
-		<div v-if="threads.length === 0" class="text-gray-400 italic">
+		<div v-if="threads.length === 0" class="text-gray-400 italic text-center mt-1">
 			No threads using this persona.
-			<Button type="button" class="mt-2" @click="createThread">Create Thread</Button>
+			<br />
+			<Button type="button" class="mt-1" @click="createThread">Create Thread</Button>
 		</div>
 		<div v-else>
 			<div v-for="thread in threads" :key="thread.id" class="mt-2">
