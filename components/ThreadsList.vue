@@ -12,6 +12,8 @@ const isThreadSelected = (threadId: string) => route.path.includes(`/chat`) && r
 
 const store = useAppStore();
 
+// TODO add option to fork a thread
+
 const newThreadName = ref('');
 const editingThreadName = ref('');
 const rightClickedId = ref('');
@@ -69,7 +71,7 @@ const doDeleteThread = async (threadId: string) => {
 
 <template>
 	<div class="sidebar">
-		<div class="flex w-full mb-4">
+		<div class="flex w-full mb-4 px-2">
 			<Input v-model="newThreadName" placeholder="Thread name" @keyup.enter="createThread" />
 			<Button @click="doCreateThread">+</Button>
 		</div>

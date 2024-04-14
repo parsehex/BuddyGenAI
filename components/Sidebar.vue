@@ -39,7 +39,7 @@ watch(
 	width: 200px;
 	height: 100vh;
 	background-color: #f5f5f5;
-	padding: 20px;
+	padding-top: 20px;
 }
 
 .sidebar ul {

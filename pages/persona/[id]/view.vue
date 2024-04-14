@@ -66,7 +66,7 @@ const createThread = async () => {
 		</div>
 		<Card class="w-full md:w-1/2">
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
-				<Avatar>
+				<Avatar size="base">
 					<AvatarImage :src="profilePic" />
 					<AvatarFallback>VC</AvatarFallback>
 				</Avatar>

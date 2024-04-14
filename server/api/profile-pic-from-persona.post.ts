@@ -5,6 +5,13 @@ import path from 'path';
 import fs from 'fs/promises';
 import { spawn } from 'child_process';
 
+/*
+TODO notes about profile pic versioning:
+- we would store the profile pic in the version table
+- would also keep the pictures themselves
+	- need to update naming to include the version id
+*/
+
 const querySchema = z.object({
 	persona_id: z.string(),
 	cache: z.string().optional(),
@@ -52,8 +59,8 @@ export default defineEventHandler(async (event) => {
 
 	const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
 
-	const posPrompt = `picture of ${currentVersion.name}, facing the viewer, centered`;
-	const negPrompt = `drawing, disfigured, distorted`;
+	const posPrompt = `picture of ${currentVersion.name}, facing the viewer, centered, thin circle frame`;
+	const negPrompt = `drawing, disfigured, distorted, thick frame`;
 
 	// find path to save image
 	let dataPath = getDataPath();

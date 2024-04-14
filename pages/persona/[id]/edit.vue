@@ -19,7 +19,13 @@ const profilePictureValue = ref('');
 
 const updatingProfilePicture = ref(false);
 
-const ppIsOpen = ref(false);
+// TODO overhaul refreshing profile picture
+// basically, allow the user to refresh the pic, but don't update until they save (+ do versioning on pics)
+// how it'll actually work:
+// page stays like it is until user clicks Refresh, at which point:
+// show new elements showing the old avatar and the newly generated one which will get saved onSave
+// (possibly have a generation history viewer)
+// we can clean up pics that werent used
 
 onBeforeMount(async () => {
 	persona.value = (await getPersona(id)).value;
@@ -67,44 +73,33 @@ const refreshProfilePicture = async () => {
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
 		</div>
-		<Collapsible class="my-2" v-model:open="ppIsOpen" :defaultOpen="false">
-			<CollapsibleTrigger>
-				<Button type="button" size="sm">{{ ppIsOpen ? 'Hide' : 'Show' }} Profile Picture</Button>
-			</CollapsibleTrigger>
-			<CollapsibleContent>
-				<Card class="whitespace-pre-wrap">
-					<CardContent>
-						<div>
-							<img v-if="profilePictureValue" :src="profilePictureValue" alt="Profile Picture" class="w-1/2 mx-auto" />
-							<div class="flex items-center justify-center">
-								<Button type="button" @click="refreshProfilePicture">
-									{{ profilePictureValue ? 'Refresh' : 'Create' }}
-								</Button>
-								<Spinner v-if="updatingProfilePicture" />
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			</CollapsibleContent>
-		</Collapsible>
-		<div class="w-full md:w-1/2 mb-4">
-			<Input v-model="nameValue" placeholder="Persona name" />
-		</div>
-		<Card class="w-full md:w-1/2">
-			<CardHeader class="text-lg">Description</CardHeader>
+		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2">
 			<CardContent>
-				<Textarea v-model="descriptionValue" placeholder="Persona description" />
+				<div class="flex flex-col items-center">
+					<Input v-model="nameValue" placeholder="Persona name" size="lg" />
+					<Avatar v-if="profilePictureValue && profilePictureValue.length > 9" size="lg">
+						<AvatarImage :src="profilePictureValue" />
+						<AvatarFallback>VC</AvatarFallback>
+					</Avatar>
+					<div class="flex flex-col items-center justify-center">
+						<Button type="button" @click="refreshProfilePicture">
+							{{ profilePictureValue ? 'Refresh' : 'Create' }}
+						</Button>
+						<Spinner :style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }" />
+					</div>
+				</div>
+				<div class="flex flex-col items-center space-y-4">
+					<label class="text-lg w-full text-center">
+						Description
+						<Textarea v-model="descriptionValue" placeholder="Persona description" />
+					</label>
+					<Button @click="handleSave">Save</Button>
+				</div>
 			</CardContent>
 		</Card>
-		<!-- TODO add option whether to update all threads with this persona -->
-		<Button @click="handleSave">Save</Button>
 	</div>
 </template>
 
 <style>
-#electron-status {
-	position: absolute;
-	font-size: 2rem;
-	font: bold;
-}
+/*  */
 </style>

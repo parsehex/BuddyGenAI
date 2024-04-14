@@ -32,9 +32,9 @@ const doCreatePersona = async () => {
 
 <template>
 	<div class="sidebar">
-		<div class="flex flex-col w-full mb-4">
+		<div class="flex w-full mb-4 px-2">
 			<Input v-model="newPersona.name" placeholder="Persona name" @keydown.enter="doCreatePersona" />
-			<Button @click="doCreatePersona">Create</Button>
+			<Button @click="doCreatePersona">+</Button>
 		</div>
 		<ul>
 			<li v-for="persona in personas" :key="persona.id" :class="{ 'bg-gray-200 font-bold': isPersonaSelected(persona.id), 'p-1': true, rounded: true, 'cursor-pointer': true }">

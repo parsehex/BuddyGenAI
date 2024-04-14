@@ -249,14 +249,18 @@ const updateSysFromPersona = async () => {
 				<TooltipProvider :delay-duration="100">
 					<Tooltip>
 						<TooltipTrigger>
-							<Label :class="{ 'cursor-pointer': personas.length, 'cursor-not-allowed': !personas.length }">
+							<Label :class="{ 'cursor-pointer': personas.length }">
 								<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
 								Persona
 							</Label>
 						</TooltipTrigger>
 						<TooltipContent v-if="!personas.length">
 							<!-- TODO add a Persona Creator/Wizard + link in this tooltip -->
-							<p>No personas available.<br />Go to the Personas tab to create one, then come back here.</p>
+							<p>
+								No personas available.
+								<br />
+								<Button type="button" @click="navigateTo('/persona/add')">Create one</Button>
+							</p>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
