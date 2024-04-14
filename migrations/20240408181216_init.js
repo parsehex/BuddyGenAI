@@ -49,7 +49,6 @@ exports.up = async function (knex) {
 		table.timestamp('created').notNullable();
 		table.string('name').notNullable();
 		table.string('description').notNullable();
-		table.unique(['persona_id', 'version']);
 	});
 	console.log('Tables created');
 };
