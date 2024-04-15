@@ -26,6 +26,7 @@ export interface PersonaVersionMerged {
 	profile_pic: string | null;
 	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
+	current_version_id: string;
 }
 
 export interface ChatThread {

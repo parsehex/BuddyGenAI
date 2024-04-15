@@ -73,6 +73,7 @@ async function updateMessages() {
 }
 async function updatePersonas() {
 	const newPersonas = await $fetch(`/api/personas`);
+	// @ts-ignore
 	personas.value = newPersonas;
 	if (threadMode.value === 'persona' && !selectedPersona.value && newPersonas.length === 1) {
 		selectedPersona.value = newPersonas[0].id;
