@@ -6,6 +6,9 @@ import type { ChatCompletionMessageParam } from 'openai/resources/chat/completio
 import { getDB } from '../../database/knex';
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 
+// TODO load api from db + figure out all that stuff
+// to allow picking 3rd party apis or whatever (like companion server app)
+
 export default defineLazyEventHandler(async () => {
 	const openai = new OpenAI({
 		apiKey: 'sk-1234',
