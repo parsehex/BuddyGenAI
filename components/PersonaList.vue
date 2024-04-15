@@ -6,8 +6,10 @@ import { Button } from './ui/button';
 import { getPersonas } from '@/lib/api/persona';
 import { useToast } from './ui/toast';
 import Spinner from '~/components/Spinner.vue';
+import { useCompletion } from 'ai/vue';
 
 const { toast } = useToast();
+const { complete } = useCompletion();
 
 const route = useRoute();
 const personas = ref([] as PersonaVersionMerged[]);
@@ -21,6 +23,19 @@ onBeforeMount(async () => {
 });
 
 const doCreatePersona = async () => {
+	if (!newPersona.value?.name) {
+		toast({ variant: 'destructive', description: 'Name is required' });
+		return;
+	}
+	const prompt = `Your task is to write a brief description of ${newPersona.value?.name}.`;
+	toast({ variant: 'info', description: 'Generating description from name...' });
+	const value = await complete(prompt, { body: { max_tokens: 100, temperature: 1 } });
+	if (!value) {
+		toast({ variant: 'destructive', description: 'Error generating description. Please try again.' });
+		return;
+	}
+	newPersona.value.description = value;
+
 	const newP = await $fetch('/api/persona', {
 		method: 'POST',
 		body: JSON.stringify(newPersona.value),
