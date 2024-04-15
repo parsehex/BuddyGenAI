@@ -37,8 +37,12 @@ const doCreatePersona = async () => {
 			<Button @click="doCreatePersona">+</Button>
 		</div>
 		<ul>
-			<li v-for="persona in personas" :key="persona.id" :class="{ 'bg-gray-200 font-bold': isPersonaSelected(persona.id), 'p-1': true, rounded: true, 'cursor-pointer': true }">
-				<NuxtLink class="block" :to="`/persona/${persona.id}/view`">{{ persona.name }}</NuxtLink>
+			<li
+				v-for="persona in personas"
+				:key="persona.id"
+				:class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isPersonaSelected(persona.id) ? 'font-bold bg-gray-200' : '']"
+			>
+				<NuxtLink class="block p-1" :to="`/persona/${persona.id}/view`">{{ persona.name }}</NuxtLink>
 			</li>
 		</ul>
 	</div>

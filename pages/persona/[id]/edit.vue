@@ -73,7 +73,7 @@ const refreshProfilePicture = async () => {
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
 		</div>
-		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2">
+		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent>
 				<div class="flex flex-col items-center">
 					<Input v-model="nameValue" placeholder="Persona name" size="lg" />
@@ -91,7 +91,7 @@ const refreshProfilePicture = async () => {
 				<div class="flex flex-col items-center space-y-4">
 					<label class="text-lg w-full text-center">
 						Description
-						<Textarea v-model="descriptionValue" placeholder="Persona description" />
+						<Textarea v-model="descriptionValue" :placeholder="`${persona?.name} is...`" />
 					</label>
 					<Button @click="handleSave">Save</Button>
 				</div>
