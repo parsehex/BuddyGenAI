@@ -4,10 +4,15 @@ import type { PersonaVersionMerged } from '~/server/database/types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { getPersonas } from '@/lib/api/persona';
+import { useToast } from './ui/toast';
+import Spinner from '~/components/Spinner.vue';
+
+const { toast } = useToast();
 
 const route = useRoute();
 const personas = ref([] as PersonaVersionMerged[]);
 const newPersona = ref({ name: '', description: '' });
+const showSpinner = ref(false);
 
 const isPersonaSelected = (id: string | number) => route.path.includes(`/persona`) && route.params.id == id;
 
@@ -25,7 +30,15 @@ const doCreatePersona = async () => {
 	const p = await $fetch('/api/personas');
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
-
+	toast({ variant: 'success', description: `Created ${newPersona.value.name}. Generating profile picture...` });
+	showSpinner.value = true;
+	await $fetch(`/api/profile-pic-from-persona?persona_id=${newId}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+	showSpinner.value = false;
 	await navigateTo(`/persona/${newId}/view`);
 };
 </script>
@@ -35,6 +48,7 @@ const doCreatePersona = async () => {
 		<div class="flex w-full mb-4 px-2">
 			<Input v-model="newPersona.name" placeholder="Persona name" @keydown.enter="doCreatePersona" />
 			<Button @click="doCreatePersona">+</Button>
+			<Spinner v-if="showSpinner" />
 		</div>
 		<ul>
 			<li

@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { useChat } from 'ai/vue';
 import { RefreshCw } from 'lucide-vue-next';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader } from './ui/card';
-import { Input } from './ui/input';
-import { Switch } from './ui/switch';
-import { Textarea } from './ui/textarea';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { Label } from './ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getThread } from '@/lib/api/thread';
 import { updateMessage, apiMsgsToOpenai } from '@/lib/api/message';
 import type { ChatMessage, ChatThread, PersonaVersionMerged } from '~/server/database/types';
 import Message from './ChatMessage.vue';
+import { useToast } from '@/components/ui/toast';
+
+const { toast } = useToast();
 
 const props = defineProps<{
 	threadId: string;
@@ -42,6 +45,10 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = 
 	body: apiPartialBody.value,
 	onFinish: async () => {
 		await updateMessages();
+	},
+	onError: (e) => {
+		console.log(e);
+		toast({ variant: 'destructive', description: e.message });
 	},
 });
 watch(

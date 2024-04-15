@@ -7,6 +7,11 @@ import { Textarea } from '~/components/ui/textarea';
 import { getPersona, updatePersona } from '~/lib/api/persona';
 import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
+import { useCompletion } from 'ai/vue';
+import { useToast } from '~/components/ui/toast';
+
+const { toast } = useToast();
+const { complete } = useCompletion();
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -17,7 +22,11 @@ const nameValue = ref('');
 const descriptionValue = ref('');
 const profilePictureValue = ref('');
 
+const wizInput = ref('');
+
 const updatingProfilePicture = ref(false);
+
+const remixedDescription = ref('');
 
 // TODO overhaul refreshing profile picture
 // basically, allow the user to refresh the pic, but don't update until they save (+ do versioning on pics)
@@ -64,6 +73,21 @@ const refreshProfilePicture = async () => {
 	profilePictureValue.value = `/api/profile-pic?persona_id=${id}&cache=${cacheVal}`;
 	updatingProfilePicture.value = false;
 };
+
+const remixDescription = async () => {
+	const desc = wizInput.value;
+	const prompt = `The following input is a description of someone named ${persona.value?.name}. Provide a succinct description of them using common language.\n\nInput:\n`;
+	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 1 } });
+	if (!value) {
+		toast({ variant: 'destructive', description: 'Error remixing description. Please try again.' });
+		return;
+	}
+	remixedDescription.value = value;
+};
+const acceptRemixedDescription = () => {
+	descriptionValue.value = remixedDescription.value;
+	remixedDescription.value = '';
+};
 </script>
 
 <template>
@@ -83,7 +107,7 @@ const refreshProfilePicture = async () => {
 					</Avatar>
 					<div class="flex flex-col items-center justify-center">
 						<Button type="button" @click="refreshProfilePicture">
-							{{ profilePictureValue ? 'Refresh' : 'Create' }}
+							{{ profilePictureValue ? 'Refresh' : 'Create Profile Picture' }}
 						</Button>
 						<Spinner :style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }" />
 					</div>
@@ -95,6 +119,23 @@ const refreshProfilePicture = async () => {
 					</label>
 					<Button @click="handleSave">Save</Button>
 				</div>
+				<Card>
+					<CardHeader>
+						<h2 class="font-bold">Description Wizard</h2>
+					</CardHeader>
+					<CardContent>
+						<Label>
+							<span class="text-lg">Keywords that describe {{ persona?.name }}</span>
+							<Input v-model="wizInput" placeholder="helpful, approachable, talkative..." @keydown.enter="remixDescription" />
+						</Label>
+						<Button @click="remixDescription">Create Description</Button>
+						<div v-if="remixedDescription">
+							<p class="text-lg">Remixed Description:</p>
+							<p class="text-lg">{{ remixedDescription }}</p>
+							<Button @click="acceptRemixedDescription">Accept</Button>
+						</div>
+					</CardContent>
+				</Card>
 			</CardContent>
 		</Card>
 	</div>

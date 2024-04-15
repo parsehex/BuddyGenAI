@@ -7,7 +7,7 @@ import { Textarea } from '~/components/ui/textarea';
 import { getPersona, updatePersona } from '~/lib/api/persona';
 import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
-import { useToast } from '@/components/ui/toast/use-toast';
+import { useToast } from '@/components/ui/toast';
 
 const { toast } = useToast();
 
