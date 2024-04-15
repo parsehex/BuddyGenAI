@@ -4,6 +4,7 @@ const { value: threads } = await getThreads();
 let thread = threads[0];
 if (!threads.length) {
 	// TODO handle this better
+	// have a "What should we call you?" to get rid of the User label
 	thread = (await createThread({ name: 'First Thread', mode: 'custom' })).value;
 	window.location.reload();
 }

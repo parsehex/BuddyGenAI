@@ -61,6 +61,8 @@ export default defineLazyEventHandler(async () => {
 			})) as ChatCompletionMessageParam[],
 		});
 
+		// TODO allow function call to generate+send image to user
+
 		return OpenAIStream(response, {
 			onCompletion: async (completion) => {
 				await db('chat_message').insert({
