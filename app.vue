@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import Toaster from '@/components/ui/toast/Toaster.vue';
 import Sidebar from '@/components/Sidebar.vue';
 </script>
 
@@ -9,6 +10,7 @@ import Sidebar from '@/components/Sidebar.vue';
 			<NuxtLoadingIndicator />
 			<NuxtPage id="page-container" />
 		</NuxtLayout>
+		<Toaster />
 	</Body>
 </template>
 

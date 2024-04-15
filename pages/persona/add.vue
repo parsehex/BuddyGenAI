@@ -7,9 +7,14 @@ import { Textarea } from '~/components/ui/textarea';
 import { getPersona, updatePersona } from '~/lib/api/persona';
 import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
+import { useToast } from '@/components/ui/toast/use-toast';
+
+const { toast } = useToast();
 
 const nameValue = ref('');
 const descriptionValue = ref('');
+
+const showSpinner = ref(false);
 
 const handleSave = async () => {
 	const newPersona = await $fetch(`/api/persona`, {
@@ -23,6 +28,14 @@ const handleSave = async () => {
 		}),
 	});
 	const id = newPersona.id;
+	toast({ description: 'Persona created. Generating profile picture. Please wait...' });
+	showSpinner.value = true;
+	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
 	await navigateTo(`/persona/${id}/view`);
 };
 </script>
@@ -40,6 +53,7 @@ const handleSave = async () => {
 			</CardContent>
 		</Card>
 		<Button @click="handleSave">Create Persona</Button>
+		<Spinner v-if="showSpinner" />
 	</div>
 </template>
 
