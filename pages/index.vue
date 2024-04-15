@@ -26,6 +26,8 @@ const acceptedPersona = ref(false);
 const newPersona = ref(null as PersonaVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
+const relationshipToBuddy = ref('');
+
 // TODO figure out temporary pics
 const profilePictureValue = ref('');
 
@@ -88,8 +90,10 @@ const createDescription = async () => {
 		toast({ variant: 'destructive', description: 'Please fill out Name and Keywords.' });
 		return;
 	}
+	const relationship = relationshipToBuddy.value ? `${personaName.value}'s relation to ${userNameValue.value}: ${relationshipToBuddy.value}` : '';
 	const desc = personaKeywords.value;
-	const prompt = `The following input is a description of someone named ${personaName.value}. Expand upon the original and provide a succinct description of ${personaName.value} using common language.\n\nInput:\n`;
+	const prompt = `The following input is a description of someone named ${personaName.value}. Expand upon the original and provide a succinct description of ${personaName.value} using common language.
+${relationship}\nInput:\n`;
 	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 1 } });
 	if (!value) {
 		toast({ variant: 'destructive', description: 'Error remixing description. Please try again.' });
@@ -141,6 +145,11 @@ const acceptPersona = async () => {
 								@keyup.enter="createDescription"
 							/>
 							<!-- TODO add more options to create description -->
+							<!-- Relationship To Buddy -->
+							<Label class="block">
+								Relationship To Buddy
+								<Input v-model="relationshipToBuddy" class="mt-2 p-2 border border-gray-300 rounded" placeholder="friend, coworker, family" />
+							</Label>
 
 							<Button @click="createDescription" class="mt-4 p-2 bg-blue-500 text-white rounded">Create</Button>
 						</div>
