@@ -72,7 +72,7 @@ const doDeleteThread = async (threadId: string) => {
 <template>
 	<div class="sidebar">
 		<div class="flex w-full mb-4 px-2">
-			<Input v-model="newThreadName" placeholder="Thread name" @keyup.enter="createThread" />
+			<Input v-model="newThreadName" placeholder="Chat name" @keyup.enter="doCreateThread" />
 			<Button @click="doCreateThread">+</Button>
 		</div>
 		<ul>

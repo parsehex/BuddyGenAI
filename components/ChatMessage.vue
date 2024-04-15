@@ -24,6 +24,15 @@ const isUser = computed(() => message.value.role === 'user');
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
 
+const userName = ref('User');
+
+onBeforeMount(async () => {
+	if (isUser.value) {
+		const { user_name } = await $fetch('/api/setting?keys=user_name');
+		userName.value = user_name;
+	}
+});
+
 const triggerEdit = async () => {
 	editingMessageTitle.value = `Editing Message`;
 	editingMessage.value = message.value.content;
@@ -56,10 +65,11 @@ const doClearThread = async () => {
 };
 
 const msgInitials = computed(() => {
-	if (isUser.value) return 'U';
+	if (isUser.value) return userName.value[0];
 	if (!currentPersona.value) return '';
-	const [first, last] = currentPersona.value.name.split(' ');
-	return `${first[0]}${last ? last[0] : ''}`;
+
+	const firstName = currentPersona.value.name.split(' ')[0];
+	return firstName[0];
 });
 </script>
 
@@ -69,12 +79,15 @@ const msgInitials = computed(() => {
 			<ContextMenuTrigger>
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
 					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
+						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar>
 							<AvatarImage v-if="!isUser" :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
 							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
 						</Avatar>
 
-						<span v-if="isUser"> User </span>
+						<span v-if="isUser">
+							{{ userName }}
+						</span>
 						<span v-else>
 							<NuxtLink :to="`/persona/${currentPersona?.id}/view`">{{ currentPersona?.name }}</NuxtLink>
 						</span>

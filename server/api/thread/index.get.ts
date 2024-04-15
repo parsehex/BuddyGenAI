@@ -6,8 +6,8 @@ const querySchema = z.object({
 });
 
 export default defineLazyEventHandler(async () => {
+	const db = await getDB();
 	return defineEventHandler(async (event) => {
-		const db = await getDB();
 		const { id } = await getValidatedQuery(event, (query) => querySchema.parse(query));
 		const thread = await db('chat_thread').where({ id }).first();
 		if (!thread) {

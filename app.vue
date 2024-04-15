@@ -17,7 +17,23 @@ import AppMenubar from '@/components/AppMenubar.vue';
 </template>
 
 <style>
-/* #page-container {
-	padding-left: 15%;
-} */
+.info {
+	@apply bg-blue-400 text-white font-bold;
+}
+.border-info {
+	@apply border-blue-700;
+}
+.info-foreground {
+	@apply text-blue-400 bg-white;
+}
+
+.success {
+	@apply bg-green-400 text-white font-bold;
+}
+.border-success {
+	@apply border-green-700;
+}
+.success-foreground {
+	@apply text-green-400 bg-white;
+}
 </style>

@@ -62,6 +62,7 @@ const handleSave = async () => {
 
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
+	toast({ variant: 'info', description: 'Generating new profile picture...' });
 	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
 		method: 'POST',
 		headers: {

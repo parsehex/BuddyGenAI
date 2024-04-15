@@ -1,6 +1,6 @@
-export function promptFromPersonaDescription(name: string, description: string) {
+export function promptFromPersonaDescription(userName: string, aiName: string, description: string | null) {
 	if (!description) {
-		return `The following is a chat between User and Assistant enthusiastically playing the role of ${name}. ${name} doesn't refer to themselves as an AI or an Assistant.`;
+		return `The following is a chat between user named ${userName} and assistant enthusiastically playing the role of ${aiName}. ${aiName} doesn't refer to themselves as an AI or an Assistant.`;
 	}
-	return `The chat is between User and an embodied Assistant, which is playing the role of ${name}. ${name} doesn't refer to themselves as an AI or an Assistant. Description of ${name} to be followed faithfully:\n${description}`;
+	return `The following is a chat between user named ${userName} and assistant enthusiastically playing the role of ${aiName}. ${aiName} doesn't refer to themselves as an AI or an Assistant. Description of ${aiName} to be followed faithfully:\n${description}`;
 }

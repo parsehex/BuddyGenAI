@@ -8,8 +8,12 @@ const reload = () => {
 	window.location.reload();
 };
 
-const appSettings = async () => {
+const goAppSettings = async () => {
 	await navigateTo('/settings');
+};
+
+const goHome = async () => {
+	await navigateTo('/');
 };
 
 (window as any).latestKeyDownHandlerId = Math.random();
@@ -23,9 +27,9 @@ const handleKeyDown = ((id) => async (e: KeyboardEvent) => {
 	} else if (e.key === 'i' && holdingCtrl && holdingShift && toggleDevTools) {
 		e.preventDefault();
 		toggleDevTools();
-	} else if (e.key === ',') {
+	} else if (e.key === ',' && holdingCtrl && !holdingShift) {
 		e.preventDefault();
-		await appSettings();
+		await goAppSettings();
 	}
 })((window as any).latestKeyDownHandlerId);
 
@@ -37,6 +41,7 @@ window.addEventListener('keydown', handleKeyDown);
 		<MenubarMenu>
 			<MenubarTrigger>File</MenubarTrigger>
 			<MenubarContent>
+				<MenubarItem @select="goHome"> Home Page </MenubarItem>
 				<MenubarItem @select="reload">
 					Reload
 					<MenubarShortcut>Ctrl + R</MenubarShortcut>
@@ -46,7 +51,7 @@ window.addEventListener('keydown', handleKeyDown);
 					<MenubarShortcut>Ctrl + Shift + I</MenubarShortcut>
 				</MenubarItem>
 				<MenubarSeparator />
-				<MenubarItem @select="appSettings">
+				<MenubarItem @select="goAppSettings">
 					App Settings
 					<MenubarShortcut>Ctrl + ,</MenubarShortcut>
 				</MenubarItem>

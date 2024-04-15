@@ -238,7 +238,7 @@ const updateSysFromPersona = async () => {
 			<TooltipProvider :delay-duration="100">
 				<Tooltip>
 					<TooltipTrigger>
-						<Label>Thread Mode</Label>
+						<Label>Chat Mode</Label>
 						<!-- TODO organize for one -->
 						<!-- TODO when there are messages already and user changes the mode, confirm that doing so will delete all messages before continuing -->
 					</TooltipTrigger>

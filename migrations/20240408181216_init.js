@@ -52,6 +52,10 @@ exports.up = async function (knex) {
 
 		table.unique(['persona_id', 'version']);
 	});
+	await knex.schema.createTable('app_settings', (table) => {
+		table.string('name').primary();
+		table.string('value').notNullable();
+	});
 	console.log('Tables created');
 };
 

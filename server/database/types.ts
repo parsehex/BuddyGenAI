@@ -2,8 +2,6 @@ export interface Persona {
 	id: string;
 	created: number;
 	updated: number | null;
-	// name: string;
-	// description: string | null;
 	profile_pic: string | null;
 	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
@@ -36,7 +34,7 @@ export interface ChatThread {
 	name: string;
 	mode: 'persona' | 'custom';
 	persona_id: string | null;
-	// TODO add current persona version (exclusive with persona_mode_use_current -- only one should be set)
+	current_persona_version_id: string | null;
 	persona_mode_use_current: boolean | null;
 }
 export interface ChatMessage {
@@ -47,4 +45,9 @@ export interface ChatMessage {
 	content: string;
 	thread_id: string;
 	thread_index: number;
+}
+
+export interface AppSettings {
+	name: string;
+	value: string;
 }

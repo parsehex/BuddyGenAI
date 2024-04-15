@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
 import { getDB } from '../../database/knex';
 import type { Persona } from '../../database/types';
+import AppSettings from '~/server/AppSettings';
 
 // Update Existing Thread
 
@@ -37,6 +38,8 @@ export default defineEventHandler(async (event) => {
 		})
 		.returning('*');
 
+	const userName = AppSettings.get('user_name');
+
 	const changedMode = mode && mode !== currentThread.mode;
 	if (changedMode) {
 		console.log('Mode changed, deleting first message');
@@ -62,7 +65,7 @@ export default defineEventHandler(async (event) => {
 					id: uuidv4(),
 					created: new Date().getTime(),
 					role: 'system',
-					content: promptFromPersonaDescription(personaVersion.name, personaVersion.description || ''),
+					content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 					thread_id: id,
 					thread_index: 0,
 				});
@@ -85,7 +88,7 @@ export default defineEventHandler(async (event) => {
 			await db('chat_message').insert({
 				created: new Date().getTime(),
 				role: 'system',
-				content: promptFromPersonaDescription(personaVersion.name, personaVersion.description || ''),
+				content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 				thread_id: id,
 				thread_index: 0,
 			});

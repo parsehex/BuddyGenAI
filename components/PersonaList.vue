@@ -26,9 +26,10 @@ const doCreatePersona = async () => {
 		body: JSON.stringify(newPersona.value),
 	});
 	const p = await $fetch('/api/personas');
+	// @ts-ignore
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
-	toast({ variant: 'success', description: `Created ${newP.name}. Generating profile picture...` });
+	toast({ variant: 'info', description: `Created ${newP.name}. Generating profile picture...` });
 	showSpinner.value = true;
 	await $fetch(`/api/profile-pic-from-persona?persona_id=${newP.id}`, {
 		method: 'POST',
@@ -44,7 +45,7 @@ const doCreatePersona = async () => {
 <template>
 	<div class="sidebar">
 		<div class="flex w-full mb-4 px-2">
-			<Input v-model="newPersona.name" placeholder="Persona name" @keydown.enter="doCreatePersona" />
+			<Input v-model="newPersona.name" placeholder="Buddy name" @keydown.enter="doCreatePersona" />
 			<Button @click="doCreatePersona">+</Button>
 			<Spinner v-if="showSpinner" />
 		</div>

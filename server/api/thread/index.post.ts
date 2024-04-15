@@ -3,6 +3,7 @@ import { getDB } from '../../database/knex';
 import z from 'zod';
 import type { Persona } from '../../database/types';
 import { v4 as uuidv4 } from 'uuid';
+import AppSettings from '~/server/AppSettings';
 
 // Create New Thread
 
@@ -57,11 +58,12 @@ export default defineEventHandler(async (event) => {
 			if (!personaVersion) {
 				throw new Error('Current version of persona not found');
 			}
+			const userName = AppSettings.get('user_name');
 			await db('chat_message').insert({
 				id: uuidv4(),
 				created: new Date().getTime(),
 				role: 'system',
-				content: promptFromPersonaDescription(personaVersion.name, personaVersion.description || ''),
+				content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 				thread_id: thread.id,
 				thread_index: 0,
 			});

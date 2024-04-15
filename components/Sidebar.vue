@@ -5,15 +5,15 @@ import PersonaList from './PersonaList.vue';
 
 const route = useRoute();
 
-const modelValue = ref(route.path.includes('/persona') ? 'personas' : 'threads');
+const modelValue = ref(route.path.includes('/persona') ? 'buddies' : 'chats');
 
 watch(
 	() => route.path,
 	(path) => {
 		if (path.includes('/persona')) {
-			modelValue.value = 'personas';
+			modelValue.value = 'buddies';
 		} else {
-			modelValue.value = 'threads';
+			modelValue.value = 'chats';
 		}
 	}
 );
@@ -22,13 +22,13 @@ watch(
 <template>
 	<Tabs v-model:model-value="modelValue" class="fixed">
 		<TabsList class="w-full">
-			<TabsTrigger value="threads">Threads</TabsTrigger>
-			<TabsTrigger value="personas">Personas</TabsTrigger>
+			<TabsTrigger value="chats">Chats</TabsTrigger>
+			<TabsTrigger value="buddies">Buddies</TabsTrigger>
 		</TabsList>
-		<TabsContent value="threads">
+		<TabsContent value="chats">
 			<ThreadsList />
 		</TabsContent>
-		<TabsContent value="personas">
+		<TabsContent value="buddies">
 			<PersonaList />
 		</TabsContent>
 	</Tabs>

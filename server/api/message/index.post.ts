@@ -5,6 +5,7 @@ import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { getDB } from '../../database/knex';
 import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import AppSettings from '~/server/AppSettings';
 
 // TODO load api from db + figure out all that stuff
 // to allow picking 3rd party apis or whatever (like companion server app)
@@ -28,7 +29,7 @@ export default defineLazyEventHandler(async () => {
 			messages: ChatCompletionMessageParam[];
 		};
 
-		if (thread.mode === 'persona' && thread.persona_mode_use_current) {
+		if (thread.mode === 'persona' && thread.persona_mode_use_current && thread.persona_id) {
 			const persona = await db('persona').where({ id: thread.persona_id }).first();
 			if (!persona) {
 				throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
@@ -39,7 +40,8 @@ export default defineLazyEventHandler(async () => {
 				throw createError({ statusCode: 404, statusMessage: 'Persona version not found' });
 			}
 
-			messages[0].content = promptFromPersonaDescription(personaVersion.name, personaVersion.description);
+			const userName = AppSettings.get('user_name');
+			messages[0].content = promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description);
 		}
 
 		const userMessage = messages[messages.length - 1];
