@@ -4,6 +4,7 @@ import { findBinaryPath } from '~/lib/fs';
 import path from 'path';
 import fs from 'fs/promises';
 import { spawn } from 'child_process';
+import { negPromptFromName, posPromptFromName } from '~/lib/prompt/sd';
 
 /*
 TODO notes about profile pic versioning:
@@ -59,8 +60,8 @@ export default defineEventHandler(async (event) => {
 
 	const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
 
-	const posPrompt = `picture of ${currentVersion.name}, facing the viewer, centered, thin circle frame`;
-	const negPrompt = `drawing, disfigured, distorted, thick frame`;
+	const posPrompt = posPromptFromName(currentVersion.name);
+	const negPrompt = negPromptFromName(currentVersion.name);
 
 	// find path to save image
 	let dataPath = getDataPath();
