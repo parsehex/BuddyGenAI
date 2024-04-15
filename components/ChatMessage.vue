@@ -54,6 +54,13 @@ const doClearThread = async () => {
 	});
 	emit('clearThread');
 };
+
+const msgInitials = computed(() => {
+	if (isUser.value) return 'U';
+	if (!currentPersona.value) return '';
+	const [first, last] = currentPersona.value.name.split(' ');
+	return `${first[0]}${last ? last[0] : ''}`;
+});
 </script>
 
 <template>
@@ -62,9 +69,9 @@ const doClearThread = async () => {
 			<ContextMenuTrigger>
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
 					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
-						<Avatar v-if="!isUser">
-							<AvatarImage :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
-							<AvatarFallback>VC</AvatarFallback>
+						<Avatar>
+							<AvatarImage v-if="!isUser" :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
+							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
 						</Avatar>
 
 						<span v-if="isUser"> User </span>
