@@ -6,13 +6,17 @@ import AppMenubar from '@/components/AppMenubar.vue';
 
 <template>
 	<Body class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950 h-screen">
-		<AppMenubar />
-		<Sidebar />
-		<NuxtLayout>
-			<NuxtLoadingIndicator />
-			<NuxtPage id="page-container" />
-		</NuxtLayout>
-		<Toaster />
+		<div class="fixed top-0 left-0 w-full z-50">
+			<AppMenubar />
+		</div>
+		<div class="pt-8">
+			<Sidebar />
+			<NuxtLayout>
+				<NuxtLoadingIndicator />
+				<NuxtPage id="page-container" />
+			</NuxtLayout>
+			<Toaster />
+		</div>
 	</Body>
 </template>
 
