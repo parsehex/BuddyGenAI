@@ -229,7 +229,7 @@ const updateSysFromPersona = async () => {
 </script>
 
 <template>
-	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch" v-if="threadId !== ''">
+	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch space-y-1" v-if="threadId !== ''">
 		<div class="flex items-end justify-between">
 			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
 			<PersonaCard v-if="threadMode === 'persona' && selectedPersona" :personaId="selectedPersona" />
