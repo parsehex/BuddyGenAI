@@ -49,6 +49,8 @@ export default defineLazyEventHandler(async () => {
 
 		const userMsgIndex = messages.length - 1;
 
+		messages[0].content = `Current Date: ${new Date().toLocaleString()}\n${messages[0].content}`;
+
 		const response = await openai.chat.completions.create({
 			model: 'gpt-3.5-turbo',
 			stream: true,
