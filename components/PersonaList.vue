@@ -21,25 +21,23 @@ onBeforeMount(async () => {
 });
 
 const doCreatePersona = async () => {
-	const newId = (
-		await $fetch('/api/persona', {
-			method: 'POST',
-			body: JSON.stringify(newPersona.value),
-		})
-	).id;
+	const newP = await $fetch('/api/persona', {
+		method: 'POST',
+		body: JSON.stringify(newPersona.value),
+	});
 	const p = await $fetch('/api/personas');
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
-	toast({ variant: 'success', description: `Created ${newPersona.value.name}. Generating profile picture...` });
+	toast({ variant: 'success', description: `Created ${newP.name}. Generating profile picture...` });
 	showSpinner.value = true;
-	await $fetch(`/api/profile-pic-from-persona?persona_id=${newId}`, {
+	await $fetch(`/api/profile-pic-from-persona?persona_id=${newP.id}`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
 	});
 	showSpinner.value = false;
-	await navigateTo(`/persona/${newId}/view`);
+	await navigateTo(`/persona/${newP.id}/view`);
 };
 </script>
 
