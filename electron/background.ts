@@ -6,6 +6,7 @@ import dynamicRenderer from './dynamicRenderer';
 import titleBarActionsModule from './modules/titleBarActions';
 import updaterModule from './modules/updater';
 import macMenuModule from './modules/macMenu';
+import { ipcMain } from 'electron/main';
 
 // Initilize
 // =========
@@ -35,9 +36,15 @@ function createWindow() {
 
 		titleBarStyle: 'hiddenInset',
 		// frame: platform === 'darwin',
-		frame: true, // <= Remove this line if you wanted to implement your own title bar
+		frame: true,
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
 		title: 'AI Persona',
+	});
+
+	mainWindow.removeMenu();
+
+	ipcMain.handle('toggleDevTools:app', () => {
+		mainWindow.webContents.toggleDevTools();
 	});
 
 	// Lock app to single instance

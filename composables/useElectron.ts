@@ -34,6 +34,10 @@ export default function useElectron() {
 		electron.clipboard.writeText(text);
 	};
 
+	const toggleDevTools = () => {
+		electron.ipcRenderer.invoke('toggleDevTools:app', null);
+	};
+
 	// Initialize ipcRenderer
-	return { copyToClipboard, isElectron, titleBarActions, windowStats };
+	return { copyToClipboard, isElectron, titleBarActions, windowStats, toggleDevTools };
 }

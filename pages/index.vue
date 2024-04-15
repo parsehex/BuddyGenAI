@@ -12,4 +12,9 @@ await navigateTo(`/chat/${thread.id}`);
 // @ts-ignore
 </script>
 
+<template>
+	<!-- TODO show first-time wizard if no threads -->
+	<!-- name, ai model setup -->
+</template>
+
 <style lang="scss"></style>

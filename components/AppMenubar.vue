@@ -1,0 +1,60 @@
+<script setup lang="ts">
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from '@/components/ui/menubar';
+import useElectron from '@/composables/useElectron';
+
+const { toggleDevTools } = useElectron();
+
+const reload = () => {
+	window.location.reload();
+};
+
+const appSettings = async () => {
+	await navigateTo('/settings');
+};
+
+(window as any).latestKeyDownHandlerId = Math.random();
+const handleKeyDown = ((id) => async (e: KeyboardEvent) => {
+	const holdingCtrl = e.metaKey || e.ctrlKey;
+	const holdingShift = e.altKey || e.shiftKey;
+	if (id !== (window as any).latestKeyDownHandlerId) return;
+	if (e.key === 'r' && holdingCtrl && !holdingShift) {
+		e.preventDefault();
+		reload();
+	} else if (e.key === 'i' && holdingCtrl && holdingShift && toggleDevTools) {
+		e.preventDefault();
+		toggleDevTools();
+	} else if (e.key === ',') {
+		e.preventDefault();
+		await appSettings();
+	}
+})((window as any).latestKeyDownHandlerId);
+
+window.addEventListener('keydown', handleKeyDown);
+</script>
+
+<template>
+	<Menubar class="pr-0" size="sm">
+		<MenubarMenu>
+			<MenubarTrigger>File</MenubarTrigger>
+			<MenubarContent>
+				<MenubarItem @select="reload">
+					Reload
+					<MenubarShortcut>Ctrl + R</MenubarShortcut>
+				</MenubarItem>
+				<MenubarItem @select="toggleDevTools">
+					DevTools
+					<MenubarShortcut>Ctrl + Shift + I</MenubarShortcut>
+				</MenubarItem>
+				<MenubarSeparator />
+				<MenubarItem @select="appSettings">
+					App Settings
+					<MenubarShortcut>Ctrl + ,</MenubarShortcut>
+				</MenubarItem>
+			</MenubarContent>
+		</MenubarMenu>
+	</Menubar>
+</template>
+
+<style>
+/*  */
+</style>
