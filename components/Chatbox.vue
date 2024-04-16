@@ -227,11 +227,17 @@ const updateSysFromPersona = async () => {
 
 	await updateMessages();
 };
+
+// disjointed:
+// TODO should save the keywords (extraPrompt) that we generate desc with
 </script>
 
 <template>
 	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
-		<h2 class="fixed text-2xl font-bold grow text-center bg-white shadow-sm p-1 rounded-md z-10"> {{ threadTitle }}</h2>
+		<!--
+			align self class: .align-self-start, .align-self-end, .align-self-center, .align-self-baseline, .align-self-stretch
+		 -->
+		<h2 class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10"> {{ threadTitle }}</h2>
 		<!-- set options to the left and inline -->
 		<div class="flex items-center justify-between mt-10">
 			<div class="my-2 w-full inline-flex items-center justify-start">

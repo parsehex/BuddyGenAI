@@ -143,17 +143,18 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 		</h1>
 		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent class="flex flex-col items-center">
-				<p v-if="newHere" class="text-lg mt-4">What should we call you?</p>
-				<Input v-model="userNameValue" class="mt-2 p-2 border border-gray-300 rounded" placeholder="John" @keyup.enter="handleSave" />
+				<h2 v-if="newHere" class="text-lg mt-4 text-center underline">What should we call you?</h2>
+				<Input v-model="userNameValue" class="mt-3 p-2 border border-gray-300 rounded" placeholder="John" @keyup.enter="handleSave" />
 
 				<!-- make read only once accepted -->
 				<Card v-if="!acceptedPersona" class="mt-4 p-2 w-full">
 					<CardContent>
-						<p class="text-lg mt-4">
+						<h2 class="text-lg mt-4 text-center underline">
 							{{ personas.length ? 'Create a Buddy' : 'Create your first Buddy' }}
-						</p>
+						</h2>
 						<Input v-model="personaName" class="my-2 p-2 border border-gray-300 rounded" placeholder="Name" />
 						<div class="flex flex-row items-center space-x-2 w-full">
+							<!-- add tooltip with tips on good values -->
 							<Label class="block grow">
 								Keywords
 								<Input
@@ -164,8 +165,6 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 									@keyup.enter="createDescription"
 								/>
 							</Label>
-							<!-- TODO add more options to create description -->
-							<!-- Relationship To Buddy -->
 							<Label class="block">
 								Relationship To Buddy
 								<Input v-model="relationshipToBuddy" class="w-40 mt-2 p-2 border border-gray-300 rounded" placeholder="friend" />
@@ -184,14 +183,15 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 				</Card>
 				<Card v-else class="mt-4 p-2 w-full">
 					<CardContent>
-						<p class="text-lg mt-4">Your first chat partner</p>
-						<p class="mt-2 text-center">
+						<h2 class="text-lg mt-4 text-center underline">Your first Buddy</h2>
+						<p class="mt-3 text-center">
 							<span class="text-lg ml-3">{{ personaName }}</span>
 						</p>
 						<div class="flex flex-col items-center">
 							<Avatar v-if="profilePictureValue" size="lg" class="mt-2">
 								<AvatarImage :src="profilePictureValue" />
 							</Avatar>
+							<!-- TODO add extraPrompt input -->
 							<Spinner v-if="updatingProfilePicture" class="mt-2" />
 							<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded">Refresh</Button>
 						</div>

@@ -73,6 +73,12 @@ const doDeleteThread = async (threadId: string) => {
 		navigateTo(`/`);
 	}
 };
+
+// TODO this is a bandaid fix
+watch(route, async () => {
+	const t = await $fetch(`/api/threads`);
+	threads.value = t;
+});
 </script>
 
 <template>
