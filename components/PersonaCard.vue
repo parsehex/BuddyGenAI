@@ -62,13 +62,17 @@ watch(
 </script>
 
 <template>
-	<HoverCard>
+	<HoverCard :open-delay="1000" :close-delay="250">
 		<HoverCardTrigger as-child>
-			<div class="flex items-center bg-primary-foreground p-2 rounded-lg">
+			<div class="flex items-center bg-primary-foreground rounded-lg">
+				<Avatar size="sm">
+					<AvatarImage :src="profilePic" />
+					<AvatarFallback>{{ name[0] }}</AvatarFallback>
+				</Avatar>
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
-		<HoverCardContent class="w-80">
+		<HoverCardContent class="w-80" :hide-when-detached="true">
 			<div class="flex items-center space-x-4">
 				<Avatar size="base">
 					<AvatarImage :src="profilePic" />

@@ -230,64 +230,57 @@ const updateSysFromPersona = async () => {
 </script>
 
 <template>
-	<div class="flex flex-col w-full pt-4 pb-24 mx-auto stretch space-y-1" v-if="threadId !== ''">
-		<div class="flex items-end justify-between">
-			<h2 class="text-2xl font-bold mb-4 grow text-center">{{ threadTitle }}</h2>
+	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
+		<h2 class="fixed text-2xl font-bold grow text-center bg-white shadow-sm p-1 rounded-md"> {{ threadTitle }}</h2>
+		<!-- set options to the left and inline -->
+		<div class="flex items-center justify-between mt-9">
+			<div class="my-2 w-full inline-flex items-center justify-start">
+				<RadioGroup v-model="threadMode" v-if="!uiMessages.length" class="mx-4">
+					<p>Chat Mode</p>
+					<div class="flex items-center space-x-5 justify-center">
+						<Label class="cursor-pointer">
+							<RadioGroupItem class="px-1" value="custom" />
+							Custom
+						</Label>
+						<TooltipProvider :delay-duration="100">
+							<Tooltip>
+								<TooltipTrigger>
+									<Label :class="{ 'cursor-pointer': personas.length }">
+										<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
+										Buddy
+									</Label>
+								</TooltipTrigger>
+								<TooltipContent v-if="!personas.length">
+									<!-- TODO add a Persona Creator/Wizard + link in this tooltip -->
+									<p>
+										No buddies available :(
+										<br />
+										<Button type="button" @click="navigateTo('/persona/add')">Create one</Button>
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+				</RadioGroup>
+				<div v-if="uiMessages.length" class="flex items-center space-x-2">
+					<Label v-if="threadMode === 'persona' && personas.length" class="mx-4 cursor-pointer flex items-center">
+						<Switch class="mr-1" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
+						Keep Buddy in sync
+					</Label>
+					<Button
+						type="button"
+						size="xs"
+						title="Update system message from current Buddy version"
+						v-if="threadMode === 'persona' && !personaModeUseCurrent"
+						@click="updateSysFromPersona"
+					>
+						<RefreshCw />
+					</Button>
+				</div>
+				<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
+			</div>
 			<PersonaCard v-if="threadMode === 'persona' && selectedPersona" :personaId="selectedPersona" />
 		</div>
-		<RadioGroup v-model="threadMode" v-if="!uiMessages.values.length" class="my-2">
-			<TooltipProvider :delay-duration="100">
-				<Tooltip>
-					<TooltipTrigger>
-						<Label>Chat Mode</Label>
-						<!-- TODO organize for one -->
-						<!-- TODO when there are messages already and user changes the mode, confirm that doing so will delete all messages before continuing -->
-					</TooltipTrigger>
-					<TooltipContent>
-						<h2 class="text-lg text-center font-bold">Warning</h2>
-						<p>Changing this is destructive -- all messages except the first/system message will be lost.</p>
-					</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
-			<div class="flex items-center space-x-5 justify-center">
-				<Label class="cursor-pointer">
-					<RadioGroupItem class="px-1" value="custom" />
-					Custom
-				</Label>
-				<TooltipProvider :delay-duration="100">
-					<Tooltip>
-						<TooltipTrigger>
-							<Label :class="{ 'cursor-pointer': personas.length }">
-								<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
-								Persona
-							</Label>
-						</TooltipTrigger>
-						<TooltipContent v-if="!personas.length">
-							<!-- TODO add a Persona Creator/Wizard + link in this tooltip -->
-							<p>
-								No personas available.
-								<br />
-								<Button type="button" @click="navigateTo('/persona/add')">Create one</Button>
-							</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-				<Label v-if="threadMode === 'persona' && personas.length" class="cursor-pointer flex items-center">
-					<Switch class="mr-1" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
-					Keep in sync
-				</Label>
-				<Button
-					type="button"
-					size="xs"
-					itle="Update system message from current Persona version"
-					v-if="threadMode === 'persona' && !personaModeUseCurrent"
-					@click="updateSysFromPersona"
-				>
-					<RefreshCw />
-				</Button>
-			</div>
-		</RadioGroup>
-		<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
 		<Collapsible v-if="hasSysMessage && threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
 			<CollapsibleTrigger @click="handleSysMessageOpen">
 				<Button type="button" size="sm">{{ sysIsOpen ? 'Hide' : 'Show' }} System Message</Button>
@@ -303,21 +296,22 @@ const updateSysFromPersona = async () => {
 				</Card>
 			</CollapsibleContent>
 		</Collapsible>
+		<div class="flex flex-col gap-1 mt-1">
+			<Message
+				v-for="m in uiMessages"
+				:key="m.id"
+				:thread-id="threadId"
+				:thread-mode="threadMode"
+				:current-persona="currentPersona"
+				:message="m"
+				@edit="updateMessages"
+				@delete="updateMessages"
+				@clearThread="updateMessages"
+			/>
+		</div>
 
-		<Message
-			v-for="m in uiMessages"
-			:key="m.id"
-			:thread-id="threadId"
-			:thread-mode="threadMode"
-			:current-persona="currentPersona"
-			:message="m"
-			@edit="updateMessages"
-			@delete="updateMessages"
-			@clearThread="updateMessages"
-		/>
-
-		<form class="w-full fixed bottom-0 flex gap-1.5">
-			<Input class="p-2 mb-8 border border-gray-300 rounded shadow-xl" tabindex="1" v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" />
+		<form class="w-full fixed bottom-0 flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl">
+			<Textarea class="p-2 border border-gray-300 rounded shadow-xl" tabindex="1" v-model="input" placeholder="Say something..." @keydown.ctrl.enter="doSubmit" />
 			<Button type="button" size="sm" @click="doSubmit">{{ isLoading ? 'Stop' : 'Send' }}</Button>
 			<!-- TODO fix - the reload method calls same api endpoint with same messaages -->
 			<!-- <Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button> -->
@@ -326,9 +320,7 @@ const updateSysFromPersona = async () => {
 </template>
 
 <style lang="scss" scoped>
-form {
-	align-items: normal;
-}
+h2,
 div,
 form,
 div > form > input {
