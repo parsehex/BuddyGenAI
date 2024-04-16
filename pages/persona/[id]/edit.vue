@@ -118,12 +118,13 @@ const acceptRemixedDescription = () => {
 		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent>
 				<div class="flex flex-col items-center">
-					<Input v-model="nameValue" placeholder="Persona name" size="lg" />
+					<Input v-model="nameValue" placeholder="Persona name" size="lg" class="mb-2" />
 					<Avatar v-if="profilePictureValue && profilePictureValue.length > 9" size="lg">
 						<AvatarImage :src="profilePictureValue" />
 						<AvatarFallback>VC</AvatarFallback>
 					</Avatar>
 					<Label>
+						<!-- TODO describe better -->
 						<span class="text-lg"> Extra keywords for prompt </span>
 						<Input v-model="profilePicturePrompt" placeholder="tan suit, sunglasses" />
 					</Label>

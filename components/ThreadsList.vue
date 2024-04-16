@@ -21,7 +21,8 @@ const rightClickedId = ref('');
 const threads = ref([] as ChatThread[]);
 
 onBeforeMount(async () => {
-	threads.value = (await getThreads()).value;
+	const t = await $fetch(`/api/threads`);
+	threads.value = t;
 });
 
 const renameClicked = (threadId: string) => {
@@ -42,25 +43,30 @@ const handleRename = async () => {
 	});
 	editingThreadName.value = '';
 
-	const threads = await getThreads();
-	threads.value = threads.value;
+	const t = await $fetch(`/api/threads`);
+	threads.value = t;
 };
 
 const doCreateThread = async () => {
 	if (!newThreadName.value) return;
 
-	const { value: newThread } = await createThread({
-		name: newThreadName.value,
-		mode: 'custom',
+	const newThread = await $fetch(`/api/thread`, {
+		method: 'POST',
+		body: JSON.stringify({
+			name: newThreadName.value,
+			mode: 'persona',
+		}),
 	});
-	threads.value = (await getThreads()).value;
+	const t = await $fetch(`/api/threads`);
+	threads.value = t;
 	navigateTo(`/chat/${newThread.id}`);
 };
 
 const doDeleteThread = async (threadId: string) => {
-	await deleteThread(threadId);
+	await $fetch(`/api/thread?id=${threadId}`, { method: 'DELETE' });
 
-	threads.value = (await getThreads()).value;
+	const t = await $fetch(`/api/threads`);
+	threads.value = t;
 	if (threads.value.length > 0) {
 		navigateTo(`/chat/${threads.value[0].id}`);
 	} else {

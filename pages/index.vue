@@ -3,19 +3,17 @@
 import { getThreads, createThread } from '@/lib/api/thread';
 import { useCompletion } from 'ai/vue';
 import { useToast } from '~/components/ui/toast';
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import type { PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
+import { getPersonas } from '~/lib/api/persona';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
 
 const { value: threads } = await getThreads();
-let thread = threads[0];
-if (threads.length) {
-	// TODO get and go to latest? (need sort option)
-	await navigateTo(`/chat/${thread.id}`);
-}
+const { value: personas } = await getPersonas();
 
 const userNameValue = ref('');
 const personaName = ref('');
@@ -30,6 +28,18 @@ const relationshipToBuddy = ref('');
 
 // TODO figure out temporary pics
 const profilePictureValue = ref('');
+
+const newHere = ref(false);
+if (!threads.length || !personas.length) {
+	newHere.value = true;
+}
+
+onBeforeMount(async () => {
+	const settings = await $fetch('/api/setting?keys=user_name');
+	if (settings.user_name) {
+		userNameValue.value = settings.user_name;
+	}
+});
 
 const handleSave = async () => {
 	if (!userNameValue.value) {
@@ -102,13 +112,16 @@ ${relationship}\nInput:\n`;
 	createdDescription.value = value;
 };
 
-const acceptPersona = async () => {
-	// save
+const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') => {
+	let personaDescription = createdDescription.value;
+	if (descriptionOrKeywords === 'keywords') {
+		personaDescription = personaKeywords.value;
+	}
 	const p = await $fetch(`/api/persona`, {
 		method: 'POST',
 		body: JSON.stringify({
 			name: personaName.value,
-			description: createdDescription.value,
+			description: personaDescription,
 		}),
 		headers: { 'Content-Type': 'application/json' },
 	});
@@ -124,31 +137,38 @@ const acceptPersona = async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-4xl font-bold">Welcome to AI Persona</h1>
+		<h1 class="text-4xl font-bold">
+			{{ newHere ? 'Welcome to ' : '' }}
+			BuddyGen
+		</h1>
 		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent class="flex flex-col items-center">
-				<p class="text-lg mt-4">What should we call you?</p>
+				<p v-if="newHere" class="text-lg mt-4">What should we call you?</p>
 				<Input v-model="userNameValue" class="mt-2 p-2 border border-gray-300 rounded" placeholder="John" @keyup.enter="handleSave" />
 
 				<!-- make read only once accepted -->
 				<Card v-if="!acceptedPersona" class="mt-4 p-2 w-full">
 					<CardContent>
-						<p class="text-lg mt-4">Describe your first chat partner</p>
-						<Input v-model="personaName" class="mt-2 p-2 border border-gray-300 rounded" placeholder="Name" />
+						<p class="text-lg mt-4">
+							{{ personas.length ? 'Create a Buddy' : 'Create your first Buddy' }}
+						</p>
+						<Input v-model="personaName" class="my-2 p-2 border border-gray-300 rounded" placeholder="Name" />
 						<div class="flex flex-row items-center space-x-2 w-full">
-							<Label for="persona-keywords">Keywords</Label>
-							<Input
-								id="persona-keywords"
-								v-model="personaKeywords"
-								class="mt-2 p-2 border border-gray-300 rounded"
-								placeholder="friendly, helpful, funny"
-								@keyup.enter="createDescription"
-							/>
+							<Label class="block grow">
+								Keywords
+								<Input
+									id="persona-keywords"
+									v-model="personaKeywords"
+									class="mt-2 p-2 border border-gray-300 rounded"
+									placeholder="friendly, helpful, funny"
+									@keyup.enter="createDescription"
+								/>
+							</Label>
 							<!-- TODO add more options to create description -->
 							<!-- Relationship To Buddy -->
 							<Label class="block">
 								Relationship To Buddy
-								<Input v-model="relationshipToBuddy" class="mt-2 p-2 border border-gray-300 rounded" placeholder="friend, coworker, family" />
+								<Input v-model="relationshipToBuddy" class="w-40 mt-2 p-2 border border-gray-300 rounded" placeholder="friend" />
 							</Label>
 
 							<Button @click="createDescription" class="mt-4 p-2 bg-blue-500 text-white rounded">Create</Button>
@@ -158,7 +178,8 @@ const acceptPersona = async () => {
 							<br />
 							<span class="text-lg ml-3">{{ createdDescription }}</span>
 						</p>
-						<Button v-if="createdDescription && !acceptedPersona" @click="acceptPersona" class="mt-4 p-2 bg-blue-500 text-white rounded">Accept Description</Button>
+						<Button v-if="createdDescription && !acceptedPersona" @click="acceptPersona('description')" class="mt-4 mr-2 p-2 bg-blue-500 text-white rounded">Accept Description</Button>
+						<Button v-if="createdDescription && !acceptedPersona" @click="acceptPersona('keywords')" class="mt-4 p-2 bg-blue-500 text-white rounded">Use Keywords</Button>
 					</CardContent>
 				</Card>
 				<Card v-else class="mt-4 p-2 w-full">
@@ -182,6 +203,10 @@ const acceptPersona = async () => {
 				</Card>
 
 				<Button v-if="acceptedPersona && profilePictureValue" @click="handleSave" class="mt-4 p-2 bg-blue-500 text-white rounded">Save</Button>
+				<Alert class="mt-4 p-2" variant="info">
+					<AlertTitle>Tip</AlertTitle>
+					<AlertDescription> You can create a chat from the sidebar without a Buddy. </AlertDescription>
+				</Alert>
 			</CardContent>
 		</Card>
 	</div>

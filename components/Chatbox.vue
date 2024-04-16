@@ -231,11 +231,11 @@ const updateSysFromPersona = async () => {
 
 <template>
 	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
-		<h2 class="fixed text-2xl font-bold grow text-center bg-white shadow-sm p-1 rounded-md"> {{ threadTitle }}</h2>
+		<h2 class="fixed text-2xl font-bold grow text-center bg-white shadow-sm p-1 rounded-md z-10"> {{ threadTitle }}</h2>
 		<!-- set options to the left and inline -->
-		<div class="flex items-center justify-between mt-9">
+		<div class="flex items-center justify-between mt-10">
 			<div class="my-2 w-full inline-flex items-center justify-start">
-				<RadioGroup v-model="threadMode" v-if="!uiMessages.length" class="mx-4">
+				<RadioGroup v-model="threadMode" v-if="!uiMessages.length && !currentPersona" class="mx-4">
 					<p>Chat Mode</p>
 					<div class="flex items-center space-x-5 justify-center">
 						<Label class="cursor-pointer">
