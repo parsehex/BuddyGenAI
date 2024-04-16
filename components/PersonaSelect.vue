@@ -10,10 +10,10 @@ const personas = await $fetch('/api/personas');
 <template>
 	<Select v-model:model-value="model" class="my-2">
 		<SelectTrigger>
-			<SelectValue placeholder="Persona" />
+			<SelectValue placeholder="Buddy" />
 		</SelectTrigger>
 		<SelectContent>
-			<SelectLabel>Personas</SelectLabel>
+			<SelectLabel>Buddies</SelectLabel>
 			<SelectGroup>
 				<SelectItem v-for="persona in personas" :key="persona.id" :value="persona.id + ''">{{ persona.name }}</SelectItem>
 			</SelectGroup>

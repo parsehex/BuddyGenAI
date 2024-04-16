@@ -59,7 +59,7 @@ const createThread = async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold"> Persona </h1>
+		<h1 class="text-2xl font-bold"> Buddy </h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>

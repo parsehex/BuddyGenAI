@@ -93,7 +93,7 @@ const acceptRemixedDescription = () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold"> Edit Persona </h1>
+		<h1 class="text-2xl font-bold"> Edit Buddy </h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
