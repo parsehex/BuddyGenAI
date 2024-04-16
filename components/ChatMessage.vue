@@ -26,6 +26,15 @@ const editingMessage = ref('');
 
 const userName = ref('User');
 
+const profilePictureValue = computed(() => {
+	if (isUser.value) return '';
+	if (!currentPersona.value) return '';
+
+	const cacheVal = Math.random() * 1000;
+
+	return `/api/profile-pic?persona_id=${currentPersona.value.id}&cache=${cacheVal}`;
+});
+
 onBeforeMount(async () => {
 	if (isUser.value) {
 		const { user_name } = await $fetch('/api/setting?keys=user_name');
@@ -80,16 +89,21 @@ const msgInitials = computed(() => {
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
 					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
 						<!-- would be good ux to have an option or a link to option to update user name -->
-						<Avatar>
-							<AvatarImage v-if="!isUser" :src="`/api/profile-pic?persona_id=${currentPersona?.id}`" />
+						<Avatar v-if="isUser">
 							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
 						</Avatar>
-
 						<span v-if="isUser">
 							{{ userName }}
 						</span>
 						<span v-else>
-							<NuxtLink :to="`/persona/${currentPersona?.id}/view`">{{ currentPersona?.name }}</NuxtLink>
+							<NuxtLink :to="`/persona/${currentPersona?.id}/view`" class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg">
+								<Avatar class="mr-1">
+									<!-- TODO add hover effect -->
+									<AvatarImage v-if="!isUser" :src="profilePictureValue" />
+									<AvatarFallback>{{ msgInitials }}</AvatarFallback>
+								</Avatar>
+								{{ currentPersona?.name }}
+							</NuxtLink>
 						</span>
 					</CardHeader>
 					<CardHeader class="p-3" v-else>

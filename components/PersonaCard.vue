@@ -35,7 +35,8 @@ const updatePersona = async () => {
 	created.value = p.created;
 	updated.value = p.updated;
 	if (p.profile_pic) {
-		profilePic.value = `/api/profile-pic?persona_id=${p.id}`;
+		const cacheVal = Math.random() * 1000;
+		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
 	} else {
 		profilePic.value = 'https://github.com/vuejs.png';
 	}
