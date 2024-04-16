@@ -205,7 +205,7 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 				<Button v-if="acceptedPersona && profilePictureValue" @click="handleSave" class="mt-4 p-2 bg-blue-500 text-white rounded">Save</Button>
 				<Alert class="mt-4 p-2" variant="info">
 					<AlertTitle>Tip</AlertTitle>
-					<AlertDescription> You can create a chat from the sidebar without a Buddy. </AlertDescription>
+					<AlertDescription> You can create a Custom chat with no Buddy from the sidebar. </AlertDescription>
 				</Alert>
 			</CardContent>
 		</Card>

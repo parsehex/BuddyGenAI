@@ -38,7 +38,7 @@ function createWindow() {
 		// frame: platform === 'darwin',
 		frame: true,
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
-		title: 'AI Persona',
+		title: 'BuddyGen',
 	});
 
 	mainWindow.removeMenu();
