@@ -1,4 +1,4 @@
-import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import * as prompt from '~/lib/prompt/persona';
 import { getDB } from '../database/knex';
 import z from 'zod';
 import AppSettings from '../AppSettings';
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
 	const userName = AppSettings.get('user_name');
 
-	const content = promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || '');
+	const content = prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description || '');
 	const [firstMessage] = await db('chat_message').where({ thread_id: thread.id, thread_index: 0 }).update({ content }).returning('*');
 
 	return firstMessage;

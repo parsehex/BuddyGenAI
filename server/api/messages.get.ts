@@ -1,6 +1,6 @@
 import z from 'zod';
 import { getDB } from '../database/knex';
-import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import * as prompt from '~/lib/prompt/persona';
 import AppSettings from '../AppSettings';
 
 const querySchema = z.object({
@@ -31,7 +31,7 @@ export default defineLazyEventHandler(async () => {
 				throw createError({ statusCode: 404, statusMessage: 'Persona version not found' });
 			}
 			const userName = AppSettings.get('user_name');
-			messages[0].content = promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description);
+			messages[0].content = prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description);
 		}
 
 		return messages || [];

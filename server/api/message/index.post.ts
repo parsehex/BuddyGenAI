@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { getDB } from '../../database/knex';
-import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import * as prompt from '~/lib/prompt/persona';
 import AppSettings from '~/server/AppSettings';
 
 // TODO load api from db + figure out all that stuff
@@ -41,7 +41,7 @@ export default defineLazyEventHandler(async () => {
 			}
 
 			const userName = AppSettings.get('user_name');
-			messages[0].content = promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description);
+			messages[0].content = prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description);
 		}
 
 		const userMessage = messages[messages.length - 1];

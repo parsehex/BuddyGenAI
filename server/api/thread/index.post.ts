@@ -1,4 +1,4 @@
-import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import * as prompt from '~/lib/prompt/persona';
 import { getDB } from '../../database/knex';
 import z from 'zod';
 import type { Persona } from '../../database/types';
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
 				id: uuidv4(),
 				created: new Date().getTime(),
 				role: 'system',
-				content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
+				content: prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 				thread_id: thread.id,
 				thread_index: 0,
 			});

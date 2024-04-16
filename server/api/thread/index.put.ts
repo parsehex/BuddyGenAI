@@ -1,6 +1,6 @@
 import z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { promptFromPersonaDescription } from '~/lib/prompt/persona';
+import * as prompt from '~/lib/prompt/persona';
 import { getDB } from '../../database/knex';
 import type { Persona } from '../../database/types';
 import AppSettings from '~/server/AppSettings';
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
 					id: uuidv4(),
 					created: new Date().getTime(),
 					role: 'system',
-					content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
+					content: prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 					thread_id: id,
 					thread_index: 0,
 				});
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
 			await db('chat_message').insert({
 				created: new Date().getTime(),
 				role: 'system',
-				content: promptFromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
+				content: prompt.fromPersonaDescription(userName, personaVersion.name, personaVersion.description || ''),
 				thread_id: id,
 				thread_index: 0,
 			});
