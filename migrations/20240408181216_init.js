@@ -1,3 +1,5 @@
+// TODO move migrations to server/
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -10,6 +12,8 @@ exports.up = async function (knex) {
 		table.string('profile_pic');
 		table.string('profile_pic_prompt');
 		table.boolean('profile_pic_use_prompt').notNullable();
+		// TODO field to disable profile pic (generating at least)
+		// maybe there are other ways to accomplish this (like thur ui)
 
 		table.string('current_version_id').notNullable();
 		table.foreign('current_version_id').references('persona_version.id');

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// the persona is our v-model
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ref } from 'vue';
 
 const model = defineModel<string>({ required: true });
 const personas = await $fetch('/api/personas');

@@ -10,6 +10,8 @@ import Spinner from '~/components/Spinner.vue';
 import { useCompletion } from 'ai/vue';
 import { useToast } from '~/components/ui/toast';
 
+// TODO idea: when remixing, if theres already a description then revise instead of write anew
+
 const { toast } = useToast();
 const { complete } = useCompletion();
 
@@ -21,6 +23,7 @@ const persona = ref(null as PersonaVersionMerged | null);
 const nameValue = ref('');
 const descriptionValue = ref('');
 const profilePictureValue = ref('');
+const profilePicturePrompt = ref('');
 
 const wizInput = ref('');
 
@@ -41,7 +44,11 @@ onBeforeMount(async () => {
 	nameValue.value = persona.value?.name ?? '';
 	descriptionValue.value = persona.value?.description ?? '';
 	if (persona.value?.profile_pic) {
-		profilePictureValue.value = `/api/profile-pic?persona_id=${persona.value.id}`;
+		const cacheVal = Math.random() * 1000;
+		profilePictureValue.value = `/api/profile-pic?persona_id=${persona.value.id}&cache=${cacheVal}`;
+	}
+	if (persona.value?.profile_pic_prompt) {
+		profilePicturePrompt.value = persona.value.profile_pic_prompt;
 	}
 });
 
@@ -62,6 +69,16 @@ const handleSave = async () => {
 
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
+	await $fetch(`/api/persona`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id,
+			profile_pic_prompt: profilePicturePrompt.value,
+		}),
+	});
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
 	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
 		method: 'POST',
@@ -106,6 +123,10 @@ const acceptRemixedDescription = () => {
 						<AvatarImage :src="profilePictureValue" />
 						<AvatarFallback>VC</AvatarFallback>
 					</Avatar>
+					<Label>
+						<span class="text-lg"> Extra keywords for prompt </span>
+						<Input v-model="profilePicturePrompt" placeholder="tan suit, sunglasses" />
+					</Label>
 					<div class="flex flex-col items-center justify-center">
 						<Button type="button" @click="refreshProfilePicture">
 							{{ profilePictureValue ? 'Refresh' : 'Create Profile Picture' }}
