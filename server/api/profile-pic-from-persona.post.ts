@@ -60,7 +60,16 @@ export default defineEventHandler(async (event) => {
 
 	const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
 
-	const posPrompt = posPromptFromName(currentVersion.name);
+	if (!currentVersion) {
+		throw new Error('Persona version not found');
+	}
+
+	let extraPrompt = '';
+	if (persona.profile_pic_prompt) {
+		extraPrompt = persona.profile_pic_prompt;
+	}
+
+	const posPrompt = posPromptFromName(currentVersion.name, extraPrompt);
 	const negPrompt = negPromptFromName(currentVersion.name);
 
 	// find path to save image
