@@ -92,9 +92,9 @@ const createDescription = async () => {
 	}
 	const relationship = relationshipToBuddy.value ? `${personaName.value}'s relation to ${userNameValue.value}: ${relationshipToBuddy.value}` : '';
 	const desc = personaKeywords.value;
-	const prompt = `The following input is a description of someone named ${personaName.value}. Expand upon the original and provide a succinct description of ${personaName.value} using common language.
+	const prompt = `The following input is a description of someone named ${personaName.value}. Briefly expand upon the input to provide a succinct description of ${personaName.value} using common language.
 ${relationship}\nInput:\n`;
-	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 1 } });
+	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 0.75 } });
 	if (!value) {
 		toast({ variant: 'destructive', description: 'Error remixing description. Please try again.' });
 		return;

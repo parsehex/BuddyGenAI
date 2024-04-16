@@ -16,7 +16,7 @@ export default defineLazyEventHandler(async () => {
 			messages: [
 				{
 					role: 'user',
-					content: prompt,
+					content: prompt + `\n\nOutput:`,
 				},
 			],
 			max_tokens,
