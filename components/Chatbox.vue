@@ -67,12 +67,12 @@ async function updateThread() {
 	return newThread;
 }
 async function updateMessages() {
-	const newMessages = await $fetch(`/api/messages?threadId=${threadId.value}`);
+	const newMessages = await $fetch(`/api/message/all?threadId=${threadId.value}`);
 	setMessages(apiMsgsToOpenai(newMessages));
 	return newMessages;
 }
 async function updatePersonas() {
-	const newPersonas = await $fetch(`/api/personas`);
+	const newPersonas = await $fetch(`/api/persona/all`);
 	// @ts-ignore
 	personas.value = newPersonas;
 	if (threadMode.value === 'persona' && !selectedPersona.value && newPersonas.length === 1) {
@@ -126,7 +126,7 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}, 10);
 		return;
 	}
-	await $fetch(`/api/messages?threadId=${threadId.value}`, {
+	await $fetch(`/api/message/all?threadId=${threadId.value}`, {
 		method: 'DELETE',
 	});
 

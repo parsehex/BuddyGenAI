@@ -67,7 +67,7 @@ const doCopyMessage = () => {
 };
 const doClearThread = async () => {
 	if (!threadId) return;
-	await $fetch(`/api/messages?threadId=${threadId.value}`, {
+	await $fetch(`/api/message/all?threadId=${threadId.value}`, {
 		method: 'DELETE',
 	});
 	emit('clearThread');

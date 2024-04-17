@@ -1,4 +1,4 @@
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 
 // TODO option to set version
 

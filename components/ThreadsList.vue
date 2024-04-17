@@ -21,7 +21,7 @@ const rightClickedId = ref('');
 const threads = ref([] as ChatThread[]);
 
 onBeforeMount(async () => {
-	const t = await $fetch(`/api/threads`);
+	const t = await $fetch(`/api/thread/all`);
 	threads.value = t;
 });
 
@@ -43,7 +43,7 @@ const handleRename = async () => {
 	});
 	editingThreadName.value = '';
 
-	const t = await $fetch(`/api/threads`);
+	const t = await $fetch(`/api/thread/all`);
 	threads.value = t;
 };
 
@@ -57,7 +57,7 @@ const doCreateThread = async () => {
 			mode: 'persona',
 		}),
 	});
-	const t = await $fetch(`/api/threads`);
+	const t = await $fetch(`/api/thread/all`);
 	threads.value = t;
 	navigateTo(`/chat/${newThread.id}`);
 };
@@ -65,7 +65,7 @@ const doCreateThread = async () => {
 const doDeleteThread = async (threadId: string) => {
 	await $fetch(`/api/thread?id=${threadId}`, { method: 'DELETE' });
 
-	const t = await $fetch(`/api/threads`);
+	const t = await $fetch(`/api/thread/all`);
 	threads.value = t;
 	if (threads.value.length > 0) {
 		navigateTo(`/chat/${threads.value[0].id}`);
@@ -76,7 +76,7 @@ const doDeleteThread = async (threadId: string) => {
 
 // TODO this is a bandaid fix
 watch(route, async () => {
-	const t = await $fetch(`/api/threads`);
+	const t = await $fetch(`/api/thread/all`);
 	threads.value = t;
 });
 </script>

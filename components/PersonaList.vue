@@ -40,7 +40,7 @@ const doCreatePersona = async () => {
 		method: 'POST',
 		body: JSON.stringify(newPersona.value),
 	});
-	const p = await $fetch('/api/personas');
+	const p = await $fetch('/api/persona/all');
 	// @ts-ignore
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };

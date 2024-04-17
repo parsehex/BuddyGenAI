@@ -1,7 +1,7 @@
 import z from 'zod';
-import { getDB } from '../database/knex';
+import { getDB } from '../../database/knex';
 import * as prompt from '~/lib/prompt/persona';
-import AppSettings from '../AppSettings';
+import AppSettings from '../../AppSettings';
 
 const querySchema = z.object({
 	threadId: z.string(),

@@ -38,7 +38,7 @@ onBeforeMount(async () => {
 		time_label.value = 'Created';
 		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
 	}
-	const t = await $fetch(`/api/threads?persona_id=${id}`);
+	const t = await $fetch(`/api/thread/all?persona_id=${id}`);
 	threads.value = t;
 });
 

@@ -13,11 +13,11 @@ interface UpdateMessageResponse {
 // TODO add format=openai option to api?
 
 export async function getMessages(threadId: string) {
-	return (await useFetch(`/api/messages?threadId=${threadId}`)).data as Ref<ChatMessage[]>;
+	return (await useFetch(`/api/message/all?threadId=${threadId}`)).data as Ref<ChatMessage[]>;
 }
 export async function deleteMessages(threadId: string) {
 	return (
-		await useFetch(`/api/messages?threadId=${threadId}`, {
+		await useFetch(`/api/message/all?threadId=${threadId}`, {
 			method: 'DELETE',
 		})
 	).data as Ref<DeleteResponse>;

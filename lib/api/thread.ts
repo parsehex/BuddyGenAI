@@ -2,10 +2,10 @@ import type { ChatThread } from '@/server/database/types';
 import type { DeleteResponse } from './types';
 
 export async function getThreads() {
-	return (await useFetch('/api/threads')).data as Ref<ChatThread[]>;
+	return (await useFetch('/api/thread/all')).data as Ref<ChatThread[]>;
 }
 export async function getThreadsByPersona(personaId: string) {
-	return (await useFetch(`/api/threads?personaId=${personaId}`)).data as Ref<ChatThread[]>;
+	return (await useFetch(`/api/thread/all?personaId=${personaId}`)).data as Ref<ChatThread[]>;
 }
 export async function getThread(threadId: string) {
 	if (!threadId) {

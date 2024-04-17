@@ -13,7 +13,7 @@ interface UpdatePersonaOptions extends Partial<CreatePersonaOptions> {
 }
 
 export async function getPersonas() {
-	return (await useFetch('/api/personas')).data as Ref<PersonaVersionMerged[]>;
+	return (await useFetch('/api/persona/all')).data as Ref<PersonaVersionMerged[]>;
 }
 export async function getPersona(id: string) {
 	if (!id) {

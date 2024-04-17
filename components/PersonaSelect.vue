@@ -2,7 +2,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const model = defineModel<string>({ required: true });
-const personas = await $fetch('/api/personas');
+const personas = await $fetch('/api/persona/all');
 </script>
 
 <template>
