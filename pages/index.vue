@@ -128,23 +128,24 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 	newPersona.value = p;
 
 	acceptedPersona.value = true;
-
-	// generate pic
-	toast({ variant: 'info', description: 'Generating profile picture...' });
-	await refreshProfilePicture();
 };
 </script>
 
 <template>
+	<!-- TODO remaining FTE -->
+	<!-- allow editing description (or something to fix broken generations) -->
 	<div class="container flex flex-col items-center">
 		<h1 class="text-4xl font-bold">
 			{{ newHere ? 'Welcome to ' : '' }}
 			BuddyGen
 		</h1>
+		<Avatar v-if="newHere && !acceptedPersona" size="lg" class="my-2">
+			<img src="/assets/logo.png" alt="BuddyGen Logo" />
+		</Avatar>
 		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent class="flex flex-col items-center">
 				<h2 v-if="newHere" class="text-lg mt-4 text-center underline">What should we call you?</h2>
-				<Input v-model="userNameValue" class="mt-3 p-2 border border-gray-300 rounded" placeholder="John" @keyup.enter="handleSave" />
+				<Input v-model="userNameValue" class="mt-3 p-2 border border-gray-300 rounded text-center" placeholder="John" @keyup.enter="handleSave" />
 
 				<!-- make read only once accepted -->
 				<Card v-if="!acceptedPersona" class="mt-4 p-2 w-full">
@@ -188,12 +189,13 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 							<span class="text-lg ml-3">{{ personaName }}</span>
 						</p>
 						<div class="flex flex-col items-center">
-							<Avatar v-if="profilePictureValue" size="lg" class="mt-2">
-								<AvatarImage :src="profilePictureValue" />
+							<Avatar size="lg" class="mt-2">
+								<AvatarImage v-if="profilePictureValue" :src="profilePictureValue" />
+								<img v-else src="/assets/logo.png" alt="BuddyGen Logo" />
 							</Avatar>
 							<!-- TODO add extraPrompt input -->
 							<Spinner v-if="updatingProfilePicture" class="mt-2" />
-							<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded">Refresh</Button>
+							<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded">New Profile Picture</Button>
 						</div>
 						<p class="mt-2"
 							>Description:
