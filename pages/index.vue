@@ -190,8 +190,10 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 						</p>
 						<div class="flex flex-col items-center">
 							<Avatar size="lg" class="mt-2">
-								<AvatarImage v-if="profilePictureValue" :src="profilePictureValue" />
-								<img v-else src="/assets/logo.png" alt="BuddyGen Logo" />
+								<AvatarImage :src="profilePictureValue" />
+								<AvatarFallback>
+									<img src="/assets/logo.png" alt="Default Buddy icon" />
+								</AvatarFallback>
 							</Avatar>
 							<!-- TODO add extraPrompt input -->
 							<Spinner v-if="updatingProfilePicture" class="mt-2" />
@@ -204,7 +206,7 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 					</CardContent>
 				</Card>
 
-				<Button v-if="acceptedPersona && profilePictureValue" @click="handleSave" class="mt-4 p-2 bg-blue-500 text-white rounded">Save</Button>
+				<Button v-if="acceptedPersona" @click="handleSave" class="mt-4 p-2 bg-blue-500 text-white rounded">Save</Button>
 				<Alert class="mt-4 p-2" variant="info">
 					<AlertTitle>Tip</AlertTitle>
 					<AlertDescription> You can create a Custom chat with no Buddy from the sidebar. </AlertDescription>

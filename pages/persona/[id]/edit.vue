@@ -119,9 +119,11 @@ const acceptRemixedDescription = () => {
 			<CardContent>
 				<div class="flex flex-col items-center">
 					<Input v-model="nameValue" placeholder="Persona name" size="lg" class="mb-2" />
-					<Avatar v-if="profilePictureValue && profilePictureValue.length > 9" size="lg">
+					<Avatar size="lg">
 						<AvatarImage :src="profilePictureValue" />
-						<AvatarFallback>VC</AvatarFallback>
+						<AvatarFallback>
+							<img src="/assets/logo.png" alt="Default Buddy icon" />
+						</AvatarFallback>
 					</Avatar>
 					<Label>
 						<!-- TODO describe better -->
@@ -130,7 +132,7 @@ const acceptRemixedDescription = () => {
 					</Label>
 					<div class="flex flex-col items-center justify-center">
 						<Button type="button" @click="refreshProfilePicture">
-							{{ profilePictureValue ? 'Refresh' : 'Create Profile Picture' }}
+							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
 						<Spinner :style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }" />
 					</div>

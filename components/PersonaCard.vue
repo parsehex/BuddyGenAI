@@ -37,8 +37,6 @@ const updatePersona = async () => {
 	if (p.profile_pic) {
 		const cacheVal = Math.random() * 1000;
 		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
-	} else {
-		profilePic.value = 'https://github.com/vuejs.png';
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
@@ -66,8 +64,10 @@ watch(
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground rounded-lg">
 				<Avatar size="sm">
-					<AvatarImage :src="profilePic" />
-					<AvatarFallback>{{ name[0] }}</AvatarFallback>
+					<AvatarImage v-if="profilePic" :src="profilePic" />
+					<AvatarFallback>
+						<img src="/assets/logo.png" alt="Default Buddy icon" />
+					</AvatarFallback>
 				</Avatar>
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
@@ -76,7 +76,9 @@ watch(
 			<div class="flex items-center space-x-4">
 				<Avatar size="base">
 					<AvatarImage :src="profilePic" />
-					<AvatarFallback>VC</AvatarFallback>
+					<AvatarFallback>
+						<img src="/assets/logo.png" alt="Default Buddy icon" />
+					</AvatarFallback>
 				</Avatar>
 				<div class="space-y-1">
 					<div class="flex justify-around">

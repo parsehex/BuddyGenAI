@@ -97,10 +97,12 @@ const msgInitials = computed(() => {
 						</span>
 						<span v-else>
 							<NuxtLink :to="`/persona/${currentPersona?.id}/view`" class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg">
-								<Avatar class="mr-1">
+								<Avatar v-if="!isUser" class="mr-1">
 									<!-- TODO add hover effect -->
-									<AvatarImage v-if="!isUser" :src="profilePictureValue" />
-									<AvatarFallback>{{ msgInitials }}</AvatarFallback>
+									<AvatarImage :src="profilePictureValue" />
+									<AvatarFallback>
+										<img src="/assets/logo.png" alt="Default Buddy icon" />
+									</AvatarFallback>
 								</Avatar>
 								{{ currentPersona?.name }}
 							</NuxtLink>

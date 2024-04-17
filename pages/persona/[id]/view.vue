@@ -30,8 +30,6 @@ onBeforeMount(async () => {
 	if (p.profile_pic) {
 		const cacheVal = Math.random() * 1000;
 		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
-	} else {
-		profilePic.value = 'https://github.com/vuejs.png';
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
@@ -68,7 +66,9 @@ const createThread = async () => {
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
 				<Avatar size="base">
 					<AvatarImage :src="profilePic" />
-					<AvatarFallback>VC</AvatarFallback>
+					<AvatarFallback>
+						<img src="/assets/logo.png" alt="Default Buddy icon" />
+					</AvatarFallback>
 				</Avatar>
 				<span class="text-blue-500">{{ name }}</span>
 			</CardHeader>
