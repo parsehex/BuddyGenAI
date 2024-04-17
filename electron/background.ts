@@ -22,12 +22,14 @@ const modules = [titleBarActionsModule, macMenuModule, updaterModule];
 // =====================
 function createWindow() {
 	console.log('System info', { isProduction, platform, architucture });
+	// TODO better sizing, remember window size/shape/position
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		width: 1440,
-		height: 1024,
-		minWidth: 1024,
-		minHeight: 676,
+		width: 1024,
+		height: 676,
+		// minWidth: 1024,
+		// minHeight: 676,
+		maximizable: true,
 		webPreferences: {
 			// devTools: !isProduction,
 			nodeIntegration: true,
