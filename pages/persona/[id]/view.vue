@@ -4,6 +4,7 @@ import Button from '~/components/ui/button/Button.vue';
 import { Plus } from 'lucide-vue-next';
 import type { ChatThread, PersonaVersionMerged } from '~/server/database/types';
 import { formatDistanceToNow } from 'date-fns';
+import $f from '~/lib/api/$fetch';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -21,15 +22,16 @@ const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
 onBeforeMount(async () => {
-	const p = await $fetch(`/api/persona?id=${id}`);
+	const p = await $f.persona.get(id);
 	persona.value = p;
 	name.value = p.name;
 	description.value = p.description || '';
 	created.value = p.created;
 	updated.value = p.updated;
+
 	if (p.profile_pic) {
 		const cacheVal = Math.random() * 1000;
-		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
+		profilePic.value = `/api/persona/${id}/profile-pic?cache=${cacheVal}`;
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
@@ -38,18 +40,15 @@ onBeforeMount(async () => {
 		time_label.value = 'Created';
 		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
 	}
-	const t = await $fetch(`/api/thread/all?persona_id=${id}`);
-	threads.value = t;
+
+	threads.value = await $f.thread.getAllByPersona(id);
 });
 
 const createThread = async () => {
-	const newThread = await $fetch(`/api/thread`, {
-		method: 'POST',
-		body: JSON.stringify({
-			name: `Chat with ${persona.value?.name}`,
-			persona_id: id,
-			mode: 'persona',
-		}),
+	const newThread = await $f.thread.create({
+		name: `Chat with ${persona.value?.name}`,
+		persona_id: id,
+		mode: 'persona',
 	});
 	navigateTo(`/chat/${newThread.id}`);
 };

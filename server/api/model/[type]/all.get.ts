@@ -1,15 +1,16 @@
 import z from 'zod';
-import AppSettings, { AppSettingsDefaults } from '~/server/AppSettings';
 import path from 'path';
 import fs from 'fs/promises';
+import AppSettings from '~/server/AppSettings';
 
-const querySchema = z.object({
+const urlSchema = z.object({
 	type: z.literal('chat').or(z.literal('image')),
 });
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
-		const { type } = await getValidatedQuery(event, (query) => querySchema.parse(query));
+		const { type } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
+
 		const directory = AppSettings.get('local_model_directory');
 		const subDir = path.join(directory, type);
 		await fs.mkdir(subDir, { recursive: true });

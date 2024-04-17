@@ -1,15 +1,18 @@
 import z from 'zod';
-import { getDB } from '../../database/knex';
+import { getDB } from '~/server/database/knex';
 
-const bodySchema = z.object({
+const urlSchema = z.object({
 	id: z.string(),
+});
+const bodySchema = z.object({
 	content: z.string(),
 });
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
+		const { id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
 		const db = await getDB();
-		const { id, content } = await readValidatedBody(event, (body) => bodySchema.parse(body));
+		const { content } = await readValidatedBody(event, (body) => bodySchema.parse(body));
 
 		const message = await db('chat_message').where({ id }).first();
 		if (!message) {

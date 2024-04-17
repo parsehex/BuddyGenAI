@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { formatDistanceToNow } from 'date-fns';
+import $f from '~/lib/api/$fetch';
 
 const props = defineProps<{
 	personaId: string;
@@ -22,7 +23,7 @@ const descLimit = 250;
 
 const updatePersona = async () => {
 	if (!props.personaId) return;
-	const p = await $fetch(`/api/persona?id=${props.personaId}`);
+	const p = await $f.persona.get(props.personaId);
 	id.value = p.id;
 	name.value = p.name;
 	if (p.description) {

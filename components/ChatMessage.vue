@@ -3,6 +3,8 @@ import type { Message } from 'ai/vue';
 import type { PersonaVersionMerged } from '~/server/database/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useElectron from '~/composables/useElectron';
+import $f from '~/lib/api/$fetch';
+import urls from '~/lib/api/urls';
 const { copyToClipboard } = useElectron();
 
 const props = defineProps<{
@@ -30,14 +32,12 @@ const profilePictureValue = computed(() => {
 	if (isUser.value) return '';
 	if (!currentPersona.value) return '';
 
-	const cacheVal = Math.random() * 1000;
-
-	return `/api/profile-pic?persona_id=${currentPersona.value.id}&cache=${cacheVal}`;
+	return urls.persona.getProfilePic(currentPersona.value.id);
 });
 
 onBeforeMount(async () => {
 	if (isUser.value) {
-		const { user_name } = await $fetch('/api/setting?keys=user_name');
+		const { user_name } = await $f.setting.get(['user_name']);
 		userName.value = user_name;
 	}
 });
@@ -47,18 +47,14 @@ const triggerEdit = async () => {
 	editingMessage.value = message.value.content;
 };
 const handleEdit = async () => {
-	await $fetch(`/api/message`, {
-		method: 'PUT',
-		body: JSON.stringify({ id: message.value.id, content: editingMessage.value }),
-		headers: { 'Content-Type': 'application/json' },
-	});
+	await $f.message.update({ id: message.value.id, content: editingMessage.value });
 	editingMessage.value = '';
 	emit('edit', message.value.id);
 };
 
 const doDelete = async () => {
 	if (message.value.role !== 'user') return;
-	await $fetch(`/api/message?id=${message.value.id}`, { method: 'DELETE' });
+	await $f.message.remove(message.value.id);
 	emit('delete', message.value.id);
 };
 const doCopyMessage = () => {
@@ -67,9 +63,7 @@ const doCopyMessage = () => {
 };
 const doClearThread = async () => {
 	if (!threadId) return;
-	await $fetch(`/api/message/all?threadId=${threadId.value}`, {
-		method: 'DELETE',
-	});
+	await $f.message.removeAll(threadId.value);
 	emit('clearThread');
 };
 

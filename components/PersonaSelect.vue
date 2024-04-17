@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import uF from '~/lib/api/useFetch';
 
 const model = defineModel<string>({ required: true });
-const personas = await $fetch('/api/persona/all');
+const personas = await uF.persona.getAll();
 </script>
 
 <template>

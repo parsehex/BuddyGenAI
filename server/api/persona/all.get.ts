@@ -1,6 +1,4 @@
-import { getDB } from '../../database/knex';
-
-// TODO option to set version
+import { getDB } from '~/server/database/knex';
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
@@ -10,6 +8,10 @@ export default defineLazyEventHandler(async () => {
 		const currentVersions = await Promise.all(
 			personas.map(async (persona) => {
 				const currentVersion = await db('persona_version').where({ id: persona.current_version_id }).first();
+				if (!currentVersion) {
+					throw createError({ statusCode: 404, statusMessage: 'Current version of persona not found' });
+					// TODO something better
+				}
 				return {
 					...persona,
 					name: currentVersion.name,

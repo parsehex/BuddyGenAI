@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { getThread, getThreads, createThread, updateThread, deleteThread } from '@/lib/api/thread';
+// import { getThread, getThreads, createThread, updateThread, deleteThread } from '@/lib/api/thread';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
 import type { ChatThread } from '~/server/database/types';
+import $f from '~/lib/api/$fetch';
 
 const route = useRoute();
 const isThreadSelected = (threadId: string) => route.path.includes(`/chat`) && route.params.id === threadId;
@@ -21,8 +22,7 @@ const rightClickedId = ref('');
 const threads = ref([] as ChatThread[]);
 
 onBeforeMount(async () => {
-	const t = await $fetch(`/api/thread/all`);
-	threads.value = t;
+	threads.value = await $f.thread.getAll();
 });
 
 const renameClicked = (threadId: string) => {
@@ -37,47 +37,40 @@ const renameClicked = (threadId: string) => {
 const handleRename = async () => {
 	if (!editingThreadName.value) return;
 
-	await updateThread({
+	await $f.thread.update({
 		id: rightClickedId.value,
 		name: editingThreadName.value,
 	});
 	editingThreadName.value = '';
 
-	const t = await $fetch(`/api/thread/all`);
-	threads.value = t;
+	threads.value = await $f.thread.getAll();
 };
 
 const doCreateThread = async () => {
 	if (!newThreadName.value) return;
 
-	const newThread = await $fetch(`/api/thread`, {
-		method: 'POST',
-		body: JSON.stringify({
-			name: newThreadName.value,
-			mode: 'persona',
-		}),
+	const newThread = await $f.thread.create({
+		name: newThreadName.value,
+		mode: 'persona',
 	});
-	const t = await $fetch(`/api/thread/all`);
-	threads.value = t;
+	threads.value = await $f.thread.getAll();
 	navigateTo(`/chat/${newThread.id}`);
 };
 
 const doDeleteThread = async (threadId: string) => {
-	await $fetch(`/api/thread?id=${threadId}`, { method: 'DELETE' });
+	await $f.thread.remove(threadId);
 
-	const t = await $fetch(`/api/thread/all`);
-	threads.value = t;
+	threads.value = await $f.thread.getAll();
 	if (threads.value.length > 0) {
-		navigateTo(`/chat/${threads.value[0].id}`);
+		await navigateTo(`/chat/${threads.value[0].id}`);
 	} else {
-		navigateTo(`/`);
+		await navigateTo(`/`);
 	}
 };
 
 // TODO this is a bandaid fix
 watch(route, async () => {
-	const t = await $fetch(`/api/thread/all`);
-	threads.value = t;
+	threads.value = await $f.thread.getAll();
 });
 </script>
 

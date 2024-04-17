@@ -4,11 +4,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import { getPersona, updatePersona } from '~/lib/api/persona';
+// import { getPersona, updatePersona } from '~/lib/api/persona';
 import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
 import { useCompletion } from 'ai/vue';
 import { useToast } from '~/components/ui/toast';
+import $f from '~/lib/api/$fetch';
+import urls from '~/lib/api/urls';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -40,9 +42,11 @@ const remixedDescription = ref('');
 // we can clean up pics that werent used
 
 onBeforeMount(async () => {
-	persona.value = (await getPersona(id)).value;
-	nameValue.value = persona.value?.name ?? '';
-	descriptionValue.value = persona.value?.description ?? '';
+	persona.value = await $f.persona.get(id);
+	if (persona.value) {
+		nameValue.value = persona.value.name;
+		descriptionValue.value = persona.value.description || '';
+	}
 	if (persona.value?.profile_pic) {
 		const cacheVal = Math.random() * 1000;
 		profilePictureValue.value = `/api/profile-pic?persona_id=${persona.value.id}&cache=${cacheVal}`;
@@ -53,42 +57,24 @@ onBeforeMount(async () => {
 });
 
 const handleSave = async () => {
-	await $fetch(`/api/persona`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			id,
-			name: nameValue.value,
-			description: descriptionValue.value,
-		}),
+	await $f.persona.update({
+		id,
+		name: nameValue.value,
+		description: descriptionValue.value,
 	});
 	await navigateTo(`./view`);
 };
 
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
-	await $fetch(`/api/persona`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			id,
-			profile_pic_prompt: profilePicturePrompt.value,
-		}),
+	await $f.persona.update({
+		id,
+		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await $f.persona.createProfilePic(id);
 
-	const cacheVal = Math.random() * 1000;
-	profilePictureValue.value = `/api/profile-pic?persona_id=${id}&cache=${cacheVal}`;
+	profilePictureValue.value = urls.persona.getProfilePic(id);
 	updatingProfilePicture.value = false;
 };
 

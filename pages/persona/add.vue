@@ -4,10 +4,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import { getPersona, updatePersona } from '~/lib/api/persona';
+// import { getPersona, updatePersona } from '~/lib/api/persona';
 import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
+import $f from '~/lib/api/$fetch';
 
 const { toast } = useToast();
 
@@ -17,25 +18,14 @@ const descriptionValue = ref('');
 const showSpinner = ref(false);
 
 const handleSave = async () => {
-	const newPersona = await $fetch(`/api/persona`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			name: nameValue.value,
-			description: descriptionValue.value,
-		}),
+	const newPersona = await $f.persona.create({
+		name: nameValue.value,
+		description: descriptionValue.value,
 	});
 	const id = newPersona.id;
 	toast({ description: 'Persona created. Generating profile picture. Please wait...' });
 	showSpinner.value = true;
-	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await $f.persona.createProfilePic(id);
 	await navigateTo(`/persona/${id}/view`);
 };
 </script>

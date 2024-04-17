@@ -1,12 +1,14 @@
 import z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { getDB } from '../../database/knex';
-import type { PersonaVersionMerged } from '../../database/types';
+import { getDB } from '~/server/database/knex';
+import type { PersonaVersionMerged } from '~/server/database/types';
 
 // Update persona
 
-const bodySchema = z.object({
+const urlSchema = z.object({
 	id: z.string(),
+});
+const bodySchema = z.object({
 	name: z.string().optional(),
 	description: z.string().optional(),
 	profile_pic: z.string().optional(),
@@ -15,8 +17,9 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
+	const { id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
 	const data = await readValidatedBody(event, (body) => bodySchema.parse(body));
-	let { id, name, description, profile_pic, profile_pic_prompt, profile_pic_use_prompt } = data;
+	let { name, description, profile_pic, profile_pic_prompt, profile_pic_use_prompt } = data;
 
 	if (!id) {
 		throw new Error('Persona ID is required');

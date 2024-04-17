@@ -1,15 +1,15 @@
 import z from 'zod';
-import { getDB } from '../database/knex';
+import { getDB } from '~/server/database/knex';
 
-const querySchema = z.object({
-	personaId: z.string(),
+const urlSchema = z.object({
+	id: z.string(),
 });
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
 		const db = await getDB();
-		const { personaId } = await getValidatedQuery(event, (query) => querySchema.parse(query));
-		const persona = await db('persona').where({ id: personaId }).first();
+		const { id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
+		const persona = await db('persona').where({ id }).first();
 		if (!persona) {
 			throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
 		}

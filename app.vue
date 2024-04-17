@@ -2,6 +2,8 @@
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import AppMenubar from '@/components/AppMenubar.vue';
+
+// TODO add alert if not setup yet
 </script>
 
 <template>

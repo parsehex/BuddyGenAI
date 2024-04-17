@@ -3,10 +3,11 @@ import { ref } from 'vue';
 import type { PersonaVersionMerged } from '~/server/database/types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { getPersonas } from '@/lib/api/persona';
+// import { getPersonas } from '@/lib/api/persona';
 import { useToast } from './ui/toast';
 import Spinner from '~/components/Spinner.vue';
 import { useCompletion } from 'ai/vue';
+import $f from '~/lib/api/$fetch';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
@@ -19,7 +20,10 @@ const showSpinner = ref(false);
 const isPersonaSelected = (id: string | number) => route.path.includes(`/persona`) && route.params.id == id;
 
 onBeforeMount(async () => {
-	personas.value = (await getPersonas()).value;
+	// personas.value = (await getPersonas()).value;
+	const p = await $f.persona.getAll();
+	// @ts-ignore
+	personas.value = p;
 });
 
 const doCreatePersona = async () => {
@@ -36,22 +40,13 @@ const doCreatePersona = async () => {
 	}
 	newPersona.value.description = value;
 
-	const newP = await $fetch('/api/persona', {
-		method: 'POST',
-		body: JSON.stringify(newPersona.value),
-	});
-	const p = await $fetch('/api/persona/all');
-	// @ts-ignore
+	const newP = await $f.persona.create(newPersona.value);
+	const p = await $f.persona.getAll();
 	personas.value = p;
 	newPersona.value = { name: '', description: '' };
 	toast({ variant: 'info', description: `Created ${newP.name}. Generating profile picture...` });
 	showSpinner.value = true;
-	await $fetch(`/api/profile-pic-from-persona?persona_id=${newP.id}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await $f.persona.createProfilePic(newP.id);
 	showSpinner.value = false;
 	await navigateTo(`/persona/${newP.id}/view`);
 };

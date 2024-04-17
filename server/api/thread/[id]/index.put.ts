@@ -1,14 +1,14 @@
 import z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import * as prompt from '~/lib/prompt/persona';
-import { getDB } from '../../database/knex';
-import type { Persona } from '../../database/types';
 import AppSettings from '~/server/AppSettings';
+import { getDB } from '~/server/database/knex';
+import type { Persona } from '~/server/database/types';
+import * as prompt from '~/lib/prompt/persona';
 
-// Update Existing Thread
-
-const bodySchema = z.object({
+const urlSchema = z.object({
 	id: z.string(),
+});
+const bodySchema = z.object({
 	name: z.string().optional(),
 	persona_id: z.string().optional(),
 	mode: z.literal('persona').or(z.literal('custom')).optional(),
@@ -16,8 +16,9 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
+	const { id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
 	const data = await readValidatedBody(event, (body) => bodySchema.parse(body));
-	const { id, name, persona_id, mode, persona_mode_use_current } = data;
+	const { name, persona_id, mode, persona_mode_use_current } = data;
 
 	const db = await getDB();
 	const currentThread = await db('chat_thread').where({ id }).first();

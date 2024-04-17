@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
 import { OpenAIStream } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { getDB } from '../../database/knex';
-import * as prompt from '~/lib/prompt/persona';
+import { getDB } from '~/server/database/knex';
 import AppSettings from '~/server/AppSettings';
+import * as prompt from '~/lib/prompt/persona';
 
 // TODO load api from db + figure out all that stuff
 // to allow picking 3rd party apis or whatever (like companion server app)

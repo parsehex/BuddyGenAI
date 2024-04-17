@@ -1,19 +1,27 @@
 <script setup lang="ts">
 // TODO convert this into a page that user can go to later (name: Persona Wizard)
-import { getThreads, createThread } from '@/lib/api/thread';
+// import { getThreads, createThread } from '@/lib/api/thread';
 import { useCompletion } from 'ai/vue';
 import { useToast } from '~/components/ui/toast';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import type { PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
-import { getPersonas } from '~/lib/api/persona';
+import uF from '~/lib/api/useFetch';
+import $f from '~/lib/api/$fetch';
+import urls from '~/lib/api/urls';
+// import { getPersonas } from '~/lib/api/persona';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
 
-const { value: threads } = await getThreads();
-const { value: personas } = await getPersonas();
+// const { value: threads } = await getThreads();
+// const { value: personas } = await getPersonas();
+
+const t = await uF.thread.getAll();
+const p = await uF.persona.getAll();
+const threads = t.value;
+const personas = p.value;
 
 const userNameValue = ref('');
 const personaName = ref('');
@@ -34,12 +42,10 @@ if (!threads.length || !personas.length) {
 	newHere.value = true;
 }
 
-onBeforeMount(async () => {
-	const settings = await $fetch('/api/setting?keys=user_name');
-	if (settings.user_name) {
-		userNameValue.value = settings.user_name;
-	}
-});
+const { value: settings } = await uF.setting.get(['user_name']);
+if (settings.user_name) {
+	userNameValue.value = settings.user_name;
+}
 
 const handleSave = async () => {
 	if (!userNameValue.value) {
@@ -57,16 +63,13 @@ const handleSave = async () => {
 	const settings = {
 		user_name: userNameValue.value,
 	};
-	await $fetch(`/api/setting`, {
-		method: 'PUT',
-		body: JSON.stringify(settings),
-	});
+	await $f.setting.update(settings);
 
 	const { id, name } = newPersona.value;
-	const newThread = await $fetch(`/api/thread`, {
-		method: 'POST',
-		body: JSON.stringify({ name: `Chat with ${name}`, mode: 'persona', persona_id: id }),
-		headers: { 'Content-Type': 'application/json' },
+	const newThread = await $f.thread.create({
+		name: `Chat with ${name}`,
+		mode: 'persona',
+		persona_id: id,
 	});
 
 	await navigateTo(`/chat/${newThread.id}`);
@@ -83,15 +86,11 @@ const refreshProfilePicture = async () => {
 	const id = newPersona.value.id;
 	updatingProfilePicture.value = true;
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await $fetch(`/api/profile-pic-from-persona?persona_id=${id}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await $f.persona.createProfilePic(id);
 
-	const cacheVal = Math.random() * 1000;
-	profilePictureValue.value = `/api/profile-pic?persona_id=${id}&cache=${cacheVal}`;
+	// TODO fix other occurrences of hardcoded url
+	// profilePictureValue.value = `/api/profile-pic?persona_id=${id}&cache=${cacheVal}`;
+	profilePictureValue.value = urls.persona.getProfilePic(id);
 	updatingProfilePicture.value = false;
 };
 
@@ -117,15 +116,10 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 	if (descriptionOrKeywords === 'keywords') {
 		personaDescription = personaKeywords.value;
 	}
-	const p = await $fetch(`/api/persona`, {
-		method: 'POST',
-		body: JSON.stringify({
-			name: personaName.value,
-			description: personaDescription,
-		}),
-		headers: { 'Content-Type': 'application/json' },
+	newPersona.value = await $f.persona.create({
+		name: personaName.value,
+		description: personaDescription,
 	});
-	newPersona.value = p;
 
 	acceptedPersona.value = true;
 };

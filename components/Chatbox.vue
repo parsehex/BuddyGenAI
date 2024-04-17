@@ -3,18 +3,19 @@ import { useChat } from 'ai/vue';
 import { RefreshCw } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { getThread } from '@/lib/api/thread';
-import { updateMessage, apiMsgsToOpenai } from '@/lib/api/message';
 import type { ChatMessage, ChatThread, PersonaVersionMerged } from '~/server/database/types';
 import Message from './ChatMessage.vue';
 import { useToast } from '@/components/ui/toast';
+import uF from '@/lib/api/useFetch';
+import $f from '@/lib/api/$fetch';
+import urls from '~/lib/api/urls';
+import { apiMsgsToOpenai } from '~/lib/api/utils';
 
 const { toast } = useToast();
 
@@ -41,7 +42,7 @@ const scrollToBottom = () => {
 
 const personas = ref([] as PersonaVersionMerged[]);
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
-	api: '/api/message',
+	api: urls.message.create(),
 	body: apiPartialBody.value,
 	onFinish: async () => {
 		await updateMessages();
@@ -61,19 +62,18 @@ watch(
 const uiMessages = computed(() => messages.value.filter((m) => m.role !== 'system'));
 
 async function updateThread() {
-	const newThread = await $fetch(`/api/thread?id=${threadId.value}`);
+	const newThread = await $f.thread.get(threadId.value);
 	thread.value = newThread;
 	threadTitle.value = newThread.name;
 	return newThread;
 }
 async function updateMessages() {
-	const newMessages = await $fetch(`/api/message/all?threadId=${threadId.value}`);
+	const newMessages = await $f.message.getAll(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
 	return newMessages;
 }
 async function updatePersonas() {
-	const newPersonas = await $fetch(`/api/persona/all`);
-	// @ts-ignore
+	const newPersonas = await $f.persona.getAll();
 	personas.value = newPersonas;
 	if (threadMode.value === 'persona' && !selectedPersona.value && newPersonas.length === 1) {
 		selectedPersona.value = newPersonas[0].id;
@@ -105,7 +105,7 @@ const handleSysMessageOpen = async () => {
 };
 const updateSysMessage = async () => {
 	if (!sysMessage.value) return;
-	await updateMessage({
+	await $f.message.update({
 		id: sysMessage.value.id,
 		content: newSysMessage.value,
 	});
@@ -126,19 +126,11 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}, 10);
 		return;
 	}
-	await $fetch(`/api/message/all?threadId=${threadId.value}`, {
-		method: 'DELETE',
-	});
+	await $f.message.removeAll(threadId.value);
 
-	await $fetch('/api/thread', {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			id: threadId.value,
-			mode: newMode,
-		}),
+	await $f.thread.update({
+		id: threadId.value,
+		mode: newMode,
 	});
 
 	await updateThread();
@@ -152,15 +144,10 @@ const handlePersonaModeUseCurrentChange = async () => {
 	if (!threadId) return;
 	const newValue = !personaModeUseCurrent.value;
 	personaModeUseCurrent.value = newValue;
-	await $fetch('/api/thread', {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			id: threadId.value,
-			persona_mode_use_current: newValue,
-		}),
+
+	await $f.thread.update({
+		id: threadId.value,
+		persona_mode_use_current: newValue,
 	});
 
 	await updateMessages();
@@ -176,15 +163,10 @@ const handlePersonaChange = async () => {
 		}, 10);
 		return;
 	}
-	await $fetch('/api/thread', {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			id: threadId.value,
-			persona_id: selectedPersona.value,
-		}),
+
+	await $f.thread.update({
+		id: threadId.value,
+		persona_id: selectedPersona.value,
 	});
 
 	await updateMessages();
@@ -196,7 +178,7 @@ watch(selectedPersona, handlePersonaChange);
 onBeforeMount(async () => {
 	await updatePersonas();
 
-	let t: any;
+	let t: ChatThread | undefined;
 	try {
 		t = await updateThread();
 	} catch (e) {
@@ -211,34 +193,25 @@ onBeforeMount(async () => {
 	}
 
 	refreshed.value = true;
-	selectedPersona.value = t.persona_id || '';
+	selectedPersona.value = t?.persona_id || '';
 
 	await updateMessages();
 });
 
 const updateSysFromPersona = async () => {
 	if (!threadId) return;
-	await $fetch(`/api/update-thread-from-persona?threadId=${threadId.value}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+	await $f.thread.updateSystemMessage(threadId.value);
 
 	await updateMessages();
 };
 
-// disjointed:
+// disjointed note:
 // TODO should save the keywords (extraPrompt) that we generate desc with
 </script>
 
 <template>
 	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
-		<!--
-			align self class: .align-self-start, .align-self-end, .align-self-center, .align-self-baseline, .align-self-stretch
-		 -->
 		<h2 class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10"> {{ threadTitle }}</h2>
-		<!-- set options to the left and inline -->
 		<div class="flex items-center justify-between mt-10">
 			<div class="my-2 w-full inline-flex items-center justify-start">
 				<RadioGroup v-model="threadMode" v-if="!uiMessages.length && !currentPersona" class="mx-4">

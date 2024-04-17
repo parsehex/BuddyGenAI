@@ -1,11 +1,11 @@
-import { getDB, getDataPath } from '../database/knex';
 import z from 'zod';
-import { findBinaryPath } from '~/lib/fs';
-import path from 'path';
-import fs from 'fs/promises';
 import { spawn } from 'child_process';
+import fs from 'fs/promises';
+import path from 'path';
+import AppSettings from '~/server/AppSettings';
+import { getDB, getDataPath } from '~/server/database/knex';
+import { findBinaryPath } from '~/lib/fs';
 import { negPromptFromName, posPromptFromName } from '~/lib/prompt/sd';
-import AppSettings from '../AppSettings';
 
 /*
 TODO notes about profile pic versioning:
@@ -14,12 +14,9 @@ TODO notes about profile pic versioning:
 	- need to update naming to include the version id
 */
 
-const querySchema = z.object({
-	persona_id: z.string(),
-	cache: z.string().optional(),
+const urlSchema = z.object({
+	id: z.string(),
 });
-
-const sdModel = '/media/user/ML/StabilityMatrix/Models/StableDiffusion/juggernaut_reborn.safetensors';
 
 async function runSD(model: string, pos: string, output: string, neg?: string) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
@@ -67,10 +64,10 @@ export default defineEventHandler(async (event) => {
 		throw new Error('Image model file not found');
 	}
 
-	const data = await getValidatedQuery(event, (body) => querySchema.parse(body));
+	const { id: persona_id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
 
 	const db = await getDB();
-	const persona = await db('persona').where({ id: data.persona_id }).first();
+	const persona = await db('persona').where({ id: persona_id }).first();
 
 	if (!persona) {
 		throw new Error('Persona not found');
@@ -107,7 +104,7 @@ export default defineEventHandler(async (event) => {
 
 	await runSD(modelPath, posPrompt, output, negPrompt);
 
-	await db('persona').where({ id: data.persona_id }).update({ profile_pic: output });
+	await db('persona').where({ id: persona.id }).update({ profile_pic: output });
 
 	return { output };
 });

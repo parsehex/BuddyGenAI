@@ -1,14 +1,14 @@
 import z from 'zod';
-import { getDB } from '../../database/knex';
+import { getDB } from '~/server/database/knex';
 
-const querySchema = z.object({
+const urlSchema = z.object({
 	id: z.string(),
 });
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
 		const db = await getDB();
-		const { id } = await getValidatedQuery(event, (query) => querySchema.parse(query));
+		const { id } = await getValidatedRouterParams(event, (params) => urlSchema.parse(params));
 		const message = await db('chat_message').where({ id }).first();
 		if (!message) {
 			throw createError({ statusCode: 404, statusMessage: 'Message not found' });
@@ -20,11 +20,11 @@ export default defineLazyEventHandler(async () => {
 			.where({ thread_id: message.thread_id, thread_index: message.thread_index + 1 })
 			.first();
 		console.log('nextMessage', nextMessage?.content);
-		// if (!nextMessage) {
-		// 	throw createError({ statusCode: 400, statusMessage: 'Cannot delete last message' });
-		// }
 		await db('chat_message').where({ id }).delete();
-		await db('chat_message').where({ id: nextMessage.id }).delete();
+		if (nextMessage) {
+			// possible if failed to get response?
+			await db('chat_message').where({ id: nextMessage.id }).delete();
+		}
 		return { success: true };
 	});
 });

@@ -1,38 +1,31 @@
 <script setup lang="ts">
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
+import $f from '~/lib/api/$fetch';
+import uF from '~/lib/api/useFetch';
 
 const { pickDirectory, verifyModelDirectory } = useElectron();
 
-const settingsObj = ref({
-	// TODO Defaults endpoint?
-	user_name: 'User',
-	local_model_directory: '',
-	selected_provider_chat: 'local',
-	selected_provider_image: 'local',
-	selected_model_chat: '',
-	selected_model_image: '',
-});
+const settings = await uF.setting.getAll();
 const chatModels = ref([] as string[]);
 const imageModels = ref([] as string[]);
 
 const error = ref('');
 
-const refreshModels = async () => {
-	const c = await $fetch('/api/models/list?type=chat');
-	if (c) chatModels.value = c;
+const refreshModels = async (useUF = false) => {
+	// TODO is there a better way to do this?
+	const provider = useUF ? uF : $f;
+	let c = await provider.model.get('chat');
+	if (Array.isArray(c)) chatModels.value = c;
+	else chatModels.value = c.value;
 
-	const i = await $fetch('/api/models/list?type=image');
-	if (i) imageModels.value = i;
+	let i = await provider.model.get('image');
+	if (Array.isArray(i)) imageModels.value = i;
+	else imageModels.value = i.value;
 };
 
-onBeforeMount(async () => {
-	const settings = await $fetch('/api/setting');
-	Object.assign(settingsObj.value, settings);
-
-	if (settings.local_model_directory) {
-		await refreshModels();
-	}
-});
+if (settings.value.local_model_directory) {
+	await refreshModels(true);
+}
 
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
@@ -47,17 +40,14 @@ const pickModelDirectory = async () => {
 	} else {
 		error.value = '';
 	}
-	settingsObj.value.local_model_directory = directory;
+	settings.value.local_model_directory = directory;
 
 	await saveSettings();
 	await refreshModels();
 };
 
 const saveSettings = async () => {
-	await $fetch('/api/setting', {
-		method: 'PUT',
-		body: JSON.stringify(settingsObj.value),
-	});
+	await $f.setting.update(settings.value);
 };
 </script>
 
@@ -74,7 +64,7 @@ const saveSettings = async () => {
 				<Label for="local_model_directory" class="w-full">
 					Local Model Directory
 					<Input
-						v-model="settingsObj.local_model_directory"
+						v-model="settings.local_model_directory"
 						type="text"
 						id="local_model_directory"
 						name="local_model_directory"
@@ -87,13 +77,7 @@ const saveSettings = async () => {
 			<div class="flex justify-evenly">
 				<div class="mt-4">
 					<Label for="selected_provider_chat" class="block"> Chat Provider </Label>
-					<select
-						v-model="settingsObj.selected_provider_chat"
-						id="selected_provider_chat"
-						name="selected_provider_chat"
-						class="w-full border border-gray-300 rounded-md p-2 mt-1"
-						disabled
-					>
+					<select v-model="settings.selected_provider_chat" id="selected_provider_chat" name="selected_provider_chat" class="w-full border border-gray-300 rounded-md p-2 mt-1" disabled>
 						<!-- TODO implement -->
 						<option value="external"> External </option>
 						<option value="local"> Local </option>
@@ -103,7 +87,7 @@ const saveSettings = async () => {
 				<div class="mt-4">
 					<Label for="selected_provider_image" class="block"> Image Provider </Label>
 					<select
-						v-model="settingsObj.selected_provider_image"
+						v-model="settings.selected_provider_image"
 						id="selected_provider_image"
 						name="selected_provider_image"
 						class="w-full border border-gray-300 rounded-md p-2 mt-1"
@@ -119,7 +103,7 @@ const saveSettings = async () => {
 			</div>
 			<div class="mt-4">
 				<Label for="chat-model" class="mb-1"> Chat Model </Label>
-				<Select v-model="settingsObj.selected_model_chat" @change="saveSettings" id="chat-model">
+				<Select v-model="settings.selected_model_chat" @update:model-value="saveSettings" id="chat-model">
 					<SelectTrigger>
 						<SelectValue placeholder="Select a chat model" />
 					</SelectTrigger>
@@ -133,7 +117,7 @@ const saveSettings = async () => {
 			</div>
 			<div class="mt-4">
 				<Label for="image-model" class="mb-1"> Image Model </Label>
-				<Select v-model="settingsObj.selected_model_image" @change="saveSettings" id="image-model">
+				<Select v-model="settings.selected_model_image" @update:model-value="saveSettings" id="image-model">
 					<SelectTrigger>
 						<SelectValue placeholder="Select an image model" />
 					</SelectTrigger>
