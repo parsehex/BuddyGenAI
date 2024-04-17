@@ -41,7 +41,7 @@ const options = {
     './whisper.cpp/**/server*',
     './.output/server/**/*',
     './.output/public/**/*',
-    './migrations/**/*',
+    './server/database/migrations/**/*',
   ],
   // asar: false,
 

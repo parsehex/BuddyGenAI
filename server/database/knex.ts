@@ -44,14 +44,14 @@ async function getMigrationsDir() {
 	const __dirname = await getDirname();
 
 	if (isDev) {
-		return path.resolve(__dirname, '../../migrations');
+		return path.resolve(__dirname, '../../server/database/migrations');
 	}
 
 	let parentDir = await findDirectoryInPath('resources', __dirname);
 	if (!parentDir) {
-		throw new Error('Could not find app directory');
+		throw new Error('Could not find app resources directory');
 	}
-	return path.resolve(parentDir, 'migrations');
+	return path.resolve(parentDir, 'server/database/migrations');
 }
 
 let db: Knex | null = null;
