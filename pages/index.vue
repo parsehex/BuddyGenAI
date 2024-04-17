@@ -59,7 +59,7 @@ const handleSave = async () => {
 	};
 	await $fetch(`/api/setting`, {
 		method: 'PUT',
-		body: JSON.stringify({ values: settings }),
+		body: JSON.stringify(settings),
 	});
 
 	const { id, name } = newPersona.value;
