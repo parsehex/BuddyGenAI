@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as os from 'os';
-import { app, BrowserWindow, session } from 'electron';
+import * as fs from 'fs/promises';
+import { app, BrowserWindow, session, dialog } from 'electron';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
 import titleBarActionsModule from './modules/titleBarActions';
@@ -45,6 +46,27 @@ function createWindow() {
 
 	ipcMain.handle('toggleDevTools:app', () => {
 		mainWindow.webContents.toggleDevTools();
+	});
+
+	ipcMain.handle('pickDirectory:app', async () => {
+		const result = await dialog.showOpenDialog({
+			properties: ['openDirectory'],
+		});
+		return result.filePaths[0];
+	});
+
+	ipcMain.handle('verifyModelDirectory:app', async (_, directory: string) => {
+		const chatDir = path.join(directory, 'chat');
+		const imageDir = path.join(directory, 'image');
+		try {
+			const chatStat = await fs.stat(chatDir);
+			const imageStat = await fs.stat(imageDir);
+			if (chatStat.isDirectory() && imageStat.isDirectory()) {
+				return true;
+			}
+		} catch (err) {
+			return false;
+		}
 	});
 
 	// Lock app to single instance

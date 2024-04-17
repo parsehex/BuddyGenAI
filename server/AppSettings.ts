@@ -1,6 +1,8 @@
 import type { Knex } from 'knex';
 import { getDB } from './database/knex';
 
+type AppSettingsKeys = 'user_name' | 'local_model_directory' | 'selected_provider_chat' | 'selected_provider_image' | 'selected_model_chat' | 'selected_model_image';
+
 export const AppSettingsDefaults: Record<string, string> = {
 	user_name: 'User',
 	local_model_directory: '', // should have chat/ and image/ subdirectories
@@ -31,20 +33,19 @@ class AppSettings {
 		return this.db;
 	}
 
-	public get(key: string): string {
+	public get(key: AppSettingsKeys): string {
 		return this.settings[key];
 	}
-	public set(key: string, value: string): void {
+	public set(key: AppSettingsKeys, value: string): void {
 		this.settings[key] = value;
 	}
 
-	public getSettings(keys?: string[]): Record<string, string> {
+	public getSettings(keys?: AppSettingsKeys[]): Record<string, string> {
 		if (!keys?.length) return this.settings;
 		return keys.reduce((acc, key) => {
-			// @ts-ignore
 			acc[key] = this.settings[key];
 			return acc;
-		}, {});
+		}, {} as Record<string, string>);
 	}
 
 	private async loadSettings(): Promise<void> {

@@ -4,8 +4,7 @@ const settingsKeys = Object.keys(AppSettingsDefaults);
 
 export default defineLazyEventHandler(async () => {
 	return defineEventHandler(async (event) => {
-		const data = await readBody(event);
-		const { values } = data;
+		const values = await readBody(event);
 
 		if (!values) {
 			throw createError({ statusCode: 400, statusMessage: 'No values provided' });
@@ -18,7 +17,6 @@ export default defineLazyEventHandler(async () => {
 			throw createError({ statusCode: 400, statusMessage: `Setting key(s) not found: ${unkownKeys.join(', ')}` });
 		}
 
-		console.log(data);
 		keys.forEach((key) => {
 			// @ts-ignore
 			AppSettings.set(key, values[key]);

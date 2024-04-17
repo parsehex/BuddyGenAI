@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { spawn } from 'child_process';
 import { negPromptFromName, posPromptFromName } from '~/lib/prompt/sd';
+import AppSettings from '../AppSettings';
 
 /*
 TODO notes about profile pic versioning:
@@ -49,6 +50,23 @@ async function runSD(model: string, pos: string, output: string, neg?: string) {
 }
 
 export default defineEventHandler(async (event) => {
+	const modelDir = AppSettings.get('local_model_directory');
+	if (!modelDir) {
+		throw new Error('Model directory not set');
+	}
+
+	const selectedImageModel = AppSettings.get('selected_model_image');
+	if (!selectedImageModel) {
+		throw new Error('No image model selected');
+	}
+
+	const modelPath = path.join(modelDir, 'image', selectedImageModel);
+	try {
+		await fs.access(modelPath);
+	} catch (e) {
+		throw new Error('Image model file not found');
+	}
+
 	const data = await getValidatedQuery(event, (body) => querySchema.parse(body));
 
 	const db = await getDB();
@@ -87,7 +105,7 @@ export default defineEventHandler(async (event) => {
 		await fs.unlink(output);
 	}
 
-	await runSD(sdModel, posPrompt, output, negPrompt);
+	await runSD(modelPath, posPrompt, output, negPrompt);
 
 	await db('persona').where({ id: data.persona_id }).update({ profile_pic: output });
 

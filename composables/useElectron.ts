@@ -38,6 +38,16 @@ export default function useElectron() {
 		electron.ipcRenderer.invoke('toggleDevTools:app', null);
 	};
 
+	const pickDirectory = async () => {
+		const result = await electron.ipcRenderer.invoke('pickDirectory:app', null);
+		return result;
+	};
+
+	const verifyModelDirectory = async (directory: string) => {
+		const result = await electron.ipcRenderer.invoke('verifyModelDirectory:app', directory);
+		return result;
+	};
+
 	// Initialize ipcRenderer
-	return { copyToClipboard, isElectron, titleBarActions, windowStats, toggleDevTools };
+	return { copyToClipboard, isElectron, titleBarActions, windowStats, toggleDevTools, pickDirectory, verifyModelDirectory };
 }
