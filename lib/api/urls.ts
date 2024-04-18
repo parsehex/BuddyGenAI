@@ -26,7 +26,7 @@ const persona = {
 const setting = {
 	getAll: () => '/api/setting/all',
 	getDefaults: () => '/api/setting/defaults',
-	get: (keys: string[]) => `/api/settings?keys=${keys.join(',')}`,
+	get: (keys: string[]) => `/api/setting?keys=${keys.join(',')}`,
 	update: () => '/api/setting',
 };
 const thread = {
