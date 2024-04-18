@@ -43,7 +43,7 @@ if (!threads.length || !personas.length) {
 }
 
 const { value: settings } = await uF.setting.get(['user_name']);
-if (settings.user_name) {
+if (settings.user_name && settings.user_name !== 'User') {
 	userNameValue.value = settings.user_name;
 }
 
@@ -128,6 +128,16 @@ const acceptPersona = async (descriptionOrKeywords: 'description' | 'keywords') 
 <template>
 	<!-- TODO remaining FTE -->
 	<!-- allow editing description (or something to fix broken generations) -->
+
+	<!-- show settings stuff if nothing is setup -->
+
+	<!-- ui messages/flow -->
+	<!-- Hey there, welcome to BuddyGen! Before we get started, you'll need to do some setup. Then we'll create your first Buddy. -->
+	<!-- First, what should we call you? -->
+
+	<!-- for the models: -->
+	<!-- You'll need to download "models" which make it possible for Buddies to respond to you as well as to give them a face -- these are called "chat" and "image" models.  -->
+	<!-- Where should we save the models? -->
 	<div class="container flex flex-col items-center">
 		<h1 class="text-4xl font-bold">
 			{{ newHere ? 'Welcome to ' : '' }}
