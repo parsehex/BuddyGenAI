@@ -1,39 +1,37 @@
-# electorn-nuxt3
+# BuddyGen AI
 
-🚀 The perfect Electron + Nuxt3 quick start that you can deploy with or without electron!
+Electron app using llama.cpp and stable-diffusion.cpp to generate Buddies to talk to.
 
 ## ✅ Features
 
-- Perfect structure for parallel development of electron and nuxt 🏢
-- Deploy with or without electron! 🚀
-- Typescript (you can use javascript too) 📍
-- electron-updater 🎉
-- custom electron-builder config 🎩
-- Latest versions of `electron` and `nuxt` ✨
-- Great DX and Extensibility 🍕
-- Parallel transpilation and hot-reloading 🧪
-- `useElectron` composable for easy access to electron APIs and IPC 🎨
-- Vue-Devtools support, ESLint & Prettier, and more! 🔥
+- Generate Buddies to talk to 🤖
+- generate a detailed Buddy from just a few keywords 📝
+- Generate profile pictures for your Buddy 🖼️
 
 # ⚙️ Setup
+
+Building is not stable yet.
+
+Linux is my daily driver, so I haven't kept the Windows bulid scripts in `./scripts` up to date. I had it working when I wrote the scripts but haven't circled back to it since.
 
 Node v18 is recommended.
 
 ```bash
-# Clone the repository
-git clone https://github.com/EternalC0der/electron-nuxt3.git
+# clone the repo
 
-# Change directory to the template
-cd electron-nuxt3/template
+# TODO repo name
+cd buddygen-ai
 
 # Install dependencies
 npm install
 
+./scripts/[linux or windows]/setup_llamacpp.[sh or ps1]
+./scripts/[linux or windows]/setup_stablediffusioncpp.[sh or ps1]
+# ./scripts/[linux or windows]/setup_whispercpp.[sh or ps1]
+
 # Start the app in development mode (in electron)
 npm run dev:electron
-# Note: Use 'npm run dev:electron:win' if you're using a windows machine!
 
-# Fire up vscode
 code .
 ```
 
@@ -41,9 +39,19 @@ code .
 
 ### Development
 
+Commonly Used Scripts:
+
 ```bash
+# in dev, we use external llamacpp server due to restarts, so start that:
+npm run llamacpp:linux
+# 'npm run llamacpp:win' for windows
+
 # Start the app in development mode (in electron)
 npm run dev:electron
+# 'npm run dev:electron:win' for windows
+
+# same as dev:electron but deletes db
+npm run reset-dev-electron
 
 # Start the app in development mode (in browser)
 npm run dev
@@ -56,5 +64,7 @@ npm run dev
 npm run build
 
 # Build electron app for production
+# call the appropriate setup_llamacpp and setup_stablediffusioncpp scripts before building
+# 	(if making a local only build that is -- only kind supported atm)
 npm run build:electron
 ```
