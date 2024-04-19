@@ -36,8 +36,7 @@ const updatePersona = async () => {
 	created.value = p.created;
 	updated.value = p.updated;
 	if (p.profile_pic) {
-		const cacheVal = Math.random() * 1000;
-		profilePic.value = `/api/profile-pic?persona_id=${p.id}&cache=${cacheVal}`;
+		profilePic.value = urls.persona.getProfilePic(p.id);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

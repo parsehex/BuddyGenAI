@@ -6,8 +6,8 @@ const Platform = builder.Platform
  * @type {import('electron-builder').Configuration}
  */
 const options = {
-  appId: 'com.app.id',
-  productName: 'electron-nuxt3',
+  appId: 'com.buddygenai',
+  productName: 'buddygenai',
   // protocols: {
   // name: 'Your deeplink',
   // - Don't forget to set `MimeType: "x-scheme-handler/deeplink"` for `linux.desktop` entry!
