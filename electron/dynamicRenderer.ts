@@ -31,14 +31,22 @@ export default function (mainWindow: BrowserWindow) {
 
 		// use spawn to run the server in a separate process
 		const server = spawn('node', [serverPath], {
-			stdio: 'inherit',
+			stdio: 'pipe',
 		});
+		server.stdout.on('data', (data) => {
+			console.log(data.toString());
+
+			setTimeout(() => {
+				mainWindow.loadURL('http://localhost:3000/');
+			}, 150);
+		});
+
+		// setTimeout(() => {
+		// 	mainWindow.loadURL('http://localhost:3000/');
+		// }, 500);
+
 		server.on('close', (code) => {
 			console.log(`Server process exited with code ${code}`);
 		});
-
-		setTimeout(() => {
-			mainWindow.loadURL('http://localhost:3000');
-		}, 150);
 	})();
 }

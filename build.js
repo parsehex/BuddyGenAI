@@ -75,7 +75,8 @@ const options = {
     desktop: {
       StartupNotify: 'false',
       Encoding: 'UTF-8',
-      MimeType: 'x-scheme-handler/deeplink'
+      MimeType: 'x-scheme-handler/deeplink',
+      Icon: './assets/icon-256x.png'
     },
     target: ['dir']
     // target: ['AppImage']

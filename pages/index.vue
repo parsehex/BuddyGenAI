@@ -56,6 +56,18 @@ if (settings.value.user_name && settings.value.user_name !== 'User') {
 	userNameValue.value = settings.value.user_name;
 }
 
+const modelProvider = computed({
+	get: () => {
+		// should be the same for both
+		return settings.value.selected_provider_chat;
+	},
+	set: (value) => {
+		settings.value.selected_provider_chat = value;
+		settings.value.selected_provider_image = value;
+		saveSettings();
+	},
+});
+
 const handleSave = async () => {
 	if (!userNameValue.value) {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
@@ -117,10 +129,22 @@ const createDescription = async () => {
 	const desc = personaKeywords.value;
 	const prompt = `The following input is a description of someone named ${personaName.value}. Briefly expand upon the input to provide a succinct description of ${personaName.value} using common language.
 ${relationship}\nInput:\n`;
-	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 0.75 } });
+	let value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 0.75 } });
+	value = value || '';
+	value = value.trim();
 	if (!value) {
 		toast({ variant: 'destructive', description: 'Error remixing description. Please try again.' });
 		return;
+	}
+
+	// TODO do better
+	// does value end with a period? if not, truncate to last period
+	const l = value.length;
+	if (value[l - 1] !== '.') {
+		const lastPeriod = value.lastIndexOf('.');
+		if (lastPeriod !== -1) {
+			value = value.slice(0, lastPeriod + 1);
+		}
 	}
 	createdDescription.value = value;
 };
@@ -208,6 +232,8 @@ const handleModelChange = async () => {
 		isModelsSetup.value = false;
 	}
 };
+
+console.log(modelProvider.value);
 </script>
 
 <template>
@@ -228,18 +254,51 @@ const handleModelChange = async () => {
 			Welcome to
 			<span class="underline"><span style="color: #61dafb">BuddyGen</span> <span style="color: #111">AI</span></span>
 		</h1>
-		<Avatar v-if="newHere && !acceptedPersona" size="lg" class="my-2">
-			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
-			<img src="/assets/logo.png" alt="BuddyGen Logo" />
-		</Avatar>
 
 		<div v-if="serverStarting" class="text-center flex flex-col items-center justify-center">
 			<Spinner />
 			Getting ready...
 		</div>
 		<div v-if="!isModelsSetup" class="text-lg text-center w-96 mb-2"> We need to answer some questions before we can create your first Buddy. </div>
+		<!-- Do you want to use a local model or an external model? -->
 		<Card v-if="!isModelsSetup" class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-4">
-			<CardHeader class="pt-0 pb-2"> Model Setup </CardHeader>
+			<CardContent>
+				<!-- <p class="text-center">
+					<code class="font-bold">Models</code> let your Buddies respond to you with words, and they let you create a face for your Buddy.
+					<br />
+					You'll need to download these models and tell BuddyGen where to find them.
+				</p> -->
+				<!-- option for either external or local provider -->
+				<div class="flex flex-col w-full items-center justify-between gap-1.5 mt-4">
+					<!-- You can use models from an external provider or use models on your computer. -->
+					<!-- ask as a question -->
+					<!-- Where would you like to get models from? -->
+					<h2 class="text-lg text-center underline">Where would you like to get models from?</h2>
+					<ul class="mb-2">
+						<li>Your choices:</li>
+						<li><b>External</b> -- like ChatGPT</li>
+						<li><b>Local</b> -- models you've downloaded and use on your computer</li>
+					</ul>
+					<Label for="chat-model-provider" class="w-full">
+						Model Provider
+						<Select v-model="modelProvider" id="chat-model-provider">
+							<SelectTrigger>
+								<SelectValue placeholder="Select a chat model provider" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel> Model Providers </SelectLabel>
+									<SelectItem value="external"> External </SelectItem>
+									<SelectItem value="local"> Local </SelectItem>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Label>
+				</div>
+			</CardContent>
+		</Card>
+		<Card v-if="!isModelsSetup && modelProvider === 'local'" class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-4">
+			<CardHeader class="pt-0 pb-2"> Local Model Setup </CardHeader>
 			<CardContent>
 				<p class="text-center">
 					<code class="font-bold">Models</code> let your Buddies respond to you with words, and they let you create a face for your Buddy.
@@ -304,6 +363,11 @@ const handleModelChange = async () => {
 						<h2 class="text-lg mt-4 text-center underline">
 							{{ personas.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 						</h2>
+						<!-- TODO untangle this rats nest of a file -->
+						<Avatar v-if="newHere && !acceptedPersona" size="lg" class="ml-28">
+							<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
+							<img src="/assets/logo.png" alt="BuddyGen Logo" />
+						</Avatar>
 						<Input v-model="personaName" class="my-2 p-2 border border-gray-300 rounded" placeholder="Name" />
 						<div class="flex flex-row items-center space-x-2 w-full">
 							<!-- add tooltip with tips on good values -->
@@ -364,7 +428,7 @@ const handleModelChange = async () => {
 				<Button v-if="acceptedPersona" @click="handleSave" class="mt-4 p-2 bg-blue-500 text-white rounded">Save</Button>
 				<Alert class="mt-4 p-2" variant="info">
 					<AlertTitle>Tip</AlertTitle>
-					<AlertDescription> You can create a Custom chat with no Buddy from the sidebar. </AlertDescription>
+					<AlertDescription> You can make a Custom chat without a Buddy from the sidebar. </AlertDescription>
 				</Alert>
 			</CardContent>
 		</Card>

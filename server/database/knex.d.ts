@@ -1,4 +1,3 @@
-import { knex } from 'knex';
 import { AppSettings, ChatMessage, ChatThread, Persona, PersonaVersion } from './types';
 
 declare module 'knex/types/tables' {

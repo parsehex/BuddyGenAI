@@ -58,14 +58,17 @@ let db: Knex | null = null;
 export async function getDB() {
 	if (isDev) await fs.mkdir('data', { recursive: true });
 	if (!db) {
+		const migrationsDir = await getMigrationsDir();
+		console.log('creating db', dbPath, 'migrations dir', migrationsDir);
 		db = knex({
 			client: 'sqlite3',
 			connection: { filename: dbPath },
+			migrations: {
+				directory: migrationsDir,
+			},
 			useNullAsDefault: true,
 		});
-		await db.migrate.latest({
-			directory: await getMigrationsDir(),
-		});
+		await db.migrate.latest();
 	}
 	return db;
 }
