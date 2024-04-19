@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { formatDistanceToNow } from 'date-fns';
 import $f from '~/lib/api/$fetch';
+import urls from '~/lib/api/urls';
 
 const props = defineProps<{
 	personaId: string;
