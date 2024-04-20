@@ -192,8 +192,6 @@ const acceptPersona = async (
 
 const isModelsSetup = ref(false);
 
-
-
 const updateName = async () => {
 	if (!userNameValue.value) return;
 	if (userNameValue.value === settings.user_name) return;
@@ -385,7 +383,7 @@ console.log(modelProvider.value);
 									@keyup.enter="createDescription"
 								/>
 							</Label>
-								Relationship To Buddy
+							<!--	Relationship To Buddy
 								<Input v-model="relationshipToBuddy" class="w-40 mt-2 p-2 border border-gray-300 rounded" placeholder="friend" />
 							</Label> -->
 
