@@ -48,8 +48,7 @@ onBeforeMount(async () => {
 		descriptionValue.value = persona.value.description || '';
 	}
 	if (persona.value?.profile_pic) {
-		const cacheVal = Math.random() * 1000;
-		profilePictureValue.value = `/api/profile-pic?persona_id=${persona.value.id}&cache=${cacheVal}`;
+		profilePictureValue.value = urls.persona.getProfilePic(id);
 	}
 	if (persona.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = persona.value.profile_pic_prompt;

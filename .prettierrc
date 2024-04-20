@@ -3,7 +3,7 @@
 	"bracketSameLine": false,
 	"bracketSpacing": true,
 	"embeddedLanguageFormatting": "auto",
-	"htmlWhitespaceSensitivity": "strict",
+	"htmlWhitespaceSensitivity": "ignore",
 	"insertPragma": false,
 	"jsxSingleQuote": false,
 	"proseWrap": "never",
@@ -15,6 +15,6 @@
 	"trailingComma": "es5",
 	"useTabs": true,
 	"vueIndentScriptAndStyle": false,
-	"printWidth": 180,
+	"printWidth": 80,
 	"endOfLine": "auto"
 }

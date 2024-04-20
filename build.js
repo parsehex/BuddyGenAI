@@ -84,7 +84,11 @@ const options = {
   }
 }
 
-const platform = 'LINUX' // "MAC" | "LINUX" | "WINDOWS" - Change this to build for other platforms
+ // "MAC" | "LINUX" | "WINDOWS"
+// const platform = 'WINDOWS'
+const platform = 'LINUX'
+// const platform = 'MAC'
+
 builder
   .build({
     targets: Platform[platform].createTarget(),

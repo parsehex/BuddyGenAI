@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import uF from '~/lib/api/useFetch';
+import { useAppStore } from '~/stores/main';
+
+const { personas } = useAppStore();
 
 const model = defineModel<string>({ required: true });
-const personas = await uF.persona.getAll();
 </script>
 
 <template>

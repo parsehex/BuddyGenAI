@@ -1,49 +1,18 @@
 <script setup lang="ts">
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import $f from '~/lib/api/$fetch';
-import uF from '~/lib/api/useFetch';
+import { useAppStore } from '~/stores/main';
 
 const { pickDirectory, verifyModelDirectory } = useElectron();
-
-const settings = await uF.setting.getAll();
-const chatModels = ref([] as string[]);
-const imageModels = ref([] as string[]);
-
-const isServerRunning = ref(false);
+const { chatModels, imageModels, settings, chatServerRunning, updateModels, updateSettings, refreshServerStatus, startServer, stopServer } = useAppStore();
 
 const error = ref('');
 
-const startServer = async () => {
-	await $fetch('/api/llama.cpp/start', { method: 'POST' });
-	await refreshServerStatus();
-};
-const stopServer = async () => {
-	await $fetch('/api/llama.cpp/stop', { method: 'POST' });
-	await refreshServerStatus();
-};
-const getServerStatus = async () => {
-	return await $fetch('/api/llama.cpp/status', { method: 'GET' });
+const refreshModels = async () => {
+	await updateModels();
 };
 
-const refreshServerStatus = async () => {
-	const status = await getServerStatus();
-	isServerRunning.value = status.isRunning;
-};
-
-const refreshModels = async (useUF = false) => {
-	// TODO is there a better way to do this?
-	const provider = useUF ? uF : $f;
-	let c = await provider.model.get('chat');
-	if (Array.isArray(c)) chatModels.value = c;
-	else chatModels.value = c.value;
-
-	let i = await provider.model.get('image');
-	if (Array.isArray(i)) imageModels.value = i;
-	else imageModels.value = i.value;
-};
-
-if (settings.value.local_model_directory) {
-	await refreshModels(true);
+if (settings.local_model_directory) {
+	await refreshModels();
 }
 
 const pickModelDirectory = async () => {
@@ -59,23 +28,17 @@ const pickModelDirectory = async () => {
 	} else {
 		error.value = '';
 	}
-	settings.value.local_model_directory = directory;
+	settings.local_model_directory = directory;
 
-	await saveSettings();
 	await refreshModels();
-};
-
-const saveSettings = async () => {
-	await $f.setting.update(settings.value);
 };
 
 const updateSelectedModel = (type: 'chat' | 'image') => {
 	return async (model: string) => {
-		settings.value[`selected_model_${type}`] = model;
-		await saveSettings();
+		settings[`selected_model_${type}`] = model;
 		if (type !== 'chat') return;
 		await refreshServerStatus();
-		if (isServerRunning.value) {
+		if (chatServerRunning) {
 			await stopServer();
 			await startServer();
 		}
@@ -94,7 +57,7 @@ const updateSelectedModel = (type: 'chat' | 'image') => {
 			<Button v-if="settings.local_model_directory && settings.selected_model_chat" @click="startServer" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md">
 				Start Server
 			</Button>
-			<Button v-if="isServerRunning" @click="stopServer" class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md"> Stop Server </Button>
+			<Button v-if="chatServerRunning" @click="stopServer" class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md"> Stop Server </Button>
 			<Button @click="refreshServerStatus" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded-md"> Refresh Server Status </Button>
 			<div class="flex w-full items-center justify-between gap-1.5 mt-4">
 				<Label for="local_model_directory" class="w-full">
@@ -114,7 +77,6 @@ const updateSelectedModel = (type: 'chat' | 'image') => {
 				<div class="mt-4">
 					<Label for="selected_provider_chat" class="block"> Chat Provider </Label>
 					<select v-model="settings.selected_provider_chat" id="selected_provider_chat" name="selected_provider_chat" class="w-full border border-gray-300 rounded-md p-2 mt-1" disabled>
-						<!-- TODO implement -->
 						<option value="external"> External </option>
 						<option value="local"> Local </option>
 						<option value="custom"> Custom </option>
@@ -129,11 +91,9 @@ const updateSelectedModel = (type: 'chat' | 'image') => {
 						class="w-full border border-gray-300 rounded-md p-2 mt-1"
 						disabled
 					>
-						<!-- TODO implement -->
 						<option value="external"> External </option>
 						<option value="local"> Local </option>
 						<option value="custom"> Custom </option>
-						<!-- TODO option: disabled ? -->
 					</select>
 				</div>
 			</div>

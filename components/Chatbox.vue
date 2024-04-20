@@ -1,23 +1,39 @@
 <script setup lang="ts">
-import { useChat } from 'ai/vue';
+import { useChat, useCompletion } from 'ai/vue';
 import { RefreshCw } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { ChatMessage, ChatThread, PersonaVersionMerged } from '~/server/database/types';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
+import type {
+	ChatMessage,
+	ChatThread,
+	PersonaVersionMerged,
+} from '~/server/database/types';
 import Message from './ChatMessage.vue';
 import { useToast } from '@/components/ui/toast';
 import uF from '@/lib/api/useFetch';
 import $f from '@/lib/api/$fetch';
 import urls from '~/lib/api/urls';
 import { apiMsgsToOpenai } from '~/lib/api/utils';
+import { useAppStore } from '~/stores/main';
 
 const { toast } = useToast();
+const { threads, personas, updatePersonas, updateThreads } = useAppStore();
+const { complete } = useCompletion();
 
 const props = defineProps<{
 	threadId: string;
@@ -25,11 +41,18 @@ const props = defineProps<{
 const { threadId } = toRefs(props);
 
 const sysIsOpen = ref(false);
-const hasSysMessage = computed(() => messages.value.some((m) => m.role === 'system'));
-const sysMessage = computed(() => messages.value.find((m) => m.role === 'system'));
+const hasSysMessage = computed(() =>
+	messages.value.some((m) => m.role === 'system')
+);
+const sysMessage = computed(() =>
+	messages.value.find((m) => m.role === 'system')
+);
 const newSysMessage = ref('');
 
-const threadTitle = ref('');
+const threadTitle = computed(() => {
+	const thread = threads.find((t) => t.id === threadId.value);
+	return thread?.name || '';
+});
 
 const apiPartialBody = ref({ threadId: threadId.value });
 
@@ -40,18 +63,48 @@ const scrollToBottom = () => {
 	}
 };
 
-const personas = ref([] as PersonaVersionMerged[]);
-const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } = useChat({
-	api: urls.message.create(),
-	body: apiPartialBody.value,
-	onFinish: async () => {
-		await updateMessages();
-	},
-	onError: (e) => {
-		console.log(e);
-		toast({ variant: 'destructive', description: e.message });
-	},
-});
+const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
+	useChat({
+		api: urls.message.create(),
+		body: apiPartialBody.value,
+		onFinish: async () => {
+			await refreshMessages();
+			console.timeEnd('message');
+
+			if (messages.value.length === 3) {
+				// 3 incl. system message
+				console.log('running completion', messages.value);
+				console.time('completion');
+				const msg1 = messages.value[0];
+				const msg2 = messages.value[1];
+				const msg3 = messages.value[2];
+				const prompt = `Your task is to write a generic title in 5 words or less for the following chat.\n\n$Context: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}\n\n\nTITLE: `;
+				let value = await complete(prompt, {
+					body: { max_tokens: 20, temperature: 0.01 },
+				});
+				if (value) {
+					// improve this
+					if (value.startsWith('Title: ')) {
+						value = value.slice(7);
+					}
+					value = value.trim();
+					if (value[0] === '"' && value[value.length - 1] === '"') {
+						value = value.slice(1, -1);
+					}
+					await $f.thread.update({
+						id: threadId.value,
+						name: value,
+					});
+					await updateThreads();
+					console.timeEnd('completion');
+				}
+			}
+		},
+		onError: (e) => {
+			console.log(e);
+			toast({ variant: 'destructive', description: e.message });
+		},
+	});
 watch(
 	() => messages.value.length,
 	() => {
@@ -59,23 +112,27 @@ watch(
 	}
 );
 
-const uiMessages = computed(() => messages.value.filter((m) => m.role !== 'system'));
+const uiMessages = computed(() =>
+	messages.value.filter((m) => m.role !== 'system')
+);
 
 async function updateThread() {
 	const newThread = await $f.thread.get(threadId.value);
 	thread.value = newThread;
-	threadTitle.value = newThread.name;
 	return newThread;
 }
-async function updateMessages() {
+async function refreshMessages() {
 	const newMessages = await $f.message.getAll(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
 	return newMessages;
 }
-async function updatePersonas() {
-	const newPersonas = await $f.persona.getAll();
-	personas.value = newPersonas;
-	if (threadMode.value === 'persona' && !selectedPersona.value && newPersonas.length === 1) {
+async function refreshPersonas() {
+	const newPersonas = await updatePersonas();
+	if (
+		threadMode.value === 'persona' &&
+		!selectedPersona.value &&
+		newPersonas.length === 1
+	) {
 		selectedPersona.value = newPersonas[0].id;
 	}
 	return newPersonas;
@@ -89,6 +146,7 @@ const doSubmit = async (e: Event) => {
 		console.log('prevented submit & stopped');
 		return;
 	}
+	console.time('message');
 	handleSubmit(e);
 	setTimeout(scrollToBottom, 5);
 };
@@ -109,7 +167,7 @@ const updateSysMessage = async () => {
 		id: sysMessage.value.id,
 		content: newSysMessage.value,
 	});
-	const newMessages = await updateMessages();
+	const newMessages = await refreshMessages();
 	const newSys = newMessages.find((m) => m.role === 'system');
 	if (newSys) newSysMessage.value = newSys.content;
 };
@@ -134,8 +192,8 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	});
 
 	await updateThread();
-	await updatePersonas();
-	await updateMessages();
+	await refreshPersonas();
+	await refreshMessages();
 };
 watch(threadMode, handleThreadModeChange);
 
@@ -150,10 +208,10 @@ const handlePersonaModeUseCurrentChange = async () => {
 		persona_mode_use_current: newValue,
 	});
 
-	await updateMessages();
+	await refreshMessages();
 };
 
-const selectedPersona = ref('');
+const selectedPersona = ref(thread.value?.persona_id || '');
 const handlePersonaChange = async () => {
 	// TODO add a confirmation dialog if there are messages already
 	if (!threadId) return;
@@ -169,40 +227,43 @@ const handlePersonaChange = async () => {
 		persona_id: selectedPersona.value,
 	});
 
-	await updateMessages();
-	await updatePersonas();
+	await refreshMessages();
+	await refreshPersonas();
 };
-const currentPersona = computed(() => personas.value.find((p) => p.id === selectedPersona.value));
+const currentPersona = computed(() =>
+	personas.find((p) => p.id === selectedPersona.value)
+);
 watch(selectedPersona, handlePersonaChange);
 
 onBeforeMount(async () => {
-	await updatePersonas();
+	await refreshPersonas();
 
 	let t: ChatThread | undefined;
 	try {
 		t = await updateThread();
+		console.log('t', t);
 	} catch (e) {
 		navigateTo('/');
 	}
 
 	refreshed.value = true;
-	threadMode.value = thread.value.mode;
+	threadMode.value = t?.mode || 'custom';
 
-	if (threadMode.value === 'persona' && thread.value.persona_mode_use_current) {
+	if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
 		personaModeUseCurrent.value = true;
 	}
 
 	refreshed.value = true;
 	selectedPersona.value = t?.persona_id || '';
 
-	await updateMessages();
+	await refreshMessages();
 });
 
 const updateSysFromPersona = async () => {
 	if (!threadId) return;
 	await $f.thread.updateSystemMessage(threadId.value);
 
-	await updateMessages();
+	await refreshMessages();
 };
 
 // disjointed note:
@@ -211,10 +272,18 @@ const updateSysFromPersona = async () => {
 
 <template>
 	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
-		<h2 class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10"> {{ threadTitle }}</h2>
+		<h2
+			class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10"
+		>
+			{{ threadTitle }}
+		</h2>
 		<div class="flex items-center justify-between mt-10">
 			<div class="my-2 w-full inline-flex items-center justify-start">
-				<RadioGroup v-model="threadMode" v-if="!uiMessages.length && !currentPersona" class="mx-4">
+				<RadioGroup
+					v-model="threadMode"
+					v-if="!uiMessages.length && !currentPersona"
+					class="mx-4"
+				>
 					<p>Chat Mode</p>
 					<div class="flex items-center space-x-5 justify-center">
 						<Label class="cursor-pointer">
@@ -225,7 +294,11 @@ const updateSysFromPersona = async () => {
 							<Tooltip>
 								<TooltipTrigger>
 									<Label :class="{ 'cursor-pointer': personas.length }">
-										<RadioGroupItem class="px-1" value="persona" :disabled="!personas.length" />
+										<RadioGroupItem
+											class="px-1"
+											value="persona"
+											:disabled="!personas.length"
+										/>
 										Buddy
 									</Label>
 								</TooltipTrigger>
@@ -234,7 +307,9 @@ const updateSysFromPersona = async () => {
 									<p>
 										No buddies available :(
 										<br />
-										<Button type="button" @click="navigateTo('/persona/add')">Create one</Button>
+										<Button type="button" @click="navigateTo('/persona/add')">
+											Create one
+										</Button>
 									</p>
 								</TooltipContent>
 							</Tooltip>
@@ -242,8 +317,15 @@ const updateSysFromPersona = async () => {
 					</div>
 				</RadioGroup>
 				<div v-if="uiMessages.length" class="flex items-center space-x-2">
-					<Label v-if="threadMode === 'persona' && personas.length" class="mx-4 cursor-pointer flex items-center">
-						<Switch class="mr-1" :checked="personaModeUseCurrent" @update:checked="handlePersonaModeUseCurrentChange" />
+					<Label
+						v-if="threadMode === 'persona' && personas.length"
+						class="mx-4 cursor-pointer flex items-center"
+					>
+						<Switch
+							class="mr-1"
+							:checked="personaModeUseCurrent"
+							@update:checked="handlePersonaModeUseCurrentChange"
+						/>
 						Keep Buddy in sync
 					</Label>
 					<Button
@@ -256,13 +338,27 @@ const updateSysFromPersona = async () => {
 						<RefreshCw />
 					</Button>
 				</div>
-				<PersonaSelect v-if="threadMode === 'persona' && !uiMessages.length" v-model="selectedPersona" class="my-2" />
+				<PersonaSelect
+					v-if="threadMode === 'persona' && !uiMessages.length"
+					v-model="selectedPersona"
+					class="my-2"
+				/>
 			</div>
-			<PersonaCard v-if="threadMode === 'persona' && selectedPersona" :personaId="selectedPersona" />
+			<PersonaCard
+				v-if="threadMode === 'persona' && selectedPersona"
+				:personaId="selectedPersona"
+			/>
 		</div>
-		<Collapsible v-if="hasSysMessage && threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
+		<Collapsible
+			v-if="hasSysMessage && threadMode === 'custom'"
+			class="my-2"
+			v-model:open="sysIsOpen"
+			:defaultOpen="false"
+		>
 			<CollapsibleTrigger @click="handleSysMessageOpen">
-				<Button type="button" size="sm">{{ sysIsOpen ? 'Hide' : 'Show' }} System Message</Button>
+				<Button type="button" size="sm">
+					{{ sysIsOpen ? 'Hide' : 'Show' }} System Message
+				</Button>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<Card class="whitespace-pre-wrap">
@@ -283,15 +379,25 @@ const updateSysFromPersona = async () => {
 				:thread-mode="threadMode"
 				:current-persona="currentPersona"
 				:message="m"
-				@edit="updateMessages"
-				@delete="updateMessages"
-				@clearThread="updateMessages"
+				@edit="refreshMessages"
+				@delete="refreshMessages"
+				@clearThread="refreshMessages"
 			/>
 		</div>
 
-		<form class="w-full fixed bottom-0 flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl">
-			<Textarea class="p-2 border border-gray-300 rounded shadow-xl" tabindex="1" v-model="input" placeholder="Say something..." @keydown.ctrl.enter="doSubmit" />
-			<Button type="button" size="sm" @click="doSubmit">{{ isLoading ? 'Stop' : 'Send' }}</Button>
+		<form
+			class="w-full fixed bottom-0 flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl"
+		>
+			<Textarea
+				class="p-2 border border-gray-300 rounded shadow-xl"
+				tabindex="1"
+				v-model="input"
+				placeholder="Say something..."
+				@keydown.ctrl.enter="doSubmit"
+			/>
+			<Button type="button" size="sm" @click="doSubmit">
+				{{ isLoading ? 'Stop' : 'Send' }}
+			</Button>
 			<!-- TODO fix - the reload method calls same api endpoint with same messaages -->
 			<!-- <Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button> -->
 		</form>

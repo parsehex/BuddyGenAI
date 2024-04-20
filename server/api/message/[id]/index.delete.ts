@@ -19,10 +19,10 @@ export default defineLazyEventHandler(async () => {
 		const nextMessage = await db('chat_message')
 			.where({ thread_id: message.thread_id, thread_index: message.thread_index + 1 })
 			.first();
-		console.log('nextMessage', nextMessage?.content);
 		await db('chat_message').where({ id }).delete();
 		if (nextMessage) {
 			// possible if failed to get response?
+			console.log('Deleting next message', nextMessage);
 			await db('chat_message').where({ id: nextMessage.id }).delete();
 		}
 		return { success: true };

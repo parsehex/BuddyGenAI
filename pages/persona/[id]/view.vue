@@ -5,6 +5,7 @@ import { Plus } from 'lucide-vue-next';
 import type { ChatThread, PersonaVersionMerged } from '~/server/database/types';
 import { formatDistanceToNow } from 'date-fns';
 import $f from '~/lib/api/$fetch';
+import urls from '~/lib/api/urls';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -30,8 +31,7 @@ onBeforeMount(async () => {
 	updated.value = p.updated;
 
 	if (p.profile_pic) {
-		const cacheVal = Math.random() * 1000;
-		profilePic.value = `/api/persona/${id}/profile-pic?cache=${cacheVal}`;
+		profilePic.value = urls.persona.getProfilePic(id);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

@@ -11,7 +11,7 @@ import $f from '~/lib/api/$fetch';
 const route = useRoute();
 const isThreadSelected = (threadId: string) => route.path.includes(`/chat`) && route.params.id === threadId;
 
-const store = useAppStore();
+const { threads, updateThreads } = useAppStore();
 
 // TODO add option to fork a thread
 
@@ -19,14 +19,13 @@ const newThreadName = ref('');
 const editingThreadName = ref('');
 const rightClickedId = ref('');
 
-const threads = ref([] as ChatThread[]);
 
 onBeforeMount(async () => {
-	threads.value = await $f.thread.getAll();
+	await updateThreads();
 });
 
 const renameClicked = (threadId: string) => {
-	const thread = threads.value.find((thread) => thread.id === threadId);
+	const thread = threads.find((thread) => thread.id === threadId);
 	if (!thread) {
 		console.error(`Couldn't find thread with id ${threadId} to rename`);
 		editingThreadName.value = '';
@@ -43,7 +42,7 @@ const handleRename = async () => {
 	});
 	editingThreadName.value = '';
 
-	threads.value = await $f.thread.getAll();
+	await updateThreads();
 };
 
 const doCreateThread = async () => {
@@ -53,16 +52,16 @@ const doCreateThread = async () => {
 		name: newThreadName.value,
 		mode: 'persona',
 	});
-	threads.value = await $f.thread.getAll();
+	await updateThreads();
 	navigateTo(`/chat/${newThread.id}`);
 };
 
 const doDeleteThread = async (threadId: string) => {
 	await $f.thread.remove(threadId);
 
-	threads.value = await $f.thread.getAll();
-	if (threads.value.length > 0) {
-		await navigateTo(`/chat/${threads.value[0].id}`);
+	const newThreads = await updateThreads();
+	if (newThreads.length > 0) {
+		await navigateTo(`/chat/${newThreads[0].id}`);
 	} else {
 		await navigateTo(`/`);
 	}
@@ -70,7 +69,7 @@ const doDeleteThread = async (threadId: string) => {
 
 // TODO this is a bandaid fix
 watch(route, async () => {
-	threads.value = await $f.thread.getAll();
+	await updateThreads();
 });
 </script>
 

@@ -4,8 +4,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-// import { getPersona, updatePersona } from '~/lib/api/persona';
-import type { Persona, PersonaVersionMerged } from '~/server/database/types';
 import Spinner from '~/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
 import $f from '~/lib/api/$fetch';

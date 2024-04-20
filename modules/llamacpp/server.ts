@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { fork } from 'child_process';
 import { findBinaryPath } from '@/lib/fs';
 
 const QUIET = true;
@@ -19,13 +19,15 @@ export function startServer(model: string) {
 		const stdio = QUIET ? 'pipe' : 'inherit';
 		const args = ['--model', model, '--n-gpu-layers', '35', '-c', '4096'];
 
-		const chatTemplate = Object.keys(chatTemplateMap).find((key) => model.includes(key));
+		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
+			model.includes(key)
+		);
 		if (chatTemplate) {
 			args.push('--chat-template', chatTemplateMap[chatTemplate]);
 			console.log('Using chat template:', chatTemplateMap[chatTemplate]);
 		}
 
-		commandObj.cmd = spawn(serverPath, args, { stdio });
+		commandObj.cmd = fork(serverPath, args, { stdio });
 
 		commandObj.cmd.on('error', (error: any) => {
 			console.error(`Llama.cpp-Server Error: ${error.message}`);

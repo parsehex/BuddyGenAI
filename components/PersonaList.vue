@@ -8,22 +8,23 @@ import { useToast } from './ui/toast';
 import Spinner from '~/components/Spinner.vue';
 import { useCompletion } from 'ai/vue';
 import $f from '~/lib/api/$fetch';
+import { useAppStore } from '~/stores/main';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
+const { personas, updatePersonas } = useAppStore();
 
 const route = useRoute();
-const personas = ref([] as PersonaVersionMerged[]);
 const newPersona = ref({ name: '', description: '' });
 const showSpinner = ref(false);
 
-const isPersonaSelected = (id: string | number) => route.path.includes(`/persona`) && route.params.id == id;
+const isPersonaSelected = (id: string | number) =>
+	route.path.includes(`/persona`) && route.params.id == id;
+
+// italicize if persona is selected in chat (still bolded if viewing/editing)
 
 onBeforeMount(async () => {
-	// personas.value = (await getPersonas()).value;
-	const p = await $f.persona.getAll();
-	// @ts-ignore
-	personas.value = p;
+	await updatePersonas();
 });
 
 const doCreatePersona = async () => {
@@ -33,18 +34,25 @@ const doCreatePersona = async () => {
 	}
 	const prompt = `Your task is to write a brief description of ${newPersona.value?.name}.`;
 	toast({ variant: 'info', description: 'Generating description from name...' });
-	const value = await complete(prompt, { body: { max_tokens: 100, temperature: 1 } });
+	const value = await complete(prompt, {
+		body: { max_tokens: 100, temperature: 1 },
+	});
 	if (!value) {
-		toast({ variant: 'destructive', description: 'Error generating description. Please try again.' });
+		toast({
+			variant: 'destructive',
+			description: 'Error generating description. Please try again.',
+		});
 		return;
 	}
 	newPersona.value.description = value;
 
 	const newP = await $f.persona.create(newPersona.value);
-	const p = await $f.persona.getAll();
-	personas.value = p;
+	await updatePersonas();
 	newPersona.value = { name: '', description: '' };
-	toast({ variant: 'info', description: `Created ${newP.name}. Generating profile picture...` });
+	toast({
+		variant: 'info',
+		description: `Created ${newP.name}. Generating profile picture...`,
+	});
 	showSpinner.value = true;
 	await $f.persona.createProfilePic(newP.id);
 	showSpinner.value = false;
@@ -54,18 +62,24 @@ const doCreatePersona = async () => {
 
 <template>
 	<div class="sidebar">
-		<div class="flex w-full mb-4 px-2">
-			<Input v-model="newPersona.name" placeholder="Buddy name" @keydown.enter="doCreatePersona" />
-			<Button @click="doCreatePersona">+</Button>
-			<Spinner v-if="showSpinner" />
+		<div class="flex justify-around">
+			<Button type="button" @click="navigateTo('/')">Create a Buddy</Button>
 		</div>
 		<ul>
 			<li
 				v-for="persona in personas"
 				:key="persona.id"
-				:class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isPersonaSelected(persona.id) ? 'font-bold bg-gray-200' : '']"
+				:class="[
+					'cursor-pointer',
+					'hover:bg-gray-200',
+					'p-1',
+					'rounded',
+					isPersonaSelected(persona.id) ? 'font-bold bg-gray-200' : '',
+				]"
 			>
-				<NuxtLink class="block p-1" :to="`/persona/${persona.id}/view`">{{ persona.name }}</NuxtLink>
+				<NuxtLink class="block p-1" :to="`/persona/${persona.id}/view`">
+					{{ persona.name }}
+				</NuxtLink>
 			</li>
 		</ul>
 	</div>

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useElectron from '~/composables/useElectron';
 import $f from '~/lib/api/$fetch';
 import urls from '~/lib/api/urls';
+import { useAppStore } from '~/stores/main';
 const { copyToClipboard } = useElectron();
 
 const props = defineProps<{
@@ -13,6 +14,7 @@ const props = defineProps<{
 	threadMode: 'persona' | 'custom';
 	currentPersona?: PersonaVersionMerged;
 }>();
+const { settings } = useAppStore();
 
 const emit = defineEmits<{
 	(e: 'edit', id: string): void;
@@ -35,12 +37,10 @@ const profilePictureValue = computed(() => {
 	return urls.persona.getProfilePic(currentPersona.value.id);
 });
 
-onBeforeMount(async () => {
-	if (isUser.value) {
-		const { user_name } = await $f.setting.get(['user_name']);
-		userName.value = user_name;
-	}
-});
+if (isUser.value) {
+	const { user_name } = settings;
+	userName.value = user_name;
+}
 
 const triggerEdit = async () => {
 	editingMessageTitle.value = `Editing Message`;

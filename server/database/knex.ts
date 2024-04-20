@@ -57,9 +57,10 @@ async function getMigrationsDir() {
 let db: Knex | null = null;
 export async function getDB() {
 	if (isDev) await fs.mkdir('data', { recursive: true });
+	// TODO detect if db exists
 	if (!db) {
 		const migrationsDir = await getMigrationsDir();
-		console.log('creating db', dbPath, 'migrations dir', migrationsDir);
+		console.log('creating db instance', dbPath, '-- migrations dir', migrationsDir);
 		db = knex({
 			client: 'sqlite3',
 			connection: { filename: dbPath },
