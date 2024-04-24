@@ -9,6 +9,9 @@ const { dbGet, dbAll, dbRun } = useElectron();
 // TODO rewrite
 // dont handle openai stuff here but only saving to db
 
+interface Message {
+	role: 'user' | 'assistant';
+	content: string;
 }
 
 export default async function createMessage(
