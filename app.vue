@@ -7,7 +7,9 @@ import AppMenubar from '@/components/AppMenubar.vue';
 </script>
 
 <template>
-	<Body class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950 h-screen">
+	<Body
+		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950 h-screen"
+	>
 		<div class="fixed top-0 left-0 w-full z-50">
 			<AppMenubar />
 		</div>

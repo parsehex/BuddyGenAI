@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Textarea } from '~/components/ui/textarea';
-// import { getPersona, updatePersona } from '~/lib/api/persona';
-import type { Persona, PersonaVersionMerged } from '~/server/database/types';
-import Spinner from '~/components/Spinner.vue';
 import { useCompletion } from 'ai/vue';
-import { useToast } from '~/components/ui/toast';
-import $f from '~/lib/api/$fetch';
-import urls from '~/lib/api/urls';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+// import { getPersona, updatePersona } from '@/lib/api/persona';
+import type { Persona, PersonaVersionMerged } from '@/lib/api/types-db';
+import Spinner from '@/components/Spinner.vue';
+import { useToast } from '@/components/ui/toast';
+// import $f from '@/lib/api/$fetch';
+import api from '@/lib/api/db';
+import urls from '@/lib/api/urls';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -42,7 +47,7 @@ const remixedDescription = ref('');
 // we can clean up pics that werent used
 
 onBeforeMount(async () => {
-	persona.value = await $f.persona.get(id);
+	persona.value = await api.persona.getOne(id);
 	if (persona.value) {
 		nameValue.value = persona.value.name;
 		descriptionValue.value = persona.value.description || '';
@@ -56,7 +61,7 @@ onBeforeMount(async () => {
 });
 
 const handleSave = async () => {
-	await $f.persona.update({
+	await api.persona.updateOne({
 		id,
 		name: nameValue.value,
 		description: descriptionValue.value,
@@ -66,12 +71,12 @@ const handleSave = async () => {
 
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
-	await $f.persona.update({
+	await api.persona.updateOne({
 		id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await $f.persona.createProfilePic(id);
+	await api.persona.profilePic.createOne(id);
 
 	profilePictureValue.value = urls.persona.getProfilePic(id);
 	updatingProfilePicture.value = false;
@@ -80,9 +85,14 @@ const refreshProfilePicture = async () => {
 const remixDescription = async () => {
 	const desc = wizInput.value;
 	const prompt = `The following input is a description of someone named ${persona.value?.name}. Provide a succinct description of them using common language.\n\nInput:\n`;
-	const value = await complete(prompt + desc, { body: { max_tokens: 100, temperature: 1 } });
+	const value = await complete(prompt + desc, {
+		body: { max_tokens: 100, temperature: 1 },
+	});
 	if (!value) {
-		toast({ variant: 'destructive', description: 'Error remixing description. Please try again.' });
+		toast({
+			variant: 'destructive',
+			description: 'Error remixing description. Please try again.',
+		});
 		return;
 	}
 	remixedDescription.value = value;
@@ -95,15 +105,22 @@ const acceptRemixedDescription = () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold"> Edit Buddy </h1>
+		<h1 class="text-2xl font-bold">Edit Buddy</h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+				Version History
+			</NuxtLink>
 		</div>
 		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
 			<CardContent>
 				<div class="flex flex-col items-center">
-					<Input v-model="nameValue" placeholder="Persona name" size="lg" class="mb-2" />
+					<Input
+						v-model="nameValue"
+						placeholder="Persona name"
+						size="lg"
+						class="mb-2"
+					/>
 					<Avatar size="lg">
 						<AvatarImage :src="profilePictureValue" />
 						<AvatarFallback>
@@ -112,20 +129,28 @@ const acceptRemixedDescription = () => {
 					</Avatar>
 					<Label>
 						<!-- TODO describe better -->
-						<span class="text-lg"> Extra keywords for prompt </span>
-						<Input v-model="profilePicturePrompt" placeholder="tan suit, sunglasses" />
+						<span class="text-lg">Extra keywords for prompt</span>
+						<Input
+							v-model="profilePicturePrompt"
+							placeholder="tan suit, sunglasses"
+						/>
 					</Label>
 					<div class="flex flex-col items-center justify-center">
 						<Button type="button" @click="refreshProfilePicture">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
-						<Spinner :style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }" />
+						<Spinner
+							:style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }"
+						/>
 					</div>
 				</div>
 				<div class="flex flex-col items-center space-y-4">
 					<label class="text-lg w-full text-center">
 						Description
-						<Textarea v-model="descriptionValue" :placeholder="`${persona?.name} is...`" />
+						<Textarea
+							v-model="descriptionValue"
+							:placeholder="`${persona?.name} is...`"
+						/>
 					</label>
 					<Button @click="handleSave">Save</Button>
 				</div>
@@ -136,7 +161,11 @@ const acceptRemixedDescription = () => {
 					<CardContent>
 						<Label>
 							<span class="text-lg">Keywords that describe {{ persona?.name }}</span>
-							<Input v-model="wizInput" placeholder="helpful, approachable, talkative..." @keydown.enter="remixDescription" />
+							<Input
+								v-model="wizInput"
+								placeholder="helpful, approachable, talkative..."
+								@keydown.enter="remixDescription"
+							/>
 						</Label>
 						<Button @click="remixDescription">Create Description</Button>
 						<div v-if="remixedDescription">

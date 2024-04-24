@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Textarea } from '~/components/ui/textarea';
-import Spinner from '~/components/Spinner.vue';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import Spinner from '@/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
-import $f from '~/lib/api/$fetch';
+import api from '@/lib/api/db';
 
 const { toast } = useToast();
 
@@ -16,14 +20,16 @@ const descriptionValue = ref('');
 const showSpinner = ref(false);
 
 const handleSave = async () => {
-	const newPersona = await $f.persona.create({
+	const newPersona = await api.persona.createOne({
 		name: nameValue.value,
 		description: descriptionValue.value,
 	});
 	const id = newPersona.id;
-	toast({ description: 'Persona created. Generating profile picture. Please wait...' });
+	toast({
+		description: 'Persona created. Generating profile picture. Please wait...',
+	});
 	showSpinner.value = true;
-	await $f.persona.createProfilePic(id);
+	await api.persona.profilePic.createOne(id);
 	await navigateTo(`/persona/${id}/view`);
 };
 </script>

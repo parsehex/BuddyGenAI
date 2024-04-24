@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { formatDistanceToNow } from 'date-fns';
-import $f from '~/lib/api/$fetch';
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import api from '~/lib/api/db';
 import urls from '~/lib/api/urls';
 
 const props = defineProps<{
@@ -24,7 +28,7 @@ const descLimit = 250;
 
 const updatePersona = async () => {
 	if (!props.personaId) return;
-	const p = await $f.persona.get(props.personaId);
+	const p = await api.persona.getOne(props.personaId);
 	id.value = p.id;
 	name.value = p.name;
 	if (p.description) {
@@ -41,10 +45,14 @@ const updatePersona = async () => {
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
-		time_at.value = formatDistanceToNow(new Date(updated.value), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(updated.value), {
+			addSuffix: true,
+		});
 	} else {
 		time_label.value = 'Created';
-		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(created.value), {
+			addSuffix: true,
+		});
 	}
 };
 
@@ -88,7 +96,9 @@ watch(
 					</div>
 					<p class="text-sm">{{ description }}</p>
 					<div class="flex items-center pt-2">
-						<span class="text-xs text-muted-foreground"> {{ time_label }} {{ time_at }} </span>
+						<span class="text-xs text-muted-foreground">
+							{{ time_label }} {{ time_at }}
+						</span>
 					</div>
 				</div>
 			</div>

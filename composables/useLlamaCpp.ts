@@ -1,9 +1,31 @@
-// want to expose:
-// - start/stop methods
-// - listening url
-// - process status (running, stopped, external (not started by us))
-//   listen to ipc for events: started, stopped, error
+export default function useLlamaCpp() {
+	const isServer =
+		process.server ||
+		typeof window === 'undefined' ||
+		typeof window.require === 'undefined';
+	const isElectron =
+		!isServer && navigator.userAgent.toLowerCase().includes('electron');
 
-// need to make llamacpp module that hooks into ai/llamacpp.ts to make these available to this composeable
-// need to make hooks and methods inside ai/llamacpp.ts
-// -
+	if (!isElectron || isServer) return;
+
+	const electron = window.require('electron');
+
+	const startServer = async (modelPath: string) => {
+		console.log('Starting server', modelPath);
+		await electron.ipcRenderer.invoke('llamacpp/start', modelPath);
+	};
+
+	const stopServer = async () => {
+		await electron.ipcRenderer.invoke('llamacpp/stop');
+	};
+
+	const isServerRunning = async () => {
+		return await electron.ipcRenderer.invoke('llamacpp/status');
+	};
+
+	return {
+		startServer,
+		stopServer,
+		isServerRunning,
+	};
+}

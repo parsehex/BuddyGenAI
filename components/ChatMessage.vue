@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { Message } from 'ai/vue';
-import type { PersonaVersionMerged } from '~/server/database/types';
+import type { PersonaVersionMerged } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import useElectron from '~/composables/useElectron';
-import $f from '~/lib/api/$fetch';
-import urls from '~/lib/api/urls';
-import { useAppStore } from '~/stores/main';
+import useElectron from '@/composables/useElectron';
+import api from '@/lib/api/db';
+import urls from '@/lib/api/urls';
+import { useAppStore } from '@/stores/main';
+
 const { copyToClipboard } = useElectron();
+const { settings } = useAppStore();
 
 const props = defineProps<{
 	threadId: string;
@@ -14,7 +16,6 @@ const props = defineProps<{
 	threadMode: 'persona' | 'custom';
 	currentPersona?: PersonaVersionMerged;
 }>();
-const { settings } = useAppStore();
 
 const emit = defineEmits<{
 	(e: 'edit', id: string): void;
@@ -47,14 +48,14 @@ const triggerEdit = async () => {
 	editingMessage.value = message.value.content;
 };
 const handleEdit = async () => {
-	await $f.message.update({ id: message.value.id, content: editingMessage.value });
+	await api.message.updateOne(message.value.id, editingMessage.value);
 	editingMessage.value = '';
 	emit('edit', message.value.id);
 };
 
 const doDelete = async () => {
 	if (message.value.role !== 'user') return;
-	await $f.message.remove(message.value.id);
+	await api.message.removeOne(message.value.id);
 	emit('delete', message.value.id);
 };
 const doCopyMessage = () => {
@@ -63,7 +64,7 @@ const doCopyMessage = () => {
 };
 const doClearThread = async () => {
 	if (!threadId) return;
-	await $f.message.removeAll(threadId.value);
+	await api.message.removeAll(threadId.value);
 	emit('clearThread');
 };
 
@@ -80,8 +81,14 @@ const msgInitials = computed(() => {
 	<Dialog :modal="true">
 		<ContextMenu>
 			<ContextMenuTrigger>
-				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
-					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2">
+				<Card
+					class="chat-message whitespace-pre-wrap"
+					:id="'message-' + message.id"
+				>
+					<CardHeader
+						v-if="threadMode === 'persona'"
+						class="p-3 flex flex-row items-center space-x-2"
+					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar v-if="isUser">
 							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
@@ -90,7 +97,10 @@ const msgInitials = computed(() => {
 							{{ userName }}
 						</span>
 						<span v-else>
-							<NuxtLink :to="`/persona/${currentPersona?.id}/view`" class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg">
+							<NuxtLink
+								:to="`/persona/${currentPersona?.id}/view`"
+								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
+							>
 								<Avatar v-if="!isUser" class="mr-1">
 									<!-- TODO add hover effect -->
 									<AvatarImage :src="profilePictureValue" />
@@ -116,7 +126,9 @@ const msgInitials = computed(() => {
 				<ContextMenuItem @click="doDelete" v-if="isUser">Delete</ContextMenuItem>
 				<ContextMenuSeparator />
 				<!-- TODO confirm (reuse same dialog) -->
-				<ContextMenuItem @click="doClearThread">Delete All Messages</ContextMenuItem>
+				<ContextMenuItem @click="doClearThread">
+					Delete All Messages
+				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
 		<DialogContent>
@@ -127,7 +139,10 @@ const msgInitials = computed(() => {
 				<!-- TODO how to programmatically close dialog? (i.e. on ctrl+enter) -->
 				<Textarea v-model="editingMessage" placeholder="Message content..." />
 				<p class="py-1 text-sm text-muted-foreground">
-					<b>Warning</b>: Clicking outside to cancel is broken -- <u>use the X button above instead</u>.
+					<b>Warning</b>
+					: Clicking outside to cancel is broken --
+					<u>use the X button above instead</u>
+					.
 					<br />
 					(If the textarea is empty then click Close above and try again)
 				</p>

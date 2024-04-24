@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Textarea } from '~/components/ui/textarea';
-// import { getPersona, updatePersona } from '~/lib/api/persona';
-import type { Persona, PersonaVersionMerged, PersonaVersion } from '~/server/database/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import type {
+	Persona,
+	PersonaVersionMerged,
+	PersonaVersion,
+} from '@/lib/api/types-db';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -27,7 +30,7 @@ onBeforeMount(async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold"> Persona Version History </h1>
+		<h1 class="text-2xl font-bold">Persona Version History</h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>

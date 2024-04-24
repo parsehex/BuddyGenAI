@@ -21,3 +21,5 @@ errors.json
 *.sqlite
 build/config.gypi
 /data
+
+/*.old

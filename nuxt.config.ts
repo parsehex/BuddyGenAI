@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 		shim: false,
 	},
 	ssr: false,
-	serverDir: './server',
+	// serverDir: './server',
 	modules: ['@nuxtjs/tailwindcss', 'shadcn-nuxt', '@pinia/nuxt'],
 	shadcn: {
 		/**
@@ -19,6 +19,6 @@ export default defineNuxtConfig({
 		componentDir: './components/ui',
 	},
 	nitro: {
-		preset: 'node-server',
+		preset: 'static',
 	},
 });

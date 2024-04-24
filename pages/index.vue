@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
-import { useToast } from '~/components/ui/toast';
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import { Card, CardContent, CardHeader } from '~/components/ui/card';
-import type { PersonaVersionMerged } from '~/server/database/types';
-import Spinner from '~/components/Spinner.vue';
-import uF from '~/lib/api/useFetch';
-import $f from '~/lib/api/$fetch';
-import urls from '~/lib/api/urls';
-import { useAppStore } from '~/stores/main';
-import LocalModelSettingsCard from '~/components/LocalModelSettingsCard.vue';
+import { useToast } from '@/components/ui/toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import Spinner from '@/components/Spinner.vue';
+import LocalModelSettingsCard from '@/components/LocalModelSettingsCard.vue';
+import useLlamaCpp from '@/composables/useLlamaCpp';
+import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import api from '@/lib/api/db';
+import urls from '@/lib/api/urls';
+import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
@@ -24,10 +24,11 @@ const {
 	updatePersonas,
 	updateSettings,
 	updateThreads,
-	startServer,
-	stopServer,
-	refreshServerStatus,
+	getChatModelPath,
 } = useAppStore();
+
+// @ts-ignore
+const { startServer, stopServer, isServerRunning } = useLlamaCpp();
 
 await updatePersonas();
 await updateThreads();
@@ -91,11 +92,11 @@ const handleSave = async () => {
 	const updatedSettings = {
 		user_name: userNameValue.value,
 	};
-	await $f.setting.update(updatedSettings);
+	await api.setting.update(updatedSettings);
 	await updateSettings();
 
 	const { id, name } = newPersona.value;
-	const newThread = await $f.thread.create({
+	const newThread = await api.thread.createOne({
 		name: `Chat with ${name}`,
 		mode: 'persona',
 		persona_id: id,
@@ -117,14 +118,14 @@ const refreshProfilePicture = async () => {
 	if (updatingProfilePicture.value) {
 		return;
 	}
-	await $f.persona.update({
+	await api.persona.updateOne({
 		id: newPersona.value.id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	const id = newPersona.value.id;
 	updatingProfilePicture.value = true;
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await $f.persona.createProfilePic(id);
+	await api.persona.profilePic.createOne(id);
 
 	profilePictureValue.value = urls.persona.getProfilePic(id);
 	updatingProfilePicture.value = false;
@@ -182,7 +183,7 @@ const acceptPersona = async (
 	if (descriptionOrKeywords === 'keywords') {
 		personaDescription = personaKeywords.value;
 	}
-	newPersona.value = await $f.persona.create({
+	newPersona.value = await api.persona.createOne({
 		name: personaName.value,
 		description: personaDescription,
 	});
@@ -234,7 +235,6 @@ isModelsSetup.value = calcIsModelsSetup.value;
 const serverStarting = ref(false);
 const handleModelChange = async () => {
 	setTimeout(async () => {
-		await updateModels();
 		const hasModelDir = !!settings.local_model_directory;
 		const hasChatModel = !!settings.selected_model_chat;
 		const hasImageModel = !!settings.selected_model_image;
@@ -243,13 +243,21 @@ const handleModelChange = async () => {
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			serverStarting.value = true;
-			await startServer();
+			await startServer(getChatModelPath());
 			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;
 		}
 	}, 10);
 };
+
+watch(
+	() => settings.local_model_directory,
+	async () => {
+		await updateModels();
+		await handleModelChange();
+	}
+);
 
 console.log(modelProvider.value);
 </script>
@@ -284,21 +292,11 @@ console.log(modelProvider.value);
 			class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-4"
 		>
 			<CardContent>
-				<!-- <p class="text-center">
-					<code class="font-bold">Models</code> let your Buddies respond to you with words, and they let you create a face for your Buddy.
-					<br />
-					You'll need to download these models and tell BuddyGen where to find them.
-				</p> -->
-				<!-- option for either external or local provider -->
 				<div class="flex flex-col w-full items-center justify-between gap-1.5 mt-4">
-					<!-- You can use models from an external provider or use models on your computer. -->
-					<!-- ask as a question -->
-					<!-- Where would you like to get models from? -->
 					<h2 class="text-lg text-center underline">
 						Where would you like to get models from?
 					</h2>
 					<ul class="mb-2">
-						<li>Your choices:</li>
 						<li>
 							<b>External</b>
 							-- like ChatGPT
@@ -327,6 +325,11 @@ console.log(modelProvider.value);
 			</CardContent>
 		</Card>
 
+		<!-- <p class="text-center">
+					<code class="font-bold">Models</code> let your Buddies respond to you with words, and they let you create a face for your Buddy.
+					<br />
+					You'll need to download these models and tell BuddyGen where to find them.
+				</p> -->
 		<LocalModelSettingsCard
 			v-if="!isModelsSetup && modelProvider === 'local'"
 			:first-time="newHere"
@@ -383,9 +386,6 @@ console.log(modelProvider.value);
 									@keyup.enter="createDescription"
 								/>
 							</Label>
-							<!--	Relationship To Buddy
-								<Input v-model="relationshipToBuddy" class="w-40 mt-2 p-2 border border-gray-300 rounded" placeholder="friend" />
-							</Label> -->
 
 							<Button
 								@click="createDescription"

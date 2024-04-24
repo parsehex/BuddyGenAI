@@ -1,6 +1,10 @@
 export default function useElectron() {
-	const isServer = process.server || typeof window === 'undefined' || typeof window.require === 'undefined';
-	const isElectron = !isServer && navigator.userAgent.toLowerCase().includes('electron');
+	const isServer =
+		process.server ||
+		typeof window === 'undefined' ||
+		typeof window.require === 'undefined';
+	const isElectron =
+		!isServer && navigator.userAgent.toLowerCase().includes('electron');
 
 	if (!isElectron || isServer) return { isElectron };
 
@@ -11,7 +15,8 @@ export default function useElectron() {
 	// ========================
 	const titleBarActions = {
 		minimize: () => electron.ipcRenderer.invoke('titlebar:action', 'minimize'),
-		toggleMaximize: () => electron.ipcRenderer.invoke('titlebar:action', 'toggleMaximize'),
+		toggleMaximize: () =>
+			electron.ipcRenderer.invoke('titlebar:action', 'toggleMaximize'),
 		isMaximized: () => electron.ipcRenderer.invoke('isMaximized:app', null),
 		close: () => electron.ipcRenderer.invoke('close:app', null),
 	};
@@ -44,10 +49,62 @@ export default function useElectron() {
 	};
 
 	const verifyModelDirectory = async (directory: string) => {
-		const result = await electron.ipcRenderer.invoke('verifyModelDirectory:app', directory);
+		const result = await electron.ipcRenderer.invoke(
+			'verifyModelDirectory:app',
+			directory
+		);
+		return result;
+	};
+
+	const dbRun = async (query: string, params: any[] = []) => {
+		const result = await electron.ipcRenderer.invoke('db:run', query, params);
+		if (result.error) {
+			console.error(result.error);
+		}
+		return result;
+	};
+	const dbGet = async (query: string, params: any[] = []) => {
+		const result = await electron.ipcRenderer.invoke('db:get', query, params);
+		if (result.error) {
+			console.error(result.error);
+		}
+		return result;
+	};
+	const dbAll = async (query: string, params: any[] = []) => {
+		const result = await electron.ipcRenderer.invoke('db:all', query, params);
+		if (result.error) {
+			console.error(result.error);
+		}
+		return result;
+	};
+
+	const pathJoin = async (path: string, ...paths: string[]): Promise<string> => {
+		const result = await electron.ipcRenderer.invoke('pathJoin', path, ...paths);
+		return result;
+	};
+	const listDirectory = async (directory: string): Promise<string[]> => {
+		const result = await electron.ipcRenderer.invoke('listDirectory', directory);
+		return result;
+	};
+	const mkdir = async (directory: string): Promise<boolean> => {
+		const result = await electron.ipcRenderer.invoke('mkdir', directory);
 		return result;
 	};
 
 	// Initialize ipcRenderer
-	return { copyToClipboard, isElectron, titleBarActions, windowStats, toggleDevTools, pickDirectory, verifyModelDirectory };
+	return {
+		copyToClipboard,
+		isElectron,
+		titleBarActions,
+		windowStats,
+		toggleDevTools,
+		pickDirectory,
+		verifyModelDirectory,
+		pathJoin,
+		listDirectory,
+		mkdir,
+		dbRun,
+		dbGet,
+		dbAll,
+	};
 }

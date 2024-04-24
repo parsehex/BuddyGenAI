@@ -18,18 +18,13 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type {
-	ChatMessage,
-	ChatThread,
-	PersonaVersionMerged,
-} from '~/server/database/types';
+import type { ChatThread } from '@/lib/api/types-db';
 import Message from './ChatMessage.vue';
 import { useToast } from '@/components/ui/toast';
-import uF from '@/lib/api/useFetch';
-import $f from '@/lib/api/$fetch';
-import urls from '~/lib/api/urls';
-import { apiMsgsToOpenai } from '~/lib/api/utils';
-import { useAppStore } from '~/stores/main';
+import api from '@/lib/api/db';
+import urls from '@/lib/api/urls';
+import { apiMsgsToOpenai } from '@/lib/api/utils';
+import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
 const { threads, personas, updatePersonas, updateThreads } = useAppStore();
@@ -73,7 +68,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			if (messages.value.length === 3) {
 				// 3 incl. system message
-				console.log('running completion', messages.value);
+				console.log('generating title');
 				console.time('completion');
 				const msg1 = messages.value[0];
 				const msg2 = messages.value[1];
@@ -91,10 +86,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					if (value[0] === '"' && value[value.length - 1] === '"') {
 						value = value.slice(1, -1);
 					}
-					await $f.thread.update({
-						id: threadId.value,
-						name: value,
-					});
+					await api.thread.updateOne(threadId.value, { name: value });
 					await updateThreads();
 					console.timeEnd('completion');
 				}
@@ -117,12 +109,12 @@ const uiMessages = computed(() =>
 );
 
 async function updateThread() {
-	const newThread = await $f.thread.get(threadId.value);
+	const newThread = await api.thread.getOne(threadId.value);
 	thread.value = newThread;
 	return newThread;
 }
 async function refreshMessages() {
-	const newMessages = await $f.message.getAll(threadId.value);
+	const newMessages = await api.message.getAll(threadId.value);
 	setMessages(apiMsgsToOpenai(newMessages));
 	return newMessages;
 }
@@ -131,7 +123,7 @@ async function refreshPersonas() {
 	if (
 		threadMode.value === 'persona' &&
 		!selectedPersona.value &&
-		newPersonas.length === 1
+		newPersonas?.length === 1
 	) {
 		selectedPersona.value = newPersonas[0].id;
 	}
@@ -163,10 +155,7 @@ const handleSysMessageOpen = async () => {
 };
 const updateSysMessage = async () => {
 	if (!sysMessage.value) return;
-	await $f.message.update({
-		id: sysMessage.value.id,
-		content: newSysMessage.value,
-	});
+	await api.message.updateOne(sysMessage.value.id, newSysMessage.value);
 	const newMessages = await refreshMessages();
 	const newSys = newMessages.find((m) => m.role === 'system');
 	if (newSys) newSysMessage.value = newSys.content;
@@ -184,12 +173,8 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 		}, 10);
 		return;
 	}
-	await $f.message.removeAll(threadId.value);
-
-	await $f.thread.update({
-		id: threadId.value,
-		mode: newMode,
-	});
+	await api.message.removeAll(threadId.value);
+	await api.thread.updateOne(threadId.value, { mode: newMode });
 
 	await updateThread();
 	await refreshPersonas();
@@ -203,8 +188,7 @@ const handlePersonaModeUseCurrentChange = async () => {
 	const newValue = !personaModeUseCurrent.value;
 	personaModeUseCurrent.value = newValue;
 
-	await $f.thread.update({
-		id: threadId.value,
+	await api.thread.updateOne(threadId.value, {
 		persona_mode_use_current: newValue,
 	});
 
@@ -222,8 +206,7 @@ const handlePersonaChange = async () => {
 		return;
 	}
 
-	await $f.thread.update({
-		id: threadId.value,
+	await api.thread.updateOne(threadId.value, {
 		persona_id: selectedPersona.value,
 	});
 
@@ -243,7 +226,8 @@ onBeforeMount(async () => {
 		t = await updateThread();
 		console.log('t', t);
 	} catch (e) {
-		navigateTo('/');
+		await navigateTo('/');
+		return;
 	}
 
 	refreshed.value = true;
@@ -261,7 +245,7 @@ onBeforeMount(async () => {
 
 const updateSysFromPersona = async () => {
 	if (!threadId) return;
-	await $f.thread.updateSystemMessage(threadId.value);
+	await api.thread.updateSystemMessage(threadId.value);
 
 	await refreshMessages();
 };

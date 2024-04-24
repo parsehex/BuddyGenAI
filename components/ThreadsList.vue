@@ -1,15 +1,28 @@
 <script setup lang="ts">
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-// import { getThread, getThreads, createThread, updateThread, deleteThread } from '@/lib/api/thread';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuTrigger,
+} from './ui/context-menu';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from './ui/dialog';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
-import type { ChatThread } from '~/server/database/types';
-import $f from '~/lib/api/$fetch';
+import type { ChatThread } from '~/lib/api/types-db';
+import api from '~/lib/api/db';
 
 const route = useRoute();
-const isThreadSelected = (threadId: string) => route.path.includes(`/chat`) && route.params.id === threadId;
+const isThreadSelected = (threadId: string) =>
+	route.path.includes(`/chat`) && route.params.id === threadId;
 
 const { threads, updateThreads } = useAppStore();
 
@@ -18,7 +31,6 @@ const { threads, updateThreads } = useAppStore();
 const newThreadName = ref('');
 const editingThreadName = ref('');
 const rightClickedId = ref('');
-
 
 onBeforeMount(async () => {
 	await updateThreads();
@@ -36,8 +48,7 @@ const renameClicked = (threadId: string) => {
 const handleRename = async () => {
 	if (!editingThreadName.value) return;
 
-	await $f.thread.update({
-		id: rightClickedId.value,
+	await api.thread.updateOne(rightClickedId.value, {
 		name: editingThreadName.value,
 	});
 	editingThreadName.value = '';
@@ -48,7 +59,7 @@ const handleRename = async () => {
 const doCreateThread = async () => {
 	if (!newThreadName.value) return;
 
-	const newThread = await $f.thread.create({
+	const newThread = await api.thread.createOne({
 		name: newThreadName.value,
 		mode: 'persona',
 	});
@@ -57,7 +68,7 @@ const doCreateThread = async () => {
 };
 
 const doDeleteThread = async (threadId: string) => {
-	await $f.thread.remove(threadId);
+	await api.thread.removeOne(threadId);
 
 	const newThreads = await updateThreads();
 	if (newThreads.length > 0) {
@@ -76,7 +87,11 @@ watch(route, async () => {
 <template>
 	<div class="sidebar">
 		<div class="flex w-full mb-4 px-2">
-			<Input v-model="newThreadName" placeholder="Chat name" @keyup.enter="doCreateThread" />
+			<Input
+				v-model="newThreadName"
+				placeholder="Chat name"
+				@keyup.enter="doCreateThread"
+			/>
 			<Button @click="doCreateThread">+</Button>
 		</div>
 		<ul>
@@ -86,7 +101,13 @@ watch(route, async () => {
 						<li
 							v-for="thread in threads"
 							:key="thread.id"
-							:class="['cursor-pointer', 'hover:bg-gray-200', 'p-1', 'rounded', isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '']"
+							:class="[
+								'cursor-pointer',
+								'hover:bg-gray-200',
+								'p-1',
+								'rounded',
+								isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
+							]"
 							@contextmenu="rightClickedId = thread.id"
 						>
 							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
@@ -101,7 +122,9 @@ watch(route, async () => {
 								<span @click="renameClicked(rightClickedId)">Rename</span>
 							</ContextMenuItem>
 						</DialogTrigger>
-						<ContextMenuItem @click="doDeleteThread(rightClickedId)">Delete</ContextMenuItem>
+						<ContextMenuItem @click="doDeleteThread(rightClickedId)">
+							Delete
+						</ContextMenuItem>
 					</ContextMenuContent>
 				</ContextMenu>
 				<DialogContent>

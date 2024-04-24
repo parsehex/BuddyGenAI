@@ -1,9 +1,4 @@
 {
 	// https://nuxt.com/docs/guide/concepts/typescript
-	"extends": "./.nuxt/tsconfig.json",
-	"compilerOptions": {
-		"types": [
-		  "./server/database/knex.d.ts",
-		]
-	}
+	"extends": "./.nuxt/tsconfig.json"
 }

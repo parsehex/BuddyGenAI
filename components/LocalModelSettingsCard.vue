@@ -78,7 +78,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { useAppStore } from '~/stores/main';
 
 const props = defineProps<{

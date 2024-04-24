@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import Button from '~/components/ui/button/Button.vue';
 import { Plus } from 'lucide-vue-next';
-import type { ChatThread, PersonaVersionMerged } from '~/server/database/types';
 import { formatDistanceToNow } from 'date-fns';
-import $f from '~/lib/api/$fetch';
-import urls from '~/lib/api/urls';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import Button from '@/components/ui/button/Button.vue';
+import type { ChatThread, PersonaVersionMerged } from '@/lib/api/types-db';
+import api from '@/lib/api/db';
+import urls from '@/lib/api/urls';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -23,7 +23,7 @@ const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
 onBeforeMount(async () => {
-	const p = await $f.persona.get(id);
+	const p = await api.persona.getOne(id);
 	persona.value = p;
 	name.value = p.name;
 	description.value = p.description || '';
@@ -35,17 +35,21 @@ onBeforeMount(async () => {
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
-		time_at.value = formatDistanceToNow(new Date(updated.value), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(updated.value), {
+			addSuffix: true,
+		});
 	} else {
 		time_label.value = 'Created';
-		time_at.value = formatDistanceToNow(new Date(created.value), { addSuffix: true });
+		time_at.value = formatDistanceToNow(new Date(created.value), {
+			addSuffix: true,
+		});
 	}
 
-	threads.value = await $f.thread.getAllByPersona(id);
+	threads.value = await api.thread.getAll(id);
 });
 
 const createThread = async () => {
-	const newThread = await $f.thread.create({
+	const newThread = await api.thread.createOne({
 		name: `Chat with ${persona.value?.name}`,
 		persona_id: id,
 		mode: 'persona',
@@ -56,10 +60,12 @@ const createThread = async () => {
 
 <template>
 	<div class="container flex flex-col items-center">
-		<h1 class="text-2xl font-bold"> Buddy </h1>
+		<h1 class="text-2xl font-bold">Buddy</h1>
 		<div>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">Version History</NuxtLink>
+			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+				Version History
+			</NuxtLink>
 		</div>
 		<Card class="w-full md:w-1/2">
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
@@ -75,27 +81,44 @@ const createThread = async () => {
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
 					No description &nbsp;&mdash;&nbsp;
-					<NuxtLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">Add description</NuxtLink>
+					<NuxtLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">
+						Add description
+					</NuxtLink>
 				</span>
 				<br />
 				<br />
-				<span class="text-xs text-muted-foreground italic">{{ time_label }} {{ time_at }}</span>
+				<span class="text-xs text-muted-foreground italic">
+					{{ time_label }} {{ time_at }}
+				</span>
 			</CardContent>
 		</Card>
 		<h2 class="text-xl font-bold mt-4 flex items-center">
 			Chats with {{ name }}
-			<Button type="button" size="sm" class="ml-4" @click="createThread" v-if="threads.length > 0">
+			<Button
+				type="button"
+				size="sm"
+				class="ml-4"
+				@click="createThread"
+				v-if="threads.length > 0"
+			>
 				<Plus />
 			</Button>
 		</h2>
-		<div v-if="threads.length === 0" class="text-gray-400 italic text-center mt-1">
+		<div
+			v-if="threads.length === 0"
+			class="text-gray-400 italic text-center mt-1"
+		>
 			No threads using this persona.
 			<br />
-			<Button type="button" class="mt-1" @click="createThread">Create Thread</Button>
+			<Button type="button" class="mt-1" @click="createThread">
+				Create Thread
+			</Button>
 		</div>
 		<div v-else>
 			<div v-for="thread in threads" :key="thread.id" class="mt-2">
-				<NuxtLink :to="`/chat/${thread.id}`" class="text-blue-500 underline">{{ thread.name }}</NuxtLink>
+				<NuxtLink :to="`/chat/${thread.id}`" class="text-blue-500 underline">
+					{{ thread.name }}
+				</NuxtLink>
 			</div>
 		</div>
 	</div>

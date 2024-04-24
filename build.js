@@ -2,26 +2,20 @@
 const builder = require('electron-builder')
 const Platform = builder.Platform
 
+
+
+
+const platform = 'WINDOWS'
+// const platform = 'LINUX'
+// const platform = 'MAC'
+
 /**
  * @type {import('electron-builder').Configuration}
  */
 const options = {
   appId: 'com.buddygenai',
-  productName: 'buddygenai',
-  // protocols: {
-  // name: 'Your deeplink',
-  // - Don't forget to set `MimeType: "x-scheme-handler/deeplink"` for `linux.desktop` entry!
-  // schemes: ['deeplink']
-  // },
-  // - Electron auto-updater config
-  // publish: [
-  //   {
-  //     provider: 'github',
-  //     owner: 'eternalc0der',
-  //     repo: 'electron-nuxt3',
-  //     releaseType: 'release'
-  //   }
   // ],
+  productName: 'BuddyGenAI',
 
   // "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.
   compression: 'maximum',
@@ -31,7 +25,9 @@ const options = {
   buildDependenciesFromSource: false,
 
   directories: {
-    output: 'electron-dist'
+    output: 'electron-dist',
+
+    app: '.output',
   },
   extraResources: [
     './llama.cpp/build/bin/**/main*',
@@ -42,8 +38,8 @@ const options = {
     './.output/server/**/*',
     './.output/public/**/*',
     './server/database/migrations/**/*',
+    './migrations/**/*',
   ],
-  // asar: false,
 
   win: {
     // eslint-disable-next-line no-template-curly-in-string
@@ -84,10 +80,7 @@ const options = {
   }
 }
 
- // "MAC" | "LINUX" | "WINDOWS"
-// const platform = 'WINDOWS'
-const platform = 'LINUX'
-// const platform = 'MAC'
+
 
 builder
   .build({

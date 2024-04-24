@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { PersonaVersionMerged } from '~/server/database/types';
+import { useCompletion } from 'ai/vue';
+import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import api from '@/lib/api/db';
+import { useAppStore } from '@/stores/main';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-// import { getPersonas } from '@/lib/api/persona';
 import { useToast } from './ui/toast';
-import Spinner from '~/components/Spinner.vue';
-import { useCompletion } from 'ai/vue';
-import $f from '~/lib/api/$fetch';
-import { useAppStore } from '~/stores/main';
 
 const { toast } = useToast();
 const { complete } = useCompletion();
@@ -21,7 +18,7 @@ const showSpinner = ref(false);
 const isPersonaSelected = (id: string | number) =>
 	route.path.includes(`/persona`) && route.params.id == id;
 
-// italicize if persona is selected in chat (still bolded if viewing/editing)
+// TODO italicize if persona is selected in chat (still bolded if viewing/editing)
 
 onBeforeMount(async () => {
 	await updatePersonas();
@@ -46,7 +43,7 @@ const doCreatePersona = async () => {
 	}
 	newPersona.value.description = value;
 
-	const newP = await $f.persona.create(newPersona.value);
+	const newP = await api.persona.createOne(newPersona.value);
 	await updatePersonas();
 	newPersona.value = { name: '', description: '' };
 	toast({
@@ -54,7 +51,7 @@ const doCreatePersona = async () => {
 		description: `Created ${newP.name}. Generating profile picture...`,
 	});
 	showSpinner.value = true;
-	await $f.persona.createProfilePic(newP.id);
+	await api.persona.profilePic.createOne(newP.id);
 	showSpinner.value = false;
 	await navigateTo(`/persona/${newP.id}/view`);
 };
