@@ -20,6 +20,8 @@ TODO notes about profile pic versioning:
 
 // 	}
 
+export default async function createProfilePic(id: string) {
+	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
 	const modelDir = AppSettings.get('local_model_directory');
 	if (!modelDir) {
