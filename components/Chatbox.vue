@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useChat, useCompletion } from 'ai/vue';
-import { RefreshCw } from 'lucide-vue-next';
+import { RefreshCw, RefreshCcwDot } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -28,7 +28,7 @@ import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
 const { threads, personas, updatePersonas, updateThreads } = useAppStore();
-const { complete } = useCompletion();
+const { complete } = useCompletion({ api: urls.message.completion() });
 
 const props = defineProps<{
 	threadId: string;
@@ -49,7 +49,11 @@ const threadTitle = computed(() => {
 	return thread?.name || '';
 });
 
-const apiPartialBody = ref({ threadId: threadId.value });
+const apiPartialBody = ref({
+	threadId: threadId.value,
+	temperature: 0.95,
+	seed: -1,
+});
 
 const scrollToBottom = () => {
 	const lastMessage = document.querySelector('.chat-message:last-child');
@@ -58,14 +62,53 @@ const scrollToBottom = () => {
 	}
 };
 
+interface Message {
+	role: 'user' | 'assistant';
+	content: string;
+}
+const msgsToSave = [] as Message[];
+
+const reloadingId = ref('');
+
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
-			await refreshMessages();
+			if (reloadingId.value) {
+				let lastMessage = messages.value[messages.value.length - 1];
+				console.log('updating last message', lastMessage);
+				lastMessage = { ...lastMessage, content: lastMessage.content };
+				await api.message.updateOne(reloadingId.value, lastMessage.content);
+				await refreshMessages();
+				reloadingId.value = '';
+				return;
+			}
+
+			console.log('onFinish', messages.value.length);
+
+			const lastMessage = messages.value[messages.value.length - 1];
+			if (lastMessage.role === 'assistant') {
+				const msg = {
+					role: 'assistant',
+					content: lastMessage.content,
+				};
+				msgsToSave.push(msg as any);
+			} else {
+				console.log('last msg was user message?', lastMessage.content);
+			}
+
+			if (msgsToSave.length) {
+				for (const msg of msgsToSave) {
+					console.log('saving', msg);
+					await api.message.createOne(threadId.value, msg);
+				}
+				msgsToSave.length = 0;
+			}
+
 			console.timeEnd('message');
 
+			// TODO break out into a function
 			if (messages.value.length === 3) {
 				// 3 incl. system message
 				console.log('generating title');
@@ -78,7 +121,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					body: { max_tokens: 20, temperature: 0.01 },
 				});
 				if (value) {
-					// improve this
+					// TODO improve this (llm response parsing)
 					if (value.startsWith('Title: ')) {
 						value = value.slice(7);
 					}
@@ -91,6 +134,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					console.timeEnd('completion');
 				}
 			}
+
+			const m = await refreshMessages();
 		},
 		onError: (e) => {
 			console.log(e);
@@ -139,6 +184,11 @@ const doSubmit = async (e: Event) => {
 		return;
 	}
 	console.time('message');
+	const msg = {
+		role: 'user',
+		content: input.value,
+	};
+	msgsToSave.push(msg as any);
 	handleSubmit(e);
 	setTimeout(scrollToBottom, 5);
 };
@@ -146,6 +196,7 @@ const doReload = async () => {
 	if (isLoading.value) {
 		return;
 	}
+	reloadingId.value = messages.value[messages.value.length - 1].id;
 	reload();
 };
 
@@ -380,10 +431,11 @@ const updateSysFromPersona = async () => {
 				@keydown.ctrl.enter="doSubmit"
 			/>
 			<Button type="button" size="sm" @click="doSubmit">
+				<!-- TODO implement stop -->
+				<!-- TODO switch to send icon and stop icon -->
 				{{ isLoading ? 'Stop' : 'Send' }}
 			</Button>
-			<!-- TODO fix - the reload method calls same api endpoint with same messaages -->
-			<!-- <Button type="button" size="sm" @click="doReload"><RefreshCcwDot /> </Button> -->
+			<Button type="button" size="sm" @click="doReload"><RefreshCcwDot /></Button>
 		</form>
 	</div>
 </template>

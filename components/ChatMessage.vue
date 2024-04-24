@@ -34,8 +34,9 @@ const userName = ref('User');
 const profilePictureValue = computed(() => {
 	if (isUser.value) return '';
 	if (!currentPersona.value) return '';
+	if (!currentPersona.value.profile_pic) return '';
 
-	return urls.persona.getProfilePic(currentPersona.value.id);
+	return urls.persona.getProfilePic(currentPersona.value.profile_pic);
 });
 
 if (isUser.value) {

@@ -6,9 +6,10 @@ import { useAppStore } from '@/stores/main';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useToast } from './ui/toast';
+import urls from '~/lib/api/urls';
 
 const { toast } = useToast();
-const { complete } = useCompletion();
+const { complete } = useCompletion({ api: urls.message.completion() });
 const { personas, updatePersonas } = useAppStore();
 
 const route = useRoute();

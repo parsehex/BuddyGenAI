@@ -5,7 +5,7 @@ CREATE TABLE persona (
 	profile_pic TEXT,
 	profile_pic_prompt TEXT,
 	profile_pic_use_prompt INTEGER NOT NULL CHECK(profile_pic_use_prompt IN (0, 1)),
-	current_version_id TEXT NOT NULL,
+	current_version_id TEXT,
 	FOREIGN KEY(current_version_id) REFERENCES persona_version(id)
 );
 

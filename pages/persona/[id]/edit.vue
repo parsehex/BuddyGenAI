@@ -20,7 +20,7 @@ import urls from '@/lib/api/urls';
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
 const { toast } = useToast();
-const { complete } = useCompletion();
+const { complete } = useCompletion({ api: urls.message.completion() });
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -53,7 +53,9 @@ onBeforeMount(async () => {
 		descriptionValue.value = persona.value.description || '';
 	}
 	if (persona.value?.profile_pic) {
-		profilePictureValue.value = urls.persona.getProfilePic(id);
+		profilePictureValue.value = urls.persona.getProfilePic(
+			persona.value.profile_pic
+		);
 	}
 	if (persona.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = persona.value.profile_pic_prompt;
@@ -76,9 +78,9 @@ const refreshProfilePicture = async () => {
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await api.persona.profilePic.createOne(id);
+	const res = await api.persona.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.persona.getProfilePic(id);
+	profilePictureValue.value = urls.persona.getProfilePic(res.output);
 	updatingProfilePicture.value = false;
 };
 

@@ -9,7 +9,7 @@ export default async function removeAll(
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
 	const sqlThread = select('chat_thread', ['*'], { id: threadId });
-	const thread = (await dbGet(sqlThread[0], sqlThread[1]))[0];
+	const thread = await dbGet(sqlThread[0], sqlThread[1]);
 	if (!thread) {
 		throw new Error('Thread not found');
 	}

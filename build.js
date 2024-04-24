@@ -14,7 +14,6 @@ const platform = 'WINDOWS'
  */
 const options = {
   appId: 'com.buddygenai',
-  // ],
   productName: 'BuddyGenAI',
 
   // "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.
@@ -35,9 +34,6 @@ const options = {
     './stable-diffusion.cpp/build/bin/**/*',
     './whisper.cpp/**/main*',
     './whisper.cpp/**/server*',
-    './.output/server/**/*',
-    './.output/public/**/*',
-    './server/database/migrations/**/*',
     './migrations/**/*',
   ],
 
@@ -71,8 +67,7 @@ const options = {
     desktop: {
       StartupNotify: 'false',
       Encoding: 'UTF-8',
-      MimeType: 'x-scheme-handler/deeplink',
-      Icon: './assets/icon-256x.png'
+      MimeType: 'x-scheme-handler/deeplink'
     },
     target: ['dir']
     // target: ['AppImage']
@@ -80,7 +75,16 @@ const options = {
   }
 }
 
+const fs = require('fs-extra')
 
+let source = './package.json'
+let dest = './.output/package.json'
+fs.copyFileSync(source, dest)
+
+// TODO how can we install deps programmatically?
+source = './node_modules'
+dest = './.output/node_modules'
+fs.copySync(source, dest)
 
 builder
   .build({

@@ -26,6 +26,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		sqlMessages[0],
 		sqlMessages[1]
 	)) as ChatMessage[];
+	const hasSystemMessage = messages[0]?.role === 'system';
 
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
@@ -47,12 +48,30 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 				statusMessage: 'Persona version not found',
 			});
 		}
-		const userName = AppSettings.get('user_name');
-		messages[0].content = prompt.fromPersonaDescription(
-			userName,
-			personaVersion.name,
-			personaVersion.description
-		);
+
+		if (!hasSystemMessage) {
+			const userName = AppSettings.get('user_name');
+			messages.unshift({
+				id: '',
+				created: new Date().getTime(),
+				updated: new Date().getTime(),
+				role: 'system',
+				content: prompt.fromPersonaDescription(
+					userName,
+					personaVersion.name,
+					personaVersion.description
+				),
+				thread_id: threadId,
+				thread_index: 0,
+			});
+		} else {
+			const userName = AppSettings.get('user_name');
+			messages[0].content = prompt.fromPersonaDescription(
+				userName,
+				personaVersion.name,
+				personaVersion.description
+			);
+		}
 	}
 
 	return messages || [];

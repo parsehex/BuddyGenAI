@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn, execFile } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
@@ -34,7 +34,7 @@ function startServer(model: string) {
 		}
 
 		console.log('Starting Llama.cpp-Server', args);
-		commandObj.cmd = exec(`"${serverPath}" ${args.join(' ')}`);
+		commandObj.cmd = execFile(serverPath, args, {});
 
 		console.log('forked');
 
@@ -48,9 +48,21 @@ function startServer(model: string) {
 			if (signal) console.log(`Llama.cpp-Server killed with signal: ${signal}`);
 		});
 
-		process.on('exit', () => {
-			commandObj.cmd.kill();
-		});
+		process.stdin.resume(); // so the program will not close instantly
+
+		function exitHandler(options: any, exitCode: any) {
+			commandObj?.cmd?.kill('SIGKILL');
+			if (options.cleanup) console.log('clean');
+			if (exitCode || exitCode === 0) console.log(exitCode);
+			if (options.exit) process.exit();
+		}
+
+		process.on('exit', exitHandler.bind(null, { cleanup: true }));
+		process.on('SIGINT', exitHandler.bind(null, { exit: true }));
+		process.on('SIGTERM', exitHandler.bind(null, { exit: true }));
+		process.on('SIGUSR1', exitHandler.bind(null, { exit: true }));
+		process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
+		process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 		if (QUIET) {
 			commandObj.cmd.stdout.on('data', (data: any) => {

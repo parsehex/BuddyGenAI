@@ -76,10 +76,12 @@ export default async function updateOne({
 			{ current_version_id: newVersionId, updated: new Date().getTime() },
 			{ id }
 		);
-		[persona] = (await dbRun(
-			sqlUpdatePersona[0],
-			sqlUpdatePersona[1]
-		)) as PersonaVersionMerged[];
+		await dbRun(sqlUpdatePersona[0], sqlUpdatePersona[1]);
+		const sqlPersonaGet = select('persona', ['*'], { id });
+		persona = (await dbGet(
+			sqlPersonaGet[0],
+			sqlPersonaGet[1]
+		)) as PersonaVersionMerged;
 	}
 
 	const sqlUpdatePersona = update(
@@ -92,10 +94,12 @@ export default async function updateOne({
 		},
 		{ id }
 	);
-	[persona] = (await dbRun(
-		sqlUpdatePersona[0],
-		sqlUpdatePersona[1]
-	)) as PersonaVersionMerged[];
+	await dbRun(sqlUpdatePersona[0], sqlUpdatePersona[1]);
+	const sqlPersonaGet = select('persona', ['*'], { id });
+	persona = (await dbGet(
+		sqlPersonaGet[0],
+		sqlPersonaGet[1]
+	)) as PersonaVersionMerged;
 	if (!returningPersona) {
 		returningPersona = { ...persona };
 		returningPersona.version = currentVersion.version;

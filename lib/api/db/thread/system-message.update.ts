@@ -56,9 +56,15 @@ export default async function updateSystemMessage(
 		{ content },
 		{ thread_id: thread.id, thread_index: 0 }
 	);
-	const firstMessage = (await dbRun(
-		sqlFirstMessage[0],
-		sqlFirstMessage[1]
+	await dbRun(sqlFirstMessage[0], sqlFirstMessage[1]);
+
+	const sqlGetFirstMessage = select('chat_message', ['*'], {
+		thread_id: thread.id,
+		thread_index: 0,
+	});
+	const firstMessage = (await dbGet(
+		sqlGetFirstMessage[0],
+		sqlGetFirstMessage[1]
 	)) as ChatMessage;
 
 	return firstMessage;

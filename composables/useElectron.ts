@@ -58,21 +58,21 @@ export default function useElectron() {
 
 	const dbRun = async (query: string, params: any[] = []) => {
 		const result = await electron.ipcRenderer.invoke('db:run', query, params);
-		if (result.error) {
+		if (result?.error) {
 			console.error(result.error);
 		}
 		return result;
 	};
 	const dbGet = async (query: string, params: any[] = []) => {
 		const result = await electron.ipcRenderer.invoke('db:get', query, params);
-		if (result.error) {
+		if (result?.error) {
 			console.error(result.error);
 		}
 		return result;
 	};
 	const dbAll = async (query: string, params: any[] = []) => {
 		const result = await electron.ipcRenderer.invoke('db:all', query, params);
-		if (result.error) {
+		if (result?.error) {
 			console.error(result.error);
 		}
 		return result;
@@ -82,12 +82,43 @@ export default function useElectron() {
 		const result = await electron.ipcRenderer.invoke('pathJoin', path, ...paths);
 		return result;
 	};
+	const pathResolve = async (
+		path: string,
+		...paths: string[]
+	): Promise<string> => {
+		const result = await electron.ipcRenderer.invoke(
+			'pathResolve',
+			path,
+			...paths
+		);
+		return result;
+	};
+	const dirname = async (path: string): Promise<string> => {
+		const result = await electron.ipcRenderer.invoke('pathDirname', path);
+		return result;
+	};
+	const basename = async (path: string): Promise<string> => {
+		const result = await electron.ipcRenderer.invoke('pathBasename', path);
+		return result;
+	};
+	const fsAccess = async (path: string): Promise<boolean> => {
+		const result = await electron.ipcRenderer.invoke('fsAccess', path);
+		return result;
+	};
+	const fsUnlink = async (path: string): Promise<boolean> => {
+		const result = await electron.ipcRenderer.invoke('fsUnlink', path);
+		return result;
+	};
 	const listDirectory = async (directory: string): Promise<string[]> => {
 		const result = await electron.ipcRenderer.invoke('listDirectory', directory);
 		return result;
 	};
 	const mkdir = async (directory: string): Promise<boolean> => {
 		const result = await electron.ipcRenderer.invoke('mkdir', directory);
+		return result;
+	};
+	const fileURLToPath = (url: string) => {
+		const result = electron.ipcRenderer.invoke('fileURLToPath', url);
 		return result;
 	};
 
@@ -101,10 +132,16 @@ export default function useElectron() {
 		pickDirectory,
 		verifyModelDirectory,
 		pathJoin,
+		pathResolve,
+		dirname,
+		basename,
 		listDirectory,
 		mkdir,
 		dbRun,
 		dbGet,
 		dbAll,
+		fsAccess,
+		fsUnlink,
+		fileURLToPath,
 	};
 }

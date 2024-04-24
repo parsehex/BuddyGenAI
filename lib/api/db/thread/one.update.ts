@@ -35,10 +35,9 @@ export default async function updateOne(
 		{ name, persona_id, mode, persona_mode_use_current },
 		{ id }
 	);
-	const thread = (await dbRun(
-		sqlUpdateThread[0],
-		sqlUpdateThread[1]
-	)) as ChatThread;
+	await dbRun(sqlUpdateThread[0], sqlUpdateThread[1]);
+	const sqlThreadGet = select('chat_thread', ['*'], { id });
+	const thread = (await dbGet(sqlThreadGet[0], sqlThreadGet[1])) as ChatThread;
 
 	if (changedMode) {
 		const sqlMessages = del('chat_message', { thread_id: id });

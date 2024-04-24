@@ -35,6 +35,12 @@ npm run dev:electron
 code .
 ```
 
+## Windows Notes
+
+- I'm starting on node v18
+- Does `spawn` work on Windows where `fork` doesn't in prod?
+
+
 # 📡 Usage
 
 ### Development

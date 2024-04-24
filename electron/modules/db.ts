@@ -55,6 +55,15 @@ async function getMigrationsDir() {
 	return path.resolve(parentDir, 'migrations');
 }
 
+function fixParams(arr: any[]) {
+	return arr.map((param) => {
+		if (typeof param === 'boolean') {
+			return param ? 1 : 0;
+		}
+		return param;
+	});
+}
+
 export default async (mainWindow: BrowserWindow) => {
 	console.log('[-] MODULE::db Initializing');
 	const migrationsDir = await getMigrationsDir();
@@ -93,9 +102,15 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:run', async (_, query: string, params) => {
 		try {
+			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const tx = sqlDb.transaction(() => {
-				const result = stmt.run(params);
+				try {
+					stmt.run(params);
+				} catch (error) {
+					console.log('dbRun query resulted in error:', query, params);
+					console.log('dbRun error:', error);
+				}
 			});
 			tx();
 		} catch (error) {
@@ -105,6 +120,7 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:get', async (_, query: string, params) => {
 		try {
+			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.get(params);
 			return result;
@@ -115,6 +131,7 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:all', async (_, query: string, params) => {
 		try {
+			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.all(params);
 			return result;

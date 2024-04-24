@@ -41,7 +41,7 @@ const updatePersona = async () => {
 	created.value = p.created;
 	updated.value = p.updated;
 	if (p.profile_pic) {
-		profilePic.value = urls.persona.getProfilePic(p.id);
+		profilePic.value = urls.persona.getProfilePic(p.profile_pic);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

@@ -31,7 +31,7 @@ onBeforeMount(async () => {
 	updated.value = p.updated;
 
 	if (p.profile_pic) {
-		profilePic.value = urls.persona.getProfilePic(id);
+		profilePic.value = urls.persona.getProfilePic(p.profile_pic);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

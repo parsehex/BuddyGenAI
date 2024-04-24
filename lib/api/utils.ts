@@ -1,4 +1,4 @@
-import type { ChatMessage } from '~/server/database/types';
+import type { ChatMessage } from '~/lib/api/types-db';
 
 export function apiMsgsToOpenai(messages: ChatMessage[]) {
 	return messages.map((message) => ({

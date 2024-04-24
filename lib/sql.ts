@@ -13,8 +13,11 @@ export function select(
 }
 
 export function insert(table: string, data: QueryParams): [string, any[]] {
-	const fields = Object.keys(data);
-	const values = Object.values(data);
+	const entries = Object.entries(data).filter(
+		([key, value]) => value !== undefined
+	);
+	const fields = entries.map(([key, value]) => key);
+	const values = entries.map(([key, value]) => value);
 	const placeholders = fields.map((_, i) => `?`);
 	const query = `INSERT INTO ${table} (${fields.join(
 		', '

@@ -1,33 +1,42 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const {
+	listDirectory,
+	pathJoin,
+	pathResolve,
+	dirname,
+	fsAccess,
+	fileURLToPath,
+} = useElectron();
 
 export async function getDirname() {
-	const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
+	if (!dirname) throw new Error('dirname not available');
+	const __filename = await fileURLToPath(import.meta.url);
+	const __dirname = dirname(__filename);
 	return __dirname;
 }
 
 export async function findDirectoryInPath(dirName: string, startPath: string) {
+	if (!listDirectory) throw new Error('listDirectory not available');
 	let currentPath = startPath;
 	let flag = false;
 	while (!flag) {
-		const files = await fs.readdir(currentPath);
+		const files = await listDirectory(currentPath);
 		if (files.includes(dirName)) {
 			flag = true;
-			return path.resolve(currentPath, dirName);
+			return await pathResolve(currentPath, dirName);
 		}
-		currentPath = path.resolve(currentPath, '..');
+		currentPath = await pathResolve(currentPath, '..');
 	}
 	return null;
 }
 
 export async function findResourcesPath() {
+	if (!pathResolve) throw new Error('pathResolve not available');
+
 	// if we're in dev then find dir containing .nuxt
 	if (process.env.NODE_ENV === 'development') {
 		let dir = await getDirname();
 		let p = await findDirectoryInPath('.nuxt', dir);
-		if (p) return path.resolve(p, '..');
+		if (p) return pathResolve(p, '..');
 	}
 
 	const dir = await getDirname();
@@ -48,13 +57,17 @@ type Binaries = {
 	'whisper.cpp': 'main' | 'server';
 };
 type BinaryName<T extends ProjectName> = Binaries[T];
-export async function findBinaryPath<T extends ProjectName>(projectName: T, binaryName: BinaryName<T>) {
+export async function findBinaryPath<T extends ProjectName>(
+	projectName: T,
+	binaryName: BinaryName<T>
+) {
+	if (!pathJoin) throw new Error('pathJoin not available');
 	let exe = binaryName;
 	// @ts-ignore
 	if (process.platform === 'win32') exe += '.exe';
 
 	let resPath = await findResourcesPath();
-	let binPath = path.join(resPath, projectName, exe);
+	let binPath = await pathJoin(resPath, projectName, exe);
 	// console.log('binPath', binPath, exe);
 
 	// look for the binary in the following directories relative to the resources path:
@@ -62,16 +75,51 @@ export async function findBinaryPath<T extends ProjectName>(projectName: T, bina
 
 	for (let i = 0; i < directories.length; i++) {
 		try {
-			binPath = path.join(resPath, projectName, directories[i], exe);
+			binPath = await pathJoin(resPath, projectName, directories[i], exe);
 			// console.log('checking', binPath);
-			await fs.access(binPath);
+			const result = await fsAccess(binPath);
+			if (!result) continue;
 			return binPath;
 		} catch (error) {}
 	}
 	try {
-		await fs.access(binPath);
+		const result = await fsAccess(binPath);
+		if (!result) throw new Error('Binary not found');
 		return binPath;
 	} catch (error) {
 		throw new Error(`Binary ${exe} not found for project ${projectName}`);
 	}
+}
+
+export async function getDataPath(subPath?: string) {
+	if (!pathJoin) throw new Error('pathJoin not available');
+
+	const dbLocations = {
+		win32: '%APPDATA%/BuddyGenAI',
+		linux: '~/.config/BuddyGenAI',
+		darwin: '~/Library/Application Support/BuddyGenAI',
+	};
+
+	const platform = process.platform;
+	// @ts-ignore
+	const dir = dbLocations[platform];
+	let p = '';
+	if (process.env.NODE_ENV === 'development') {
+		p = await pathJoin('data', subPath || '');
+	} else {
+		p = await pathJoin(dir, subPath || '');
+
+		// resolve ~ and %APPDATA%
+		if (platform === 'win32') {
+			const appData = process.env.APPDATA;
+			if (appData) {
+				p = p.replace('%APPDATA%', appData);
+			}
+		} else if (platform === 'linux') {
+			p = p.replace('~', process.env.HOME as string);
+		} else if (platform === 'darwin') {
+			p = p.replace('~', '/Users/' + process.env.USER);
+		}
+	}
+	return p;
 }

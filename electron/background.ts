@@ -11,8 +11,10 @@ import { ipcMain } from 'electron/main';
 import macMenu from './modules/macMenu';
 import { title } from 'process';
 import db from './modules/db';
-import { join } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
+import { fileURLToPath } from 'url';
+import sdModule from './modules/sd';
 
 // Initilize
 // =========
@@ -51,11 +53,37 @@ async function createWindow() {
 
 	await db(mainWindow);
 	await llamaCppModule(mainWindow);
+	await sdModule(mainWindow);
 
 	mainWindow.removeMenu();
 
 	ipcMain.handle('pathJoin', async (_, path: string, ...paths: string[]) => {
 		return join(path, ...paths);
+	});
+	ipcMain.handle('pathResolve', async (_, path: string, ...paths: string[]) => {
+		return resolve(path, ...paths);
+	});
+	ipcMain.handle('pathDirname', async (_, path: string) => {
+		return dirname(path);
+	});
+	ipcMain.handle('pathBasename', async (_, path: string) => {
+		return basename(path);
+	});
+	ipcMain.handle('fsAccess', async (_, path: string) => {
+		try {
+			await fs.access(path);
+			return true;
+		} catch (err) {
+			return false;
+		}
+	});
+	ipcMain.handle('fsUnlink', async (_, path: string) => {
+		try {
+			await fs.unlink(path);
+			return true;
+		} catch (err) {
+			return false;
+		}
 	});
 	ipcMain.handle('listDirectory', async (_, directory: string) => {
 		try {
@@ -72,6 +100,9 @@ async function createWindow() {
 		} catch (err) {
 			return false;
 		}
+	});
+	ipcMain.handle('fileURLToPath', async (_, url: string) => {
+		return fileURLToPath(url);
 	});
 
 	ipcMain.handle('toggleDevTools:app', () => {

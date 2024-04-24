@@ -12,7 +12,7 @@ import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
-const { complete } = useCompletion();
+const { complete } = useCompletion({ api: urls.message.completion() });
 const {
 	chatServerRunning,
 	chatModels,
@@ -125,9 +125,9 @@ const refreshProfilePicture = async () => {
 	const id = newPersona.value.id;
 	updatingProfilePicture.value = true;
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	await api.persona.profilePic.createOne(id);
+	const res = await api.persona.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.persona.getProfilePic(id);
+	profilePictureValue.value = urls.persona.getProfilePic(res.output);
 	updatingProfilePicture.value = false;
 };
 
@@ -433,6 +433,7 @@ console.log(modelProvider.value);
 								<span class="text-lg">Extra keywords for picture</span>
 								<Input
 									v-model="profilePicturePrompt"
+									@keyup.enter="refreshProfilePicture"
 									placeholder="tan suit, sunglasses"
 								/>
 							</Label>
