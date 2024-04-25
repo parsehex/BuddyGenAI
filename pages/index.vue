@@ -39,7 +39,7 @@ const personaKeywords = ref('');
 const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
-const acceptedPersona = ref(false);
+const acceptedPersona = ref('' as '' | 'description' | 'keywords');
 const newPersona = ref(null as PersonaVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
@@ -175,7 +175,7 @@ ${relationship}\nInput:\n`;
 	}
 	createdDescription.value = value;
 };
-
+const acceptedPersonaDesc = ref('');
 const acceptPersona = async (
 	descriptionOrKeywords: 'description' | 'keywords'
 ) => {
@@ -188,7 +188,8 @@ const acceptPersona = async (
 		description: personaDescription,
 	});
 
-	acceptedPersona.value = true;
+	acceptedPersona.value = descriptionOrKeywords;
+	acceptedPersonaDesc.value = personaDescription;
 };
 
 const isModelsSetup = ref(false);
@@ -447,7 +448,7 @@ console.log(modelProvider.value);
 						</div>
 						<p class="mt-2">
 							Description:
-							<span class="text-lg ml-3">{{ createdDescription }}</span>
+							<span class="text-lg ml-3">{{ acceptedPersonaDesc }}</span>
 						</p>
 					</CardContent>
 				</Card>
