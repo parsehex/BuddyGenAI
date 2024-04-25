@@ -5,7 +5,8 @@ Electron app using llama.cpp and stable-diffusion.cpp to generate Buddies to tal
 ## ✅ Features
 
 - Generate Buddies to talk to 🤖
-- generate a detailed Buddy from just a few keywords 📝
+- Create a detailed Buddy from just a few words 📝
+  - Or customize your Buddy to behave exactly how you want 🎨
 - Generate profile pictures for your Buddy 🖼️
 
 # ⚙️ Setup
@@ -40,7 +41,6 @@ code .
 - I'm starting on node v18
 - Does `spawn` work on Windows where `fork` doesn't in prod?
 
-
 # 📡 Usage
 
 ### Development
@@ -57,7 +57,8 @@ npm run dev:electron
 # 'npm run dev:electron:win' for windows
 
 # same as dev:electron but deletes db
-npm run reset-dev-electron
+npm run reset-dev
+# npm run reset-dev:win
 
 # Start the app in development mode (in browser)
 npm run dev
@@ -69,8 +70,9 @@ npm run dev
 # Generate Nuxt static build
 npm run build
 
-# Build electron app for production
-# call the appropriate setup_llamacpp and setup_stablediffusioncpp scripts before building
+# Call the appropriate setup_llamacpp and setup_stablediffusioncpp scripts before building
 # 	(if making a local only build that is -- only kind supported atm)
+
+# Build electron app for production
 npm run build:electron
 ```
