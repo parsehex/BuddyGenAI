@@ -74,15 +74,6 @@ export const useAppStore = defineStore('app', () => {
 		}
 	});
 
-	// TODO convert to ipc methods
-	const startServer = async () => {
-		if (chatServerRunning.value) return;
-		await $fetch('/api/llama.cpp/start', { method: 'POST' });
-		chatServerRunning.value = true;
-	};
-	const stopServer = async () => {
-		await $fetch('/api/llama.cpp/stop', { method: 'POST' });
-	};
 	const refreshServerStatus = async () => {
 		const status = await isServerRunning();
 		if (!status) return false;

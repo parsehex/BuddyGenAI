@@ -59,6 +59,12 @@ const updateSelectedModel = (type: 'chat' | 'image') => {
 	};
 };
 
+const doRefreshServerStatus = async () => {
+	const running = await isServerRunning();
+	console.log('Server running:', running);
+	await refreshServerStatus();
+};
+
 const doStartServer = async () => {
 	await startServer(getChatModelPath());
 };
@@ -73,7 +79,11 @@ const doStartServer = async () => {
 				<AlertDescription>{{ error }}</AlertDescription>
 			</Alert>
 			<Button
-				v-if="settings.local_model_directory && settings.selected_model_chat"
+				v-if="
+					settings.local_model_directory &&
+					settings.selected_model_chat &&
+					!chatServerRunning
+				"
 				@click="doStartServer"
 				class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
 			>
@@ -87,7 +97,7 @@ const doStartServer = async () => {
 				Stop Server
 			</Button>
 			<Button
-				@click="refreshServerStatus"
+				@click="doRefreshServerStatus"
 				class="mt-4 bg-gray-500 text-white px-4 py-2 rounded-md"
 			>
 				Refresh Server Status

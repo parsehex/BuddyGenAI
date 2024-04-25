@@ -86,7 +86,10 @@ async function stopServer() {
 }
 
 async function isServerRunning() {
-	return commandObj.cmd !== null;
+	if (commandObj.cmd) {
+		return true;
+	}
+	return false;
 }
 
 export default function llamaCppModule(mainWindow: BrowserWindow) {
