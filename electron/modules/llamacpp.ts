@@ -13,6 +13,14 @@ const commandObj = {
 const chatTemplateMap: { [key: string]: string } = {
 	Moistral: 'vicuna',
 	'WizardLM-2': 'vicuna',
+	'Lexi-': 'chatml',
+	'llama-3': 'llama3',
+};
+
+const contextLengthMap: { [key: string]: number } = {
+	'WizardLM-2': 4096,
+	'Lexi-': 8192,
+	'llama-3': 8192,
 };
 
 function startServer(model: string) {
@@ -23,7 +31,7 @@ function startServer(model: string) {
 		const serverPath = await findBinaryPath('llama.cpp', 'server');
 		// console.log('binPath', serverPath);
 		const stdio = QUIET ? 'pipe' : 'inherit';
-		const args = ['--model', model, '--n-gpu-layers', '35', '-c', '4096'];
+		const args = ['--model', model, '--n-gpu-layers', '35'];
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			model.includes(key)
@@ -33,8 +41,30 @@ function startServer(model: string) {
 			console.log('Using chat template:', chatTemplateMap[chatTemplate]);
 		}
 
-		console.log('Starting Llama.cpp-Server', args);
-		commandObj.cmd = execFile(serverPath, args, {});
+		const contextLength = Object.keys(contextLengthMap).find((key) =>
+			model.includes(key)
+		);
+		if (contextLength && contextLengthMap[contextLength]) {
+			args.push('-c', contextLengthMap[contextLength] + '');
+			console.log('Using context length:', contextLengthMap[contextLength]);
+		} else {
+			args.push('-c', '4096');
+		}
+
+		console.log('Starting Llama.cpp-Server.', args);
+		commandObj.cmd = execFile(
+			serverPath,
+			args,
+			{ shell: true },
+			(error: any, stdout: any, stderr: any) => {
+				if (error) {
+					console.error(`Llama.cpp-Server error: ${error.message}`);
+					if (reject) reject();
+				}
+				if (stdout) console.log(`Llama.cpp-Server stdout: ${stdout}`);
+				if (stderr) console.error(`Llama.cpp-Server stderr: ${stderr}`);
+			}
+		);
 
 		console.log('forked');
 
