@@ -84,8 +84,9 @@ export default async (mainWindow: BrowserWindow) => {
 	migrations.sort();
 	if (applyMigrations) console.log('will apply migrations', migrations);
 
-	const sqlDb = new Database(dbPath, { verbose: console.log.bind(console) });
-	// const sqlDb = new Database(dbPath);
+	const verbose = isDev ? console.log.bind(console) : undefined;
+
+	const sqlDb = new Database(dbPath, { verbose });
 
 	// run migrations
 	for (const migration of migrations) {
