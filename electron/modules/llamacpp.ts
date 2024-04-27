@@ -1,11 +1,12 @@
-import { exec, spawn, execFile } from 'child_process';
+import { exec, spawn, execFile, ChildProcess } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { updateModel } from '../routes/message';
 
 const QUIET = false;
 const commandObj = {
-	cmd: null as any,
+	cmd: null as ChildProcess | null,
 };
 
 // by default, llamacpp uses template embedded in gguf if availabe
@@ -22,6 +23,9 @@ const contextLengthMap: { [key: string]: number } = {
 	'Lexi-': 8192,
 	'llama-3': 8192,
 };
+
+let lastModel = '';
+let pid = 0;
 
 function startServer(model: string) {
 	return new Promise<void>(async (resolve, reject) => {
@@ -55,8 +59,9 @@ function startServer(model: string) {
 		commandObj.cmd = execFile(
 			serverPath,
 			args,
-			{ shell: true },
+			{ shell: true, windowsHide: true, killSignal: 'SIGKILL' },
 			(error: any, stdout: any, stderr: any) => {
+				console.log('execFile callback', commandObj.cmd?.pid);
 				if (error) {
 					console.error(`Llama.cpp-Server error: ${error.message}`);
 					if (reject) reject();
@@ -65,6 +70,10 @@ function startServer(model: string) {
 				if (stderr) console.error(`Llama.cpp-Server stderr: ${stderr}`);
 			}
 		);
+		pid = commandObj.cmd.pid || 0;
+		commandObj.cmd.stdin?.end();
+		console.log('pid', pid);
+		updateModel(model);
 
 		console.log('forked');
 
@@ -74,14 +83,21 @@ function startServer(model: string) {
 		});
 
 		commandObj.cmd.on('exit', (code: any, signal: any) => {
-			if (code) console.log(`Llama.cpp-Server exited with code: ${code}`);
-			if (signal) console.log(`Llama.cpp-Server killed with signal: ${signal}`);
+			if (code) {
+				console.log(`Llama.cpp-Server exited with code: ${code}`);
+				commandObj.cmd?.disconnect(); //
+			}
+			if (signal) {
+				console.log(`Llama.cpp-Server killed with signal: ${signal}`);
+				commandObj.cmd?.disconnect();
+			}
 		});
 
 		process.stdin.resume(); // so the program will not close instantly
 
-		function exitHandler(options: any, exitCode: any) {
-			commandObj?.cmd?.kill('SIGKILL');
+		async function exitHandler(options: any, exitCode: any) {
+			// commandObj?.cmd?.kill('SIGKILL');
+			await stopServer();
 			if (options.cleanup) console.log('clean');
 			if (exitCode || exitCode === 0) console.log(exitCode);
 			if (options.exit) process.exit();
@@ -95,7 +111,7 @@ function startServer(model: string) {
 		process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 		if (QUIET) {
-			commandObj.cmd.stdout.on('data', (data: any) => {
+			commandObj.cmd.stdout?.on('data', (data: any) => {
 				const str = data.toString();
 				if (str?.includes('all slots are idle')) {
 					console.log('Llama.cpp-Server ready');
@@ -109,13 +125,26 @@ function startServer(model: string) {
 }
 
 async function stopServer() {
-	if (commandObj.cmd) {
-		commandObj.cmd.kill();
-		commandObj.cmd = null;
+	// TODO find process id and kill it
+	// if (commandObj.cmd) {
+	// 	commandObj.cmd.kill('SIGKILL');
+	// 	commandObj.cmd = null;
+
+	// 	updateModel(''); // reset model
+	// }
+
+	if (pid) {
+		console.log('killing', pid);
+		process.kill(pid);
+		pid = 0;
+		updateModel(''); // reset model
 	}
 }
 
 async function isServerRunning() {
+	// return commandObj.cmd !== null;
+	// do something better
+
 	if (commandObj.cmd) {
 		return true;
 	}
@@ -137,5 +166,9 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 
 	ipcMain.handle('llamacpp/status', async () => {
 		return { isRunning: await isServerRunning() };
+	});
+
+	ipcMain.handle('llamacpp/lastModel', async () => {
+		return { lastModel };
 	});
 }

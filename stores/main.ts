@@ -7,6 +7,8 @@ import type {
 
 import api from '@/lib/api/db';
 import useLlamaCpp from '@/composables/useLlamaCpp';
+import urls from '~/lib/api/urls';
+import axios from 'axios';
 
 // @ts-ignore
 const { startServer, stopServer, isServerRunning } = useLlamaCpp();
@@ -46,6 +48,10 @@ export const useAppStore = defineStore('app', () => {
 	const threads = ref([] as ChatThread[]);
 	const chatServerRunning = ref(false);
 
+	const isExternalProvider = computed(
+		() => settings.value.selected_provider_chat === 'external'
+	);
+
 	onBeforeMount(async () => {
 		const [cM, iM, p, s, t] = await Promise.all([
 			api.model.getAll('chat'),
@@ -75,11 +81,23 @@ export const useAppStore = defineStore('app', () => {
 	});
 
 	const refreshServerStatus = async () => {
-		const status = await isServerRunning();
-		if (!status) return false;
-		const { isRunning } = status;
-		chatServerRunning.value = isRunning;
+		const url = urls.other.llamacppHealth();
+		try {
+			const response = await axios.get(url, {
+				timeout: 3500,
+			});
+			return response.data.isRunning;
+		} catch (error) {
+			return false;
+		}
 	};
+
+	const doRefreshServerStatus = async () => {
+		chatServerRunning.value = await refreshServerStatus();
+		console.log('chatServerRunning', chatServerRunning.value);
+		setTimeout(doRefreshServerStatus, 5000);
+	};
+	doRefreshServerStatus();
 
 	const updateChatModels = async () => {
 		const res = await api.model.getAll('chat');
@@ -136,7 +154,10 @@ export const useAppStore = defineStore('app', () => {
 	const getChatModelPath = () => {
 		if (!settings.value.local_model_directory) return;
 		if (!settings.value.selected_model_chat) return;
-		return `${settings.value.local_model_directory}/chat/${settings.value.selected_model_chat}`;
+		const slash = settings.value.local_model_directory.includes('\\')
+			? '\\'
+			: '/';
+		return `${settings.value.local_model_directory}${slash}chat${slash}${settings.value.selected_model_chat}`;
 	};
 
 	watch(route, async (newVal) => {
@@ -185,5 +206,6 @@ export const useAppStore = defineStore('app', () => {
 		startServer,
 		stopServer,
 		refreshServerStatus,
+		isExternalProvider,
 	};
 });

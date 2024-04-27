@@ -8,15 +8,19 @@ type AppSettingsKeys =
 	| 'selected_provider_chat'
 	| 'selected_provider_image'
 	| 'selected_model_chat'
-	| 'selected_model_image';
+	| 'selected_model_image'
+	| 'fresh_db';
 
-export const AppSettingsDefaults: Record<string, string> = {
+type SQLiteVal = string | number | null;
+
+export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
 	local_model_directory: '', // should have chat/ and image/ subdirectories
-	selected_provider_chat: 'local',
-	selected_provider_image: 'local', // not implemented
+	selected_provider_chat: 'external',
+	selected_provider_image: 'external', // not implemented
 	selected_model_chat: '', // depends on selected_chat_api_provider
 	selected_model_image: '',
+	fresh_db: 0,
 };
 
 // TODO AppSettings method to validate
@@ -32,23 +36,23 @@ class AppSettings {
 		this.loadSettings();
 	}
 
-	private settings: Record<string, string> = JSON.parse(
+	private settings: Record<string, SQLiteVal> = JSON.parse(
 		JSON.stringify(AppSettingsDefaults)
 	);
 
-	public get(key: AppSettingsKeys): string {
+	public get(key: AppSettingsKeys): SQLiteVal {
 		return this.settings[key];
 	}
 	public set(key: AppSettingsKeys, value: string): void {
 		this.settings[key] = value;
 	}
 
-	public getSettings(keys?: AppSettingsKeys[]): Record<string, string> {
+	public getSettings(keys?: AppSettingsKeys[]): Record<string, SQLiteVal> {
 		if (!keys?.length) return this.settings;
 		return keys.reduce((acc, key) => {
 			acc[key] = this.settings[key];
 			return acc;
-		}, {} as Record<string, string>);
+		}, {} as Record<string, SQLiteVal>);
 	}
 
 	private async loadSettings(): Promise<void> {
@@ -57,7 +61,7 @@ class AppSettings {
 		const sqlSettings = select('app_settings', ['*']);
 		const settings = (await dbAll(sqlSettings[0], sqlSettings[1])) as {
 			name: string;
-			value: string;
+			value: SQLiteVal;
 		}[];
 
 		if (!settings) {
@@ -100,7 +104,7 @@ class AppSettings {
 			sqlExistingSettings[1]
 		)) as {
 			name: string;
-			value: string;
+			value: SQLiteVal;
 		}[];
 
 		if (!existingSettings) {

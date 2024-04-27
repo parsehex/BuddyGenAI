@@ -19,12 +19,13 @@ import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
 import type { ChatThread } from '~/lib/api/types-db';
 import api from '~/lib/api/db';
+import ChatServerStatus from './ChatServerStatus.vue';
 
 const route = useRoute();
 const isThreadSelected = (threadId: string) =>
 	route.path.includes(`/chat`) && route.params.id === threadId;
 
-const { threads, updateThreads } = useAppStore();
+const { threads, updateThreads, isExternalProvider } = useAppStore();
 
 // TODO add option to fork a thread
 
@@ -86,6 +87,8 @@ watch(route, async () => {
 
 <template>
 	<div class="sidebar">
+		<!-- maybe allow managing external here too -->
+		<ChatServerStatus v-if="!isExternalProvider" />
 		<div class="flex w-full mb-4 px-2">
 			<Input
 				v-model="newThreadName"

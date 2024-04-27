@@ -1,7 +1,7 @@
-<script lang="ts" setup>
-import Toaster from '@/components/ui/toast/Toaster.vue';
-import Sidebar from '@/components/Sidebar.vue';
-import AppMenubar from '@/components/AppMenubar.vue';
+<script setup lang="ts">
+import Toaster from '~/components/ui/toast/Toaster.vue';
+import Sidebar from '~/components/Sidebar.vue';
+import AppMenubar from '~/components/AppMenubar.vue';
 
 // TODO add alert if not setup yet
 </script>
@@ -17,7 +17,9 @@ import AppMenubar from '@/components/AppMenubar.vue';
 			<Sidebar />
 			<NuxtLayout>
 				<NuxtLoadingIndicator />
-				<NuxtPage id="page-container" />
+				<div id="page-container">
+					<NuxtPage />
+				</div>
 			</NuxtLayout>
 			<Toaster />
 		</div>

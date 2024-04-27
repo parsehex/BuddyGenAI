@@ -6,6 +6,12 @@ import type { ChatCompletionMessageParam } from 'openai/resources/chat/completio
 
 const router = Router();
 
+let currentModel = '';
+
+export function updateModel(modelName: string) {
+	currentModel = modelName;
+}
+
 const openai = new OpenAI({
 	apiKey: 'sk-1234',
 	baseURL: 'http://localhost:8080',
@@ -57,6 +63,16 @@ router.post('/api/completion', async (req, res) => {
 
 	const stream = OpenAIStream(response);
 	streamToResponse(stream, res);
+});
+
+router.get('/health', async (req, res) => {
+	try {
+		const response = await fetch('http://localhost:8080/health');
+		const data = await response.json();
+		res.json({ isRunning: true, currentModel });
+	} catch (error) {
+		res.status(200).json({ isRunning: false, currentModel });
+	}
 });
 
 export default router;

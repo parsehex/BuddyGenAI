@@ -58,14 +58,6 @@ export default function (mainWindow: BrowserWindow) {
 		);
 		app.use('/images', serveStatic(imgPath));
 		app.use(llamaCppRouter);
-		app.use((req, res, next) => {
-			res.header('Access-Control-Allow-Origin', '*');
-			res.header(
-				'Access-Control-Allow-Headers',
-				'Origin, X-Requested-With, Content-Type, Accept'
-			);
-			next();
-		});
 
 		const listener = app.listen(8079, 'localhost', () => {
 			const port = (listener.address() as any).port;

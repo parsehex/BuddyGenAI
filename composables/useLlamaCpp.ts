@@ -23,9 +23,17 @@ export default function useLlamaCpp() {
 		return await electron.ipcRenderer.invoke('llamacpp/status');
 	};
 
+	const getLastModel = async () => {
+		const p = await electron.ipcRenderer.invoke('llamacpp/lastModel');
+		const slash = p.lastModel.includes('\\') ? '\\' : '/';
+		const filename = p.lastModel.split(slash).pop();
+		return filename;
+	};
+
 	return {
 		startServer,
 		stopServer,
 		isServerRunning,
+		getLastModel,
 	};
 }

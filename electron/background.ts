@@ -120,11 +120,9 @@ async function createWindow() {
 		const chatDir = path.join(directory, 'chat');
 		const imageDir = path.join(directory, 'image');
 		try {
-			const chatStat = await fs.stat(chatDir);
-			const imageStat = await fs.stat(imageDir);
-			if (chatStat.isDirectory() && imageStat.isDirectory()) {
-				return true;
-			}
+			await fs.mkdir(chatDir, { recursive: true });
+			await fs.mkdir(imageDir, { recursive: true });
+			return true;
 		} catch (err) {
 			return false;
 		}

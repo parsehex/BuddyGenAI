@@ -61,7 +61,9 @@ const doCreatePersona = async () => {
 <template>
 	<div class="sidebar">
 		<div class="flex justify-around">
-			<Button type="button" @click="navigateTo('/')">Create a Buddy</Button>
+			<Button type="button" @click="navigateTo('/create-buddy')">
+				Create a Buddy
+			</Button>
 		</div>
 		<ul>
 			<li

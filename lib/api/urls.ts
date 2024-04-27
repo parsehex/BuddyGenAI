@@ -1,5 +1,14 @@
 const isDev = process.env.NODE_ENV === 'development';
 
+const other = {
+	llamacppHealth: () => {
+		if (isDev) {
+			return 'http://localhost:8079/health';
+		}
+		return '/health';
+	},
+};
+
 const message = {
 	getAll: (threadId: string) => `/api/message/all?threadId=${threadId}`,
 	deleteAll: (threadId: string) => `/api/message/all?threadId=${threadId}`,
@@ -62,4 +71,4 @@ const thread = {
 	updateSystemMessage: (threadId: string) =>
 		`/api/update-thread-from-persona?threadId=${threadId}`,
 };
-export default { message, model, persona, setting, thread };
+export default { other, message, model, persona, setting, thread };

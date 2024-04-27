@@ -102,6 +102,29 @@ export default async (mainWindow: BrowserWindow) => {
 
 	console.log('migrations applied');
 
+	if (applyMigrations) {
+		// TODO fix table name
+		const stmt = sqlDb.prepare(
+			'INSERT INTO app_settings (name, value) VALUES (?, ?)'
+		);
+		sqlDb.transaction(() => {
+			stmt.run('fresh_db', 1);
+		});
+	} else {
+		const stmt = sqlDb.prepare('SELECT value FROM app_settings WHERE name = ?');
+		let result = stmt.get('fresh_db') as string | number;
+		console.log('fresh_db', result);
+		result = +result;
+		if (result === 1) {
+			const stmt = sqlDb.prepare(
+				'UPDATE app_settings SET value = 0 WHERE name = ?'
+			);
+			sqlDb.transaction(() => {
+				stmt.run('fresh_db');
+			});
+		}
+	}
+
 	ipcMain.handle('db:run', async (_, query: string, params) => {
 		try {
 			params = fixParams(params);

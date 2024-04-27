@@ -35,11 +35,17 @@ watch(
 </template>
 
 <style>
+#page-container {
+	/* putting this here to keep nearby */
+	margin-left: 200px;
+}
 .sidebar {
 	width: 200px;
 	height: 100vh;
 	background-color: #f5f5f5;
-	padding-top: 20px;
+
+	/* why does removing this line break the file? */
+	padding-top: 5px;
 }
 
 .sidebar ul {

@@ -9,7 +9,7 @@
 				<br />
 				You'll need to download these models and tell BuddyGen where to find them.
 			</p>
-			<div class="flex w-full items-center justify-between gap-1.5 mt-4">
+			<div class="flex w-full items-end justify-between gap-1.5 mt-4">
 				<Label for="local_model_directory" class="w-full">
 					Local Model Directory
 					<Input

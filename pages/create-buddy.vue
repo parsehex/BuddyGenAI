@@ -100,51 +100,8 @@ watch(
 </script>
 
 <template>
-	<!-- TODO remaining FTE -->
-	<!-- allow editing description (or something to fix broken generations) -->
-	<!-- instructions to acquire models -->
-
-	<div v-if="threads.length" class="container flex flex-col items-center gap-4">
-		<h1 class="text-xl font-bold mb-2">
-			{{ newHere ? 'Welcome to' : '' }}
-			<span class="underline">
-				<span style="color: #61dafb">BuddyGen</span>
-				<span style="color: #111">AI</span>
-			</span>
-		</h1>
-		<div class="flex flex-col items-center gap-4">
-			<h2 class="text-lg">Your Chats</h2>
-			<div class="flex flex-col items-center gap-4">
-				<div
-					v-for="thread in threads"
-					:key="thread.id"
-					class="flex flex-col items-center gap-2"
-				>
-					<!-- TODO this is a good idea: show buddy info in thread list -->
-					<!-- <Avatar size="lg" class="mb-2">
-						<AvatarImage :src="thread.persona.profile_pic" />
-						<AvatarFallback>
-							<img src="/assets/logo.png" alt="Default Buddy icon" />
-						</AvatarFallback>
-					</Avatar>
-					<p class="text-lg">{{ thread.persona.name }}</p> -->
-					<!-- <Button
-						@click="navigateTo(`/chat/${thread.id}`)"
-						class="p-2 bg-blue-500 text-white rounded"
-					>
-						{{ thread.name }}
-					</Button> -->
-					<NuxtLink :to="`/chat/${thread.id}`" class="underline hover:text-blue-500">
-						{{ thread.name }}
-					</NuxtLink>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<FirstTimeSetup
-		v-else
-		:new-here="newHere"
+		:new-here="false"
 		:is-models-setup="isModelsSetup"
 		:server-starting="serverStarting"
 		:handle-model-change="handleModelChange"
