@@ -81,9 +81,9 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
+			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {
 				let lastMessage = messages.value[messages.value.length - 1];
-				console.log('updating last message', lastMessage);
 				lastMessage = { ...lastMessage, content: lastMessage.content };
 				await api.message.updateOne(reloadingId.value, lastMessage.content);
 				await refreshMessages();
