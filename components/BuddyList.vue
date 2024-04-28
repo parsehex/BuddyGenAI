@@ -31,16 +31,13 @@ onBeforeMount(async () => {
 				v-for="persona in buddies"
 				:key="persona.id"
 				:class="[
-					'cursor-pointer hover:bg-gray-200 rounded my-1',
+					'cursor-pointer hover:bg-gray-200 rounded border-b-2',
 					isBuddySelected(persona.id) ? 'font-bold bg-gray-200' : '',
 				]"
 			>
-				<NuxtLink
-					class="p-1 pl-3 flex items-center"
-					:to="`/persona/${persona.id}/view`"
-				>
+				<NuxtLink class="p-2 flex items-center" :to="`/persona/${persona.id}/view`">
 					<BuddyAvatar :persona="persona" />
-					{{ persona.name }}
+					<span class="ml-1">{{ persona.name }}</span>
 				</NuxtLink>
 			</li>
 		</ul>

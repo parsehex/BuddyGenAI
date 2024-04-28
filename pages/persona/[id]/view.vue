@@ -11,6 +11,7 @@ import type {
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '~/components/BuddyAvatar.vue';
+import { useTitle } from '@vueuse/core';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -51,6 +52,8 @@ onBeforeMount(async () => {
 	}
 
 	threads.value = await api.thread.getAll(id);
+
+	useTitle(`${name.value} | BuddyGen`);
 });
 
 const createThread = async () => {
@@ -64,17 +67,17 @@ const createThread = async () => {
 </script>
 
 <template>
-	<div class="container flex flex-col items-center">
+	<div class="flex flex-col items-center">
 		<h1 class="text-2xl font-bold">Buddy</h1>
-		<div>
+		<div class="flex items-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
 			</NuxtLink>
 		</div>
 		<Card class="w-full md:w-5/6">
-			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
-				<BuddyAvatar v-if="buddy" :persona="buddy" size="md" />
+			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
+				<BuddyAvatar v-if="buddy" :persona="buddy" size="lg" />
 				<span class="text-blue-500">{{ name }}</span>
 			</CardHeader>
 			<CardContent>

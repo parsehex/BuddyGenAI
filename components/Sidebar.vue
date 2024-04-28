@@ -37,10 +37,10 @@ watch(
 <style>
 #page-container {
 	/* putting this here to keep nearby */
-	margin-left: 200px;
+	margin-left: 250px;
 }
 .sidebar {
-	width: 200px;
+	width: 250px;
 	height: 100vh;
 	background-color: #f5f5f5;
 

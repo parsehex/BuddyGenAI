@@ -2,6 +2,9 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAppStore } from '@/stores/main';
 import useLlamaCpp from '@/composables/useLlamaCpp';
+import { useTitle } from '@vueuse/core';
+
+useTitle('Settings | BuddyGen');
 
 const { pickDirectory, verifyModelDirectory } = useElectron();
 const {

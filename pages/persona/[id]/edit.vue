@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/toast';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '~/components/BuddyAvatar.vue';
+import { useTitle } from '@vueuse/core';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -61,6 +62,7 @@ onBeforeMount(async () => {
 	if (persona.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = persona.value.profile_pic_prompt;
 	}
+	useTitle(`Edit ${persona.value?.name || 'Buddy'} | BuddyGen`);
 });
 
 const handleSave = async () => {
@@ -107,9 +109,9 @@ const acceptRemixedDescription = () => {
 </script>
 
 <template>
-	<div class="container flex flex-col items-center">
+	<div class="flex flex-col items-center">
 		<h1 class="text-2xl font-bold">Edit Buddy</h1>
-		<div>
+		<div class="flex items-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
@@ -122,19 +124,19 @@ const acceptRemixedDescription = () => {
 						v-model="nameValue"
 						placeholder="Persona name"
 						size="lg"
-						class="mb-2"
+						class="mb-2 w-2/5"
 					/>
 					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
-					<Label>
+					<Label class="flex flex-col items-center space-y-2">
 						<!-- TODO describe better -->
-						<span class="text-lg">Extra keywords for prompt</span>
+						<span class="text-lg">Appearance</span>
 						<Input
 							v-model="profilePicturePrompt"
 							placeholder="tan suit, sunglasses"
 						/>
 					</Label>
 					<div class="flex flex-col items-center justify-center">
-						<Button type="button" @click="refreshProfilePicture">
+						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
 						<Spinner

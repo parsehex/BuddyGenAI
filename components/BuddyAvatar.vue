@@ -17,6 +17,7 @@ const initials = computed(() => {
 	return '';
 });
 
+// TODO store each pic, watch for change
 const profilePicValue = computed(() => {
 	if (props.persona.profile_pic) {
 		return urls.buddy.getProfilePic(props.persona.profile_pic);

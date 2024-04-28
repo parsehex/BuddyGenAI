@@ -98,7 +98,7 @@ watch(route, async () => {
 	<div class="sidebar">
 		<!-- maybe allow managing external here too -->
 		<ChatServerStatus v-if="!isExternalProvider" />
-		<div class="flex w-full mb-4 px-2">
+		<div class="flex w-full mb-4">
 			<Input
 				v-model="newThreadName"
 				placeholder="Chat name"
@@ -117,6 +117,7 @@ watch(route, async () => {
 								'cursor-pointer',
 								'hover:bg-gray-200',
 								'rounded',
+								'border-b-2',
 								isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
 							]"
 							@contextmenu="rightClickedId = thread.id"

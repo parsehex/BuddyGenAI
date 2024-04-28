@@ -31,6 +31,7 @@ import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
+import { useTitle } from '@vueuse/core';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -370,7 +371,7 @@ const updateSysFromBuddy = async () => {
 							:checked="buddyModeUseCurrent"
 							@update:checked="handleBuddyModeUseCurrentChange"
 						/>
-						Keep Buddy in sync
+						Keep Buddy updated
 					</Label>
 					<Button
 						type="button"

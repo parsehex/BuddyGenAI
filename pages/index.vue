@@ -6,6 +6,9 @@ import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
+import { useTitle } from '@vueuse/core';
+
+useTitle('BuddyGen');
 
 const {
 	settings,

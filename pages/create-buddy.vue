@@ -2,6 +2,9 @@
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { useAppStore } from '@/stores/main';
+import { useTitle } from '@vueuse/core';
+
+useTitle('Create a Buddy | BuddyGen');
 
 const {
 	settings,
