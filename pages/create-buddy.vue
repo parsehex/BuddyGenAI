@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Spinner from '@/components/Spinner.vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
@@ -39,7 +39,7 @@ const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
 const acceptedPersona = ref('' as '' | 'description' | 'keywords');
-const newPersona = ref(null as PersonaVersionMerged | null);
+const newPersona = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
 const relationshipToBuddy = ref('');

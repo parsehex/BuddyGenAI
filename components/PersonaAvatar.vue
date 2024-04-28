@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PersonaVersionMerged } from '~/lib/api/types-db';
+import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import urls from '~/lib/api/urls';
 
 const props = defineProps<{
-	persona: PersonaVersionMerged;
+	persona: BuddyVersionMerged;
 	size?: 'xs' | 'sm' | 'base' | 'md' | 'lg';
 }>();
 

@@ -6,7 +6,7 @@ import Button from '@/components/ui/button/Button.vue';
 import type {
 	ChatThread,
 	MergedChatThread,
-	PersonaVersionMerged,
+	BuddyVersionMerged,
 } from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
@@ -15,7 +15,7 @@ import PersonaAvatar from '@/components/PersonaAvatar.vue';
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as PersonaVersionMerged | null);
+const persona = ref(null as BuddyVersionMerged | null);
 const name = ref('');
 const description = ref('');
 const created = ref(null as number | null);

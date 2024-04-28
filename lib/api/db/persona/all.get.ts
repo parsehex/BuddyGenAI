@@ -1,9 +1,9 @@
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
 
 const { dbGet, dbAll } = useElectron();
 
-export default async function getAll(): Promise<PersonaVersionMerged[]> {
+export default async function getAll(): Promise<BuddyVersionMerged[]> {
 	if (!dbGet || !dbAll) throw new Error('dbGet or dbAll is not defined');
 
 	const sqlPersonas = select('persona', ['*']);
@@ -14,14 +14,14 @@ export default async function getAll(): Promise<PersonaVersionMerged[]> {
 	}
 
 	const currentVersions = await Promise.all(
-		personas.map(async (persona: PersonaVersionMerged) => {
+		personas.map(async (persona: BuddyVersionMerged) => {
 			const sqlCurrentVersion = select('persona_version', ['*'], {
 				id: persona.current_version_id,
 			});
 			const currentVersion = (await dbGet(
 				sqlCurrentVersion[0],
 				sqlCurrentVersion[1]
-			)) as PersonaVersionMerged;
+			)) as BuddyVersionMerged;
 			if (!currentVersion) {
 				throw new Error('Current version of persona not found');
 			}

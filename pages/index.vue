@@ -6,10 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Spinner from '@/components/Spinner.vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import type {
-	MergedChatThread,
-	PersonaVersionMerged,
-} from '@/lib/api/types-db';
+import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';

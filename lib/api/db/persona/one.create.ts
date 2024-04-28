@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
 
 const { dbGet, dbRun } = useElectron();
@@ -18,7 +18,7 @@ export default async function createOne({
 	profile_pic,
 	profile_pic_prompt,
 	profile_pic_use_prompt = true,
-}: CreatePersonaOptions): Promise<PersonaVersionMerged> {
+}: CreatePersonaOptions): Promise<BuddyVersionMerged> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
 	if (!name) {
@@ -61,5 +61,5 @@ export default async function createOne({
 		...persona,
 		name,
 		description,
-	} as PersonaVersionMerged;
+	} as BuddyVersionMerged;
 }

@@ -3,7 +3,7 @@ import type {
 	ChatMessage,
 	ChatThread,
 	MergedChatThread,
-	PersonaVersionMerged,
+	BuddyVersionMerged,
 } from '@/lib/api/types-db';
 
 import api from '@/lib/api/db';
@@ -44,7 +44,7 @@ export const useAppStore = defineStore('app', () => {
 
 	const chatModels = ref([] as string[]);
 	const imageModels = ref([] as string[]);
-	const personas = ref([] as PersonaVersionMerged[]);
+	const personas = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
 

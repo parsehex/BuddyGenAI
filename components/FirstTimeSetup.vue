@@ -3,7 +3,7 @@ import { useCompletion } from 'ai/vue';
 import { useToast } from '@/components/ui/toast';
 import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
-import type { PersonaVersionMerged } from '~/lib/api/types-db';
+import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import api from '~/lib/api/db';
 import PersonaAvatar from './PersonaAvatar.vue';
 
@@ -38,7 +38,7 @@ const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
 const acceptedPersona = ref('' as '' | 'description' | 'keywords');
-const newPersona = ref(null as PersonaVersionMerged | null);
+const newPersona = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
 const relationshipToBuddy = ref('');

@@ -2,7 +2,7 @@ import type {
 	ChatMessage,
 	ChatThread,
 	MergedChatThread,
-	Persona,
+	Buddy,
 } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
 
@@ -25,7 +25,7 @@ export default async function getAll(
 		);
 
 		const sqlPersona = select('persona', ['*'], { id: persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 
 		const sqlPersonaVersion = select('persona_version', ['*'], {
 			id: persona.current_version_id,

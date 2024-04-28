@@ -21,7 +21,7 @@ import {
 import type {
 	ChatThread,
 	MergedChatThread,
-	PersonaVersionMerged,
+	BuddyVersionMerged,
 } from '@/lib/api/types-db';
 import Message from './ChatMessage.vue';
 import { useToast } from '@/components/ui/toast';
@@ -32,7 +32,7 @@ import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
 const { updatePersonas, updateThreads } = useAppStore();
-const personas = useAppStore().personas as PersonaVersionMerged[];
+const personas = useAppStore().personas as BuddyVersionMerged[];
 const threads = useAppStore().threads as MergedChatThread[];
 const { complete } = useCompletion({ api: urls.message.completion() });
 

@@ -9,11 +9,11 @@ import {
 } from '@/components/ui/hover-card';
 import api from '~/lib/api/db';
 import urls from '~/lib/api/urls';
-import type { PersonaVersionMerged } from '~/lib/api/types-db';
+import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import PersonaAvatar from './PersonaAvatar.vue';
 
 const props = defineProps<{
-	persona: PersonaVersionMerged;
+	persona: BuddyVersionMerged;
 }>();
 
 const id = ref('');

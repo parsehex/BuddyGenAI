@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { ChatThread, PersonaVersionMerged } from '@/lib/api/types-db';
+import type { ChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
 
 const { dbGet, dbRun } = useElectron();
@@ -20,19 +20,19 @@ export default async function updateOne({
 	profile_pic,
 	profile_pic_prompt,
 	profile_pic_use_prompt = true,
-}: UpdatePersonaOptions): Promise<PersonaVersionMerged> {
+}: UpdatePersonaOptions): Promise<BuddyVersionMerged> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 	if (!id) {
 		throw new Error('Persona ID is required');
 	}
 
-	let returningPersona: PersonaVersionMerged = null as any;
+	let returningPersona: BuddyVersionMerged = null as any;
 
 	const sqlPersona = select('persona', ['*'], { id });
 	let persona = (await dbGet(
 		sqlPersona[0],
 		sqlPersona[1]
-	)) as PersonaVersionMerged;
+	)) as BuddyVersionMerged;
 	if (!persona) {
 		throw new Error('Persona not found');
 	}
@@ -43,7 +43,7 @@ export default async function updateOne({
 	const currentVersion = (await dbGet(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
-	)) as PersonaVersionMerged;
+	)) as BuddyVersionMerged;
 	if (!currentVersion) {
 		throw new Error('Current version not found');
 	}
@@ -81,7 +81,7 @@ export default async function updateOne({
 		persona = (await dbGet(
 			sqlPersonaGet[0],
 			sqlPersonaGet[1]
-		)) as PersonaVersionMerged;
+		)) as BuddyVersionMerged;
 
 		const sqlThreads = select('chat_thread', ['*'], {
 			persona_id: id,
@@ -117,7 +117,7 @@ export default async function updateOne({
 	persona = (await dbGet(
 		sqlPersonaGet[0],
 		sqlPersonaGet[1]
-	)) as PersonaVersionMerged;
+	)) as BuddyVersionMerged;
 	if (!returningPersona) {
 		returningPersona = { ...persona };
 		returningPersona.version = currentVersion.version;

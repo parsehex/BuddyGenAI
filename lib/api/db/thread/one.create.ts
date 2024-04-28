@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import AppSettings from '../../AppSettings';
-import type { ChatThread, Persona, PersonaVersion } from '@/lib/api/types-db';
+import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
 
 import * as prompt from '@/lib/prompt/persona';
 import { insert, select } from '@/lib/sql';
@@ -43,7 +43,7 @@ export default async function createOne({
 		const sqlPersona = select('persona', ['current_version_id'], {
 			id: persona_id,
 		});
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 		if (!persona) {
 			throw new Error('Persona not found');
 		}
@@ -77,7 +77,7 @@ export default async function createOne({
 		await dbRun(sqlMessage[0], sqlMessage[1]);
 	} else if (mode === 'persona') {
 		const sqlPersona = select('persona', ['*'], { id: persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 		if (persona) {
 			const sqlPersonaVersion = select('persona_version', ['*'], {
 				id: persona.current_version_id,
@@ -85,7 +85,7 @@ export default async function createOne({
 			const personaVersion = (await dbGet(
 				sqlPersonaVersion[0],
 				sqlPersonaVersion[1]
-			)) as PersonaVersion;
+			)) as BuddyVersion;
 			if (!personaVersion) {
 				throw new Error('Current version of persona not found');
 			}

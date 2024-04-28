@@ -1,8 +1,8 @@
 import type {
 	ChatMessage,
 	ChatThread,
-	Persona,
-	PersonaVersion,
+	Buddy,
+	BuddyVersion,
 } from '../../types-db';
 import AppSettings from '../../AppSettings';
 import * as prompt from '../../../prompt/persona';
@@ -30,7 +30,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 		if (!persona) {
 			throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
 		}
@@ -41,7 +41,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		const personaVersion = (await dbGet(
 			sqlPersonaVersion[0],
 			sqlPersonaVersion[1]
-		)) as PersonaVersion;
+		)) as BuddyVersion;
 		if (!personaVersion) {
 			throw createError({
 				statusCode: 404,

@@ -1,4 +1,4 @@
-export interface Persona {
+export interface Buddy {
 	id: string;
 	created: number;
 	updated: number | null;
@@ -7,7 +7,7 @@ export interface Persona {
 	profile_pic_use_prompt: boolean;
 	current_version_id: string;
 }
-export interface PersonaVersion {
+export interface BuddyVersion {
 	id: string;
 	created: number;
 	persona_id: string;
@@ -15,7 +15,7 @@ export interface PersonaVersion {
 	name: string;
 	description: string | null;
 }
-export interface PersonaVersionMerged {
+export interface BuddyVersionMerged {
 	id: string;
 	created: number;
 	updated: number | null;
@@ -55,5 +55,5 @@ export interface AppSettings {
 
 export interface MergedChatThread extends ChatThread {
 	latest_message: ChatMessage;
-	selected_buddy: PersonaVersionMerged | null;
+	selected_buddy: BuddyVersionMerged | null;
 }

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 // import { getPersona, updatePersona } from '@/lib/api/persona';
-import type { Persona, PersonaVersionMerged } from '@/lib/api/types-db';
+import type { Buddy, BuddyVersionMerged } from '@/lib/api/types-db';
 import Spinner from '@/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
 // import $f from '@/lib/api/$fetch';
@@ -26,7 +26,7 @@ const { complete } = useCompletion({ api: urls.message.completion() });
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as PersonaVersionMerged | null);
+const persona = ref(null as BuddyVersionMerged | null);
 
 const nameValue = ref('');
 const descriptionValue = ref('');

@@ -4,16 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type {
-	Persona,
-	PersonaVersionMerged,
-	PersonaVersion,
+	Buddy,
+	BuddyVersionMerged,
+	BuddyVersion,
 } from '@/lib/api/types-db';
 
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as PersonaVersionMerged | null);
-const versions = ref([] as PersonaVersion[]);
+const persona = ref(null as BuddyVersionMerged | null);
+const versions = ref([] as BuddyVersion[]);
 
 onBeforeMount(async () => {
 	//

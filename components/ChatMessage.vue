@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Message } from 'ai/vue';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useElectron from '@/composables/useElectron';
 import api from '@/lib/api/db';
@@ -15,7 +15,7 @@ const props = defineProps<{
 	threadId: string;
 	message: Message;
 	threadMode: 'persona' | 'custom';
-	currentPersona?: PersonaVersionMerged;
+	currentPersona?: BuddyVersionMerged;
 }>();
 
 const emit = defineEmits<{

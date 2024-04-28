@@ -3,8 +3,8 @@ import AppSettings from '../../AppSettings';
 import type {
 	ChatMessage,
 	ChatThread,
-	Persona,
-	PersonaVersion,
+	Buddy,
+	BuddyVersion,
 } from '@/lib/api/types-db';
 import { select, update } from '@/lib/sql';
 
@@ -28,7 +28,7 @@ export default async function updateSystemMessage(
 	}
 
 	const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
-	const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+	const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 	if (!persona) {
 		throw new Error('Persona not found');
 	}
@@ -39,7 +39,7 @@ export default async function updateSystemMessage(
 	const personaVersion = (await dbGet(
 		sqlPersonaVersion[0],
 		sqlPersonaVersion[1]
-	)) as PersonaVersion;
+	)) as BuddyVersion;
 	if (!personaVersion) {
 		throw new Error('Current version of persona not found');
 	}

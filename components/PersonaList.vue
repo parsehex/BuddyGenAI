@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import { useAppStore } from '@/stores/main';
 import { Input } from './ui/input';
