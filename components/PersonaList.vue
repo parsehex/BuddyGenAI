@@ -7,6 +7,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useToast } from './ui/toast';
 import urls from '~/lib/api/urls';
+import PersonaAvatar from './PersonaAvatar.vue';
 
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
@@ -70,14 +71,13 @@ const doCreatePersona = async () => {
 				v-for="persona in personas"
 				:key="persona.id"
 				:class="[
-					'cursor-pointer',
-					'hover:bg-gray-200',
-					'p-1',
-					'rounded',
+					'cursor-pointer hover:bg-gray-200 rounded my-1',
 					isPersonaSelected(persona.id) ? 'font-bold bg-gray-200' : '',
 				]"
 			>
-				<NuxtLink class="block p-1" :to="`/persona/${persona.id}/view`">
+				<NuxtLink class="p-1 flex items-center" :to="`/persona/${persona.id}/view`">
+					<!-- add buddy avatar -->
+					<PersonaAvatar :persona="persona" />
 					{{ persona.name }}
 				</NuxtLink>
 			</li>

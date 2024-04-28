@@ -9,49 +9,95 @@ import {
 	HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { useAppStore } from '~/stores/main';
+import urls from '~/lib/api/urls';
+import axios from 'axios';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const { getChatModelPath, chatServerRunning } = useAppStore();
+const { getChatModelPath } = useAppStore();
 
+const chatServerRunning = ref(false);
 const lastModel = ref<string | null>(null);
 
 const doStartServer = async () => {
 	const modelPath = getChatModelPath();
 	await startServer(modelPath);
+
+	setTimeout(() => {
+		doRefreshServerStatus();
+	}, 1500);
 	// lastModel.value = modelPath;
 };
 
 const doStopServer = async () => {
 	await stopServer();
+
+	setTimeout(() => {
+		doRefreshServerStatus();
+	}, 1000);
 	lastModel.value = null;
 };
+
+const refreshServerStatus = async () => {
+	const url = urls.other.llamacppHealth();
+	try {
+		const response = await axios.get(url, {
+			timeout: 3500,
+		});
+		return response.data.isRunning;
+	} catch (error) {
+		return false;
+	}
+};
+
+const intervalIdKey = 'refreshServerStatusIntervalId';
+
+const doRefreshServerStatus = async () => {
+	try {
+		chatServerRunning.value = await refreshServerStatus();
+		console.log('chatServerRunning', chatServerRunning.value);
+	} catch (error) {
+		console.error('Error refreshing server status:', error);
+		if ((window as any)[intervalIdKey]) {
+			clearInterval((window as any)[intervalIdKey]);
+			(window as any)[intervalIdKey] = null;
+		}
+	}
+};
+
+// Clear any existing interval when the component is loaded
+if ((window as any)[intervalIdKey]) {
+	clearInterval((window as any)[intervalIdKey]);
+	(window as any)[intervalIdKey] = null;
+}
+
+doRefreshServerStatus();
+(window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 5000);
 
 onBeforeMount(async () => {
 	// lastModel.value = await getLastModel();
 });
 
 watch(
-	() => chatServerRunning,
-	async (running) => {
-		if (running) {
-			lastModel.value = await getLastModel();
-		}
+	() => chatServerRunning.value,
+	async () => {
+		lastModel.value = await getLastModel();
 	}
 );
+
+const bgColor = computed(() =>
+	chatServerRunning.value ? 'bg-green-500' : 'bg-red-500'
+);
+const color = computed(() => (chatServerRunning.value ? 'green' : 'red'));
 </script>
 
 <template>
-	<HoverCard :open-delay="1000" :close-delay="250">
+	<HoverCard :close-delay="250">
 		<HoverCardTrigger as-child>
 			<div
 				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center"
 			>
-				<Avatar
-					:class="chatServerRunning ? 'bg-green-500' : 'bg-red-500'"
-					size="xs"
-					:color="chatServerRunning ? 'green' : 'red'"
-				></Avatar>
+				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
 				<Button variant="link">
 					Chat {{ chatServerRunning ? 'Online' : 'Offline' }}
 				</Button>

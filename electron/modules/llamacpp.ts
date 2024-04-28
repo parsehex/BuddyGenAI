@@ -85,11 +85,9 @@ function startServer(model: string) {
 		commandObj.cmd.on('exit', (code: any, signal: any) => {
 			if (code) {
 				console.log(`Llama.cpp-Server exited with code: ${code}`);
-				commandObj.cmd?.disconnect(); //
 			}
 			if (signal) {
 				console.log(`Llama.cpp-Server killed with signal: ${signal}`);
-				commandObj.cmd?.disconnect();
 			}
 		});
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type {
 	ChatMessage,
 	ChatThread,
+	MergedChatThread,
 	PersonaVersionMerged,
 } from '@/lib/api/types-db';
 
@@ -45,8 +46,7 @@ export const useAppStore = defineStore('app', () => {
 	const imageModels = ref([] as string[]);
 	const personas = ref([] as PersonaVersionMerged[]);
 	const settings = ref({} as Settings);
-	const threads = ref([] as ChatThread[]);
-	const chatServerRunning = ref(false);
+	const threads = ref([] as MergedChatThread[]);
 
 	const isExternalProvider = computed(
 		() => settings.value.selected_provider_chat === 'external'
@@ -79,25 +79,6 @@ export const useAppStore = defineStore('app', () => {
 			threads.value.push(...t);
 		}
 	});
-
-	const refreshServerStatus = async () => {
-		const url = urls.other.llamacppHealth();
-		try {
-			const response = await axios.get(url, {
-				timeout: 3500,
-			});
-			return response.data.isRunning;
-		} catch (error) {
-			return false;
-		}
-	};
-
-	const doRefreshServerStatus = async () => {
-		chatServerRunning.value = await refreshServerStatus();
-		console.log('chatServerRunning', chatServerRunning.value);
-		setTimeout(doRefreshServerStatus, 5000);
-	};
-	doRefreshServerStatus();
 
 	const updateChatModels = async () => {
 		const res = await api.model.getAll('chat');
@@ -189,7 +170,6 @@ export const useAppStore = defineStore('app', () => {
 	return {
 		selectedPersonaId,
 		threadMessages,
-		chatServerRunning,
 		chatModels,
 		imageModels,
 		personas,
@@ -205,7 +185,6 @@ export const useAppStore = defineStore('app', () => {
 
 		startServer,
 		stopServer,
-		refreshServerStatus,
 		isExternalProvider,
 	};
 });

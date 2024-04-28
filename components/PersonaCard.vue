@@ -9,9 +9,11 @@ import {
 } from '@/components/ui/hover-card';
 import api from '~/lib/api/db';
 import urls from '~/lib/api/urls';
+import type { PersonaVersionMerged } from '~/lib/api/types-db';
+import PersonaAvatar from './PersonaAvatar.vue';
 
 const props = defineProps<{
-	personaId: string;
+	persona: PersonaVersionMerged;
 }>();
 
 const id = ref('');
@@ -27,8 +29,9 @@ const time_at = ref('');
 const descLimit = 250;
 
 const updatePersona = async () => {
-	if (!props.personaId) return;
-	const p = await api.persona.getOne(props.personaId);
+	if (!props.persona) return;
+	// const p = await api.persona.getOne(props.persona.id);
+	const p = props.persona;
 	id.value = p.id;
 	name.value = p.name;
 	if (p.description) {
@@ -61,7 +64,7 @@ onBeforeMount(async () => {
 });
 
 watch(
-	() => props.personaId,
+	() => props.persona,
 	async () => {
 		await updatePersona();
 	}
@@ -72,23 +75,13 @@ watch(
 	<HoverCard :open-delay="1000" :close-delay="250">
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground rounded-lg">
-				<Avatar size="sm">
-					<AvatarImage v-if="profilePic" :src="profilePic" />
-					<AvatarFallback>
-						<img src="/assets/logo.png" alt="Default Buddy icon" />
-					</AvatarFallback>
-				</Avatar>
+				<PersonaAvatar :persona="props.persona" size="sm" />
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-80" :hide-when-detached="true">
 			<div class="flex items-center space-x-4">
-				<Avatar size="base">
-					<AvatarImage :src="profilePic" />
-					<AvatarFallback>
-						<img src="/assets/logo.png" alt="Default Buddy icon" />
-					</AvatarFallback>
-				</Avatar>
+				<PersonaAvatar :persona="props.persona" size="base" />
 				<div class="space-y-1">
 					<div class="flex justify-around">
 						<NuxtLink :to="`/persona/${id}/edit`">Edit</NuxtLink>

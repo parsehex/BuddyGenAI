@@ -102,6 +102,15 @@ const doStartServer = async () => {
 			>
 				Refresh Server Status
 			</Button>
+			<div>
+				<Label for="name" class="block">Your Name</Label>
+				<Input
+					v-model="settings.user_name"
+					type="text"
+					id="name"
+					class="w-full border border-gray-300 rounded-md p-2 mt-1"
+				/>
+			</div>
 			<div class="flex w-full items-center justify-between gap-1.5 mt-4">
 				<Label for="local_model_directory" class="w-full">
 					Local Model Directory

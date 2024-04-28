@@ -6,10 +6,14 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Spinner from '@/components/Spinner.vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type {
+	MergedChatThread,
+	PersonaVersionMerged,
+} from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
+import { formatDistanceToNow } from 'date-fns';
 
 const {
 	chatServerRunning,
@@ -17,7 +21,6 @@ const {
 	imageModels,
 	personas,
 	settings,
-	threads,
 	updateModels,
 	updatePersonas,
 	updateSettings,
@@ -25,6 +28,7 @@ const {
 	getChatModelPath,
 	mkdir,
 } = useAppStore();
+const threads: MergedChatThread[] = useAppStore().threads;
 
 // @ts-ignore
 const { startServer, stopServer, isServerRunning } = useLlamaCpp();
@@ -33,19 +37,6 @@ await updatePersonas();
 await updateThreads();
 
 const userNameValue = ref('');
-const personaName = ref('');
-const personaKeywords = ref('');
-const createdDescription = ref('');
-const profilePicturePrompt = ref('');
-
-const acceptedPersona = ref('' as '' | 'description' | 'keywords');
-const newPersona = ref(null as PersonaVersionMerged | null);
-const updatingProfilePicture = ref(false);
-
-const relationshipToBuddy = ref('');
-
-// TODO figure out temporary pics
-const profilePictureValue = ref('');
 
 const newHere = computed(
 	() => !!+settings.fresh_db || (!threads.length && !personas.length)
@@ -97,6 +88,51 @@ watch(
 		await handleModelChange();
 	}
 );
+
+const getMessageName = (thread: MergedChatThread) => {
+	if (thread.latest_message?.role === 'user') {
+		return userNameValue.value;
+	} else if (thread.latest_message?.role === 'assistant') {
+		// console.log(thread.selected_buddy);
+		return thread.selected_buddy?.name || 'AI';
+	}
+};
+
+const MaxMessageLength = 150;
+const getMessageContent = (thread: MergedChatThread) => {
+	if (thread.latest_message?.content.length > MaxMessageLength) {
+		return thread.latest_message?.content.slice(0, MaxMessageLength) + '...';
+	}
+	return thread.latest_message?.content;
+};
+
+const getMessageTime = (thread: MergedChatThread) => {
+	if (thread.latest_message) {
+		return formatDistanceToNow(new Date(thread.latest_message.created), {
+			addSuffix: true,
+		});
+	}
+	return '';
+};
+
+const userInitials = computed(() => {
+	if (userNameValue.value) {
+		return userNameValue.value[0].toUpperCase();
+	}
+	return '';
+});
+
+const sortedThreads = computed(() => {
+	return threads.sort((a, b) => {
+		if (!a.latest_message || !b.latest_message) {
+			return 0;
+		}
+		return (
+			new Date(b.latest_message.created).getTime() -
+			new Date(a.latest_message.created).getTime()
+		);
+	});
+});
 </script>
 
 <template>
@@ -104,40 +140,55 @@ watch(
 	<!-- allow editing description (or something to fix broken generations) -->
 	<!-- instructions to acquire models -->
 
-	<div v-if="threads.length" class="container flex flex-col items-center gap-4">
-		<h1 class="text-xl font-bold mb-2">
+	<div v-if="threads.length" class="container flex flex-col items-center">
+		<h1 class="text-xl font-bold mb-0">
 			{{ newHere ? 'Welcome to' : '' }}
 			<span class="underline">
 				<span style="color: #61dafb">BuddyGen</span>
 				<span style="color: #111">AI</span>
 			</span>
 		</h1>
-		<div class="flex flex-col items-center gap-4">
+		<div class="flex flex-col items-center gap-2">
 			<h2 class="text-lg">Your Chats</h2>
-			<div class="flex flex-col items-center gap-4">
-				<div
-					v-for="thread in threads"
+			<div class="flex flex-col items-center gap-1">
+				<Card
+					v-for="thread in sortedThreads"
 					:key="thread.id"
-					class="flex flex-col items-center gap-2"
+					class="w-full hover:bg-gray-100"
 				>
-					<!-- TODO this is a good idea: show buddy info in thread list -->
-					<!-- <Avatar size="lg" class="mb-2">
-						<AvatarImage :src="thread.persona.profile_pic" />
-						<AvatarFallback>
-							<img src="/assets/logo.png" alt="Default Buddy icon" />
-						</AvatarFallback>
-					</Avatar>
-					<p class="text-lg">{{ thread.persona.name }}</p> -->
-					<!-- <Button
-						@click="navigateTo(`/chat/${thread.id}`)"
-						class="p-2 bg-blue-500 text-white rounded"
+					<!-- sort by latest first -->
+					<NuxtLink
+						:to="`/chat/${thread.id}`"
+						class="w-full h-full flex items-center justify-center p-4"
 					>
-						{{ thread.name }}
-					</Button> -->
-					<NuxtLink :to="`/chat/${thread.id}`" class="underline hover:text-blue-500">
-						{{ thread.name }}
+						<!-- TODO this is a good idea: show buddy info in thread list -->
+						<div v-if="thread.selected_buddy">
+							<PersonaAvatar
+								v-if="thread.latest_message.role !== 'user'"
+								:persona="thread.selected_buddy"
+								size="base"
+							/>
+							<Avatar v-else>
+								<AvatarFallback>{{ userInitials }}</AvatarFallback>
+							</Avatar>
+						</div>
+						<div class="ml-2">
+							<p class="flex items-baseline">
+								<span>
+									{{ thread.name }}
+								</span>
+								<span class="text-xs text-gray-500 italic ml-2">
+									{{ getMessageTime(thread) }}
+								</span>
+							</p>
+							<p v-if="thread.latest_message" class="text-sm mt-2">
+								<b>{{ getMessageName(thread) }}</b>
+								:
+								{{ getMessageContent(thread) }}
+							</p>
+						</div>
 					</NuxtLink>
-				</div>
+				</Card>
 			</div>
 		</div>
 	</div>

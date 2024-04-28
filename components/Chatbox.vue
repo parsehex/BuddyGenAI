@@ -18,7 +18,11 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { ChatThread } from '@/lib/api/types-db';
+import type {
+	ChatThread,
+	MergedChatThread,
+	PersonaVersionMerged,
+} from '@/lib/api/types-db';
 import Message from './ChatMessage.vue';
 import { useToast } from '@/components/ui/toast';
 import api from '@/lib/api/db';
@@ -27,7 +31,9 @@ import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
-const { threads, personas, updatePersonas, updateThreads } = useAppStore();
+const { updatePersonas, updateThreads } = useAppStore();
+const personas = useAppStore().personas as PersonaVersionMerged[];
+const threads = useAppStore().threads as MergedChatThread[];
 const { complete } = useCompletion({ api: urls.message.completion() });
 
 const props = defineProps<{
@@ -82,6 +88,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				await api.message.updateOne(reloadingId.value, lastMessage.content);
 				await refreshMessages();
 				reloadingId.value = '';
+
+				// TODO regen title if first msg, like below
 				return;
 			}
 
@@ -116,7 +124,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				const msg1 = messages.value[0];
 				const msg2 = messages.value[1];
 				const msg3 = messages.value[2];
-				const prompt = `Your task is to write a generic title in 5 words or less for the following chat.\n\n$Context: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}\n\n\nTITLE: `;
+				const prompt = `Your task is to write a generic title in 5 words or less for the following chat.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
 				let value = await complete(prompt, {
 					body: { max_tokens: 20, temperature: 0.01 },
 				});
@@ -380,8 +388,8 @@ const updateSysFromPersona = async () => {
 				/>
 			</div>
 			<PersonaCard
-				v-if="threadMode === 'persona' && selectedPersona"
-				:personaId="selectedPersona"
+				v-if="threadMode === 'persona' && selectedPersona && currentPersona"
+				:persona="currentPersona"
 			/>
 		</div>
 		<Collapsible

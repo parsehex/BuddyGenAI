@@ -10,6 +10,8 @@ export default function useSD() {
 
 	const electron = window.require('electron');
 
+	// TODO getProgress
+
 	const runSD = async (
 		model: string,
 		pos: string,

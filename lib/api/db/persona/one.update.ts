@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { PersonaVersionMerged } from '@/lib/api/types-db';
+import type { ChatThread, PersonaVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
 
 const { dbGet, dbRun } = useElectron();
@@ -82,18 +82,36 @@ export default async function updateOne({
 			sqlPersonaGet[0],
 			sqlPersonaGet[1]
 		)) as PersonaVersionMerged;
+
+		const sqlThreads = select('chat_thread', ['*'], {
+			persona_id: id,
+			persona_mode_use_current: true,
+		});
+		const threads = (await dbGet(sqlThreads[0], sqlThreads[1])) as ChatThread[];
+		if (threads.length) {
+			const sqlUpdateThreads = threads.map((thread) => {
+				return update(
+					'chat_thread',
+					{ current_persona_version_id: newVersionId },
+					{ id: thread.id }
+				);
+			});
+			await Promise.all(sqlUpdateThreads.map((sql) => dbRun(sql[0], sql[1])));
+		}
 	}
 
-	const sqlUpdatePersona = update(
-		'persona',
-		{
-			updated: new Date().getTime(),
-			profile_pic,
-			profile_pic_prompt,
-			profile_pic_use_prompt,
-		},
-		{ id }
-	);
+	const dataToUpdate: Record<string, any> = {
+		updated: new Date().getTime(),
+	};
+	if (profile_pic) dataToUpdate.profile_pic = profile_pic;
+	if (profile_pic_prompt) dataToUpdate.profile_pic_prompt = profile_pic_prompt;
+	if (profile_pic_use_prompt)
+		dataToUpdate.profile_pic_use_prompt = profile_pic_use_prompt;
+
+	if (Object.keys(dataToUpdate).length === 1) {
+		return returningPersona;
+	}
+	const sqlUpdatePersona = update('persona', dataToUpdate, { id });
 	await dbRun(sqlUpdatePersona[0], sqlUpdatePersona[1]);
 	const sqlPersonaGet = select('persona', ['*'], { id });
 	persona = (await dbGet(

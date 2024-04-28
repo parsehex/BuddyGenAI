@@ -3,9 +3,14 @@ import { Plus } from 'lucide-vue-next';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Button from '@/components/ui/button/Button.vue';
-import type { ChatThread, PersonaVersionMerged } from '@/lib/api/types-db';
+import type {
+	ChatThread,
+	MergedChatThread,
+	PersonaVersionMerged,
+} from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
+import PersonaAvatar from '@/components/PersonaAvatar.vue';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -17,7 +22,7 @@ const created = ref(null as number | null);
 const updated = ref(null as number | null);
 const profilePic = ref('');
 
-const threads = ref([] as ChatThread[]);
+const threads = ref([] as MergedChatThread[]);
 
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
@@ -69,7 +74,7 @@ const createThread = async () => {
 		</div>
 		<Card class="w-full md:w-1/2">
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
-				<Avatar size="base">
+				<Avatar size="md">
 					<AvatarImage :src="profilePic" />
 					<AvatarFallback>
 						<img src="/assets/logo.png" alt="Default Buddy icon" />

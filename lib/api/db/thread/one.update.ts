@@ -25,16 +25,19 @@ export default async function updateOne(
 		throw new Error('Thread not found');
 	}
 
-	const userName = AppSettings.get('user_name');
+	const userName = AppSettings.get('user_name') as string;
 
+	const changedName = name && name !== currentThread.name;
 	const changedMode = mode && mode !== currentThread.mode;
 	const changedPersona = persona_id && persona_id !== currentThread.persona_id;
 
-	const sqlUpdateThread = update(
-		'chat_thread',
-		{ name, persona_id, mode, persona_mode_use_current },
-		{ id }
-	);
+	const dataToUpdate: Record<string, any> = {};
+	if (changedName) dataToUpdate.name = name;
+	if (changedMode) dataToUpdate.mode = mode;
+	if (changedPersona) dataToUpdate.persona_id = persona_id;
+	if (persona_mode_use_current) dataToUpdate.persona_id = null;
+
+	const sqlUpdateThread = update('chat_thread', dataToUpdate, { id });
 	await dbRun(sqlUpdateThread[0], sqlUpdateThread[1]);
 	const sqlThreadGet = select('chat_thread', ['*'], { id });
 	const thread = (await dbGet(sqlThreadGet[0], sqlThreadGet[1])) as ChatThread;

@@ -52,3 +52,8 @@ export interface AppSettings {
 	name: string;
 	value: string;
 }
+
+export interface MergedChatThread extends ChatThread {
+	latest_message: ChatMessage;
+	selected_buddy: PersonaVersionMerged | null;
+}

@@ -35,12 +35,28 @@ export default async function createOne({
 		}
 	}
 
+	let current_persona_version_id = null;
+	if (mode === 'persona') {
+		if (!persona_id) {
+			throw new Error('Persona ID is required');
+		}
+		const sqlPersona = select('persona', ['current_version_id'], {
+			id: persona_id,
+		});
+		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Persona;
+		if (!persona) {
+			throw new Error('Persona not found');
+		}
+		current_persona_version_id = persona.current_version_id;
+	}
+
 	const id = uuidv4();
 	const sqlInsert = insert('chat_thread', {
 		id,
 		created: new Date().getTime(),
 		name,
 		persona_id,
+		current_persona_version_id,
 		mode,
 		persona_mode_use_current: true,
 	});
@@ -73,7 +89,7 @@ export default async function createOne({
 			if (!personaVersion) {
 				throw new Error('Current version of persona not found');
 			}
-			const userName = AppSettings.get('user_name');
+			const userName = AppSettings.get('user_name') as string;
 			const sqlMessage = insert('chat_message', {
 				id: uuidv4(),
 				created: new Date().getTime(),

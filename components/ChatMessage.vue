@@ -6,6 +6,7 @@ import useElectron from '@/composables/useElectron';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
+import PersonaAvatar from './PersonaAvatar.vue';
 
 const { copyToClipboard } = useElectron();
 const { settings } = useAppStore();
@@ -76,6 +77,17 @@ const msgInitials = computed(() => {
 	const firstName = currentPersona.value.name.split(' ')[0];
 	return firstName[0];
 });
+
+// https://medium.com/@pppped/compute-an-arbitrary-color-for-user-avatar-starting-from-his-username-with-javascript-cd0675943b66
+function textToHslColor(t: string, s: number, l: number) {
+	var hash = 0;
+	for (var i = 0; i < t.length; i++) {
+		hash = t.charCodeAt(i) + ((hash << 5) - hash);
+	}
+
+	var h = hash % 360;
+	return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
+}
 </script>
 
 <template>
@@ -91,7 +103,13 @@ const msgInitials = computed(() => {
 						class="p-3 flex flex-row items-center space-x-2"
 					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
-						<Avatar v-if="isUser">
+						<Avatar
+							v-if="isUser"
+							:style="{
+								backgroundColor: textToHslColor(userName, 60, 80),
+								'font-weight': 'bold',
+							}"
+						>
 							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
 						</Avatar>
 						<span v-if="isUser">
@@ -102,13 +120,10 @@ const msgInitials = computed(() => {
 								:to="`/persona/${currentPersona?.id}/view`"
 								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
 							>
-								<Avatar v-if="!isUser" class="mr-1">
-									<!-- TODO add hover effect -->
-									<AvatarImage :src="profilePictureValue" />
-									<AvatarFallback>
-										<img src="/assets/logo.png" alt="Default Buddy icon" />
-									</AvatarFallback>
-								</Avatar>
+								<PersonaAvatar
+									v-if="!isUser && currentPersona"
+									:persona="currentPersona"
+								/>
 								{{ currentPersona?.name }}
 							</NuxtLink>
 						</span>

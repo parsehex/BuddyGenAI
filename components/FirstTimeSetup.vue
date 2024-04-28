@@ -5,6 +5,7 @@ import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
 import type { PersonaVersionMerged } from '~/lib/api/types-db';
 import api from '~/lib/api/db';
+import PersonaAvatar from './PersonaAvatar.vue';
 
 const props = defineProps<{
 	newHere: boolean;
@@ -93,7 +94,7 @@ const modelProvider = computed({
 });
 
 const handleSave = async () => {
-	if (!userNameValue.value) {
+	if (props.newHere && !userNameValue.value) {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
 		return;
 	}
@@ -357,12 +358,11 @@ ${relationship}\nInput:\n`;
 								<span class="text-lg ml-3">{{ personaName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
-								<Avatar size="lg" class="mt-2">
-									<AvatarImage :src="profilePictureValue" />
-									<AvatarFallback>
-										<img src="/assets/logo.png" alt="Default Buddy icon" />
-									</AvatarFallback>
-								</Avatar>
+								<PersonaAvatar
+									v-if="acceptedPersona && newPersona"
+									:persona="newPersona"
+									size="lg"
+								/>
 								<Label>
 									<!-- TODO describe better -->
 									<span class="text-lg">Extra keywords for picture</span>

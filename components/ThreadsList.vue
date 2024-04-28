@@ -25,7 +25,8 @@ const route = useRoute();
 const isThreadSelected = (threadId: string) =>
 	route.path.includes(`/chat`) && route.params.id === threadId;
 
-const { threads, updateThreads, isExternalProvider } = useAppStore();
+const { updateThreads, isExternalProvider } = useAppStore();
+const threads = useAppStore().threads as ChatThread[];
 
 // TODO add option to fork a thread
 
@@ -68,14 +69,22 @@ const doCreateThread = async () => {
 	navigateTo(`/chat/${newThread.id}`);
 };
 
+const shouldRedirect = (deletedThreadId: string) => {
+	return route.params.id === deletedThreadId;
+};
+
 const doDeleteThread = async (threadId: string) => {
+	console.log('deleting thread', threadId);
 	await api.thread.removeOne(threadId);
 
 	const newThreads = await updateThreads();
-	if (newThreads.length > 0) {
-		await navigateTo(`/chat/${newThreads[0].id}`);
-	} else {
-		await navigateTo(`/`);
+	if (shouldRedirect(threadId)) {
+		const newThread = newThreads[0];
+		if (newThread) {
+			navigateTo(`/chat/${newThread.id}`);
+		} else {
+			navigateTo(`/chat`);
+		}
 	}
 };
 
@@ -107,13 +116,12 @@ watch(route, async () => {
 							:class="[
 								'cursor-pointer',
 								'hover:bg-gray-200',
-								'p-1',
 								'rounded',
 								isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
 							]"
 							@contextmenu="rightClickedId = thread.id"
 						>
-							<NuxtLink :to="`/chat/${thread.id}`" class="block p-1">
+							<NuxtLink :to="`/chat/${thread.id}`" class="block p-2">
 								{{ thread.name }}
 							</NuxtLink>
 						</li>
