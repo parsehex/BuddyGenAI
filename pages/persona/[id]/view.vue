@@ -72,7 +72,7 @@ const createThread = async () => {
 				Version History
 			</NuxtLink>
 		</div>
-		<Card class="w-full md:w-1/2">
+		<Card class="w-full md:w-5/6">
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
 				<BuddyAvatar v-if="buddy" :persona="buddy" size="md" />
 				<span class="text-blue-500">{{ name }}</span>

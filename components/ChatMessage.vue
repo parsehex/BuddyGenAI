@@ -105,9 +105,9 @@ function textToHslColor(t: string, s: number, l: number) {
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar
 							v-if="isUser"
+							class="text-lg"
 							:style="{
 								backgroundColor: textToHslColor(userName, 60, 80),
-								'font-weight': 'bold',
 							}"
 						>
 							<AvatarFallback>{{ msgInitials }}</AvatarFallback>

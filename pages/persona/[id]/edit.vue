@@ -115,7 +115,7 @@ const acceptRemixedDescription = () => {
 				Version History
 			</NuxtLink>
 		</div>
-		<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6">
+		<Card class="whitespace-pre-wrap w-full md:w-5/6 p-2 pt-6">
 			<CardContent>
 				<div class="flex flex-col items-center">
 					<Input

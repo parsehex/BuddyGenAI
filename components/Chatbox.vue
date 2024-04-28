@@ -439,12 +439,29 @@ const updateSysFromBuddy = async () => {
 				placeholder="Say something..."
 				@keydown.ctrl.enter="doSubmit"
 			/>
-			<Button type="button" size="sm" @click="doSubmit">
-				<!-- TODO implement stop -->
-				<!-- TODO switch to send icon and stop icon -->
-				{{ isLoading ? 'Stop' : 'Send' }}
-			</Button>
-			<Button type="button" size="sm" @click="doReload"><RefreshCcwDot /></Button>
+			<div class="flex flex-col items-center gap-1">
+				<Button
+					type="button"
+					size="sm"
+					@click="doSubmit"
+					class="info"
+					:disabled="isLoading"
+				>
+					<!-- TODO implement stop -->
+					<!-- TODO switch to send icon and stop icon -->
+					Send
+				</Button>
+				<Button
+					v-if="messages.length"
+					type="button"
+					size="sm"
+					:disabled="isLoading"
+					@click="doReload"
+					title="Re-submit your last message to get a new response"
+				>
+					<RefreshCcwDot />
+				</Button>
+			</div>
 		</form>
 	</div>
 </template>
