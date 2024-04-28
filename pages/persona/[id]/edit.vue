@@ -153,7 +153,7 @@ const acceptRemixedDescription = () => {
 					</label>
 					<Button @click="handleSave">Save</Button>
 				</div>
-				<Card>
+				<Card class="w-full mt-4">
 					<CardHeader>
 						<h2 class="font-bold">Description Wizard</h2>
 					</CardHeader>
