@@ -31,8 +31,8 @@ import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
 
 const { toast } = useToast();
-const { updatePersonas, updateThreads } = useAppStore();
-const personas = useAppStore().personas as BuddyVersionMerged[];
+const { updateBuddies, updateThreads } = useAppStore();
+const buddies = useAppStore().buddies as BuddyVersionMerged[];
 const threads = useAppStore().threads as MergedChatThread[];
 const { complete } = useCompletion({ api: urls.message.completion() });
 
@@ -171,16 +171,16 @@ async function refreshMessages() {
 	setMessages(apiMsgsToOpenai(newMessages));
 	return newMessages;
 }
-async function refreshPersonas() {
-	const newPersonas = await updatePersonas();
+async function refreshBuddies() {
+	const newBuddies = await updateBuddies();
 	if (
 		threadMode.value === 'persona' &&
-		!selectedPersona.value &&
-		newPersonas?.length === 1
+		!selectedBuddy.value &&
+		newBuddies?.length === 1
 	) {
-		selectedPersona.value = newPersonas[0].id;
+		selectedBuddy.value = newBuddies[0].id;
 	}
-	return newPersonas;
+	return newBuddies;
 }
 
 const doSubmit = async (e: Event) => {
@@ -236,16 +236,16 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	await api.thread.updateOne(threadId.value, { mode: newMode });
 
 	await updateThread();
-	await refreshPersonas();
+	await refreshBuddies();
 	await refreshMessages();
 };
 watch(threadMode, handleThreadModeChange);
 
-const personaModeUseCurrent = ref(false);
-const handlePersonaModeUseCurrentChange = async () => {
+const buddyModeUseCurrent = ref(false);
+const handleBuddyModeUseCurrentChange = async () => {
 	if (!threadId) return;
-	const newValue = !personaModeUseCurrent.value;
-	personaModeUseCurrent.value = newValue;
+	const newValue = !buddyModeUseCurrent.value;
+	buddyModeUseCurrent.value = newValue;
 
 	await api.thread.updateOne(threadId.value, {
 		persona_mode_use_current: newValue,
@@ -254,8 +254,8 @@ const handlePersonaModeUseCurrentChange = async () => {
 	await refreshMessages();
 };
 
-const selectedPersona = ref(thread.value?.persona_id || '');
-const handlePersonaChange = async () => {
+const selectedBuddy = ref(thread.value?.persona_id || '');
+const handleBuddyChange = async () => {
 	// TODO add a confirmation dialog if there are messages already
 	if (!threadId) return;
 	if (refreshed.value) {
@@ -266,19 +266,19 @@ const handlePersonaChange = async () => {
 	}
 
 	await api.thread.updateOne(threadId.value, {
-		persona_id: selectedPersona.value,
+		persona_id: selectedBuddy.value,
 	});
 
 	await refreshMessages();
-	await refreshPersonas();
+	await refreshBuddies();
 };
-const currentPersona = computed(() =>
-	personas.find((p) => p.id === selectedPersona.value)
+const currentBuddy = computed(() =>
+	buddies.find((p) => p.id === selectedBuddy.value)
 );
-watch(selectedPersona, handlePersonaChange);
+watch(selectedBuddy, handleBuddyChange);
 
 onBeforeMount(async () => {
-	await refreshPersonas();
+	await refreshBuddies();
 
 	let t: ChatThread | undefined;
 	try {
@@ -293,16 +293,16 @@ onBeforeMount(async () => {
 	threadMode.value = t?.mode || 'custom';
 
 	if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
-		personaModeUseCurrent.value = true;
+		buddyModeUseCurrent.value = true;
 	}
 
 	refreshed.value = true;
-	selectedPersona.value = t?.persona_id || '';
+	selectedBuddy.value = t?.persona_id || '';
 
 	await refreshMessages();
 });
 
-const updateSysFromPersona = async () => {
+const updateSysFromBuddy = async () => {
 	if (!threadId) return;
 	await api.thread.updateSystemMessage(threadId.value);
 
@@ -324,7 +324,7 @@ const updateSysFromPersona = async () => {
 			<div class="my-2 w-full inline-flex items-center justify-start">
 				<RadioGroup
 					v-model="threadMode"
-					v-if="!uiMessages.length && !currentPersona"
+					v-if="!uiMessages.length && !currentBuddy"
 					class="mx-4"
 				>
 					<p>Chat Mode</p>
@@ -336,21 +336,20 @@ const updateSysFromPersona = async () => {
 						<TooltipProvider :delay-duration="100">
 							<Tooltip>
 								<TooltipTrigger>
-									<Label :class="{ 'cursor-pointer': personas.length }">
+									<Label :class="{ 'cursor-pointer': buddies.length }">
 										<RadioGroupItem
 											class="px-1"
 											value="persona"
-											:disabled="!personas.length"
+											:disabled="!buddies.length"
 										/>
 										Buddy
 									</Label>
 								</TooltipTrigger>
-								<TooltipContent v-if="!personas.length">
-									<!-- TODO add a Persona Creator/Wizard + link in this tooltip -->
+								<TooltipContent v-if="!buddies.length">
 									<p>
-										No buddies available :(
+										No Buddies available :(
 										<br />
-										<Button type="button" @click="navigateTo('/persona/add')">
+										<Button type="button" @click="navigateTo('/create-buddy')">
 											Create one
 										</Button>
 									</p>
@@ -361,13 +360,13 @@ const updateSysFromPersona = async () => {
 				</RadioGroup>
 				<div v-if="uiMessages.length" class="flex items-center space-x-2">
 					<Label
-						v-if="threadMode === 'persona' && personas.length"
+						v-if="threadMode === 'persona' && buddies.length"
 						class="mx-4 cursor-pointer flex items-center"
 					>
 						<Switch
 							class="mr-1"
-							:checked="personaModeUseCurrent"
-							@update:checked="handlePersonaModeUseCurrentChange"
+							:checked="buddyModeUseCurrent"
+							@update:checked="handleBuddyModeUseCurrentChange"
 						/>
 						Keep Buddy in sync
 					</Label>
@@ -375,21 +374,21 @@ const updateSysFromPersona = async () => {
 						type="button"
 						size="xs"
 						title="Update system message from current Buddy version"
-						v-if="threadMode === 'persona' && !personaModeUseCurrent"
-						@click="updateSysFromPersona"
+						v-if="threadMode === 'persona' && !buddyModeUseCurrent"
+						@click="updateSysFromBuddy"
 					>
 						<RefreshCw />
 					</Button>
 				</div>
 				<PersonaSelect
 					v-if="threadMode === 'persona' && !uiMessages.length"
-					v-model="selectedPersona"
+					v-model="selectedBuddy"
 					class="my-2"
 				/>
 			</div>
 			<PersonaCard
-				v-if="threadMode === 'persona' && selectedPersona && currentPersona"
-				:persona="currentPersona"
+				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
+				:persona="currentBuddy"
 			/>
 		</div>
 		<Collapsible
@@ -420,7 +419,7 @@ const updateSysFromPersona = async () => {
 				:key="m.id"
 				:thread-id="threadId"
 				:thread-mode="threadMode"
-				:current-persona="currentPersona"
+				:current-persona="currentBuddy"
 				:message="m"
 				@edit="refreshMessages"
 				@delete="refreshMessages"

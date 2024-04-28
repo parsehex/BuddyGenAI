@@ -28,7 +28,7 @@ const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
 
 onBeforeMount(async () => {
-	const p = await api.persona.getOne(id);
+	const p = await api.buddy.getOne(id);
 	persona.value = p;
 	name.value = p.name;
 	description.value = p.description || '';
@@ -36,7 +36,7 @@ onBeforeMount(async () => {
 	updated.value = p.updated;
 
 	if (p.profile_pic) {
-		profilePic.value = urls.persona.getProfilePic(p.profile_pic);
+		profilePic.value = urls.buddy.getProfilePic(p.profile_pic);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

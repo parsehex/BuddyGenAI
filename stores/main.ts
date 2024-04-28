@@ -39,12 +39,12 @@ let firstRun = true;
 export const useAppStore = defineStore('app', () => {
 	const route = useRoute();
 
-	const selectedPersonaId = ref<string>('');
+	const selectedBuddyId = ref<string>('');
 	const threadMessages = ref<ChatMessage[]>([]);
 
 	const chatModels = ref([] as string[]);
 	const imageModels = ref([] as string[]);
-	const personas = ref([] as BuddyVersionMerged[]);
+	const buddies = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
 
@@ -56,7 +56,7 @@ export const useAppStore = defineStore('app', () => {
 		const [cM, iM, p, s, t] = await Promise.all([
 			api.model.getAll('chat'),
 			api.model.getAll('image'),
-			api.persona.getAll(),
+			api.buddy.getAll(),
 			api.setting.getAll(),
 			api.thread.getAll(),
 		]);
@@ -70,8 +70,8 @@ export const useAppStore = defineStore('app', () => {
 			imageModels.value.push(...iM);
 		}
 		if (p) {
-			personas.value.length = 0;
-			personas.value.push(...p);
+			buddies.value.length = 0;
+			buddies.value.push(...p);
 		}
 		if (s) Object.assign(settings.value, s);
 		if (t) {
@@ -108,11 +108,11 @@ export const useAppStore = defineStore('app', () => {
 
 		return { chatModels: chat, imageModels: image };
 	};
-	const updatePersonas = async () => {
-		const res = await api.persona.getAll();
+	const updateBuddies = async () => {
+		const res = await api.buddy.getAll();
 		if (!res) return [];
-		personas.value.length = 0;
-		personas.value.push(...res);
+		buddies.value.length = 0;
+		buddies.value.push(...res);
 		return res;
 	};
 	const updateSettings = async () => {
@@ -168,16 +168,16 @@ export const useAppStore = defineStore('app', () => {
 	);
 
 	return {
-		selectedPersonaId,
+		selectedBuddyId,
 		threadMessages,
 		chatModels,
 		imageModels,
-		personas,
+		buddies,
 		settings,
 		threads,
 
 		updateModels,
-		updatePersonas,
+		updateBuddies,
 		updateSettings,
 		saveSettings,
 		updateThreads,

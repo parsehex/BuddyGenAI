@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import { useAppStore } from '~/stores/main';
 
-const { personas } = useAppStore();
+const buddies = useAppStore().buddies as BuddyVersionMerged[];
 
 const model = defineModel<string>({ required: true });
 </script>
@@ -15,7 +24,9 @@ const model = defineModel<string>({ required: true });
 		<SelectContent>
 			<SelectLabel>Buddies</SelectLabel>
 			<SelectGroup>
-				<SelectItem v-for="persona in personas" :key="persona.id" :value="persona.id + ''">{{ persona.name }}</SelectItem>
+				<SelectItem v-for="buddy in buddies" :key="buddy.id" :value="buddy.id + ''">
+					{{ buddy.name }}
+				</SelectItem>
 			</SelectGroup>
 		</SelectContent>
 	</Select>

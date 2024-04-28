@@ -20,7 +20,7 @@ const descriptionValue = ref('');
 const showSpinner = ref(false);
 
 const handleSave = async () => {
-	const newPersona = await api.persona.createOne({
+	const newPersona = await api.buddy.createOne({
 		name: nameValue.value,
 		description: descriptionValue.value,
 	});
@@ -29,7 +29,7 @@ const handleSave = async () => {
 		description: 'Persona created. Generating profile picture. Please wait...',
 	});
 	showSpinner.value = true;
-	await api.persona.profilePic.createOne(id);
+	await api.buddy.profilePic.createOne(id);
 	await navigateTo(`/persona/${id}/view`);
 };
 </script>

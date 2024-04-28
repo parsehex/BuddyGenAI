@@ -37,7 +37,7 @@ const profilePictureValue = computed(() => {
 	if (!currentPersona.value) return '';
 	if (!currentPersona.value.profile_pic) return '';
 
-	return urls.persona.getProfilePic(currentPersona.value.profile_pic);
+	return urls.buddy.getProfilePic(currentPersona.value.profile_pic);
 });
 
 if (isUser.value) {

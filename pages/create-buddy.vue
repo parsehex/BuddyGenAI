@@ -1,56 +1,24 @@
 <script setup lang="ts">
-import { useCompletion } from 'ai/vue';
-import { useToast } from '@/components/ui/toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import Spinner from '@/components/Spinner.vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import type { BuddyVersionMerged } from '@/lib/api/types-db';
-import api from '@/lib/api/db';
-import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 
 const {
-	chatServerRunning,
-	chatModels,
-	imageModels,
-	personas,
 	settings,
-	threads,
 	updateModels,
-	updatePersonas,
+	updateBuddies,
 	updateSettings,
 	updateThreads,
 	getChatModelPath,
-	mkdir,
 } = useAppStore();
 
 // @ts-ignore
-const { startServer, stopServer, isServerRunning } = useLlamaCpp();
+const { startServer } = useLlamaCpp();
 
-await updatePersonas();
+await updateBuddies();
 await updateThreads();
 
 const userNameValue = ref('');
-const personaName = ref('');
-const personaKeywords = ref('');
-const createdDescription = ref('');
-const profilePicturePrompt = ref('');
-
-const acceptedPersona = ref('' as '' | 'description' | 'keywords');
-const newPersona = ref(null as BuddyVersionMerged | null);
-const updatingProfilePicture = ref(false);
-
-const relationshipToBuddy = ref('');
-
-// TODO figure out temporary pics
-const profilePictureValue = ref('');
-
-const newHere = computed(
-	() => !!+settings.fresh_db || (!threads.length && !personas.length)
-);
-
 await updateSettings();
 if (settings.user_name && settings.user_name !== 'User') {
 	userNameValue.value = settings.user_name;

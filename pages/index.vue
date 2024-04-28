@@ -1,42 +1,32 @@
 <script setup lang="ts">
-import { useCompletion } from 'ai/vue';
-import { useToast } from '@/components/ui/toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import Spinner from '@/components/Spinner.vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
-import api from '@/lib/api/db';
-import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 
 const {
-	chatServerRunning,
-	chatModels,
-	imageModels,
-	personas,
 	settings,
 	updateModels,
-	updatePersonas,
+	updateBuddies,
 	updateSettings,
 	updateThreads,
 	getChatModelPath,
-	mkdir,
 } = useAppStore();
 const threads: MergedChatThread[] = useAppStore().threads;
+const buddies: BuddyVersionMerged[] = useAppStore().buddies;
 
 // @ts-ignore
-const { startServer, stopServer, isServerRunning } = useLlamaCpp();
+const { startServer } = useLlamaCpp();
 
-await updatePersonas();
+await updateBuddies();
 await updateThreads();
 
 const userNameValue = ref('');
 
 const newHere = computed(
-	() => !!+settings.fresh_db || (!threads.length && !personas.length)
+	() => !!+settings.fresh_db || (!threads.length && !buddies.length)
 );
 
 await updateSettings();

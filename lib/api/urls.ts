@@ -31,7 +31,7 @@ const message = {
 const model = {
 	getAvailableModels: (type: 'chat' | 'image') => `/api/model/${type}/all`,
 };
-const persona = {
+const buddy = {
 	getAll: () => '/api/persona/all',
 	create: () => '/api/persona',
 	get: (id: string) => `/api/persona/${id}`,
@@ -71,4 +71,4 @@ const thread = {
 	updateSystemMessage: (threadId: string) =>
 		`/api/update-thread-from-persona?threadId=${threadId}`,
 };
-export default { other, message, model, persona, setting, thread };
+export default { other, message, model, buddy, setting, thread };

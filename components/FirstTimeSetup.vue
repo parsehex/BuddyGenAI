@@ -16,29 +16,17 @@ const props = defineProps<{
 
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
-const {
-	chatServerRunning,
-	chatModels,
-	imageModels,
-	personas,
-	settings,
-	threads,
-	updateModels,
-	updatePersonas,
-	updateSettings,
-	updateThreads,
-	getChatModelPath,
-	mkdir,
-} = useAppStore();
+const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
+const buddies = useAppStore().buddies as BuddyVersionMerged[];
 
 const userNameValue = ref('');
-const personaName = ref('');
-const personaKeywords = ref('');
+const buddyName = ref('');
+const buddyKeywords = ref('');
 const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
-const acceptedPersona = ref('' as '' | 'description' | 'keywords');
-const newPersona = ref(null as BuddyVersionMerged | null);
+const acceptedBuddy = ref('' as '' | 'description' | 'keywords');
+const newBuddy = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
 const relationshipToBuddy = ref('');
@@ -46,21 +34,21 @@ const relationshipToBuddy = ref('');
 // TODO figure out temporary pics
 const profilePictureValue = ref('');
 
-const acceptedPersonaDesc = ref('');
-const acceptPersona = async (
+const acceptedBuddyDesc = ref('');
+const acceptBuddy = async (
 	descriptionOrKeywords: 'description' | 'keywords'
 ) => {
-	let personaDescription = createdDescription.value;
+	let buddyDescription = createdDescription.value;
 	if (descriptionOrKeywords === 'keywords') {
-		personaDescription = personaKeywords.value;
+		buddyDescription = buddyKeywords.value;
 	}
-	newPersona.value = await api.persona.createOne({
-		name: personaName.value,
-		description: personaDescription,
+	newBuddy.value = await api.buddy.createOne({
+		name: buddyName.value,
+		description: buddyDescription,
 	});
 
-	acceptedPersona.value = descriptionOrKeywords;
-	acceptedPersonaDesc.value = personaDescription;
+	acceptedBuddy.value = descriptionOrKeywords;
+	acceptedBuddyDesc.value = buddyDescription;
 };
 
 const updateName = async () => {
@@ -98,14 +86,14 @@ const handleSave = async () => {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
 		return;
 	}
-	if (!personaName.value || !personaKeywords.value) {
+	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
 			variant: 'destructive',
 			description: "Please fill out your Buddy's Name and Keywords.",
 		});
 		return;
 	}
-	if (!newPersona.value) {
+	if (!newBuddy.value) {
 		toast({
 			variant: 'destructive',
 			description: 'Please create a Buddy first.',
@@ -118,7 +106,7 @@ const handleSave = async () => {
 	await api.setting.update(updatedSettings);
 	await updateSettings();
 
-	const { id, name } = newPersona.value;
+	const { id, name } = newBuddy.value;
 	const newThread = await api.thread.createOne({
 		name: `Chat with ${name}`,
 		mode: 'persona',
@@ -131,7 +119,7 @@ const handleSave = async () => {
 };
 
 const refreshProfilePicture = async () => {
-	if (!newPersona.value) {
+	if (!newBuddy.value) {
 		toast({
 			variant: 'destructive',
 			description: 'Please create a Buddy first.',
@@ -141,21 +129,21 @@ const refreshProfilePicture = async () => {
 	if (updatingProfilePicture.value) {
 		return;
 	}
-	await api.persona.updateOne({
-		id: newPersona.value.id,
+	await api.buddy.updateOne({
+		id: newBuddy.value.id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
-	const id = newPersona.value.id;
+	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	const res = await api.persona.profilePic.createOne(id);
+	const res = await api.buddy.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.persona.getProfilePic(res.output);
+	profilePictureValue.value = urls.buddy.getProfilePic(res.output);
 	updatingProfilePicture.value = false;
 };
 
 const createDescription = async () => {
-	if (!personaName.value || !personaKeywords.value) {
+	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
 			variant: 'destructive',
 			description: 'Please fill out a Name and Keywords for your Buddy.',
@@ -163,10 +151,10 @@ const createDescription = async () => {
 		return;
 	}
 	const relationship = relationshipToBuddy.value
-		? `${personaName.value}'s relation to ${userNameValue.value}: ${relationshipToBuddy.value}`
+		? `${buddyName.value}'s relation to ${userNameValue.value}: ${relationshipToBuddy.value}`
 		: '';
-	const desc = personaKeywords.value;
-	const prompt = `The following input is a description of someone named ${personaName.value}. Briefly expand upon the input to provide a succinct description of ${personaName.value} using common language.
+	const desc = buddyKeywords.value;
+	const prompt = `The following input is a description of someone named ${buddyName.value}. Briefly expand upon the input to provide a succinct description of ${buddyName.value} using common language.
 ${relationship}\nInput:\n`;
 	let value = '';
 	try {
@@ -295,18 +283,18 @@ ${relationship}\nInput:\n`;
 				</CardHeader>
 				<CardContent class="flex flex-col items-center">
 					<!-- make read only once accepted -->
-					<Card v-if="!acceptedPersona" class="mt-2 p-2 w-full">
+					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
 						<CardContent>
 							<h2 class="text-lg mt-4 text-center underline">
-								{{ personas.length ? 'Create a Buddy' : 'Create your first Buddy' }}
+								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
-							<Avatar v-if="newHere && !acceptedPersona" size="lg" class="ml-28">
+							<Avatar v-if="newHere && !acceptedBuddy" size="lg" class="ml-28">
 								<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
 								<img src="/assets/logo.png" alt="BuddyGen Logo" />
 							</Avatar>
 							<Input
-								v-model="personaName"
+								v-model="buddyName"
 								class="my-2 p-2 border border-gray-300 rounded"
 								placeholder="Name"
 							/>
@@ -316,7 +304,7 @@ ${relationship}\nInput:\n`;
 									Describe your Buddy in a few words
 									<Input
 										id="persona-keywords"
-										v-model="personaKeywords"
+										v-model="buddyKeywords"
 										class="mt-2 p-2 border border-gray-300 rounded"
 										placeholder="friendly, helpful, funny"
 										@keyup.enter="createDescription"
@@ -336,15 +324,15 @@ ${relationship}\nInput:\n`;
 								<span class="text-lg ml-3">{{ createdDescription }}</span>
 							</p>
 							<Button
-								v-if="createdDescription && !acceptedPersona"
-								@click="acceptPersona('description')"
+								v-if="createdDescription && !acceptedBuddy"
+								@click="acceptBuddy('description')"
 								class="mt-4 mr-2 p-2 bg-blue-500 text-white rounded"
 							>
 								Accept Description
 							</Button>
 							<Button
-								v-if="createdDescription && !acceptedPersona"
-								@click="acceptPersona('keywords')"
+								v-if="createdDescription && !acceptedBuddy"
+								@click="acceptBuddy('keywords')"
 								class="mt-4 p-2 bg-blue-500 text-white rounded"
 							>
 								Use Keywords
@@ -355,12 +343,12 @@ ${relationship}\nInput:\n`;
 						<CardContent>
 							<h2 class="text-lg mt-4 text-center underline">Your first Buddy</h2>
 							<p class="mt-3 text-center">
-								<span class="text-lg ml-3">{{ personaName }}</span>
+								<span class="text-lg ml-3">{{ buddyName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
 								<PersonaAvatar
-									v-if="acceptedPersona && newPersona"
-									:persona="newPersona"
+									v-if="acceptedBuddy && newBuddy"
+									:persona="newBuddy"
 									size="lg"
 								/>
 								<Label>
@@ -382,13 +370,13 @@ ${relationship}\nInput:\n`;
 							</div>
 							<p class="mt-2">
 								Description:
-								<span class="text-lg ml-3">{{ acceptedPersonaDesc }}</span>
+								<span class="text-lg ml-3">{{ acceptedBuddyDesc }}</span>
 							</p>
 						</CardContent>
 					</Card>
 
 					<Button
-						v-if="acceptedPersona"
+						v-if="acceptedBuddy"
 						@click="handleSave"
 						class="mt-4 p-2 bg-blue-500 text-white rounded"
 					>

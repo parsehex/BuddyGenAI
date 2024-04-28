@@ -48,13 +48,13 @@ const remixedDescription = ref('');
 // we can clean up pics that werent used
 
 onBeforeMount(async () => {
-	persona.value = await api.persona.getOne(id);
+	persona.value = await api.buddy.getOne(id);
 	if (persona.value) {
 		nameValue.value = persona.value.name;
 		descriptionValue.value = persona.value.description || '';
 	}
 	if (persona.value?.profile_pic) {
-		profilePictureValue.value = urls.persona.getProfilePic(
+		profilePictureValue.value = urls.buddy.getProfilePic(
 			persona.value.profile_pic
 		);
 	}
@@ -64,7 +64,7 @@ onBeforeMount(async () => {
 });
 
 const handleSave = async () => {
-	await api.persona.updateOne({
+	await api.buddy.updateOne({
 		id,
 		name: nameValue.value,
 		description: descriptionValue.value,
@@ -74,14 +74,14 @@ const handleSave = async () => {
 
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
-	await api.persona.updateOne({
+	await api.buddy.updateOne({
 		id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	const res = await api.persona.profilePic.createOne(id);
+	const res = await api.buddy.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.persona.getProfilePic(res.output);
+	profilePictureValue.value = urls.buddy.getProfilePic(res.output);
 	updatingProfilePicture.value = false;
 };
 

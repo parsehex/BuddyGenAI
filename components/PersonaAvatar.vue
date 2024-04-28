@@ -19,7 +19,7 @@ const initials = computed(() => {
 
 const profilePicValue = computed(() => {
 	if (props.persona.profile_pic) {
-		return urls.persona.getProfilePic(props.persona.profile_pic);
+		return urls.buddy.getProfilePic(props.persona.profile_pic);
 	}
 	return '';
 });

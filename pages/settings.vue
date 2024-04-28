@@ -11,7 +11,6 @@ const {
 	chatServerRunning,
 	refreshServerStatus,
 	updateModels,
-	updateSettings,
 	getChatModelPath,
 } = useAppStore();
 
