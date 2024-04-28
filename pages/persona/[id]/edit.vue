@@ -16,7 +16,7 @@ import { useToast } from '@/components/ui/toast';
 // import $f from '@/lib/api/$fetch';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
-import PersonaAvatar from '@/components/PersonaAvatar.vue';
+import BuddyAvatar from '~/components/BuddyAvatar.vue';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -124,7 +124,7 @@ const acceptRemixedDescription = () => {
 						size="lg"
 						class="mb-2"
 					/>
-					<PersonaAvatar v-if="persona" :persona="persona" size="lg" />
+					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
 					<Label>
 						<!-- TODO describe better -->
 						<span class="text-lg">Extra keywords for prompt</span>

@@ -10,12 +10,12 @@ import type {
 } from '@/lib/api/types-db';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
-import PersonaAvatar from '@/components/PersonaAvatar.vue';
+import BuddyAvatar from '~/components/BuddyAvatar.vue';
 
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as BuddyVersionMerged | null);
+const buddy = ref(null as BuddyVersionMerged | null);
 const name = ref('');
 const description = ref('');
 const created = ref(null as number | null);
@@ -29,7 +29,7 @@ const time_at = ref('');
 
 onBeforeMount(async () => {
 	const p = await api.buddy.getOne(id);
-	persona.value = p;
+	buddy.value = p;
 	name.value = p.name;
 	description.value = p.description || '';
 	created.value = p.created;
@@ -55,7 +55,7 @@ onBeforeMount(async () => {
 
 const createThread = async () => {
 	const newThread = await api.thread.createOne({
-		name: `Chat with ${persona.value?.name}`,
+		name: `Chat with ${buddy.value?.name}`,
 		persona_id: id,
 		mode: 'persona',
 	});
@@ -74,12 +74,7 @@ const createThread = async () => {
 		</div>
 		<Card class="w-full md:w-1/2">
 			<CardHeader class="text-lg font-bold flex flex-row items-center space-x-2">
-				<Avatar size="md">
-					<AvatarImage :src="profilePic" />
-					<AvatarFallback>
-						<img src="/assets/logo.png" alt="Default Buddy icon" />
-					</AvatarFallback>
-				</Avatar>
+				<BuddyAvatar v-if="buddy" :persona="buddy" size="md" />
 				<span class="text-blue-500">{{ name }}</span>
 			</CardHeader>
 			<CardContent>

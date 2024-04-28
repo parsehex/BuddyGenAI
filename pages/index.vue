@@ -5,6 +5,7 @@ import useLlamaCpp from '@/composables/useLlamaCpp';
 import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
+import BuddyAvatar from '@/components/BuddyAvatar.vue';
 
 const {
 	settings,
@@ -150,7 +151,7 @@ const sortedThreads = computed(() => {
 					>
 						<!-- TODO this is a good idea: show buddy info in thread list -->
 						<div v-if="thread.selected_buddy">
-							<PersonaAvatar
+							<BuddyAvatar
 								v-if="thread.latest_message.role !== 'user'"
 								:persona="thread.selected_buddy"
 								size="base"

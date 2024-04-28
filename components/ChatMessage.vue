@@ -6,7 +6,7 @@ import useElectron from '@/composables/useElectron';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
-import PersonaAvatar from './PersonaAvatar.vue';
+import BuddyAvatar from './BuddyAvatar.vue';
 
 const { copyToClipboard } = useElectron();
 const { settings } = useAppStore();
@@ -120,7 +120,7 @@ function textToHslColor(t: string, s: number, l: number) {
 								:to="`/persona/${currentPersona?.id}/view`"
 								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
 							>
-								<PersonaAvatar
+								<BuddyAvatar
 									v-if="!isUser && currentPersona"
 									:persona="currentPersona"
 								/>

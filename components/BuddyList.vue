@@ -2,7 +2,7 @@
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { Button } from './ui/button';
-import PersonaAvatar from './PersonaAvatar.vue';
+import BuddyAvatar from './BuddyAvatar.vue';
 
 const { updateBuddies } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
@@ -36,8 +36,7 @@ onBeforeMount(async () => {
 				]"
 			>
 				<NuxtLink class="p-1 flex items-center" :to="`/persona/${persona.id}/view`">
-					<!-- add buddy avatar -->
-					<PersonaAvatar :persona="persona" />
+					<BuddyAvatar :persona="persona" />
 					{{ persona.name }}
 				</NuxtLink>
 			</li>

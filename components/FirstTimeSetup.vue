@@ -5,7 +5,7 @@ import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import api from '~/lib/api/db';
-import PersonaAvatar from './PersonaAvatar.vue';
+import BuddyAvatar from './BuddyAvatar.vue';
 
 const props = defineProps<{
 	newHere: boolean;
@@ -346,7 +346,7 @@ ${relationship}\nInput:\n`;
 								<span class="text-lg ml-3">{{ buddyName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
-								<PersonaAvatar
+								<BuddyAvatar
 									v-if="acceptedBuddy && newBuddy"
 									:persona="newBuddy"
 									size="lg"

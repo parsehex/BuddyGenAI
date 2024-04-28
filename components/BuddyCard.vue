@@ -10,7 +10,7 @@ import {
 import api from '~/lib/api/db';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import PersonaAvatar from './PersonaAvatar.vue';
+import BuddyAvatar from './BuddyAvatar.vue';
 
 const props = defineProps<{
 	persona: BuddyVersionMerged;
@@ -75,13 +75,13 @@ watch(
 	<HoverCard :open-delay="1000" :close-delay="250">
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground rounded-lg">
-				<PersonaAvatar :persona="props.persona" size="sm" />
+				<BuddyAvatar :persona="props.persona" size="sm" />
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-80" :hide-when-detached="true">
 			<div class="flex items-center space-x-4">
-				<PersonaAvatar :persona="props.persona" size="base" />
+				<BuddyAvatar :persona="props.persona" size="base" />
 				<div class="space-y-1">
 					<div class="flex justify-around">
 						<NuxtLink :to="`/persona/${id}/edit`">Edit</NuxtLink>

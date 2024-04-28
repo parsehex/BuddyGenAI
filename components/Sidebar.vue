@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import ThreadsList from './ThreadsList.vue';
-import PersonaList from './PersonaList.vue';
+import BuddyList from './BuddyList.vue';
 
 const route = useRoute();
 
@@ -29,7 +29,7 @@ watch(
 			<ThreadsList />
 		</TabsContent>
 		<TabsContent value="buddy">
-			<PersonaList />
+			<BuddyList />
 		</TabsContent>
 	</Tabs>
 </template>

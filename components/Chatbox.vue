@@ -24,6 +24,8 @@ import type {
 	BuddyVersionMerged,
 } from '@/lib/api/types-db';
 import Message from './ChatMessage.vue';
+import BuddySelect from './BuddySelect.vue';
+import BuddyCard from './BuddyCard.vue';
 import { useToast } from '@/components/ui/toast';
 import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
@@ -380,13 +382,13 @@ const updateSysFromBuddy = async () => {
 						<RefreshCw />
 					</Button>
 				</div>
-				<PersonaSelect
+				<BuddySelect
 					v-if="threadMode === 'persona' && !uiMessages.length"
 					v-model="selectedBuddy"
 					class="my-2"
 				/>
 			</div>
-			<PersonaCard
+			<BuddyCard
 				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
 				:persona="currentBuddy"
 			/>
