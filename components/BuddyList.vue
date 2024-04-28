@@ -26,7 +26,7 @@ onBeforeMount(async () => {
 				Create a Buddy
 			</Button>
 		</div>
-		<ul>
+		<ul class="mt-2">
 			<li
 				v-for="persona in buddies"
 				:key="persona.id"
@@ -35,7 +35,10 @@ onBeforeMount(async () => {
 					isBuddySelected(persona.id) ? 'font-bold bg-gray-200' : '',
 				]"
 			>
-				<NuxtLink class="p-1 flex items-center" :to="`/persona/${persona.id}/view`">
+				<NuxtLink
+					class="p-1 pl-3 flex items-center"
+					:to="`/persona/${persona.id}/view`"
+				>
 					<BuddyAvatar :persona="persona" />
 					{{ persona.name }}
 				</NuxtLink>

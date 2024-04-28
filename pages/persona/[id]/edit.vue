@@ -148,6 +148,7 @@ const acceptRemixedDescription = () => {
 						<Textarea
 							v-model="descriptionValue"
 							:placeholder="`${persona?.name} is...`"
+							class="w-full min-h-48"
 						/>
 					</label>
 					<Button @click="handleSave">Save</Button>

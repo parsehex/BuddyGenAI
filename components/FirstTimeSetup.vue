@@ -20,6 +20,8 @@ const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 
 const userNameValue = ref('');
+
+// TODO check if buddy name already exists, add text alerting user
 const buddyName = ref('');
 const buddyKeywords = ref('');
 const createdDescription = ref('');
