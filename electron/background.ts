@@ -15,6 +15,7 @@ import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
 import { fileURLToPath } from 'url';
 import sdModule from './modules/sd';
+import { getDataPath } from './fs';
 
 // Initilize
 // =========
@@ -126,6 +127,10 @@ async function createWindow() {
 		} catch (err) {
 			return false;
 		}
+	});
+
+	ipcMain.handle('getDataPath', async (_, path: string) => {
+		return getDataPath(path);
 	});
 
 	// Lock app to single instance

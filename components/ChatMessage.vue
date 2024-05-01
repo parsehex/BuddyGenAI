@@ -32,14 +32,6 @@ const editingMessage = ref('');
 
 const userName = ref('User');
 
-const profilePictureValue = computed(() => {
-	if (isUser.value) return '';
-	if (!currentPersona.value) return '';
-	if (!currentPersona.value.profile_pic) return '';
-
-	return urls.buddy.getProfilePic(currentPersona.value.profile_pic);
-});
-
 if (isUser.value) {
 	const { user_name } = settings;
 	userName.value = user_name;
@@ -153,7 +145,11 @@ function textToHslColor(t: string, s: number, l: number) {
 			</DialogHeader>
 			<DialogDescription>
 				<!-- TODO how to programmatically close dialog? (i.e. on ctrl+enter) -->
-				<Textarea v-model="editingMessage" placeholder="Message content..." />
+				<Textarea
+					v-model="editingMessage"
+					placeholder="Message content..."
+					class="w-full min-h-48"
+				/>
 				<p class="py-1 text-sm text-muted-foreground">
 					<b>Warning</b>
 					: Clicking outside to cancel is broken --

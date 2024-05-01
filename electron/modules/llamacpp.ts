@@ -15,12 +15,14 @@ const chatTemplateMap: { [key: string]: string } = {
 	Moistral: 'vicuna',
 	'WizardLM-2': 'vicuna',
 	'Lexi-': 'chatml',
+	'Llama-3': 'llama3',
 	'llama-3': 'llama3',
 };
 
 const contextLengthMap: { [key: string]: number } = {
 	'WizardLM-2': 4096,
 	'Lexi-': 8192,
+	'Llama-3': 8192,
 	'llama-3': 8192,
 };
 

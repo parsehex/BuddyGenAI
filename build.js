@@ -2,9 +2,6 @@
 const builder = require('electron-builder')
 const Platform = builder.Platform
 
-
-
-
 const platform = 'WINDOWS'
 // const platform = 'LINUX'
 // const platform = 'MAC'

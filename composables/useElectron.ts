@@ -122,7 +122,11 @@ export default function useElectron() {
 		return result;
 	};
 
-	// Initialize ipcRenderer
+	const getDataPath = async (subPath?: string) => {
+		const result = await electron.ipcRenderer.invoke('getDataPath', subPath);
+		return result;
+	};
+
 	return {
 		copyToClipboard,
 		isElectron,
@@ -143,5 +147,6 @@ export default function useElectron() {
 		fsAccess,
 		fsUnlink,
 		fileURLToPath,
+		getDataPath,
 	};
 }

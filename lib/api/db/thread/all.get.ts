@@ -41,7 +41,10 @@ export default async function getAll(
 				latest_message: messages[i][messages[i].length - 1],
 				selected_buddy: {
 					...persona,
-					...personaVersion,
+					name: personaVersion.name,
+					description: personaVersion.description,
+					persona_id: persona.id,
+					version: personaVersion.version,
 				},
 			};
 		});
@@ -69,22 +72,31 @@ export default async function getAll(
 			})
 		);
 
-		console.log('personas', personas);
-
 		const mergedThreads = threads.map((thread, i) => {
 			const persona = personas[i][0];
 			const personaVersion = personas[i][1];
-			console.log('persona', persona, 'personaVersion', personaVersion);
 			return {
 				...thread,
 				latest_message: messages[i][messages[i].length - 1],
-				selected_buddy: {
-					...persona,
-					...personaVersion,
-				},
+				selected_buddy: persona
+					? {
+							...persona,
+							name: personaVersion.name,
+							description: personaVersion.description,
+							persona_id: persona.id,
+							version: personaVersion.version,
+					  }
+					: null,
 			};
 		});
-		console.log('mergedThreads', mergedThreads);
+
+		mergedThreads.sort((a, b) => {
+			if (!a.latest_message || !b.latest_message) {
+				return 0;
+			}
+			return b.latest_message.created - a.latest_message.created;
+		});
+
 		return mergedThreads;
 	}
 }

@@ -73,6 +73,10 @@ export default function (mainWindow: BrowserWindow) {
 
 	app.use(llamaCppRouter);
 
+	app.get('*', (req, res) => {
+		res.sendFile(path.resolve(__dirname, '../public', 'index.html')); // replace with the path to your SPA's entry point
+	});
+
 	const listener = app.listen(8079, 'localhost', () => {
 		const port = (listener.address() as any).port;
 		console.log('Dynamic-Renderer Listening on', port);

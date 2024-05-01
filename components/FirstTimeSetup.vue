@@ -140,7 +140,7 @@ const refreshProfilePicture = async () => {
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
 	const res = await api.buddy.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.buddy.getProfilePic(res.output);
+	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
 };
 
@@ -192,7 +192,7 @@ ${relationship}\nInput:\n`;
 
 <template>
 	<div>
-		<div class="container flex flex-col items-center">
+		<div class="flex flex-col items-center">
 			<NuxtLink class="text-xl font-bold mb-2" to="/">
 				{{ newHere ? 'Welcome to' : '' }}
 				<span class="underline">
@@ -213,7 +213,7 @@ ${relationship}\nInput:\n`;
 			<!-- Model Source -- External or Local -->
 			<Card
 				v-if="!isModelsSetup"
-				class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-4"
+				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4"
 			>
 				<CardHeader class="pt-0 pb-0 text-center">
 					We need to answer some questions before we can create your first Buddy.
@@ -263,11 +263,11 @@ ${relationship}\nInput:\n`;
 
 			<Card
 				v-if="!serverStarting && isModelsSetup"
-				class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-6"
+				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-2"
 			>
 				<CardHeader class="pt-0 pb-0">
 					<h2 v-if="newHere" class="text-lg text-center underline mb-0 pb-3">
-						What should we call you?
+						{{ 'What do we call you?' }}
 					</h2>
 					<Label
 						v-if="newHere"
@@ -277,41 +277,43 @@ ${relationship}\nInput:\n`;
 						<Input
 							v-model="userNameValue"
 							@blur="updateName"
-							class="p-2 border border-gray-300 rounded text-center w-2/3 ml-2"
+							class="p-2 border border-gray-300 rounded text-center w-1/2 ml-2"
 							placeholder="John"
 							@keyup.enter="handleSave"
 						/>
 					</Label>
 				</CardHeader>
 				<CardContent class="flex flex-col items-center">
-					<!-- make read only once accepted -->
 					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
-						<CardContent>
-							<h2 class="text-lg mt-4 text-center underline">
+						<CardContent class="flex flex-col items-center">
+							<h2 class="text-lg mb-4 text-center underline">
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
-							<Avatar v-if="newHere && !acceptedBuddy" size="lg" class="ml-28">
+							<Avatar v-if="newHere && !acceptedBuddy" size="lg">
 								<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
 								<img src="/assets/logo.png" alt="BuddyGen Logo" />
 							</Avatar>
 							<Input
 								v-model="buddyName"
-								class="my-2 p-2 border border-gray-300 rounded"
+								class="my-2 p-2 border border-gray-300 rounded w-1/2"
 								placeholder="Name"
 							/>
-							<div class="flex flex-row items-center space-x-2 w-full mt-4">
+							<div class="flex flex-col items-center space-x-2 w-full mt-4">
 								<!-- add tooltip with tips on good values -->
-								<Label class="block grow">
-									Describe your Buddy in a few words
-									<Input
-										id="persona-keywords"
-										v-model="buddyKeywords"
-										class="mt-2 p-2 border border-gray-300 rounded"
-										placeholder="friendly, helpful, funny"
-										@keyup.enter="createDescription"
-									/>
+								<Label
+									class="block text-lg text-center font-bold"
+									for="persona-keywords"
+								>
+									Use a few words to describe your Buddy
 								</Label>
+								<Input
+									id="persona-keywords"
+									v-model="buddyKeywords"
+									class="mt-2 p-2 border border-gray-300 rounded"
+									placeholder="friendly, helpful, funny"
+									@keyup.enter="createDescription"
+								/>
 
 								<Button
 									@click="createDescription"
@@ -355,7 +357,7 @@ ${relationship}\nInput:\n`;
 								/>
 								<Label>
 									<!-- TODO describe better -->
-									<span class="text-lg">Extra keywords for picture</span>
+									<span class="text-lg">Appearance</span>
 									<Input
 										v-model="profilePicturePrompt"
 										@keyup.enter="refreshProfilePicture"

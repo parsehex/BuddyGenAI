@@ -37,7 +37,7 @@ onBeforeMount(async () => {
 	updated.value = p.updated;
 
 	if (p.profile_pic) {
-		profilePic.value = urls.buddy.getProfilePic(p.profile_pic);
+		profilePic.value = urls.buddy.getProfilePic(`${p.id}/${p.profile_pic}`);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';
@@ -68,19 +68,20 @@ const createThread = async () => {
 
 <template>
 	<div class="flex flex-col items-center">
-		<h1 class="text-2xl font-bold">Buddy</h1>
+		<h1 class="text-2xl font-bold">
+			<span class="text-blue-500">{{ name }}</span>
+		</h1>
 		<div class="flex items-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
 			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
 			</NuxtLink>
 		</div>
-		<Card class="w-full md:w-5/6">
+		<Card class="w-full md:w-2/3">
 			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
 				<BuddyAvatar v-if="buddy" :persona="buddy" size="lg" />
-				<span class="text-blue-500">{{ name }}</span>
 			</CardHeader>
-			<CardContent>
+			<CardContent class="whitespace-pre-wrap">
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
 					No description &nbsp;&mdash;&nbsp;
@@ -98,11 +99,11 @@ const createThread = async () => {
 		<h2 class="text-xl font-bold mt-4 flex items-center">
 			Chats with {{ name }}
 			<Button
+				v-if="threads.length > 0"
 				type="button"
 				size="sm"
 				class="ml-4"
 				@click="createThread"
-				v-if="threads.length > 0"
 			>
 				<Plus />
 			</Button>
@@ -113,7 +114,7 @@ const createThread = async () => {
 		>
 			No threads using this persona.
 			<br />
-			<Button type="button" class="mt-1" @click="createThread">
+			<Button type="button" class="mt-2" @click="createThread">
 				Create Thread
 			</Button>
 		</div>

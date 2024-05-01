@@ -13,16 +13,18 @@ import AppMenubar from '~/components/AppMenubar.vue';
 		<div class="fixed top-0 left-0 w-full z-50">
 			<AppMenubar />
 		</div>
-		<div class="pt-8">
-			<Sidebar />
-			<NuxtLayout>
-				<NuxtLoadingIndicator />
-				<div id="page-container">
-					<NuxtPage />
-				</div>
-			</NuxtLayout>
-			<Toaster />
-		</div>
+		<Suspense>
+			<div class="pt-8">
+				<Sidebar />
+				<NuxtLayout>
+					<NuxtLoadingIndicator />
+					<div id="page-container">
+						<NuxtPage />
+					</div>
+				</NuxtLayout>
+				<Toaster />
+			</div>
+		</Suspense>
 	</Body>
 </template>
 

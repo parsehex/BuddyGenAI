@@ -38,8 +38,7 @@ const buddy = {
 	update: (id: string) => `/api/persona/${id}`,
 	delete: (id: string) => `/api/persona/${id}`,
 	getProfilePic: (pic_name: string) => {
-		const cacheVal = Math.random() * 1000;
-		const p = `/images/${pic_name}?cache=${cacheVal}`;
+		const p = `/images/${pic_name}`;
 
 		if (isDev) {
 			return `http://localhost:8079${p}`;

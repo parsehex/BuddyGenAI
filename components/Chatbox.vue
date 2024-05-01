@@ -37,6 +37,7 @@ const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 const threads = useAppStore().threads as MergedChatThread[];
+const chatServerRunning = useAppStore().chatServerRunning as boolean;
 const { complete } = useCompletion({ api: urls.message.completion() });
 
 const props = defineProps<{
@@ -65,7 +66,7 @@ const apiPartialBody = ref({
 });
 
 const scrollToBottom = () => {
-	const lastMessage = document.querySelector('.chat-message:last-child');
+	const lastMessage = document.querySelector('div#chatbox > span:last-child');
 	if (lastMessage) {
 		lastMessage.scrollIntoView();
 	}
@@ -183,7 +184,7 @@ async function refreshBuddies() {
 	) {
 		selectedBuddy.value = newBuddies[0].id;
 	}
-	return newBuddies;
+	return newBuddies || [];
 }
 
 const doSubmit = async (e: Event) => {
@@ -231,7 +232,6 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 	if (refreshed.value) {
 		setTimeout(() => {
 			refreshed.value = false;
-			console.log('refreshed');
 		}, 10);
 		return;
 	}
@@ -280,29 +280,29 @@ const currentBuddy = computed(() =>
 );
 watch(selectedBuddy, handleBuddyChange);
 
+await refreshBuddies();
+
+let t: ChatThread | undefined;
+try {
+	t = await updateThread();
+	console.log('thread', t);
+} catch (e) {
+	await navigateTo('/');
+}
+refreshed.value = true;
+threadMode.value = t?.mode || 'custom';
+
+if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
+	buddyModeUseCurrent.value = true;
+}
+
+refreshed.value = true;
+selectedBuddy.value = t?.persona_id || '';
+await refreshMessages();
 onBeforeMount(async () => {
-	await refreshBuddies();
-
-	let t: ChatThread | undefined;
-	try {
-		t = await updateThread();
-		console.log('t', t);
-	} catch (e) {
-		await navigateTo('/');
-		return;
-	}
-
-	refreshed.value = true;
-	threadMode.value = t?.mode || 'custom';
-
-	if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
-		buddyModeUseCurrent.value = true;
-	}
-
-	refreshed.value = true;
-	selectedBuddy.value = t?.persona_id || '';
-
-	await refreshMessages();
+	setTimeout(() => {
+		scrollToBottom();
+	}, 250);
 });
 
 const updateSysFromBuddy = async () => {
@@ -311,6 +311,20 @@ const updateSysFromBuddy = async () => {
 
 	await refreshMessages();
 };
+
+const canSend = computed(() => {
+	if (!chatServerRunning) {
+		return false;
+	}
+	return input.value !== '' && !isLoading.value;
+});
+
+const canReload = computed(() => {
+	if (!chatServerRunning) {
+		return false;
+	}
+	return messages.value.length >= 2 && !isLoading.value;
+});
 
 // disjointed note:
 // TODO should save the keywords (extraPrompt) that we generate desc with
@@ -327,7 +341,7 @@ const updateSysFromBuddy = async () => {
 			<div class="my-2 w-full inline-flex items-center justify-start">
 				<RadioGroup
 					v-model="threadMode"
-					v-if="!uiMessages.length && !currentBuddy"
+					v-if="!uiMessages.length && !currentBuddy && threadTitle"
 					class="mx-4"
 				>
 					<p>Chat Mode</p>
@@ -361,7 +375,10 @@ const updateSysFromBuddy = async () => {
 						</TooltipProvider>
 					</div>
 				</RadioGroup>
-				<div v-if="uiMessages.length" class="flex items-center space-x-2">
+				<div
+					v-if="uiMessages.length && threadTitle"
+					class="flex items-center space-x-2"
+				>
 					<Label
 						v-if="threadMode === 'persona' && buddies.length"
 						class="mx-4 cursor-pointer flex items-center"
@@ -384,7 +401,12 @@ const updateSysFromBuddy = async () => {
 					</Button>
 				</div>
 				<BuddySelect
-					v-if="threadMode === 'persona' && !uiMessages.length"
+					v-if="
+						threadMode === 'persona' &&
+						!uiMessages.length &&
+						buddies.length &&
+						threadTitle
+					"
 					v-model="selectedBuddy"
 					class="my-2"
 				/>
@@ -416,7 +438,7 @@ const updateSysFromBuddy = async () => {
 				</Card>
 			</CollapsibleContent>
 		</Collapsible>
-		<div class="flex flex-col gap-1 mt-1">
+		<div class="flex flex-col gap-1 mt-1" id="chatbox">
 			<Message
 				v-for="m in uiMessages"
 				:key="m.id"
@@ -446,7 +468,7 @@ const updateSysFromBuddy = async () => {
 					size="sm"
 					@click="doSubmit"
 					class="info"
-					:disabled="isLoading"
+					:disabled="!canSend"
 				>
 					<!-- TODO implement stop -->
 					<!-- TODO switch to send icon and stop icon -->
@@ -456,7 +478,7 @@ const updateSysFromBuddy = async () => {
 					v-if="messages.length"
 					type="button"
 					size="sm"
-					:disabled="isLoading"
+					:disabled="!canReload"
 					@click="doReload"
 					title="Re-submit your last message to get a new response"
 				>

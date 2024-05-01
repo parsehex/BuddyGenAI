@@ -8,5 +8,5 @@ export function posPromptFromName(name: string, extra: string) {
 }
 export function negPromptFromName(name: string) {
 	// TODO take extra
-	return `drawing, disfigured, distorted, thick frame`;
+	return `disfigured, distorted, thick frame`;
 }

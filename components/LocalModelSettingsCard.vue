@@ -1,5 +1,5 @@
 <template>
-	<Card class="whitespace-pre-wrap w-full md:w-1/2 p-2 pt-4">
+	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
 		<CardHeader class="pt-0 pb-2">Local Model Setup</CardHeader>
 		<CardContent>
 			<p v-if="firstTime" class="text-center">

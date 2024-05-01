@@ -167,6 +167,12 @@ export const useAppStore = defineStore('app', () => {
 		{ deep: true }
 	);
 
+	const chatServerRunning = ref(false);
+	const updateChatServerRunning = async () => {
+		const running = await isServerRunning();
+		chatServerRunning.value = running;
+	};
+
 	return {
 		selectedBuddyId,
 		threadMessages,
@@ -186,5 +192,8 @@ export const useAppStore = defineStore('app', () => {
 		startServer,
 		stopServer,
 		isExternalProvider,
+
+		chatServerRunning,
+		updateChatServerRunning,
 	};
 });

@@ -17,13 +17,26 @@ const initials = computed(() => {
 	return '';
 });
 
-// TODO store each pic, watch for change
-const profilePicValue = computed(() => {
+const profilePicValue = ref('');
+onMounted(() => {
 	if (props.persona.profile_pic) {
-		return urls.buddy.getProfilePic(props.persona.profile_pic);
+		profilePicValue.value = urls.buddy.getProfilePic(
+			`${props.persona.id}/${props.persona.profile_pic}`
+		);
 	}
-	return '';
 });
+watch(
+	() => props.persona.profile_pic,
+	() => {
+		if (props.persona.profile_pic) {
+			profilePicValue.value = urls.buddy.getProfilePic(
+				`${props.persona.id}/${props.persona.profile_pic}`
+			);
+		} else {
+			profilePicValue.value = '';
+		}
+	}
+);
 </script>
 
 <template>

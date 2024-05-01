@@ -63,7 +63,7 @@ const doCreateThread = async () => {
 
 	const newThread = await api.thread.createOne({
 		name: newThreadName.value,
-		mode: 'persona',
+		mode: 'custom',
 	});
 	await updateThreads();
 	navigateTo(`/chat/${newThread.id}`);

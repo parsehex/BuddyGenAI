@@ -131,7 +131,7 @@ const sortedThreads = computed(() => {
 	<!-- allow editing description (or something to fix broken generations) -->
 	<!-- instructions to acquire models -->
 
-	<div v-if="threads.length" class="container flex flex-col items-center">
+	<div v-if="threads.length" class="flex flex-col items-center">
 		<h1 class="text-xl font-bold mb-0">
 			{{ newHere ? 'Welcome to' : '' }}
 			<span class="underline">

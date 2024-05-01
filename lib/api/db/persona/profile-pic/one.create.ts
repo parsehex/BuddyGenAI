@@ -2,12 +2,20 @@ import AppSettings from '../../../AppSettings';
 import { negPromptFromName, posPromptFromName } from '~/lib/prompt/sd';
 import useSD from '~/composables/useSD';
 import { select, update } from '~/lib/sql';
-import { getDataPath } from '~/lib/fs';
+import type { Buddy, BuddyVersion } from '~/lib/api/types-db';
 
 // @ts-ignore
 const { runSD } = useSD();
-const { dbGet, dbRun, fsAccess, pathJoin, mkdir, basename, fsUnlink } =
-	useElectron();
+const {
+	dbGet,
+	dbRun,
+	fsAccess,
+	pathJoin,
+	mkdir,
+	basename,
+	fsUnlink,
+	getDataPath,
+} = useElectron();
 
 // TODO rewrite
 
@@ -23,12 +31,12 @@ TODO notes about profile pic versioning:
 export default async function createProfilePic(id: string) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
-	const modelDir = AppSettings.get('local_model_directory');
+	const modelDir = AppSettings.get('local_model_directory') as string;
 	if (!modelDir) {
 		throw new Error('Model directory not set');
 	}
 
-	const selectedImageModel = AppSettings.get('selected_model_image');
+	const selectedImageModel = AppSettings.get('selected_model_image') as string;
 	if (!selectedImageModel) {
 		throw new Error('No image model selected');
 	}
@@ -42,7 +50,7 @@ export default async function createProfilePic(id: string) {
 	}
 
 	const sqlPersona = select('persona', ['*'], { id });
-	const persona = await dbGet(sqlPersona[0], sqlPersona[1]);
+	const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 
 	if (!persona) {
 		throw new Error('Persona not found');
@@ -51,7 +59,10 @@ export default async function createProfilePic(id: string) {
 	const sqlCurrentVersion = select('persona_version', ['*'], {
 		id: persona.current_version_id,
 	});
-	const currentVersion = await dbGet(sqlCurrentVersion[0], sqlCurrentVersion[1]);
+	const currentVersion = (await dbGet(
+		sqlCurrentVersion[0],
+		sqlCurrentVersion[1]
+	)) as BuddyVersion;
 
 	if (!currentVersion) {
 		throw new Error('Persona version not found');
@@ -66,10 +77,12 @@ export default async function createProfilePic(id: string) {
 	const negPrompt = negPromptFromName(currentVersion.name);
 
 	// find path to save image
-	const dataPath = await getDataPath('images');
+	const dataPath = await getDataPath('images/' + persona.id);
+	console.log('profile pic dataPath', dataPath);
 	await mkdir(dataPath);
 
-	const output = await pathJoin(dataPath, `${persona.id}.png`);
+	const now = Date.now();
+	const output = await pathJoin(dataPath, `${now}.png`);
 	let outputExists = false;
 	try {
 		await fsAccess(output);
@@ -81,7 +94,7 @@ export default async function createProfilePic(id: string) {
 
 	await runSD(modelPath, posPrompt, output, negPrompt);
 
-	const filename = await basename(output);
+	const filename = `${now}.png`;
 	const sqlUpdate = update('persona', { profile_pic: filename }, { id });
 	await dbRun(sqlUpdate[0], sqlUpdate[1]);
 

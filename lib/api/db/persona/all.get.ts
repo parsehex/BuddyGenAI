@@ -33,5 +33,7 @@ export default async function getAll(): Promise<BuddyVersionMerged[]> {
 		})
 	);
 
+	currentVersions.sort((a, b) => b.updated - a.updated);
+
 	return currentVersions;
 }

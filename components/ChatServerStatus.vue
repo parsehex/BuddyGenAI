@@ -14,9 +14,10 @@ import axios from 'axios';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const { getChatModelPath } = useAppStore();
+const { getChatModelPath, chatServerRunning, updateChatServerRunning } =
+	useAppStore();
 
-const chatServerRunning = ref(false);
+const isRunning = ref(false);
 const lastModel = ref<string | null>(null);
 
 const doStartServer = async () => {
@@ -38,13 +39,13 @@ const doStopServer = async () => {
 	lastModel.value = null;
 };
 
-const refreshServerStatus = async () => {
+const refreshServerStatus = async (): Promise<boolean> => {
 	const url = urls.other.llamacppHealth();
 	try {
 		const response = await axios.get(url, {
 			timeout: 3500,
 		});
-		return response.data.isRunning;
+		return !!response.data.isRunning;
 	} catch (error) {
 		return false;
 	}
@@ -54,8 +55,9 @@ const intervalIdKey = 'refreshServerStatusIntervalId';
 
 const doRefreshServerStatus = async () => {
 	try {
-		chatServerRunning.value = await refreshServerStatus();
-		console.log('chatServerRunning', chatServerRunning.value);
+		const isRunningValue = await refreshServerStatus();
+		isRunning.value = isRunningValue;
+		updateChatServerRunning(isRunning.value);
 	} catch (error) {
 		console.error('Error refreshing server status:', error);
 		if ((window as any)[intervalIdKey]) {
@@ -79,28 +81,27 @@ onBeforeMount(async () => {
 });
 
 watch(
-	() => chatServerRunning.value,
+	() => isRunning.value,
 	async () => {
 		lastModel.value = await getLastModel();
+		updateChatServerRunning(isRunning.value);
 	}
 );
 
 const bgColor = computed(() =>
-	chatServerRunning.value ? 'bg-green-500' : 'bg-red-500'
+	isRunning.value ? 'bg-green-500' : 'bg-red-500'
 );
-const color = computed(() => (chatServerRunning.value ? 'green' : 'red'));
+const color = computed(() => (isRunning.value ? 'green' : 'red'));
 </script>
 
 <template>
-	<HoverCard :close-delay="250">
+	<HoverCard :close-delay="250" :open-delay="50">
 		<HoverCardTrigger as-child>
 			<div
 				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center"
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
-				<Button variant="link">
-					Chat {{ chatServerRunning ? 'Online' : 'Offline' }}
-				</Button>
+				<Button variant="link">Chat {{ isRunning ? 'Online' : 'Offline' }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-40" :hide-when-detached="true" side="right">
@@ -110,7 +111,7 @@ const color = computed(() => (chatServerRunning.value ? 'green' : 'red'));
 						{{ lastModel }}
 					</p>
 					<div class="flex justify-around">
-						<Button v-if="!chatServerRunning" @click="doStartServer">Start</Button>
+						<Button v-if="!isRunning" @click="doStartServer">Start</Button>
 						<Button v-else @click="doStopServer">Stop</Button>
 					</div>
 				</div>

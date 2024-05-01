@@ -34,7 +34,10 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const dataPath = getDataPath();
-	let imagePath = path.join(dataPath, `images/${persona.id}.png`);
+	let imagePath = path.join(
+		dataPath,
+		`images/${persona.id}/${persona.profile_pic}`
+	);
 
 	if (process.env.NODE_ENV === 'development') {
 		// TODO overhaul paths

@@ -90,36 +90,3 @@ export async function findBinaryPath<T extends ProjectName>(
 		throw new Error(`Binary ${exe} not found for project ${projectName}`);
 	}
 }
-
-export async function getDataPath(subPath?: string) {
-	if (!pathJoin) throw new Error('pathJoin not available');
-
-	const dbLocations = {
-		win32: '%APPDATA%/BuddyGenAI',
-		linux: '~/.config/BuddyGenAI',
-		darwin: '~/Library/Application Support/BuddyGenAI',
-	};
-
-	const platform = process.platform;
-	// @ts-ignore
-	const dir = dbLocations[platform];
-	let p = '';
-	if (process.env.NODE_ENV === 'development') {
-		p = await pathJoin('data', subPath || '');
-	} else {
-		p = await pathJoin(dir, subPath || '');
-
-		// resolve ~ and %APPDATA%
-		if (platform === 'win32') {
-			const appData = process.env.APPDATA;
-			if (appData) {
-				p = p.replace('%APPDATA%', appData);
-			}
-		} else if (platform === 'linux') {
-			p = p.replace('~', process.env.HOME as string);
-		} else if (platform === 'darwin') {
-			p = p.replace('~', '/Users/' + process.env.USER);
-		}
-	}
-	return p;
-}

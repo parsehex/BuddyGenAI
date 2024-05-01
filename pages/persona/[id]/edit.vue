@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -9,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 // import { getPersona, updatePersona } from '@/lib/api/persona';
 import type { Buddy, BuddyVersionMerged } from '@/lib/api/types-db';
 import Spinner from '@/components/Spinner.vue';
@@ -18,11 +20,13 @@ import api from '@/lib/api/db';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '~/components/BuddyAvatar.vue';
 import { useTitle } from '@vueuse/core';
+import { useAppStore } from '~/stores/main';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
+const { updateBuddies } = useAppStore();
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -40,6 +44,22 @@ const updatingProfilePicture = ref(false);
 
 const remixedDescription = ref('');
 
+const allProfilePics = ref([] as string[]);
+const allPicsOpen = ref(false);
+
+const handleSelectProfilePic = async (pic: string) => {
+	await api.buddy.updateOne({
+		id,
+		profile_pic: pic,
+	});
+	persona.value = await api.buddy.getOne(id);
+	profilePictureValue.value = urls.buddy.getProfilePic(
+		`${persona.value?.id}/${pic}`
+	);
+
+	updateBuddies();
+};
+
 // TODO overhaul refreshing profile picture
 // basically, allow the user to refresh the pic, but don't update until they save (+ do versioning on pics)
 // how it'll actually work:
@@ -56,13 +76,15 @@ onBeforeMount(async () => {
 	}
 	if (persona.value?.profile_pic) {
 		profilePictureValue.value = urls.buddy.getProfilePic(
-			persona.value.profile_pic
+			`${persona.value.id}/${persona.value.profile_pic}`
 		);
 	}
 	if (persona.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = persona.value.profile_pic_prompt;
 	}
 	useTitle(`Edit ${persona.value?.name || 'Buddy'} | BuddyGen`);
+
+	allProfilePics.value = await api.buddy.profilePic.getAll(id);
 });
 
 const handleSave = async () => {
@@ -83,8 +105,15 @@ const refreshProfilePicture = async () => {
 	toast({ variant: 'info', description: 'Generating new profile picture...' });
 	const res = await api.buddy.profilePic.createOne(id);
 
-	profilePictureValue.value = urls.buddy.getProfilePic(res.output);
+	persona.value = await api.buddy.getOne(id);
+
+	profilePictureValue.value = urls.buddy.getProfilePic(
+		`${persona.value?.id}/${res.output}`
+	);
 	updatingProfilePicture.value = false;
+
+	allProfilePics.value = await api.buddy.profilePic.getAll(id);
+	updateBuddies();
 };
 
 const remixDescription = async () => {
@@ -127,12 +156,51 @@ const acceptRemixedDescription = () => {
 						class="mb-2 w-2/5"
 					/>
 					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
+
+					<!-- TODO BuddyAvatarSelect :persona @select-pic -->
+					<Collapsible
+						v-if="allProfilePics.length > 1"
+						v-model:open="allPicsOpen"
+						class="space-y-2 w-full my-2 border border-gray-200 rounded-lg"
+					>
+						<CollapsibleTrigger as-child>
+							<div
+								class="text-md flex items-center justify-center cursor-pointer hover:bg-gray-100"
+							>
+								Other Profile Pictures
+								<Button variant="ghost" size="sm" class="w-9 p-0 hover:bg-transparent">
+									<ChevronDown v-if="!allPicsOpen" />
+									<ChevronUp v-else />
+								</Button>
+							</div>
+						</CollapsibleTrigger>
+						<CollapsibleContent>
+							<ScrollArea class="w-full mx-auto">
+								<div class="flex flex-wrap justify-center w-max">
+									<div
+										v-for="pic in allProfilePics"
+										:key="pic"
+										@click="handleSelectProfilePic(pic)"
+										class="cursor-pointer w-16 h-16 m-2 rounded-full hover:shadow-lg hover:scale-105 hover:opacity-90"
+										:style="{
+											backgroundImage: `url(${urls.buddy.getProfilePic(
+												`${persona?.id}/${pic}`
+											)})`,
+											backgroundSize: 'cover',
+											userSelect: 'none',
+										}"
+									></div>
+								</div>
+								<ScrollBar orientation="horizontal" />
+							</ScrollArea>
+						</CollapsibleContent>
+					</Collapsible>
 					<Label class="flex flex-col items-center space-y-2">
-						<!-- TODO describe better -->
 						<span class="text-lg">Appearance</span>
 						<Input
 							v-model="profilePicturePrompt"
 							placeholder="tan suit, sunglasses"
+							@keydown.enter="refreshProfilePicture"
 						/>
 					</Label>
 					<div class="flex flex-col items-center justify-center">
