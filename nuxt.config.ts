@@ -5,7 +5,9 @@ export default defineNuxtConfig({
 		shim: false,
 	},
 	ssr: false,
-	// serverDir: './server',
+	devtools: {
+		enabled: true,
+	},
 	modules: ['@nuxtjs/tailwindcss', 'shadcn-nuxt', '@pinia/nuxt'],
 	shadcn: {
 		/**
