@@ -131,7 +131,8 @@ const sortedThreads = computed(() => {
 	<!-- allow editing description (or something to fix broken generations) -->
 	<!-- instructions to acquire models -->
 
-	<div v-if="threads.length" class="flex flex-col items-center">
+	<div v-if="threads.length" class="flex flex-col items-center cont">
+		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-0">
 			{{ newHere ? 'Welcome to' : '' }}
 			<span class="underline">
@@ -193,4 +194,8 @@ const sortedThreads = computed(() => {
 	/>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss" scoped>
+.cont {
+	@apply w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg mx-auto;
+}
+</style>
