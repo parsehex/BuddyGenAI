@@ -165,7 +165,7 @@ const acceptRemixedDescription = () => {
 							<div
 								class="text-md flex items-center justify-center cursor-pointer hover:bg-gray-100"
 							>
-								Other Profile Pictures
+								Other Pictures
 								<Button variant="ghost" size="sm" class="w-9 p-0 hover:bg-transparent">
 									<ChevronDown v-if="!allPicsOpen" />
 									<ChevronUp v-else />
@@ -174,7 +174,7 @@ const acceptRemixedDescription = () => {
 						</CollapsibleTrigger>
 						<CollapsibleContent>
 							<ScrollArea class="w-full mx-auto">
-								<div class="flex flex-wrap justify-center w-max">
+								<div class="flex flex-wrap justify-center w-max pb-2">
 									<div
 										v-for="pic in allProfilePics"
 										:key="pic"

@@ -6,7 +6,7 @@ CREATE TABLE persona (
 	profile_pic_prompt TEXT,
 	profile_pic_use_prompt INTEGER NOT NULL CHECK(profile_pic_use_prompt IN (0, 1)),
 	current_version_id TEXT,
-	FOREIGN KEY(current_version_id) REFERENCES persona_version(id)
+	FOREIGN KEY(current_version_id) REFERENCES persona_version(id) ON DELETE CASCADE
 );
 
 CREATE TABLE chat_thread (
@@ -17,8 +17,8 @@ CREATE TABLE chat_thread (
 	current_persona_version_id TEXT,
 	persona_mode_use_current INTEGER CHECK(persona_mode_use_current IN (0, 1)),
 	mode TEXT NOT NULL CHECK(mode IN ('persona', 'custom')),
-	FOREIGN KEY(persona_id) REFERENCES persona(id),
-	FOREIGN KEY(current_persona_version_id) REFERENCES persona_version(id)
+	FOREIGN KEY(persona_id) REFERENCES persona(id) ON DELETE CASCADE,
+	FOREIGN KEY(current_persona_version_id) REFERENCES persona_version(id) ON DELETE CASCADE
 );
 
 CREATE TABLE chat_message (
@@ -29,7 +29,7 @@ CREATE TABLE chat_message (
 	content TEXT NOT NULL,
 	thread_id TEXT NOT NULL,
 	thread_index INTEGER NOT NULL,
-	FOREIGN KEY(thread_id) REFERENCES chat_thread(id)
+	FOREIGN KEY(thread_id) REFERENCES chat_thread(id) ON DELETE CASCADE
 );
 
 CREATE TABLE persona_version (
@@ -40,7 +40,7 @@ CREATE TABLE persona_version (
 	name TEXT NOT NULL,
 	description TEXT NOT NULL,
 	UNIQUE(persona_id, version),
-	FOREIGN KEY(persona_id) REFERENCES persona(id)
+	FOREIGN KEY(persona_id) REFERENCES persona(id) ON DELETE CASCADE
 );
 
 CREATE TABLE app_settings (

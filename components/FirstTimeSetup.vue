@@ -33,13 +33,17 @@ const updatingProfilePicture = ref(false);
 
 const relationshipToBuddy = ref('');
 
-// TODO figure out temporary pics
-const profilePictureValue = ref('');
-
 const acceptedBuddyDesc = ref('');
 const acceptBuddy = async (
 	descriptionOrKeywords: 'description' | 'keywords'
 ) => {
+	if (!buddyName.value || !buddyKeywords.value) {
+		toast({
+			variant: 'destructive',
+			description: 'Please fill out a Name and Keywords for your Buddy.',
+		});
+		return;
+	}
 	let buddyDescription = createdDescription.value;
 	if (descriptionOrKeywords === 'keywords') {
 		buddyDescription = buddyKeywords.value;
@@ -152,12 +156,9 @@ const createDescription = async () => {
 		});
 		return;
 	}
-	const relationship = relationshipToBuddy.value
-		? `${buddyName.value}'s relation to ${userNameValue.value}: ${relationshipToBuddy.value}`
-		: '';
 	const desc = buddyKeywords.value;
 	const prompt = `The following input is a description of someone named ${buddyName.value}. Briefly expand upon the input to provide a succinct description of ${buddyName.value} using common language.
-${relationship}\nInput:\n`;
+Input:\n`;
 	let value = '';
 	try {
 		value = (await complete(prompt + desc, {
@@ -315,12 +316,21 @@ ${relationship}\nInput:\n`;
 									@keyup.enter="createDescription"
 								/>
 
-								<Button
-									@click="createDescription"
-									class="mt-4 p-2 bg-blue-500 text-white rounded"
-								>
-									Create
-								</Button>
+								<div>
+									<Button
+										@click="acceptBuddy('keywords')"
+										class="mt-4 p-2 bg-blue-500 text-white rounded"
+									>
+										Create Buddy
+									</Button>
+									{{ 'or' }}
+									<Button
+										@click="createDescription"
+										class="mt-4 p-2 bg-blue-500 text-white rounded"
+									>
+										Remix Description
+									</Button>
+								</div>
 							</div>
 							<p class="mt-4" v-if="createdDescription">
 								Created Description:

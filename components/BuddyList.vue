@@ -28,17 +28,16 @@ onBeforeMount(async () => {
 });
 
 const removeBuddy = async (id: string) => {
+	const shouldRedirect = isBuddySelected(id);
 	await api.buddy.removeOne(id);
 	await updateBuddies();
+	if (shouldRedirect) {
+		navigateTo('/');
+	}
 };
 
 const editBuddy = (id: string) => {
 	navigateTo(`/persona/${id}/edit`);
-};
-
-const doRightClick = (id: string) => {
-	rightClickedId.value = id;
-	// console.log('right clicked', id);
 };
 </script>
 
@@ -59,7 +58,7 @@ const doRightClick = (id: string) => {
 							'cursor-pointer hover:bg-gray-200 rounded border-b-2',
 							isBuddySelected(persona.id) ? 'font-bold bg-gray-200' : '',
 						]"
-						@contextmenu="doRightClick(persona.id)"
+						@contextmenu="rightClickedId = persona.id"
 					>
 						<NuxtLink
 							class="p-2 flex items-center"
