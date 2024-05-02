@@ -161,7 +161,7 @@ ${relationship}\nInput:\n`;
 	let value = '';
 	try {
 		value = (await complete(prompt + desc, {
-			body: { max_tokens: 100, temperature: 0.75 },
+			body: { max_tokens: 175, temperature: 0.25 },
 		})) as string;
 	} catch (e) {
 		console.error(e);
