@@ -1,5 +1,5 @@
 import { select, update } from '@/lib/sql';
-import type { ChatMessage } from '../../types-db';
+import type { ChatMessage } from '@/lib/api/types-db';
 
 const { dbGet, dbRun } = useElectron();
 

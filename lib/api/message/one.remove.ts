@@ -1,6 +1,6 @@
 import { del, select } from '@/lib/sql';
-import type { DeleteResponse } from '../../types-api';
-import type { ChatMessage } from '../../types-db';
+import type { DeleteResponse } from '@/lib/api/types-api';
+import type { ChatMessage } from '@/lib/api/types-db';
 
 const { dbGet, dbRun } = useElectron();
 

@@ -1,5 +1,5 @@
 import * as prompt from '@/lib/prompt/persona';
-import AppSettings from '../../AppSettings';
+import { AppSettings } from '@/lib/api/AppSettings';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -44,7 +44,7 @@ export default async function updateSystemMessage(
 		throw new Error('Current version of persona not found');
 	}
 
-	const userName = AppSettings.get('user_name');
+	const userName = AppSettings.get('user_name') as string;
 
 	const content = prompt.fromPersonaDescription(
 		userName,

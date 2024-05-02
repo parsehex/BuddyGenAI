@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Spinner from '@/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
-import api from '@/lib/api/db';
+import { api } from '@/lib/api';
 
 const { toast } = useToast();
 

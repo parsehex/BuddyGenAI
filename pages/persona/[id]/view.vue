@@ -8,7 +8,7 @@ import type {
 	MergedChatThread,
 	BuddyVersionMerged,
 } from '@/lib/api/types-db';
-import api from '@/lib/api/db';
+import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '~/components/BuddyAvatar.vue';
 import { useTitle } from '@vueuse/core';

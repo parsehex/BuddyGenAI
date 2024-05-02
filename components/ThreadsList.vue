@@ -18,7 +18,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
 import type { ChatThread } from '~/lib/api/types-db';
-import api from '~/lib/api/db';
+import { api } from '~/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
 
 const route = useRoute();

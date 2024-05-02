@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/toast';
 import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import api from '~/lib/api/db';
+import { api } from '~/lib/api';
 import BuddyAvatar from './BuddyAvatar.vue';
 
 const props = defineProps<{

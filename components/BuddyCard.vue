@@ -7,7 +7,7 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import api from '~/lib/api/db';
+import { api } from '~/lib/api';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import BuddyAvatar from './BuddyAvatar.vue';

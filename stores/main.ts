@@ -6,7 +6,7 @@ import type {
 	BuddyVersionMerged,
 } from '@/lib/api/types-db';
 
-import api from '@/lib/api/db';
+import { api } from '@/lib/api';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import urls from '~/lib/api/urls';
 import axios from 'axios';

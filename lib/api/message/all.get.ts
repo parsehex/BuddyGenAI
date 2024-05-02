@@ -3,9 +3,9 @@ import type {
 	ChatThread,
 	Buddy,
 	BuddyVersion,
-} from '../../types-db';
-import AppSettings from '../../AppSettings';
-import * as prompt from '../../../prompt/persona';
+} from '@/lib/api/types-db';
+import { AppSettings } from '@/lib/api/AppSettings';
+import * as prompt from '@/lib/prompt/persona';
 import { select } from '@/lib/sql';
 
 const { dbGet, dbAll } = useElectron();
@@ -50,7 +50,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		}
 
 		if (!hasSystemMessage) {
-			const userName = AppSettings.get('user_name');
+			const userName = AppSettings.get('user_name') as string;
 			messages.unshift({
 				id: '',
 				created: new Date().getTime(),
@@ -65,7 +65,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 				thread_index: 0,
 			});
 		} else {
-			const userName = AppSettings.get('user_name');
+			const userName = AppSettings.get('user_name') as string;
 			messages[0].content = prompt.fromPersonaDescription(
 				userName,
 				personaVersion.name,

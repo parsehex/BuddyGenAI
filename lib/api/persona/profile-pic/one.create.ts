@@ -1,8 +1,8 @@
-import AppSettings from '../../../AppSettings';
-import { negPromptFromName, posPromptFromName } from '~/lib/prompt/sd';
-import useSD from '~/composables/useSD';
-import { select, update } from '~/lib/sql';
-import type { Buddy, BuddyVersion } from '~/lib/api/types-db';
+import { AppSettings } from '@/lib/api/AppSettings';
+import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
+import useSD from '@/composables/useSD';
+import { select, update } from '@/lib/sql';
+import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 
 // @ts-ignore
 const { runSD } = useSD();

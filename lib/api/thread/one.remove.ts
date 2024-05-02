@@ -1,6 +1,6 @@
 import type { DeleteResponse } from '@/lib/api/types-api';
 import { del, select } from '@/lib/sql';
-import api from '..';
+import { api } from '@/lib/api';
 
 const { dbGet, dbRun } = useElectron();
 

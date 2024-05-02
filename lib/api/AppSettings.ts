@@ -1,4 +1,4 @@
-import { insert, select, update } from '../sql';
+import { insert, select, update } from '@/lib/sql';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
@@ -29,7 +29,7 @@ const validations = {
 	selected_provider_image: ['local'], // ['external', 'local', 'custom'],
 };
 
-class AppSettings {
+class AppSettingsCls {
 	public isLoaded = false;
 
 	constructor() {
@@ -149,4 +149,4 @@ class AppSettings {
 	}
 }
 
-export default new AppSettings();
+export const AppSettings = new AppSettingsCls();

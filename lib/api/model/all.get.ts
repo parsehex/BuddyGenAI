@@ -1,4 +1,4 @@
-import AppSettings from '../../AppSettings';
+import { AppSettings } from '@/lib/api/AppSettings';
 
 const { dbGet, pathJoin, listDirectory, mkdir } = useElectron();
 
@@ -7,7 +7,7 @@ export default async function getAll(
 ): Promise<string[]> {
 	if (!dbGet) throw new Error('dbGet not available');
 
-	const directory = AppSettings.get('local_model_directory');
+	const directory = AppSettings.get('local_model_directory') as string;
 	if (!directory) {
 		console.log('No directory');
 		return [];

@@ -9,7 +9,7 @@ import {
 import { useAppStore } from '@/stores/main';
 import { Button } from './ui/button';
 import BuddyAvatar from './BuddyAvatar.vue';
-import api from '~/lib/api/db';
+import { api } from '~/lib/api';
 
 const { updateBuddies } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];

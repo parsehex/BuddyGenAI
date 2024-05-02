@@ -27,7 +27,7 @@ import Message from './ChatMessage.vue';
 import BuddySelect from './BuddySelect.vue';
 import BuddyCard from './BuddyCard.vue';
 import { useToast } from '@/components/ui/toast';
-import api from '@/lib/api/db';
+import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';

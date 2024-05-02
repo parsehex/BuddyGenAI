@@ -3,7 +3,7 @@ import type { Message } from 'ai/vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useElectron from '@/composables/useElectron';
-import api from '@/lib/api/db';
+import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import BuddyAvatar from './BuddyAvatar.vue';

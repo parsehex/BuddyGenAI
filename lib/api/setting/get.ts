@@ -1,4 +1,4 @@
-import AppSettings, { AppSettingsDefaults } from '../../AppSettings';
+import { AppSettings, AppSettingsDefaults } from '@/lib/api/AppSettings';
 
 const settingsKeys = Object.keys(AppSettingsDefaults);
 

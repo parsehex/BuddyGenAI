@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Chatbox from '@/components/Chatbox.vue';
 import { useTitle } from '@vueuse/core';
-import api from '~/lib/api/db';
+import { api } from '~/lib/api';
 import type { MergedChatThread } from '~/lib/api/types-db';
 import { useAppStore } from '~/stores/main';
 
