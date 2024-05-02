@@ -130,8 +130,8 @@ watch(route, async () => {
 					<ContextMenuContent>
 						<!-- TODO fix to not use selected thread -->
 						<DialogTrigger asChild>
-							<ContextMenuItem>
-								<span @click="renameClicked(rightClickedId)">Rename</span>
+							<ContextMenuItem @click="renameClicked(rightClickedId)">
+								Rename
 							</ContextMenuItem>
 						</DialogTrigger>
 						<ContextMenuItem @click="doDeleteThread(rightClickedId)">

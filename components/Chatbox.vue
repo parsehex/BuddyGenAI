@@ -456,7 +456,7 @@ const canReload = computed(() => {
 			class="w-full fixed bottom-0 flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl"
 		>
 			<Textarea
-				class="p-2 border border-gray-300 rounded shadow-xl"
+				class="p-2 border border-gray-300 rounded shadow-xl text-lg"
 				tabindex="1"
 				v-model="input"
 				placeholder="Say something..."

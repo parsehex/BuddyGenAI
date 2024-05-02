@@ -263,7 +263,7 @@ ${relationship}\nInput:\n`;
 
 			<Card
 				v-if="!serverStarting && isModelsSetup"
-				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-2"
+				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2"
 			>
 				<CardHeader class="pt-0 pb-0">
 					<h2 v-if="newHere" class="text-lg text-center underline mb-0 pb-3">
