@@ -34,3 +34,12 @@ assistant's name: ${aiName} -- ${aiName} is unaware that they are an AI and beli
 
 The following is a chat between 2 people named ${userName} and ${aiName}. ${aiName} is often doing their own activities that they sometimes tell ${userName} about. Description of ${aiName} to be followed faithfully:\n${description}`;
 }
+
+export function descriptionFromKeywords(
+	buddyName: string,
+	keywordsStr: string
+) {
+	const prompt = `The following input is a description of someone named ${buddyName}. Briefly expand upon the input to provide a succinct description of ${buddyName} using common language.
+Input:\n`;
+	return prompt + keywordsStr;
+}

@@ -1,30 +1,35 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { AtomIcon, ChevronDown, ChevronUp } from 'lucide-vue-next';
 import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import type { Buddy, BuddyVersionMerged } from '@/lib/api/types-db';
-import Spinner from '@/components/Spinner.vue';
 import { useToast } from '@/components/ui/toast';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
-import BuddyAvatar from '~/components/BuddyAvatar.vue';
+import BuddyAvatar from '@/components/BuddyAvatar.vue';
+import Spinner from '@/components/Spinner.vue';
 import { useTitle } from '@vueuse/core';
-import { useAppStore } from '~/stores/main';
+import { useAppStore } from '@/stores/main';
+import type { ProfilePicQuality } from '@/lib/api/types-api';
+import { descriptionFromKeywords } from '@/lib/prompt/persona';
+import { keywordsFromNameAndDescription } from '~/lib/prompt/sd';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
 const { updateBuddies } = useAppStore();
+const store = useAppStore();
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -44,6 +49,16 @@ const remixedDescription = ref('');
 
 const allProfilePics = ref([] as string[]);
 const allPicsOpen = ref(false);
+
+const gen = ref(false);
+const prog = ref(0);
+watch(
+	() => [store.imgGenerating, store.imgProgress],
+	() => {
+		gen.value = store.imgGenerating;
+		prog.value = store.imgProgress;
+	}
+);
 
 const handleSelectProfilePic = async (pic: string) => {
 	await api.buddy.updateOne({
@@ -94,14 +109,15 @@ const handleSave = async () => {
 	await navigateTo(`./view`);
 };
 
+const picQuality = ref(2 as ProfilePicQuality);
+
 const refreshProfilePicture = async () => {
 	updatingProfilePicture.value = true;
 	await api.buddy.updateOne({
 		id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
-	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	const res = await api.buddy.profilePic.createOne(id);
+	const res = await api.buddy.profilePic.createOne(id, picQuality.value);
 
 	persona.value = await api.buddy.getOne(id);
 
@@ -114,12 +130,24 @@ const refreshProfilePicture = async () => {
 	updateBuddies();
 };
 
+const generating = ref(false);
 const remixDescription = async () => {
-	const desc = wizInput.value;
-	const prompt = `The following input is a description of someone named ${persona.value?.name}. Provide a succinct description of them using common language.\n\nInput:\n`;
-	const value = await complete(prompt + desc, {
+	if (!store.chatServerRunning) {
+		toast({
+			variant: 'destructive',
+			description: 'Please go to the Chat tab and start the server first.',
+		});
+		return;
+	}
+	const promptStr = descriptionFromKeywords(
+		persona.value?.name || '',
+		wizInput.value
+	);
+	generating.value = true;
+	const value = await complete(promptStr, {
 		body: { max_tokens: 100, temperature: 1 },
 	});
+	generating.value = false;
 	if (!value) {
 		toast({
 			variant: 'destructive',
@@ -132,6 +160,60 @@ const remixDescription = async () => {
 const acceptRemixedDescription = () => {
 	descriptionValue.value = remixedDescription.value;
 	remixedDescription.value = '';
+};
+
+let chosenType = 'more';
+
+const keywordsPopover = ref(false);
+const createdKeywords = ref('');
+const creatingKeywords = ref(false);
+const suggestKeywords = async (type: 'more' | 'new') => {
+	chosenType = type;
+	const descVal = persona.value?.description || '';
+	const promptStr = keywordsFromNameAndDescription(
+		persona.value?.name || '',
+		descVal,
+		type === 'more' ? profilePicturePrompt.value : undefined
+	);
+	let value = '';
+	try {
+		creatingKeywords.value = true;
+		value = (await complete(promptStr, {
+			body: { max_tokens: 75, temperature: 0.75 },
+		})) as string;
+		creatingKeywords.value = false;
+	} catch (e) {
+		creatingKeywords.value = false;
+		console.error(e);
+		value = '';
+	}
+	value = value || '';
+	value = value.trim();
+	if (!value) {
+		toast({
+			variant: 'destructive',
+			description: 'Error generating keywords. Please try again.',
+		});
+		return;
+	}
+	createdKeywords.value = value;
+};
+
+const acceptKeywords = () => {
+	const existingKeywords = profilePicturePrompt.value;
+	if (chosenType === 'more') {
+		if (existingKeywords) {
+			profilePicturePrompt.value = `${existingKeywords}, ${createdKeywords.value}`;
+		} else {
+			profilePicturePrompt.value = createdKeywords.value;
+		}
+	} else {
+		profilePicturePrompt.value = createdKeywords.value;
+	}
+	createdKeywords.value = '';
+	keywordsPopover.value = false;
+
+	refreshProfilePicture();
 };
 </script>
 
@@ -193,21 +275,76 @@ const acceptRemixedDescription = () => {
 							</ScrollArea>
 						</CollapsibleContent>
 					</Collapsible>
-					<Label class="flex flex-col items-center space-y-2">
+					<Label for="profile-picture" class="flex flex-col items-center">
 						<span class="text-lg">Appearance</span>
-						<Input
-							v-model="profilePicturePrompt"
-							placeholder="tan suit, sunglasses"
-							@keydown.enter="refreshProfilePicture"
-						/>
 					</Label>
+					<div class="flex w-full items-center gap-1.5">
+						<Input
+							id="profile-picture"
+							v-model="profilePicturePrompt"
+							class="p-2 border border-gray-300 rounded"
+							placeholder="tan suit, sunglasses"
+						/>
+
+						<Popover :open="keywordsPopover" @update:open="keywordsPopover = $event">
+							<PopoverTrigger>
+								<Button type="button" class="info" title="Suggest keywords">
+									<AtomIcon />
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent
+								side="top"
+								:avoid-collisions="true"
+								align="start"
+								class="flex flex-col px-2 py-4"
+							>
+								<div>
+									Suggest:
+									<Button
+										class="p-2 bg-blue-500 text-white rounded"
+										@click="suggestKeywords('more')"
+									>
+										More
+									</Button>
+									<Button
+										class="p-2 bg-blue-500 text-white rounded"
+										@click="suggestKeywords('new')"
+									>
+										New Keywords
+									</Button>
+								</div>
+
+								<Spinner v-if="creatingKeywords" />
+
+								<p v-if="createdKeywords" class="my-4">
+									<span class="text-sm">AI Suggestion:</span>
+									<br />
+									<span class="font-bold">{{ createdKeywords }}</span>
+								</p>
+								<Button
+									v-if="createdKeywords"
+									class="p-2 success text-white rounded"
+									@click="acceptKeywords"
+								>
+									Accept & Make Picture
+								</Button>
+							</PopoverContent>
+						</Popover>
+					</div>
+
+					<div class="flex flex-col items-center justify-center my-1">
+						<Label class="text-lg">Picture Quality</Label>
+						<select v-model="picQuality">
+							<option :value="1">Low</option>
+							<option :value="2">Medium</option>
+							<option :value="3">High</option>
+						</select>
+					</div>
 					<div class="flex flex-col items-center justify-center">
+						<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
-						<Spinner
-							:style="{ visibility: updatingProfilePicture ? 'visible' : 'hidden' }"
-						/>
 					</div>
 				</div>
 				<div class="flex flex-col items-center space-y-4">
@@ -224,6 +361,10 @@ const acceptRemixedDescription = () => {
 				<Card class="w-full mt-4">
 					<CardHeader>
 						<h2 class="font-bold">Description Wizard</h2>
+						<p class="text-sm text-gray-500">
+							Create a new description for {{ persona?.name }} using the AI Description
+							Wizard.
+						</p>
 					</CardHeader>
 					<CardContent>
 						<Label>
@@ -234,11 +375,16 @@ const acceptRemixedDescription = () => {
 								@keydown.enter="remixDescription"
 							/>
 						</Label>
-						<Button @click="remixDescription">Create Description</Button>
+						<div class="flex items-center">
+							<Button class="mt-2" @click="remixDescription">Remix Description</Button>
+							<Spinner v-if="generating" />
+						</div>
 						<div v-if="remixedDescription">
-							<p class="text-lg">Remixed Description:</p>
+							<p class="text-lg">New Description:</p>
 							<p class="text-lg">{{ remixedDescription }}</p>
-							<Button @click="acceptRemixedDescription">Accept</Button>
+							<Button class="mt-2 success" @click="acceptRemixedDescription">
+								Accept
+							</Button>
 						</div>
 					</CardContent>
 				</Card>

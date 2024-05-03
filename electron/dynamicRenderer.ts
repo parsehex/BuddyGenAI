@@ -10,6 +10,7 @@ import { spawn, fork } from 'child_process';
 import { findDirectoryInPath } from './fs';
 import { pathToFileURL } from 'url';
 import llamaCppRouter from './routes/message';
+import sdRouter from './routes/sd';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -58,6 +59,7 @@ export default function (mainWindow: BrowserWindow) {
 		);
 		app.use('/images', serveStatic(imgPath));
 		app.use(llamaCppRouter);
+		app.use(sdRouter);
 
 		const listener = app.listen(8079, 'localhost', () => {
 			const port = (listener.address() as any).port;
@@ -72,6 +74,7 @@ export default function (mainWindow: BrowserWindow) {
 	app.use('/images', serveStatic(imgPath));
 
 	app.use(llamaCppRouter);
+	app.use(sdRouter);
 
 	app.get('*', (req, res) => {
 		res.sendFile(path.resolve(__dirname, '../public', 'index.html')); // replace with the path to your SPA's entry point

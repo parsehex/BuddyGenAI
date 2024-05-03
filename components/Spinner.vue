@@ -1,5 +1,5 @@
 <template>
-	<div class="spinner"></div>
+	<div class="spinner mx-2"></div>
 </template>
 
 <script setup lang="ts">

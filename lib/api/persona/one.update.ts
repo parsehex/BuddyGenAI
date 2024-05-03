@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
 
-const { dbGet, dbRun } = useElectron();
+const { dbGet, dbAll, dbRun } = useElectron();
 
 interface UpdatePersonaOptions {
 	id: string;
@@ -87,7 +87,7 @@ export default async function updateOne({
 			persona_id: id,
 			persona_mode_use_current: true,
 		});
-		const threads = (await dbGet(sqlThreads[0], sqlThreads[1])) as ChatThread[];
+		const threads = (await dbAll(sqlThreads[0], sqlThreads[1])) as ChatThread[];
 		if (threads.length) {
 			const sqlUpdateThreads = threads.map((thread) => {
 				return update(

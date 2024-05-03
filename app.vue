@@ -40,7 +40,7 @@ import AppMenubar from '~/components/AppMenubar.vue';
 }
 
 .success {
-	@apply bg-green-400 text-white font-bold;
+	@apply bg-green-400 text-black font-bold;
 }
 .border-success {
 	@apply border-green-700;

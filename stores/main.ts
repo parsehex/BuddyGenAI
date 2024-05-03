@@ -4,6 +4,7 @@ import type {
 	ChatThread,
 	MergedChatThread,
 	BuddyVersionMerged,
+	SQLiteVal,
 } from '@/lib/api/types-db';
 
 import { api } from '@/lib/api';
@@ -33,6 +34,8 @@ interface Settings {
 	selected_provider_image: Provider;
 	selected_model_chat: string;
 	selected_model_image: string;
+	fresh_db: number;
+	n_gpu_layers: number;
 }
 
 let firstRun = true;
@@ -121,7 +124,7 @@ export const useAppStore = defineStore('app', () => {
 		Object.assign(settings.value, res);
 		return res;
 	};
-	const saveSettings = async (newVal: Record<string, string>) => {
+	const saveSettings = async (newVal: Record<string, SQLiteVal>) => {
 		await api.setting.update(newVal);
 	};
 	const updateThreads = async () => {
@@ -130,6 +133,10 @@ export const useAppStore = defineStore('app', () => {
 		threads.value.length = 0;
 		threads.value.push(...res);
 		return res;
+	};
+
+	const getNGpuLayers = () => {
+		return settings.value.n_gpu_layers;
 	};
 
 	const getChatModelPath = () => {
@@ -169,9 +176,44 @@ export const useAppStore = defineStore('app', () => {
 
 	const chatServerRunning = ref(false);
 	const updateChatServerRunning = async () => {
-		const running = await isServerRunning();
-		chatServerRunning.value = running;
+		const running: { isRunning: boolean } = await isServerRunning();
+		chatServerRunning.value = running.isRunning;
 	};
+
+	const imgGenerating = ref(false);
+	const updateImgGenerating = (val: boolean) => {
+		imgGenerating.value = val;
+	};
+	const imgProgress = ref(0);
+	const updateImgProgress = (val: number) => {
+		imgProgress.value = val;
+	};
+
+	function getSDProgress() {
+		const eventSource = new EventSource('http://localhost:8079/api/sd/progress');
+
+		eventSource.onmessage = function (event) {
+			const data = JSON.parse(event.data);
+			if (data.type === 'start') {
+				updateImgProgress(0);
+				updateImgGenerating(true);
+			} else if (data.type === 'stop') {
+				updateImgProgress(1);
+				updateImgGenerating(false);
+			} else if (data.type === 'progress') {
+				if (data.progress >= 0.95) {
+					updateImgGenerating(false);
+				}
+				updateImgProgress(data.progress);
+			}
+		};
+
+		eventSource.onerror = function (error) {
+			updateImgGenerating(false);
+			updateImgProgress(0);
+		};
+	}
+	getSDProgress();
 
 	return {
 		selectedBuddyId,
@@ -187,6 +229,7 @@ export const useAppStore = defineStore('app', () => {
 		updateSettings,
 		saveSettings,
 		updateThreads,
+		getNGpuLayers,
 		getChatModelPath,
 
 		startServer,
@@ -195,5 +238,10 @@ export const useAppStore = defineStore('app', () => {
 
 		chatServerRunning,
 		updateChatServerRunning,
+
+		imgGenerating,
+		updateImgGenerating,
+		imgProgress,
+		updateImgProgress,
 	};
 });

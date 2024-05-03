@@ -15,6 +15,7 @@ const {
 	refreshServerStatus,
 	updateModels,
 	getChatModelPath,
+	getNGpuLayers,
 } = useAppStore();
 
 // @ts-ignore
@@ -56,7 +57,7 @@ const updateSelectedModel = (type: 'chat' | 'image') => {
 		await refreshServerStatus();
 		if (chatServerRunning) {
 			await stopServer();
-			await startServer(getChatModelPath());
+			await startServer(getChatModelPath(), getNGpuLayers());
 		}
 	};
 };
@@ -68,12 +69,12 @@ const doRefreshServerStatus = async () => {
 };
 
 const doStartServer = async () => {
-	await startServer(getChatModelPath());
+	await startServer(getChatModelPath(), getNGpuLayers());
 };
 </script>
 
 <template>
-	<div class="container flex flex-col items-center">
+	<div class="container flex flex-col items-center pb-8">
 		<h1 class="text-2xl font-bold">App Settings</h1>
 		<div class="w-1/2">
 			<Alert v-if="error" variant="destructive">
@@ -181,6 +182,16 @@ const doStartServer = async () => {
 						</SelectGroup>
 					</SelectContent>
 				</Select>
+				<div class="mt-2">
+					<Label for="n-gpu-layers" class="block">Number of GPU Layers</Label>
+					<Input
+						v-model="settings.n_gpu_layers"
+						type="number"
+						id="n-gpu-layers"
+						name="n-gpu-layers"
+						class="w-full border border-gray-300 rounded-md p-2 mt-1"
+					/>
+				</div>
 			</div>
 			<div class="mt-4">
 				<Label for="image-model" class="mb-1">Image Model</Label>

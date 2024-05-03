@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs/promises';
 import { findDirectoryInPath, getDirname } from '../fs';
 
+const VERBOSE = false;
+
 const isDev = process.env.NODE_ENV === 'development';
 
 const dbLocations = {
@@ -84,7 +86,7 @@ export default async (mainWindow: BrowserWindow) => {
 	migrations.sort();
 	if (applyMigrations) console.log('will apply migrations', migrations);
 
-	const verbose = isDev ? console.log.bind(console) : undefined;
+	const verbose = isDev && VERBOSE ? console.log.bind(console) : undefined;
 
 	const sqlDb = new Database(dbPath, { verbose });
 

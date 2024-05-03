@@ -1,4 +1,5 @@
 import { insert, select, update } from '@/lib/sql';
+import type { SQLiteVal } from './types-db';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
@@ -11,8 +12,6 @@ type AppSettingsKeys =
 	| 'selected_model_image'
 	| 'fresh_db';
 
-type SQLiteVal = string | number | null;
-
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
 	local_model_directory: '', // should have chat/ and image/ subdirectories
@@ -21,6 +20,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_model_chat: '', // depends on selected_chat_api_provider
 	selected_model_image: '',
 	fresh_db: 0,
+	n_gpu_layers: 0,
 };
 
 // TODO AppSettings method to validate

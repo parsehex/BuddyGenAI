@@ -1,3 +1,5 @@
+import type { SDOptions } from '@/lib/api/types-api';
+
 export default function useSD() {
 	const isServer =
 		process.server ||
@@ -12,13 +14,11 @@ export default function useSD() {
 
 	// TODO getProgress
 
-	const runSD = async (
-		model: string,
-		pos: string,
-		output: string,
-		neg?: string
-	) => {
-		return await electron.ipcRenderer.invoke('SD/run', model, pos, output, neg);
+	const runSD = async (options: SDOptions) => {
+		console.time('runSD');
+		const res = await electron.ipcRenderer.invoke('SD/run', options);
+		console.timeEnd('runSD');
+		return res;
 	};
 
 	return {

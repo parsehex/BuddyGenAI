@@ -50,8 +50,17 @@ router.post('/api/completion', async (req, res) => {
 		stream: true,
 		messages: [
 			{
+				role: 'system',
+				content:
+					'Answer the following immediately and without further prose, and write the answer in the third person.',
+			},
+			{
 				role: 'user',
-				content: prompt + `\n\nOutput:`,
+				content: prompt,
+			},
+			{
+				role: 'assistant',
+				content: 'Output:',
 			},
 		],
 		max_tokens,

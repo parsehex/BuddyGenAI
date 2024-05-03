@@ -17,6 +17,7 @@ const {
 	updateSettings,
 	updateThreads,
 	getChatModelPath,
+	getNGpuLayers,
 } = useAppStore();
 const threads: MergedChatThread[] = useAppStore().threads;
 const buddies: BuddyVersionMerged[] = useAppStore().buddies;
@@ -64,7 +65,7 @@ const handleModelChange = async () => {
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			serverStarting.value = true;
-			await startServer(getChatModelPath());
+			await startServer(getChatModelPath(), getNGpuLayers());
 			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;
@@ -156,11 +157,14 @@ const sortedThreads = computed(() => {
 						<!-- TODO this is a good idea: show buddy info in thread list -->
 						<div v-if="thread.selected_buddy">
 							<BuddyAvatar
-								v-if="thread.latest_message.role !== 'user'"
+								:style="{
+									visibility:
+										thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
+								}"
 								:persona="thread.selected_buddy"
 								size="base"
 							/>
-							<Avatar v-else>
+							<Avatar v-if="thread.latest_message.role === 'user'">
 								<AvatarFallback>{{ userInitials }}</AvatarFallback>
 							</Avatar>
 						</div>

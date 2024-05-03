@@ -5,7 +5,18 @@ import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import { api } from '~/lib/api';
+import { AtomIcon } from 'lucide-vue-next';
 import BuddyAvatar from './BuddyAvatar.vue';
+import type { ProfilePicQuality } from '~/lib/api/types-api';
+import { Progress } from '@/components/ui/progress';
+import { descriptionFromKeywords } from '~/lib/prompt/persona';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
+import Spinner from './Spinner.vue';
+import { keywordsFromNameAndDescription } from '~/lib/prompt/sd';
 
 const props = defineProps<{
 	newHere: boolean;
@@ -18,6 +29,17 @@ const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
 const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
+const store = useAppStore();
+
+const gen = ref(false);
+const prog = ref(0);
+watch(
+	() => [store.imgGenerating, store.imgProgress],
+	() => {
+		gen.value = store.imgGenerating;
+		prog.value = store.imgProgress;
+	}
+);
 
 const userNameValue = ref('');
 
@@ -32,6 +54,9 @@ const newBuddy = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
 const relationshipToBuddy = ref('');
+
+const keywordsPopover = ref(false);
+const createdKeywords = ref('');
 
 const acceptedBuddyDesc = ref('');
 const acceptBuddy = async (
@@ -124,6 +149,8 @@ const handleSave = async () => {
 	await navigateTo(`/chat/${newThread.id}`);
 };
 
+const picQuality = ref(2 as ProfilePicQuality);
+
 const refreshProfilePicture = async () => {
 	if (!newBuddy.value) {
 		toast({
@@ -141,8 +168,7 @@ const refreshProfilePicture = async () => {
 	});
 	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
-	toast({ variant: 'info', description: 'Generating new profile picture...' });
-	const res = await api.buddy.profilePic.createOne(id);
+	const res = await api.buddy.profilePic.createOne(id, picQuality.value);
 
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
@@ -156,12 +182,13 @@ const createDescription = async () => {
 		});
 		return;
 	}
-	const desc = buddyKeywords.value;
-	const prompt = `The following input is a description of someone named ${buddyName.value}. Briefly expand upon the input to provide a succinct description of ${buddyName.value} using common language.
-Input:\n`;
+	const promptStr = descriptionFromKeywords(
+		buddyName.value,
+		buddyKeywords.value
+	);
 	let value = '';
 	try {
-		value = (await complete(prompt + desc, {
+		value = (await complete(promptStr, {
 			body: { max_tokens: 175, temperature: 0.25 },
 		})) as string;
 	} catch (e) {
@@ -188,6 +215,43 @@ Input:\n`;
 		}
 	}
 	createdDescription.value = value;
+};
+
+const suggestKeywords = async () => {
+	const descVal = newBuddy.value?.description || acceptedBuddyDesc.value || '';
+	const promptStr = keywordsFromNameAndDescription(buddyName.value, descVal);
+	let value = '';
+	try {
+		value = (await complete(promptStr, {
+			body: { max_tokens: 75, temperature: 0.75 },
+		})) as string;
+	} catch (e) {
+		console.error(e);
+		value = '';
+	}
+	value = value || '';
+	value = value.trim();
+	if (!value) {
+		toast({
+			variant: 'destructive',
+			description: 'Error generating keywords. Please try again.',
+		});
+		return;
+	}
+	createdKeywords.value = value;
+};
+
+const acceptKeywords = () => {
+	const existingKeywords = profilePicturePrompt.value;
+	if (existingKeywords) {
+		profilePicturePrompt.value = `${existingKeywords}, ${createdKeywords.value}`;
+	} else {
+		profilePicturePrompt.value = createdKeywords.value;
+	}
+	createdKeywords.value = '';
+	keywordsPopover.value = false;
+
+	refreshProfilePicture();
 };
 </script>
 
@@ -308,55 +372,78 @@ Input:\n`;
 								>
 									Use a few words to describe your Buddy
 								</Label>
-								<Input
-									id="persona-keywords"
-									v-model="buddyKeywords"
-									class="mt-2 p-2 border border-gray-300 rounded"
-									placeholder="friendly, helpful, funny"
-									@keyup.enter="createDescription"
-								/>
+								<p class="text-sm text-gray-500">
+									This affects how {{ buddyName || 'your Buddy' }} talks with you.
+								</p>
+								<div class="flex w-full items-center gap-1.5">
+									<Input
+										id="persona-keywords"
+										v-model="buddyKeywords"
+										class="p-2 border border-gray-300 rounded"
+										placeholder="friendly, helpful, funny"
+									/>
+
+									<Popover>
+										<PopoverTrigger>
+											<Button type="button" class="info" title="Create a description">
+												<AtomIcon />
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent
+											:prioritize-position="true"
+											side="left"
+											:avoid-collisions="true"
+											align="start"
+										>
+											<Button
+												@click="createDescription"
+												class="p-2 bg-blue-500 text-white rounded"
+											>
+												Remix Description
+											</Button>
+											<p class="mt-4">
+												Created Description:
+												<br />
+												<Spinner v-if="!createdDescription" />
+												<span class="text-lg ml-3">{{ createdDescription }}</span>
+											</p>
+
+											<!-- accept/cancel buttons -->
+											<div class="flex justify-center mt-4">
+												<Button
+													@click="acceptBuddy('description')"
+													class="mr-2 p-2 success text-white rounded"
+												>
+													Accept
+												</Button>
+												<Button
+													@click="createdDescription = ''"
+													class="p-2 bg-blue-500 text-white rounded"
+												>
+													Cancel
+												</Button>
+											</div>
+										</PopoverContent>
+									</Popover>
+								</div>
 
 								<div>
 									<Button
-										@click="acceptBuddy('keywords')"
+										@click="acceptBuddy(createdDescription ? 'description' : 'keywords')"
 										class="mt-4 p-2 bg-blue-500 text-white rounded"
 									>
 										Create Buddy
 									</Button>
-									{{ 'or' }}
-									<Button
-										@click="createDescription"
-										class="mt-4 p-2 bg-blue-500 text-white rounded"
-									>
-										Remix Description
-									</Button>
 								</div>
 							</div>
-							<p class="mt-4" v-if="createdDescription">
-								Created Description:
-								<br />
-								<span class="text-lg ml-3">{{ createdDescription }}</span>
-							</p>
-							<Button
-								v-if="createdDescription && !acceptedBuddy"
-								@click="acceptBuddy('description')"
-								class="mt-4 mr-2 p-2 bg-blue-500 text-white rounded"
-							>
-								Accept Description
-							</Button>
-							<Button
-								v-if="createdDescription && !acceptedBuddy"
-								@click="acceptBuddy('keywords')"
-								class="mt-4 p-2 bg-blue-500 text-white rounded"
-							>
-								Use Keywords
-							</Button>
 						</CardContent>
 					</Card>
 					<Card v-else class="mt-4 p-2 w-full">
 						<CardContent>
-							<h2 class="text-lg mt-4 text-center underline">Your first Buddy</h2>
-							<p class="mt-3 text-center">
+							<h2 v-if="newHere" class="text-lg mt-4 text-center underline">
+								Your first Buddy
+							</h2>
+							<p class="my-2 text-center">
 								<span class="text-lg ml-3">{{ buddyName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
@@ -365,16 +452,64 @@ Input:\n`;
 									:persona="newBuddy"
 									size="lg"
 								/>
-								<Label>
-									<!-- TODO describe better -->
+								<Label for="profile-picture" class="flex flex-col items-center">
 									<span class="text-lg">Appearance</span>
+								</Label>
+								<div class="flex w-full items-center gap-1.5">
 									<Input
+										id="profile-picture"
 										v-model="profilePicturePrompt"
-										@keyup.enter="refreshProfilePicture"
+										class="p-2 border border-gray-300 rounded"
 										placeholder="tan suit, sunglasses"
 									/>
+
+									<Popover
+										:open="keywordsPopover"
+										@update:open="keywordsPopover = $event"
+									>
+										<PopoverTrigger>
+											<Button type="button" class="info" title="Suggest keywords">
+												<AtomIcon />
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent
+											side="top"
+											:avoid-collisions="true"
+											align="start"
+											class="flex flex-col px-2 py-4"
+										>
+											<Button
+												@click="suggestKeywords"
+												class="p-2 bg-blue-500 text-white rounded"
+											>
+												Suggest {{ profilePicturePrompt.length ? 'More' : '' }} Keywords
+											</Button>
+
+											<p v-if="createdKeywords" class="my-4">
+												<span class="text-sm">AI Suggestion:</span>
+												<br />
+												<span class="font-bold">{{ createdKeywords }}</span>
+											</p>
+											<Button
+												v-if="createdKeywords"
+												class="p-2 success text-white rounded"
+												@click="acceptKeywords"
+											>
+												Accept & Make Picture
+											</Button>
+										</PopoverContent>
+									</Popover>
+								</div>
+								<Label class="mt-2">
+									<span class="text-lg">Picture Quality</span>
+									<!-- rename Decent/Good/Best -->
+									<select v-model="picQuality">
+										<option :value="1">Low</option>
+										<option :value="2">Medium</option>
+										<option :value="3">High</option>
+									</select>
 								</Label>
-								<Spinner v-if="updatingProfilePicture" class="mt-2" />
+								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button
 									@click="refreshProfilePicture"
 									class="mt-4 p-2 bg-blue-500 text-white rounded"
@@ -396,7 +531,7 @@ Input:\n`;
 					>
 						Save
 					</Button>
-					<Alert class="mt-4 p-2" variant="info">
+					<Alert v-if="newHere" class="mt-4 p-2" variant="info">
 						<AlertTitle>Tip</AlertTitle>
 						<AlertDescription>
 							You can make a Custom chat without a Buddy from the sidebar.

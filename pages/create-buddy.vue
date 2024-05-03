@@ -13,6 +13,7 @@ const {
 	updateSettings,
 	updateThreads,
 	getChatModelPath,
+	getNGpuLayers,
 } = useAppStore();
 
 // @ts-ignore
@@ -53,7 +54,7 @@ const handleModelChange = async () => {
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			serverStarting.value = true;
-			await startServer(getChatModelPath());
+			await startServer(getChatModelPath(), getNGpuLayers());
 			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;

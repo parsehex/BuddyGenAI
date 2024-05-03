@@ -1,43 +1,82 @@
 import { execFile, spawn } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
+import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 
-const QUIET = false;
-const commandObj = {
-	cmd: null as any,
-};
+// @/lib/api/types-api
+interface SDOptions {
+	model: string;
+	pos: string;
+	output: string;
+	neg?: string;
+	size?: number;
+}
 
-// by default, llamacpp uses template embedded in gguf if availabe
-// TODO any way to get this from the model?
-const chatTemplateMap: { [key: string]: string } = {
-	Moistral: 'vicuna',
-	'WizardLM-2': 'vicuna',
-};
+let hasResolved = false;
 
-async function runSD(model: string, pos: string, output: string, neg?: string) {
+async function runSD(
+	model: string,
+	pos: string,
+	output: string,
+	neg?: string,
+	size = 256
+) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
 	return new Promise((resolve, reject) => {
-		const args = ['-m', model, '-p', pos, '-o', output, '--seed', '-1'];
+		const args = [
+			'-m',
+			model,
+			'-p',
+			pos,
+			'-o',
+			output,
+			'--seed',
+			'-1',
+			'-H',
+			`${size}`,
+			'-W',
+			`${size}`,
+		];
 		if (neg) {
 			args.push('-n', neg);
 		}
+		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
 		command.on('error', (error) => {
-			console.error(`Error: ${error.message}`);
+			console.error(`SD Error: ${error.message}`);
+			hasResolved = true;
+			stopGenerating();
 			reject(error);
 		});
 
 		command.on('exit', (code, signal) => {
-			if (code) console.log(`Process exited with code: ${code}`);
-			if (signal) console.log(`Process killed with signal: ${signal}`);
+			if (code) console.log(`SD Process exited with code: ${code}`);
+			if (signal) console.log(`SD Process killed with signal: ${signal}`);
+			hasResolved = true;
+			stopGenerating();
 			resolve(output);
 		});
 
-		// Prevent the script from exiting until the child process exits
+		command.stdout?.on('data', (data: any) => {
+			const str = data.toString();
+			let isProgressLine = false;
+			isProgressLine = str.match(/(\d+\/\d+)/) !== null;
+			if (isProgressLine) {
+				const cur = str.match(/(\d+)\/\d+/);
+				const total = str.match(/\d+\/(\d+)/);
+				const isNotValid = cur[1] === total[1];
+				if (!isNotValid && cur && total) {
+					const progress = +cur[1] / +total[1];
+					updateProgress(progress);
+				}
+			}
+		});
+
 		process.on('exit', () => {
 			command.kill();
+			hasResolved = true;
+			stopGenerating();
 			resolve(output);
 		});
 	});
@@ -46,11 +85,14 @@ async function runSD(model: string, pos: string, output: string, neg?: string) {
 export default function sdModule(mainWindow: BrowserWindow) {
 	console.log('[-] MODULE::SD Initializing');
 
-	ipcMain.handle(
-		'SD/run',
-		async (_, model: string, pos: string, output: string, neg?: string) => {
-			console.log('[-] MODULE::SD Running');
-			return runSD(model, pos, output, neg);
-		}
-	);
+	ipcMain.handle('SD/run', async (_, options: SDOptions) => {
+		console.log('[-] MODULE::SD Running - new');
+		return await runSD(
+			options.model,
+			options.pos,
+			options.output,
+			options.neg,
+			options.size
+		);
+	});
 }

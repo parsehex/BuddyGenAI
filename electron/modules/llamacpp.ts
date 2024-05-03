@@ -28,16 +28,16 @@ const contextLengthMap: { [key: string]: number } = {
 
 let lastModel = '';
 let pid = 0;
+let hasResolved = false;
 
-function startServer(model: string) {
+function startServer(model: string, gpuLayers: number) {
 	return new Promise<void>(async (resolve, reject) => {
-		// normalize model path  for cross platform
 		model = path.normalize(model);
 		console.log('model', model);
 		const serverPath = await findBinaryPath('llama.cpp', 'server');
 		// console.log('binPath', serverPath);
 		const stdio = QUIET ? 'pipe' : 'inherit';
-		const args = ['--model', model, '--n-gpu-layers', '35'];
+		const args = ['--model', model, '--n-gpu-layers', gpuLayers + ''];
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			model.includes(key)
@@ -58,15 +58,19 @@ function startServer(model: string) {
 		}
 
 		console.log('Starting Llama.cpp-Server.', args);
+		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
 			serverPath,
 			args,
-			{ shell: true, windowsHide: true, killSignal: 'SIGKILL' },
+			{ windowsHide: true, killSignal: 'SIGKILL' },
 			(error: any, stdout: any, stderr: any) => {
 				console.log('execFile callback', commandObj.cmd?.pid);
 				if (error) {
 					console.error(`Llama.cpp-Server error: ${error.message}`);
-					if (reject) reject();
+					if (reject) {
+						hasResolved = false;
+						reject();
+					}
 				}
 				if (stdout) console.log(`Llama.cpp-Server stdout: ${stdout}`);
 				if (stderr) console.error(`Llama.cpp-Server stderr: ${stderr}`);
@@ -81,7 +85,10 @@ function startServer(model: string) {
 
 		commandObj.cmd.on('error', (error: any) => {
 			console.error(`Llama.cpp-Server Error: ${error.message}`);
-			if (reject) reject();
+			if (reject) {
+				hasResolved = false;
+				reject();
+			}
 		});
 
 		commandObj.cmd.on('exit', (code: any, signal: any) => {
@@ -110,41 +117,28 @@ function startServer(model: string) {
 		process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
 		process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
-		if (QUIET) {
-			commandObj.cmd.stdout?.on('data', (data: any) => {
-				const str = data.toString();
-				if (str?.includes('all slots are idle')) {
-					console.log('Llama.cpp-Server ready');
-					resolve();
-				}
-			});
-		} else {
-			resolve();
-		}
+		commandObj.cmd.stdout?.on('data', (data: any) => {
+			const str = data.toString();
+			if (!hasResolved && str?.includes('all slots are idle')) {
+				console.log('Llama.cpp-Server ready');
+				hasResolved = true;
+				resolve();
+			}
+		});
 	});
 }
 
 async function stopServer() {
-	// TODO find process id and kill it
-	// if (commandObj.cmd) {
-	// 	commandObj.cmd.kill('SIGKILL');
-	// 	commandObj.cmd = null;
-
-	// 	updateModel(''); // reset model
-	// }
-
 	if (pid) {
-		console.log('killing', pid);
+		console.log('stopping server', pid);
 		process.kill(pid);
+		commandObj.cmd = null;
 		pid = 0;
 		updateModel(''); // reset model
 	}
 }
 
 async function isServerRunning() {
-	// return commandObj.cmd !== null;
-	// do something better
-
 	if (commandObj.cmd) {
 		return true;
 	}
@@ -154,10 +148,13 @@ async function isServerRunning() {
 export default function llamaCppModule(mainWindow: BrowserWindow) {
 	console.log('[-] MODULE::llamacpp Initializing');
 
-	ipcMain.handle('llamacpp/start', async (_, modelPath: string) => {
-		await startServer(modelPath);
-		return { message: 'Server started' };
-	});
+	ipcMain.handle(
+		'llamacpp/start',
+		async (_, modelPath: string, nGpuLayers: number) => {
+			await startServer(modelPath, nGpuLayers);
+			return { message: 'Server started' };
+		}
+	);
 
 	ipcMain.handle('llamacpp/stop', async () => {
 		await stopServer();

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import axios from 'axios';
 import { ref, onBeforeMount, watch } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,25 +9,30 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { useAppStore } from '~/stores/main';
-import urls from '~/lib/api/urls';
-import axios from 'axios';
+import Spinner from '@/components/Spinner.vue';
+import { useAppStore } from '@/stores/main';
+import urls from '@/lib/api/urls';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const { getChatModelPath, chatServerRunning, updateChatServerRunning } =
-	useAppStore();
+const {
+	getNGpuLayers,
+	getChatModelPath,
+	chatServerRunning,
+	updateChatServerRunning,
+} = useAppStore();
 
 const isRunning = ref(false);
+const isStarting = ref(false);
 const lastModel = ref<string | null>(null);
 
 const doStartServer = async () => {
 	const modelPath = getChatModelPath();
-	await startServer(modelPath);
+	const nGpuLayers = getNGpuLayers();
+	isStarting.value = true;
+	await startServer(modelPath, nGpuLayers);
 
-	setTimeout(() => {
-		doRefreshServerStatus();
-	}, 1500);
+	isStarting.value = false;
 	// lastModel.value = modelPath;
 };
 
@@ -110,9 +116,17 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 					<p v-if="lastModel" class="text-sm text-gray-500">
 						{{ lastModel }}
 					</p>
-					<div class="flex justify-around">
-						<Button v-if="!isRunning" @click="doStartServer">Start</Button>
-						<Button v-else @click="doStopServer">Stop</Button>
+					<div class="flex items-center space-x-2">
+						<Button
+							v-if="!isRunning"
+							class="success"
+							@click="doStartServer"
+							:disabled="isStarting"
+						>
+							Start
+						</Button>
+						<Button v-else variant="destructive" @click="doStopServer">Stop</Button>
+						<Spinner v-if="isStarting" />
 					</div>
 				</div>
 			</div>

@@ -1,3 +1,5 @@
+export type SQLiteVal = string | number | null;
+
 export interface Buddy {
 	id: string;
 	created: number;
