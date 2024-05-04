@@ -1,10 +1,12 @@
+import { useCompletion } from 'ai/vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
 import useSD from '@/composables/useSD';
 import { select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
-import { ProfilePicQuality } from '../../types-api';
-import { useAppStore } from '~/stores/main';
+import { ProfilePicQuality } from '@/lib/api/types-api';
+import { useAppStore } from '@/stores/main';
+import urls from '@/lib/api/urls';
 
 // @ts-ignore
 const { runSD } = useSD();
@@ -25,7 +27,7 @@ const {
 TODO notes about profile pic versioning:
 - we would store the profile pic in the version table
 - would also keep the pictures themselves
-	- need to update naming to include the version id
+- need to update naming to include the version id
 */
 
 function getSDProgress() {
@@ -58,7 +60,8 @@ function getSDProgress() {
 
 export default async function createProfilePic(
 	id: string,
-	quality?: ProfilePicQuality
+	quality?: ProfilePicQuality,
+	gender = ''
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
@@ -104,7 +107,7 @@ export default async function createProfilePic(
 		extraPrompt = persona.profile_pic_prompt;
 	}
 
-	const posPrompt = posPromptFromName(currentVersion.name, extraPrompt);
+	const posPrompt = posPromptFromName(currentVersion.name, extraPrompt, gender);
 	const negPrompt = negPromptFromName(currentVersion.name);
 
 	// find path to save image

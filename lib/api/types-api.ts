@@ -3,9 +3,9 @@ export interface DeleteResponse {
 }
 
 export enum ProfilePicQuality {
-	LOW = 128,
-	MEDIUM = 256,
-	HIGH = 512,
+	LOW = 1,
+	MEDIUM = 2,
+	HIGH = 3,
 }
 
 export interface SDOptions {

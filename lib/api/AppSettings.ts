@@ -10,7 +10,8 @@ type AppSettingsKeys =
 	| 'selected_provider_image'
 	| 'selected_model_chat'
 	| 'selected_model_image'
-	| 'fresh_db';
+	| 'fresh_db'
+	| 'n_gpu_layers';
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
@@ -21,6 +22,10 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_model_image: '',
 	fresh_db: 0,
 	n_gpu_layers: 0,
+	// preferred_pic_quality (1 | 2 | 3)
+	// used_binary_type_llamacpp (avx2 | clblast | cuda12 | arm64 | etc.)
+	// used_binary_type_sd (avx2 | clblast | cuda12 | arm64 | etc.)
+	//   ^^ base these options on what is available at runtime
 };
 
 // TODO AppSettings method to validate
@@ -44,6 +49,9 @@ class AppSettingsCls {
 		return this.settings[key];
 	}
 	public set(key: AppSettingsKeys, value: string): void {
+		// try to prevent resetting values
+		// TODO do better
+		if (!value && this.settings[key]) return;
 		this.settings[key] = value;
 	}
 

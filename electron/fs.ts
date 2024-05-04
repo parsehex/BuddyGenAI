@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { execFile } from 'child_process';
 
 export async function getDirname() {
 	return __dirname;
@@ -38,6 +39,26 @@ export async function findResourcesPath() {
 	return p;
 }
 
+const llamaGoodError = 'failed to load model';
+const sdGoodError = 'the following arguments are required';
+
+function tryBinary(p: string) {
+	return new Promise((resolve, reject) => {
+		execFile(p, (error, stdout, stderr) => {
+			if (
+				error &&
+				!error.message.includes(llamaGoodError) &&
+				!error.message.includes(sdGoodError)
+			) {
+				console.log('execFile', error);
+				reject(error);
+			} else {
+				resolve(stdout);
+			}
+		});
+	});
+}
+
 type ProjectName = 'llama.cpp' | 'stable-diffusion.cpp' | 'whisper.cpp'; // bark.cpp?
 type Binaries = {
 	'llama.cpp': 'main' | 'server';
@@ -54,18 +75,25 @@ export async function findBinaryPath<T extends ProjectName>(
 	if (process.platform === 'win32') exe += '.exe';
 
 	let resPath = await findResourcesPath();
-	let binPath = path.join(resPath, projectName, exe);
-	// console.log('binPath', binPath, exe);
+	let binPath = path.join(resPath, 'binaries/build', projectName, exe);
 
-	// look for the binary in the following directories relative to the resources path:
-	const directories = ['', 'build', 'build/bin/Release', 'build/bin'];
+	// TODO pull these in dynamically at runtime + have preferred order like below (out of available)
+	const directories = ['arm64', 'cuda12', 'clblast', 'avx2'];
 
 	for (let i = 0; i < directories.length; i++) {
 		try {
-			binPath = path.join(resPath, projectName, directories[i], exe);
+			binPath = path.join(
+				resPath,
+				'binaries/build',
+				projectName,
+				directories[i],
+				exe
+			);
 			// console.log('checking', binPath);
 			await fs.access(binPath);
-			console.log('found', binPath);
+			// console.log('found', binPath);
+			await tryBinary(binPath);
+			console.log('using', directories[i], 'version of', projectName);
 			return binPath;
 		} catch (error) {}
 	}
@@ -104,5 +132,6 @@ export function getDataPath(subPath?: string) {
 			p = p.replace('~', '/Users/' + process.env.USER);
 		}
 	}
+	p = path.resolve(p);
 	return p;
 }

@@ -16,7 +16,10 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import Spinner from './Spinner.vue';
-import { keywordsFromNameAndDescription } from '~/lib/prompt/sd';
+import {
+	genderFromName,
+	keywordsFromNameAndDescription,
+} from '~/lib/prompt/sd';
 
 const props = defineProps<{
 	newHere: boolean;
@@ -166,19 +169,37 @@ const refreshProfilePicture = async () => {
 		id: newBuddy.value.id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
+	const genderPrompt = genderFromName(
+		buddyName.value,
+		profilePicturePrompt.value
+	);
+	let gender = '';
+	const completion = await complete(genderPrompt);
+	console.log(genderPrompt, completion);
+	if (completion) {
+		gender = completion;
+	}
 	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
-	const res = await api.buddy.profilePic.createOne(id, picQuality.value);
+	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
 
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
 };
 
+const creatingDescription = ref(false);
 const createDescription = async () => {
 	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
 			variant: 'destructive',
 			description: 'Please fill out a Name and Keywords for your Buddy.',
+		});
+		return;
+	}
+	if (!store.chatServerRunning) {
+		toast({
+			variant: 'destructive',
+			description: 'Please start the chat server first.',
 		});
 		return;
 	}
@@ -188,9 +209,11 @@ const createDescription = async () => {
 	);
 	let value = '';
 	try {
+		creatingDescription.value = true;
 		value = (await complete(promptStr, {
 			body: { max_tokens: 175, temperature: 0.25 },
 		})) as string;
+		creatingDescription.value = false;
 	} catch (e) {
 		console.error(e);
 		value = '';
@@ -394,25 +417,28 @@ const acceptKeywords = () => {
 											side="left"
 											:avoid-collisions="true"
 											align="start"
+											class="w-96"
 										>
-											<Button
-												@click="createDescription"
-												class="p-2 bg-blue-500 text-white rounded"
-											>
-												Remix Description
-											</Button>
-											<p class="mt-4">
+											<div class="flex items-center">
+												<Button
+													@click="createDescription"
+													class="p-2 bg-blue-500 text-white rounded"
+												>
+													Remix Description
+												</Button>
+												<Spinner v-if="creatingDescription" />
+											</div>
+											<p class="mt-4" v-if="createdDescription">
 												Created Description:
 												<br />
-												<Spinner v-if="!createdDescription" />
 												<span class="text-lg ml-3">{{ createdDescription }}</span>
 											</p>
 
 											<!-- accept/cancel buttons -->
-											<div class="flex justify-center mt-4">
+											<div class="flex justify-center mt-4" v-if="createdDescription">
 												<Button
 													@click="acceptBuddy('description')"
-													class="mr-2 p-2 success text-white rounded"
+													class="p-2 success text-white rounded"
 												>
 													Accept
 												</Button>

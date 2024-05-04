@@ -37,7 +37,7 @@ const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 const threads = useAppStore().threads as MergedChatThread[];
-const chatServerRunning = useAppStore().chatServerRunning as boolean;
+const store = useAppStore();
 const { complete } = useCompletion({ api: urls.message.completion() });
 
 const props = defineProps<{
@@ -79,6 +79,9 @@ interface Message {
 const msgsToSave = [] as Message[];
 
 const reloadingId = ref('');
+
+// TODO if first time, generate first message to user
+// TODO figure out solution to stream completion response
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
@@ -313,14 +316,14 @@ const updateSysFromBuddy = async () => {
 };
 
 const canSend = computed(() => {
-	if (!chatServerRunning) {
+	if (!store.chatServerRunning) {
 		return false;
 	}
 	return input.value !== '' && !isLoading.value;
 });
 
 const canReload = computed(() => {
-	if (!chatServerRunning) {
+	if (!store.chatServerRunning) {
 		return false;
 	}
 	return messages.value.length >= 2 && !isLoading.value;
@@ -333,7 +336,7 @@ const canReload = computed(() => {
 <template>
 	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
 		<h2
-			class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10"
+			class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10 w-full text-center opacity-90"
 		>
 			{{ threadTitle }}
 		</h2>
@@ -364,10 +367,10 @@ const canReload = computed(() => {
 								</TooltipTrigger>
 								<TooltipContent v-if="!buddies.length">
 									<p>
-										No Buddies available :(
+										No Buddies available ☹️
 										<br />
 										<Button type="button" @click="navigateTo('/create-buddy')">
-											Create one
+											Create one 😊
 										</Button>
 									</p>
 								</TooltipContent>
@@ -379,7 +382,7 @@ const canReload = computed(() => {
 					v-if="uiMessages.length && threadTitle"
 					class="flex items-center space-x-2"
 				>
-					<Label
+					<!-- <Label
 						v-if="threadMode === 'persona' && buddies.length"
 						class="mx-4 cursor-pointer flex items-center"
 					>
@@ -398,7 +401,7 @@ const canReload = computed(() => {
 						@click="updateSysFromBuddy"
 					>
 						<RefreshCw />
-					</Button>
+					</Button> -->
 				</div>
 				<BuddySelect
 					v-if="
@@ -477,6 +480,7 @@ const canReload = computed(() => {
 				<Button
 					v-if="messages.length"
 					type="button"
+					class="w-full"
 					size="sm"
 					:disabled="!canReload"
 					@click="doReload"
@@ -486,6 +490,14 @@ const canReload = computed(() => {
 				</Button>
 			</div>
 		</form>
+		<p
+			class="mt-4 text-sm text-gray-400 select-none"
+			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
+		>
+			<u><i>Friendly Reminder</i></u>
+			Buddies in this app are AI -- they make mistakes sometimes and they are not
+			real.
+		</p>
 	</div>
 </template>
 

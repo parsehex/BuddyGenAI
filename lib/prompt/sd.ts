@@ -1,6 +1,7 @@
-export function posPromptFromName(name: string, extra: string) {
+export function posPromptFromName(name: string, extra: string, gender = '') {
 	// NOTE: profile picture ends up from the side
 	let prompt = `picture of ${name}`;
+	if (gender) prompt += `, ${gender}`;
 	if (extra) prompt += `, ${extra}`;
 	prompt += `, facing the viewer, centered, thin circle frame`;
 	console.log(prompt);
@@ -8,7 +9,7 @@ export function posPromptFromName(name: string, extra: string) {
 }
 export function negPromptFromName(name: string) {
 	// TODO take extra
-	return `disfigured, distorted, thick frame`;
+	return `disfigured, distorted, thick frame, floating debris, square`;
 }
 
 /** Returns prompt for LLM to generate keyword suggestions. */
@@ -23,5 +24,14 @@ Keywords should be visually descriptive and comma-separated. For example: "brown
 		prompt += `\nExisting keywords (do not include):\n${existingKeywords}`;
 	prompt += `\n\nInput:\n${description}`;
 	console.log(prompt);
+	return prompt;
+}
+
+/** Returns prompt for LLM to generate gender from name and optional appearance keywords. */
+export function genderFromName(name: string, extraPrompt = '') {
+	let prompt = `What gender is ${name}? Answer with a single word (e.g. female, male, etc.)`;
+	if (extraPrompt) {
+		prompt += `\n\nAppearance: ${extraPrompt}`;
+	}
 	return prompt;
 }

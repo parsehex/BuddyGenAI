@@ -39,7 +39,7 @@ export function descriptionFromKeywords(
 	buddyName: string,
 	keywordsStr: string
 ) {
-	const prompt = `The following input is a description of someone named ${buddyName}. Briefly expand upon the input to provide a succinct description of ${buddyName} using common language.
+	const prompt = `The following input is a description of someone named ${buddyName}. Briefly expand upon the input to provide a succinct description of ${buddyName} using common language. Describe them in order for someone else to role-play as them.
 Input:\n`;
 	return prompt + keywordsStr;
 }

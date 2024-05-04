@@ -12,6 +12,10 @@ interface SDOptions {
 	size?: number;
 }
 
+function removeAccents(input: string): string {
+	return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 let hasResolved = false;
 
 async function runSD(
@@ -27,7 +31,7 @@ async function runSD(
 			'-m',
 			model,
 			'-p',
-			pos,
+			removeAccents(pos),
 			'-o',
 			output,
 			'--seed',
@@ -38,8 +42,11 @@ async function runSD(
 			`${size}`,
 		];
 		if (neg) {
-			args.push('-n', neg);
+			args.push('-n', removeAccents(neg));
 		}
+
+		console.log('SD Path:', sdPath);
+		console.log('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
@@ -60,6 +67,7 @@ async function runSD(
 
 		command.stdout?.on('data', (data: any) => {
 			const str = data.toString();
+			console.log('SD stdout:', str);
 			let isProgressLine = false;
 			isProgressLine = str.match(/(\d+\/\d+)/) !== null;
 			if (isProgressLine) {
@@ -86,7 +94,7 @@ export default function sdModule(mainWindow: BrowserWindow) {
 	console.log('[-] MODULE::SD Initializing');
 
 	ipcMain.handle('SD/run', async (_, options: SDOptions) => {
-		console.log('[-] MODULE::SD Running - new');
+		console.log('[-] MODULE::SD Running');
 		return await runSD(
 			options.model,
 			options.pos,

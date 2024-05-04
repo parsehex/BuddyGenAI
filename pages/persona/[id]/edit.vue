@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { AtomIcon, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { Sparkles, ChevronDown, ChevronUp } from 'lucide-vue-next';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -22,7 +22,10 @@ import { useTitle } from '@vueuse/core';
 import { useAppStore } from '@/stores/main';
 import type { ProfilePicQuality } from '@/lib/api/types-api';
 import { descriptionFromKeywords } from '@/lib/prompt/persona';
-import { keywordsFromNameAndDescription } from '~/lib/prompt/sd';
+import {
+	genderFromName,
+	keywordsFromNameAndDescription,
+} from '~/lib/prompt/sd';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -112,12 +115,27 @@ const handleSave = async () => {
 const picQuality = ref(2 as ProfilePicQuality);
 
 const refreshProfilePicture = async () => {
+	if (!persona.value) {
+		return;
+	}
 	updatingProfilePicture.value = true;
 	await api.buddy.updateOne({
 		id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
-	const res = await api.buddy.profilePic.createOne(id, picQuality.value);
+	const genderPrompt = genderFromName(
+		persona.value.name,
+		profilePicturePrompt.value
+	);
+	let gender = '';
+	const completion = await complete(genderPrompt, {
+		body: { max_tokens: 5, temperature: 0.01 },
+	});
+	console.log(genderPrompt, completion);
+	if (completion) {
+		gender = completion;
+	}
+	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
 
 	persona.value = await api.buddy.getOne(id);
 
@@ -289,7 +307,7 @@ const acceptKeywords = () => {
 						<Popover :open="keywordsPopover" @update:open="keywordsPopover = $event">
 							<PopoverTrigger>
 								<Button type="button" class="info" title="Suggest keywords">
-									<AtomIcon />
+									<Sparkles />
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent

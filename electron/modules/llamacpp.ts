@@ -4,12 +4,11 @@ import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { updateModel } from '../routes/message';
 
-const QUIET = false;
 const commandObj = {
 	cmd: null as ChildProcess | null,
 };
 
-// by default, llamacpp uses template embedded in gguf if availabe
+// by default, llamacpp uses template embedded in gguf if available
 // TODO any way to get this from the model?
 const chatTemplateMap: { [key: string]: string } = {
 	Moistral: 'vicuna',
@@ -33,10 +32,8 @@ let hasResolved = false;
 function startServer(model: string, gpuLayers: number) {
 	return new Promise<void>(async (resolve, reject) => {
 		model = path.normalize(model);
-		console.log('model', model);
+		gpuLayers = Math.floor(+gpuLayers);
 		const serverPath = await findBinaryPath('llama.cpp', 'server');
-		// console.log('binPath', serverPath);
-		const stdio = QUIET ? 'pipe' : 'inherit';
 		const args = ['--model', model, '--n-gpu-layers', gpuLayers + ''];
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
@@ -55,9 +52,11 @@ function startServer(model: string, gpuLayers: number) {
 			console.log('Using context length:', contextLengthMap[contextLength]);
 		} else {
 			args.push('-c', '4096');
+			console.log('Using default context length:', 4096);
 		}
 
-		console.log('Starting Llama.cpp-Server.', args);
+		console.log('Llama.cpp Server Path:', serverPath);
+		console.log('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
 			serverPath,
@@ -78,10 +77,7 @@ function startServer(model: string, gpuLayers: number) {
 		);
 		pid = commandObj.cmd.pid || 0;
 		commandObj.cmd.stdin?.end();
-		console.log('pid', pid);
 		updateModel(model);
-
-		console.log('forked');
 
 		commandObj.cmd.on('error', (error: any) => {
 			console.error(`Llama.cpp-Server Error: ${error.message}`);
@@ -103,7 +99,6 @@ function startServer(model: string, gpuLayers: number) {
 		process.stdin.resume(); // so the program will not close instantly
 
 		async function exitHandler(options: any, exitCode: any) {
-			// commandObj?.cmd?.kill('SIGKILL');
 			await stopServer();
 			if (options.cleanup) console.log('clean');
 			if (exitCode || exitCode === 0) console.log(exitCode);
@@ -130,7 +125,7 @@ function startServer(model: string, gpuLayers: number) {
 
 async function stopServer() {
 	if (pid) {
-		console.log('stopping server', pid);
+		console.log('stopping llama.cpp server', pid);
 		process.kill(pid);
 		commandObj.cmd = null;
 		pid = 0;

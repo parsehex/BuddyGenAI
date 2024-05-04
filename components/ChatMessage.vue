@@ -129,14 +129,19 @@ function textToHslColor(t: string, s: number, l: number) {
 			<ContextMenuContent>
 				<ContextMenuItem @click="doCopyMessage">Copy</ContextMenuItem>
 				<DialogTrigger asChild>
-					<ContextMenuItem @click="triggerEdit">Edit</ContextMenuItem>
+					<ContextMenuItem
+						@click="triggerEdit"
+						v-if="isUser || threadMode === 'custom'"
+					>
+						Edit
+					</ContextMenuItem>
 				</DialogTrigger>
 				<ContextMenuItem @click="doDelete" v-if="isUser">Delete</ContextMenuItem>
-				<ContextMenuSeparator />
 				<!-- TODO confirm (reuse same dialog) -->
+				<!-- <ContextMenuSeparator />
 				<ContextMenuItem @click="doClearThread">
 					Delete All Messages
-				</ContextMenuItem>
+				</ContextMenuItem> -->
 			</ContextMenuContent>
 		</ContextMenu>
 		<DialogContent>

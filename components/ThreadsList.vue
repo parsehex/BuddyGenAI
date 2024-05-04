@@ -99,6 +99,7 @@ watch(route, async () => {
 		<!-- maybe allow managing external here too -->
 		<ChatServerStatus v-if="!isExternalProvider" />
 		<div class="flex w-full mb-4">
+			<!-- TODO replace with buddyselect, make thread title "Chat with X" -->
 			<Input
 				v-model="newThreadName"
 				placeholder="Chat name"

@@ -81,30 +81,6 @@ const doStartServer = async () => {
 				<AlertTitle>Error</AlertTitle>
 				<AlertDescription>{{ error }}</AlertDescription>
 			</Alert>
-			<Button
-				v-if="
-					settings.local_model_directory &&
-					settings.selected_model_chat &&
-					!chatServerRunning
-				"
-				@click="doStartServer"
-				class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
-			>
-				Start Server
-			</Button>
-			<Button
-				v-if="chatServerRunning"
-				@click="stopServer"
-				class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md"
-			>
-				Stop Server
-			</Button>
-			<Button
-				@click="doRefreshServerStatus"
-				class="mt-4 bg-gray-500 text-white px-4 py-2 rounded-md"
-			>
-				Refresh Server Status
-			</Button>
 			<div>
 				<Label for="name" class="block">Your Name</Label>
 				<Input

@@ -101,6 +101,7 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 </script>
 
 <template>
+	<!-- TODO when server is off, change delay (+ figure out what delay to use) -->
 	<HoverCard :close-delay="250" :open-delay="50">
 		<HoverCardTrigger as-child>
 			<div
