@@ -115,7 +115,7 @@ async function createWindow() {
 
 	ipcMain.handle('pickDirectory:app', async () => {
 		const result = await dialog.showOpenDialog({
-			properties: ['openDirectory'],
+			properties: ['openDirectory', 'createDirectory'],
 		});
 		return result.filePaths[0];
 	});
