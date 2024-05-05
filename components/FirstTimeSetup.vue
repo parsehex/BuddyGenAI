@@ -494,8 +494,8 @@ const acceptKeywords = () => {
 										@update:open="keywordsPopover = $event"
 									>
 										<PopoverTrigger>
-											<Button type="button" class="info" title="Suggest keywords">
-												<AtomIcon />
+											<Button type="button" class="magic" title="Suggest keywords">
+												<Sparkles />
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent
