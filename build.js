@@ -22,8 +22,8 @@ if (!isVersionsSet) {
 }
 
 // check for the required binaries
-const binPath = path.join(__dirname, 'binaries');
-const LCPP = path.join(binPath, 'llama.cpp', versions.llamaCpp);
+const binPath = path.join(__dirname, 'binaries/build');
+const LCPP = path.join(binPath, 'llama.cpp', 'cuda12');
 const LCPPmainBin =
 	platform === 'WINDOWS' ? path.join(LCPP, 'main.exe') : path.join(LCPP, 'main');
 const LCPPserverBin =
@@ -31,11 +31,7 @@ const LCPPserverBin =
 		? path.join(LCPP, 'server.exe')
 		: path.join(LCPP, 'server');
 
-const sdCPP = path.join(
-	binPath,
-	'stable-diffusion.cpp',
-	versions.stabeDiffusionCpp
-);
+const sdCPP = path.join(binPath, 'stable-diffusion.cpp', 'cuda12');
 const sdCPPbin =
 	process.platform === 'win32'
 		? path.join(sdCPP, 'sd.exe')
