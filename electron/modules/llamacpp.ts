@@ -14,6 +14,7 @@ const chatTemplateMap: { [key: string]: string } = {
 	Moistral: 'vicuna',
 	'WizardLM-2': 'vicuna',
 	'Lexi-': 'chatml',
+	'Hermes-2': 'chatml',
 	'Llama-3': 'llama3',
 	'llama-3': 'llama3',
 };
