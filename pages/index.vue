@@ -188,7 +188,14 @@ const sortedThreads = computed(() => {
 									{{ getMessageTime(thread) }}
 								</span>
 							</p>
-							<p v-if="thread.latest_message" class="text-sm mt-2">
+							<p
+								v-if="thread.latest_message"
+								class="text-sm mt-2"
+								:style="{
+									visibility:
+										thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
+								}"
+							>
 								<b>{{ getMessageName(thread) }}</b>
 								:
 								{{ getMessageContent(thread) }}
@@ -201,12 +208,16 @@ const sortedThreads = computed(() => {
 	</div>
 
 	<FirstTimeSetup
-		v-else
+		v-if="!threads.length && !buddies.length"
 		:new-here="newHere"
 		:is-models-setup="isModelsSetup"
 		:server-starting="serverStarting"
 		:handle-model-change="handleModelChange"
 	/>
+	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
+		<!-- TODO improve -->
+		You have no chats yet. Create one to get started!
+	</p>
 </template>
 
 <style lang="scss" scoped>

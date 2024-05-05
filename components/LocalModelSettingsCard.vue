@@ -1,17 +1,23 @@
 <template>
 	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
-		<CardHeader class="pt-0 pb-2">Local Model Setup</CardHeader>
+		<CardHeader class="text-lg pt-0 pb-2">Local Model Setup</CardHeader>
 		<CardContent>
-			<p v-if="firstTime" class="text-center">
-				<code class="font-bold">Models</code>
-				let your Buddies respond to you with words, and they let you create a face
-				for your Buddy.
+			<p v-if="firstTime">
+				You'll need to download models to let your Buddies chat with you and have a
+				profile picture.
 				<br />
-				You'll need to download these models and tell BuddyGen where to find them.
+				Please visit
+				<span
+					@click="openExternalLink && openExternalLink('https://buddygenai.com')"
+					class="text-blue-500 cursor-pointer"
+				>
+					buddygenai.com
+				</span>
+				for model recommendations and instructions.
 			</p>
 			<div class="flex w-full items-end justify-between gap-1.5 mt-4">
 				<Label for="local_model_directory" class="w-full">
-					Local Model Directory
+					Choose where to keep your models
 					<Input
 						v-model="settings.local_model_directory"
 						type="text"
@@ -35,6 +41,14 @@
 					visibility: settings.local_model_directory ? 'visible' : 'hidden',
 				}"
 			>
+				<Button
+					@click="updateModels"
+					class="bg-green-500 text-white px-4 py-2 rounded-md"
+				>
+					Update Models
+				</Button>
+				<br />
+				<br />
 				<Label for="chat-model" class="mb-1">Chat Model</Label>
 				<Select
 					v-model="settings.selected_model_chat"
@@ -78,7 +92,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '~/stores/main';
+import { useAppStore } from '@/stores/main';
+
+const { openExternalLink } = useElectron();
 
 const props = defineProps<{
 	firstTime: boolean;

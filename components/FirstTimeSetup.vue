@@ -91,7 +91,7 @@ const updateName = async () => {
 	settings.user_name = userNameValue.value;
 };
 
-const { pickDirectory, verifyModelDirectory } = useElectron();
+const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
 
@@ -99,7 +99,7 @@ const pickModelDirectory = async () => {
 	if (!directory) return;
 
 	await verifyModelDirectory(directory);
-	settings.local_model_directory = directory;
+	settings.local_model_directory = await pathJoin(directory, 'BuddyGen Models');
 
 	await updateModels();
 };
@@ -192,7 +192,7 @@ const createDescription = async () => {
 	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
 			variant: 'destructive',
-			description: 'Please fill out a Name and Keywords for your Buddy.',
+			description: 'Please enter a name and some info for your Buddy.',
 		});
 		return;
 	}
@@ -238,6 +238,43 @@ const createDescription = async () => {
 		}
 	}
 	createdDescription.value = value;
+};
+
+const randomizedBuddy = ref(
+	null as { name: string; description: string } | null
+);
+const randomizeKeywords = async () => {
+	let promptStr = `Your task is to generate a name and a description for someone${
+		buddyName.value ? ' named ' + buddyName.value : ''
+	}.\n\nReturn a JSON object with the keys "name" and "description".\n\nRandom seed: ${Math.random()}`;
+	let value = '';
+	try {
+		value = (await complete(promptStr, {
+			body: { max_tokens: 150, temperature: 0.15 },
+		})) as string;
+	} catch (e) {
+		console.error(e);
+		value = '';
+	}
+	console.log(value);
+	value = value || '';
+	value = value.trim();
+	if (!value) {
+		toast({
+			variant: 'destructive',
+			description: 'Error generating keywords. Please try again.',
+		});
+		return;
+	}
+	try {
+		randomizedBuddy.value = JSON.parse(value);
+	} catch (e) {
+		console.error(value, e);
+		toast({
+			variant: 'destructive',
+			description: 'Error parsing response. Please try again.',
+		});
+	}
 };
 
 const suggestKeywords = async () => {
@@ -289,6 +326,11 @@ const acceptPicKeywords = () => {
 				</span>
 			</NuxtLink>
 
+			<Avatar v-if="newHere" size="base">
+				<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
+				<img src="/assets/logo.png" alt="BuddyGen Logo" />
+			</Avatar>
+
 			<!-- Server Starting Spinner -->
 			<div
 				v-if="serverStarting"
@@ -298,13 +340,14 @@ const acceptPicKeywords = () => {
 				Getting ready...
 			</div>
 
+			<!-- TODO implement external models using OpenRouter (idk how for images) -->
 			<!-- Model Source -- External or Local -->
-			<Card
+			<!-- <Card
 				v-if="!isModelsSetup"
 				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4"
 			>
 				<CardHeader class="pt-0 pb-0 text-center">
-					We need to answer some questions before we can create your first Buddy.
+					Please answer some questions before you create your first Buddy.
 				</CardHeader>
 				<CardContent>
 					<div
@@ -340,7 +383,7 @@ const acceptPicKeywords = () => {
 						</Label>
 					</div>
 				</CardContent>
-			</Card>
+			</Card> -->
 
 			<LocalModelSettingsCard
 				v-if="!isModelsSetup && modelProvider === 'local'"
@@ -351,7 +394,7 @@ const acceptPicKeywords = () => {
 
 			<Card
 				v-if="!serverStarting && isModelsSetup"
-				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2"
+				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">
 					<h2 v-if="newHere" class="text-lg text-center underline mb-0 pb-3">
@@ -366,7 +409,6 @@ const acceptPicKeywords = () => {
 							v-model="userNameValue"
 							@blur="updateName"
 							class="p-2 border border-gray-300 rounded text-center w-1/2 ml-2"
-							placeholder="John"
 							@keyup.enter="handleSave"
 						/>
 					</Label>
@@ -382,10 +424,6 @@ const acceptPicKeywords = () => {
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
-							<Avatar v-if="newHere && !acceptedBuddy" size="lg">
-								<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
-								<img src="/assets/logo.png" alt="BuddyGen Logo" />
-							</Avatar>
 							<Input
 								v-model="buddyName"
 								class="my-2 p-2 border border-gray-300 rounded w-1/2"
@@ -441,8 +479,16 @@ const acceptPicKeywords = () => {
 												<Button
 													@click="createDescription"
 													class="p-2 bg-blue-500 text-white rounded"
+													v-if="buddyKeywords"
 												>
-													Remix Description
+													Create Description
+												</Button>
+												<Button
+													@click="randomizeKeywords"
+													class="p-2 bg-blue-500 text-white rounded"
+													v-else
+												>
+													Randomize
 												</Button>
 												<Spinner v-if="creatingDescription" />
 											</div>
@@ -450,6 +496,17 @@ const acceptPicKeywords = () => {
 												Created Description:
 												<br />
 												<span class="text-lg ml-3">{{ createdDescription }}</span>
+											</p>
+											<p class="mt-4" v-else-if="randomizedBuddy">
+												Randomized Buddy:
+												<br />
+												<span class="text-lg ml-3">
+													{{ randomizedBuddy.name }}
+												</span>
+												<br />
+												<span class="text-lg ml-3">
+													{{ randomizedBuddy.description }}
+												</span>
 											</p>
 
 											<!-- accept/cancel buttons -->
@@ -462,6 +519,33 @@ const acceptPicKeywords = () => {
 												</Button>
 												<Button
 													@click="createdDescription = ''"
+													class="p-2 bg-blue-500 text-white rounded"
+												>
+													Cancel
+												</Button>
+											</div>
+											<div class="flex justify-center mt-4" v-else-if="randomizedBuddy">
+												<Button
+													@click="
+														() => {
+															if (!randomizedBuddy) return;
+															buddyName = randomizedBuddy.name;
+															buddyKeywords = randomizedBuddy.description;
+															randomizedBuddy = null;
+															keywordsPopover = false;
+														}
+													"
+													class="p-2 success text-white rounded"
+												>
+													Accept
+												</Button>
+												<Button
+													@click="
+														() => {
+															randomizedBuddy = null;
+															keywordsPopover = false;
+														}
+													"
 													class="p-2 bg-blue-500 text-white rounded"
 												>
 													Cancel

@@ -9,7 +9,7 @@ const platform = 'WINDOWS';
 // const platform = 'MAC'
 
 const versions = {
-	llamaCpp: 'b2781',
+	llamaCpp: 'b2787',
 	stabeDiffusionCpp: 'ce1bcc7',
 };
 
@@ -20,6 +20,13 @@ if (!isVersionsSet) {
 	);
 	process.exit(1);
 }
+
+/**
+ * @type {import('electron-builder').CompressionLevel}
+ */
+const compression = 'store';
+
+console.time(`build (${compression} compression-level)`);
 
 // check for the required binaries
 const binPath = path.join(__dirname, 'binaries/build');
@@ -67,7 +74,10 @@ const sdVersionExists = fs.existsSync(
 // copy version folders to binaries/build under their project names
 // add file to folder called `version ${ver}`
 if (!llamaVersionExists) {
-	fs.copySync(LCPP, path.join(binPath, 'build', 'llama.cpp'));
+	fs.copySync(
+		LCPP.replace('cuda12', ''),
+		path.join(binPath, 'build', 'llama.cpp')
+	);
 	const verPath = path.join(
 		binPath,
 		'build',
@@ -77,7 +87,10 @@ if (!llamaVersionExists) {
 	fs.writeFileSync(verPath, '');
 }
 if (!sdVersionExists) {
-	fs.copySync(sdCPP, path.join(binPath, 'build', 'stable-diffusion.cpp'));
+	fs.copySync(
+		sdCPP.replace('cuda12', ''),
+		path.join(binPath, 'build', 'stable-diffusion.cpp')
+	);
 	const verPath = path.join(
 		binPath,
 		'build',
@@ -95,7 +108,7 @@ const options = {
 	productName: 'BuddyGenAI',
 
 	// "store" | "normal" | "maximum" - For testing builds, use 'store' to reduce build time significantly.
-	compression: 'maximum',
+	compression,
 	removePackageScripts: true,
 
 	nodeGypRebuild: false,
@@ -115,9 +128,10 @@ const options = {
 	win: {
 		// eslint-disable-next-line no-template-curly-in-string
 		artifactName: '${productName}-Setup-${version}.${ext}',
+		icon: './build/icon.ico',
 		target: [
 			{
-				target: 'zip',
+				target: 'nsis',
 				arch: ['x64'],
 				// arch: ['x64', 'ia32']
 			},
@@ -168,4 +182,5 @@ builder
 		console.log('----------------------------');
 		console.log('Platform:', platform);
 		console.log('Output:', JSON.stringify(result, null, 2));
+		console.timeEnd(`build (${compression} compression-level)`);
 	});

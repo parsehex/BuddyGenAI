@@ -3,6 +3,8 @@ import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { updateModel } from '../routes/message';
+// @ts-ignore
+import log from 'electron-log/main';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
@@ -30,6 +32,8 @@ let lastModel = '';
 let pid = 0;
 let hasResolved = false;
 
+// TODO i think error 3221225781 means vcredist is needed
+
 function startServer(model: string, gpuLayers: number) {
 	return new Promise<void>(async (resolve, reject) => {
 		model = path.normalize(model);
@@ -42,7 +46,7 @@ function startServer(model: string, gpuLayers: number) {
 		);
 		if (chatTemplate) {
 			args.push('--chat-template', chatTemplateMap[chatTemplate]);
-			console.log('Using chat template:', chatTemplateMap[chatTemplate]);
+			log.info('Using chat template:', chatTemplateMap[chatTemplate]);
 		}
 
 		const contextLength = Object.keys(contextLengthMap).find((key) =>
@@ -50,14 +54,14 @@ function startServer(model: string, gpuLayers: number) {
 		);
 		if (contextLength && contextLengthMap[contextLength]) {
 			args.push('-c', contextLengthMap[contextLength] + '');
-			console.log('Using context length:', contextLengthMap[contextLength]);
+			log.info('Using context length:', contextLengthMap[contextLength]);
 		} else {
 			args.push('-c', '4096');
-			console.log('Using default context length:', 4096);
+			log.info('Using default context length:', 4096);
 		}
 
-		console.log('Llama.cpp Server Path:', serverPath);
-		console.log('Starting Llama.cpp Server with args:', args);
+		log.info('Llama.cpp Server Path:', serverPath);
+		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
 			serverPath,
@@ -81,7 +85,7 @@ function startServer(model: string, gpuLayers: number) {
 		updateModel(model);
 
 		commandObj.cmd.on('error', (error: any) => {
-			console.error(`Llama.cpp-Server Error: ${error.message}`);
+			log.error(`Llama.cpp-Server Error: ${error.message}`);
 			if (reject) {
 				hasResolved = false;
 				reject();
@@ -90,10 +94,10 @@ function startServer(model: string, gpuLayers: number) {
 
 		commandObj.cmd.on('exit', (code: any, signal: any) => {
 			if (code) {
-				console.log(`Llama.cpp-Server exited with code: ${code}`);
+				log.warn(`Llama.cpp-Server exited with code: ${code}`);
 			}
 			if (signal) {
-				console.log(`Llama.cpp-Server killed with signal: ${signal}`);
+				log.warn(`Llama.cpp-Server killed with signal: ${signal}`);
 			}
 		});
 
@@ -116,7 +120,7 @@ function startServer(model: string, gpuLayers: number) {
 		commandObj.cmd.stdout?.on('data', (data: any) => {
 			const str = data.toString();
 			if (!hasResolved && str?.includes('all slots are idle')) {
-				console.log('Llama.cpp-Server ready');
+				log.info('Llama.cpp-Server ready');
 				hasResolved = true;
 				resolve();
 			}
@@ -126,7 +130,7 @@ function startServer(model: string, gpuLayers: number) {
 
 async function stopServer() {
 	if (pid) {
-		console.log('stopping llama.cpp server', pid);
+		log.info('stopping llama.cpp server', pid);
 		process.kill(pid);
 		commandObj.cmd = null;
 		pid = 0;
@@ -142,7 +146,7 @@ async function isServerRunning() {
 }
 
 export default function llamaCppModule(mainWindow: BrowserWindow) {
-	console.log('[-] MODULE::llamacpp Initializing');
+	log.info('[-] MODULE::llamacpp Initializing');
 
 	ipcMain.handle(
 		'llamacpp/start',

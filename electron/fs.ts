@@ -78,7 +78,16 @@ export async function findBinaryPath<T extends ProjectName>(
 	let binPath = path.join(resPath, 'binaries/build', projectName, exe);
 
 	// TODO pull these in dynamically at runtime + have preferred order like below (out of available)
-	const directories = ['arm64', 'cuda12', 'clblast', 'avx2'];
+	const directories = [
+		'cuda12',
+		'cuda11',
+		'clblast',
+		'vulkan',
+		'avx512',
+		'avx2',
+		'avx',
+		'noavx',
+	];
 
 	for (let i = 0; i < directories.length; i++) {
 		try {

@@ -151,6 +151,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			}
 
 			const m = await refreshMessages();
+
+			scrollToBottom();
 		},
 		onError: (e) => {
 			console.log(e);
@@ -191,7 +193,8 @@ async function refreshBuddies() {
 }
 
 const doSubmit = async (e: Event) => {
-	if (input.value === '') return;
+	if ((e as KeyboardEvent).shiftKey) return;
+	if (!canSend || input.value === '' || isLoading.value) return;
 	if (isLoading.value) {
 		e.preventDefault();
 		stop();
@@ -463,7 +466,7 @@ const canReload = computed(() => {
 				tabindex="1"
 				v-model="input"
 				placeholder="Say something..."
-				@keydown.ctrl.enter="doSubmit"
+				@keydown.enter="doSubmit"
 			/>
 			<div class="flex flex-col items-center gap-1">
 				<Button

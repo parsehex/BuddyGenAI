@@ -16,6 +16,11 @@ import llamaCppModule from './modules/llamacpp';
 import { fileURLToPath } from 'url';
 import sdModule from './modules/sd';
 import { getDataPath } from './fs';
+// @ts-ignore
+import log from 'electron-log/main';
+
+log.initialize();
+log.errorHandler.startCatching();
 
 // Initilize
 // =========
@@ -115,14 +120,16 @@ async function createWindow() {
 
 	ipcMain.handle('pickDirectory:app', async () => {
 		const result = await dialog.showOpenDialog({
-			properties: ['openDirectory', 'createDirectory'],
+			properties: ['openDirectory'],
 		});
 		return result.filePaths[0];
 	});
 
 	ipcMain.handle('verifyModelDirectory:app', async (_, directory: string) => {
-		const chatDir = path.join(directory, 'chat');
-		const imageDir = path.join(directory, 'image');
+		console.log('verifyModelDirectory:app', directory);
+		const bgDir = path.join(directory, 'BuddyGen Models');
+		const chatDir = path.join(bgDir, 'chat');
+		const imageDir = path.join(bgDir, 'image');
 		try {
 			await fs.mkdir(chatDir, { recursive: true });
 			await fs.mkdir(imageDir, { recursive: true });

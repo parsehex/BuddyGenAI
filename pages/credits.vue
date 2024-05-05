@@ -247,6 +247,12 @@ const deps = [
 		author: 'Jeff Barczewski',
 		license: 'MIT',
 	},
+	{
+		name: 'zod',
+		link: 'https://github.com/colinhacks/zod',
+		author: 'Colin McDonnell',
+		license: 'MIT',
+	},
 ];
 
 const openLink = (link: string) => {
