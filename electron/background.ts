@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs/promises';
-import { app, BrowserWindow, session, dialog } from 'electron';
+import { app, BrowserWindow, session, dialog, shell } from 'electron';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
 import titleBarActionsModule from './modules/titleBarActions';
@@ -105,6 +105,9 @@ async function createWindow() {
 	ipcMain.handle('fileURLToPath', async (_, url: string) => {
 		return fileURLToPath(url);
 	});
+	ipcMain.handle('openExternalLink', async (_, url: string) => {
+		shell.openExternal(url);
+	});
 
 	ipcMain.handle('toggleDevTools:app', () => {
 		mainWindow.webContents.toggleDevTools();
@@ -193,8 +196,6 @@ app.whenReady().then(async () => {
 		// if (BrowserWindow.getAllWindows().length === 0) createWindow()
 		mainWindow.show();
 	});
-
-	// await import('./ai/llamacpp')
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

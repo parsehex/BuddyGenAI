@@ -76,3 +76,9 @@ npm run build
 # Build electron app for production
 npm run build:electron
 ```
+
+# License
+
+BuddyGen AI - An app to generate AI-powered companions to talk to. Copyright (C) 2024 Thomas Mays
+
+This program is licensed under the GNU Affero General Public License version 3. See the LICENSE file for more details.

@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from '@/components/ui/menubar';
+import {
+	Menubar,
+	MenubarContent,
+	MenubarItem,
+	MenubarMenu,
+	MenubarSeparator,
+	MenubarShortcut,
+	MenubarTrigger,
+} from '@/components/ui/menubar';
 import useElectron from '@/composables/useElectron';
 
 const { toggleDevTools } = useElectron();
@@ -10,6 +18,10 @@ const reload = () => {
 
 const goAppSettings = async () => {
 	await navigateTo('/settings');
+};
+
+const goToCredits = async () => {
+	await navigateTo('/credits');
 };
 
 const goHome = async () => {
@@ -41,7 +53,7 @@ window.addEventListener('keydown', handleKeyDown);
 		<MenubarMenu>
 			<MenubarTrigger>File</MenubarTrigger>
 			<MenubarContent>
-				<MenubarItem @select="goHome"> Home Page </MenubarItem>
+				<MenubarItem @select="goHome">Home Page</MenubarItem>
 				<MenubarItem @select="reload">
 					Reload
 					<MenubarShortcut>Ctrl + R</MenubarShortcut>
@@ -55,6 +67,7 @@ window.addEventListener('keydown', handleKeyDown);
 					App Settings
 					<MenubarShortcut>Ctrl + ,</MenubarShortcut>
 				</MenubarItem>
+				<MenubarItem @select="goToCredits">Credits</MenubarItem>
 			</MenubarContent>
 		</MenubarMenu>
 	</Menubar>

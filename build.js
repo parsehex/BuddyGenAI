@@ -111,8 +111,8 @@ const options = {
 		app: '.output',
 	},
 	extraResources: [
-		'./llama.cpp/build/bin/**/main*',
 		'./binaries/build/**/*',
+		'./licenses/**/*',
 		'./migrations/**/*',
 	],
 

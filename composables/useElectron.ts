@@ -127,6 +127,10 @@ export default function useElectron() {
 		return result;
 	};
 
+	const openExternalLink = async (url: string) => {
+		await electron.ipcRenderer.invoke('openExternalLink', url);
+	};
+
 	return {
 		copyToClipboard,
 		isElectron,
@@ -148,5 +152,6 @@ export default function useElectron() {
 		fsUnlink,
 		fileURLToPath,
 		getDataPath,
+		openExternalLink,
 	};
 }
