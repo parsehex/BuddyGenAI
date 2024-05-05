@@ -12,7 +12,6 @@ ${aiName} is a new model of Buddy, designed as part of the BuddyGen program -- a
 		str += `${userName} is the developer of BuddyGen and may wish to talk about the program to get ${aiName}'s feedback. `;
 	}
 	str += `Description of ${aiName}:\n${description}`;
-	console.log(str);
 	return str;
 }
 
@@ -39,7 +38,7 @@ export function descriptionFromKeywords(
 	buddyName: string,
 	keywordsStr: string
 ) {
-	const prompt = `The following input is a description of someone named ${buddyName}. Briefly expand upon the input to provide a succinct description of ${buddyName} using common language. Describe them in order for someone else to role-play as them.
+	const prompt = `The following input is a description of someone named ${buddyName}. Briefly expand upon the input to provide a succinct description of ${buddyName} using common language. Describe them definitively, in order for someone to role-play as them.
 Input:\n`;
 	return prompt + keywordsStr;
 }

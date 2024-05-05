@@ -5,7 +5,7 @@ import { useAppStore } from '~/stores/main';
 import urls from '~/lib/api/urls';
 import type { BuddyVersionMerged } from '~/lib/api/types-db';
 import { api } from '~/lib/api';
-import { AtomIcon } from 'lucide-vue-next';
+import { Sparkles } from 'lucide-vue-next';
 import BuddyAvatar from './BuddyAvatar.vue';
 import type { ProfilePicQuality } from '~/lib/api/types-api';
 import { Progress } from '@/components/ui/progress';
@@ -56,9 +56,8 @@ const acceptedBuddy = ref('' as '' | 'description' | 'keywords');
 const newBuddy = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
-const relationshipToBuddy = ref('');
-
 const keywordsPopover = ref(false);
+const profilePicPopover = ref(false);
 const createdKeywords = ref('');
 
 const acceptedBuddyDesc = ref('');
@@ -83,6 +82,7 @@ const acceptBuddy = async (
 
 	acceptedBuddy.value = descriptionOrKeywords;
 	acceptedBuddyDesc.value = buddyDescription;
+	keywordsPopover.value = false;
 };
 
 const updateName = async () => {
@@ -264,7 +264,7 @@ const suggestKeywords = async () => {
 	createdKeywords.value = value;
 };
 
-const acceptKeywords = () => {
+const acceptPicKeywords = () => {
 	const existingKeywords = profilePicturePrompt.value;
 	if (existingKeywords) {
 		profilePicturePrompt.value = `${existingKeywords}, ${createdKeywords.value}`;
@@ -272,7 +272,7 @@ const acceptKeywords = () => {
 		profilePicturePrompt.value = createdKeywords.value;
 	}
 	createdKeywords.value = '';
-	keywordsPopover.value = false;
+	profilePicPopover.value = false;
 
 	refreshProfilePicture();
 };
@@ -373,6 +373,10 @@ const acceptKeywords = () => {
 				</CardHeader>
 				<CardContent class="flex flex-col items-center">
 					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
+						<!-- TODO starters -->
+						<!-- TODO when settings change only update the values that changed -->
+						<!-- require name first? -->
+						<!-- ${userName} would like to talk to a buddy.\n\nYour task is to list names of buddies which the user might want to talk to.\nRespond with a valid JSON array of strings. -->
 						<CardContent class="flex flex-col items-center">
 							<h2 class="text-lg mb-4 text-center underline">
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
@@ -406,10 +410,24 @@ const acceptKeywords = () => {
 										placeholder="friendly, helpful, funny"
 									/>
 
-									<Popover>
-										<PopoverTrigger>
-											<Button type="button" class="info" title="Create a description">
-												<AtomIcon />
+									<Popover
+										:open="keywordsPopover"
+										@update:open="
+											($event) => {
+												if (!store.chatServerRunning) return;
+												keywordsPopover = $event;
+											}
+										"
+									>
+										<PopoverTrigger as-child>
+											<!-- TODO make component -->
+											<Button
+												type="button"
+												class="magic"
+												title="Create a description"
+												:disabled="!store.chatServerRunning"
+											>
+												<Sparkles />
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent
@@ -490,11 +508,21 @@ const acceptKeywords = () => {
 									/>
 
 									<Popover
-										:open="keywordsPopover"
-										@update:open="keywordsPopover = $event"
+										:open="profilePicPopover"
+										@update:open="
+											($event) => {
+												if (!store.chatServerRunning) return;
+												profilePicPopover = $event;
+											}
+										"
 									>
-										<PopoverTrigger>
-											<Button type="button" class="magic" title="Suggest keywords">
+										<PopoverTrigger as-child>
+											<Button
+												type="button"
+												class="magic"
+												title="Suggest keywords"
+												:disabled="!store.chatServerRunning"
+											>
 												<Sparkles />
 											</Button>
 										</PopoverTrigger>
@@ -519,7 +547,7 @@ const acceptKeywords = () => {
 											<Button
 												v-if="createdKeywords"
 												class="p-2 success text-white rounded"
-												@click="acceptKeywords"
+												@click="acceptPicKeywords"
 											>
 												Accept & Make Picture
 											</Button>

@@ -48,4 +48,8 @@ import AppMenubar from '~/components/AppMenubar.vue';
 .success-foreground {
 	@apply text-green-400 bg-white;
 }
+
+.magic {
+	@apply bg-purple-400 text-black font-bold;
+}
 </style>

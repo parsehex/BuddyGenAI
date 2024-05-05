@@ -304,9 +304,24 @@ const acceptKeywords = () => {
 							placeholder="tan suit, sunglasses"
 						/>
 
-						<Popover :open="keywordsPopover" @update:open="keywordsPopover = $event">
-							<PopoverTrigger>
-								<Button type="button" class="info" title="Suggest keywords">
+						<Popover
+							:open="keywordsPopover"
+							@update:open="
+								($event) => {
+									if (creatingKeywords || !store.chatServerRunning) {
+										return;
+									}
+									keywordsPopover = $event;
+								}
+							"
+						>
+							<PopoverTrigger as-child>
+								<Button
+									type="button"
+									class="magic"
+									title="Suggest keywords"
+									:disabled="creatingKeywords || !store.chatServerRunning"
+								>
 									<Sparkles />
 								</Button>
 							</PopoverTrigger>
