@@ -131,7 +131,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				const msg1 = messages.value[0];
 				const msg2 = messages.value[1];
 				const msg3 = messages.value[2];
-				const prompt = `Your task is to write a generic title in 5 words or less for the following chat.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
+				const prompt = `Your task is to write a generic and impersonal title in 5 words or less for the following chat.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
 				let value = await complete(prompt, {
 					body: { max_tokens: 20, temperature: 0.01 },
 				});
@@ -495,8 +495,8 @@ const canReload = computed(() => {
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
 			<u><i>Friendly Reminder</i></u>
-			Buddies in this app are AI -- they make mistakes sometimes and they are not
-			real.
+			Buddies in this app are AI -- they make mistakes sometimes and are not real
+			people.
 		</p>
 	</div>
 </template>
