@@ -10,6 +10,7 @@ import { useTitle } from '@vueuse/core';
 
 useTitle('BuddyGen');
 
+const store = useAppStore();
 const {
 	settings,
 	updateModels,
@@ -24,6 +25,16 @@ const buddies: BuddyVersionMerged[] = useAppStore().buddies;
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();
+
+onMounted(async () => {
+	if (
+		!store.chatServerRunning &&
+		settings.local_model_directory &&
+		settings.selected_model_chat
+	) {
+		await startServer(getChatModelPath(), getNGpuLayers());
+	}
+});
 
 await updateBuddies();
 await updateThreads();

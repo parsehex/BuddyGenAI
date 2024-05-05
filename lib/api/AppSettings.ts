@@ -11,7 +11,8 @@ type AppSettingsKeys =
 	| 'selected_model_chat'
 	| 'selected_model_image'
 	| 'fresh_db'
-	| 'n_gpu_layers';
+	| 'n_gpu_layers'
+	| 'auto_start_server';
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
@@ -22,6 +23,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_model_image: '',
 	fresh_db: 0,
 	n_gpu_layers: 0,
+	auto_start_server: 0,
 	// preferred_pic_quality (1 | 2 | 3)
 	// used_binary_type_llamacpp (avx2 | clblast | cuda12 | arm64 | etc.)
 	// used_binary_type_sd (avx2 | clblast | cuda12 | arm64 | etc.)

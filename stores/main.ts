@@ -36,6 +36,7 @@ interface Settings {
 	selected_model_image: string;
 	fresh_db: number;
 	n_gpu_layers: number;
+	auto_start_server: number;
 }
 
 let firstRun = true;
@@ -243,5 +244,9 @@ export const useAppStore = defineStore('app', () => {
 		updateImgGenerating,
 		imgProgress,
 		updateImgProgress,
+
+		toggleAutoStartServer: () => {
+			settings.value.auto_start_server = settings.value.auto_start_server ? 0 : 1;
+		},
 	};
 });
