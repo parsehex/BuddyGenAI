@@ -73,6 +73,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'electron-nuxt3',
+		link: 'https://github.com/EternalC0der/electron-nuxt3',
+		author: 'EternalC0der',
+		license: 'Unknown',
+	},
+	{
 		name: 'electron-updater',
 		link: 'https://github.com/electron-userland/electron-builder',
 		author: 'Loopline Systems',
