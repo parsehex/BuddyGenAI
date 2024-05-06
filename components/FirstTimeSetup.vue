@@ -28,6 +28,7 @@ const props = defineProps<{
 	handleModelChange: () => void;
 }>();
 
+const { openExternalLink } = useElectron();
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
 const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
@@ -330,6 +331,21 @@ const acceptPicKeywords = () => {
 				<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
 				<img src="/assets/logo.png" alt="BuddyGen Logo" />
 			</Avatar>
+
+			<p>
+				If you get stuck, please
+				<span
+					class="text-blue-500 cursor-pointer"
+					@click="
+						openExternalLink &&
+							openExternalLink(
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md'
+							)
+					"
+				>
+					go here
+				</span>
+			</p>
 
 			<!-- Server Starting Spinner -->
 			<div
