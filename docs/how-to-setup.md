@@ -36,26 +36,26 @@ Now back to the app, pick your models:
 
 ![BuddyGen AI setup 2](./img/model-setup_3.png)
 
-Fill in your name and the name of your Buddy.
+Fill in your name and the name of your Buddy:
 
 ![BuddyGen AI setup 3](./img/setup%20-%201%20with%20name.png)
 
-Fill in a description you like, or click the purple Magic button to use AI to generate suggestions for your Buddy.
+Fill in a description you like, or click the purple Magic button to use AI to generate suggestions for your Buddy:
 
 ![BuddyGen AI setup 4](./img/setup%20-%202%20randomize%20with%20a%20name%20after.png)
 
-Click `Create Buddy` when you're satisfied and now you can give your Buddy an appearance using keywords.
+Click `Create Buddy` when you're satisfied and now you can give your Buddy an appearance using keywords:
 
 ![BuddyGen AI setup 5](./img/setup%20-%203%20describe%20buddy%20appearance.png)
 
-You can use the Magic button to generate suggestions for your Buddy's appearance as well.
+You can use the Magic button to generate suggestions for your Buddy's appearance as well:
 
 ![BuddyGen AI setup 6](./img/setup%20-%203%20pick%20what%20you%20want.png)
 
-Click "Accept & Make Picture" and wait for the picture to be generated. You can click "Make Profile Picture" until you find one you like and then click "Save".
+Click "Accept & Make Picture" and wait for the picture to be generated. You can click "Make Profile Picture" until you find one you like and then click "Save":
 
 ![BuddyGen AI setup 7](./img/setup%20-%204%20result.png)
 
-Start talking with your Buddy.
+Start talking with your Buddy:
 
 ![BuddyGen AI setup 8](./img/chat.png)
