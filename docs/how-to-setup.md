@@ -2,6 +2,8 @@
 
 ## Requirements
 
+[Microsoft Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
 You'll need to download a couple AI models if you don't already have them - an LLM like Llama 3 and a Stable Diffusion (1.5) model.
 
 The following models are what I developed with and should work for most. Other models may work (planned to support more in the future).
