@@ -578,6 +578,7 @@ const acceptPicKeywords = () => {
 								<BuddyAvatar
 									v-if="acceptedBuddy && newBuddy"
 									:persona="newBuddy"
+									:no-default="true"
 									size="lg"
 								/>
 								<Label for="profile-picture" class="flex flex-col items-center">

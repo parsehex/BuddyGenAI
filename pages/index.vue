@@ -39,7 +39,9 @@ onMounted(async () => {
 await updateBuddies();
 await updateThreads();
 
-const userNameValue = ref('');
+const userNameValue = ref(
+	settings.user_name === 'User' ? '' : settings.user_name
+);
 
 const newHere = computed(
 	() => !!+settings.fresh_db || (!threads.length && !buddies.length)

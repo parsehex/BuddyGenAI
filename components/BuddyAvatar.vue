@@ -5,6 +5,7 @@ import urls from '~/lib/api/urls';
 const props = defineProps<{
 	persona: BuddyVersionMerged;
 	size?: 'xs' | 'sm' | 'base' | 'md' | 'lg';
+	noDefault?: boolean;
 }>();
 
 const initials = computed(() => {
@@ -44,7 +45,7 @@ watch(
 		<AvatarImage :src="profilePicValue" />
 		<AvatarFallback>
 			<img
-				v-if="!profilePicValue"
+				v-if="!profilePicValue && !noDefault"
 				src="/assets/logo.png"
 				alt="Default Buddy icon"
 			/>
