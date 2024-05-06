@@ -6,7 +6,7 @@ You'll need to download a couple AI models if you don't already have them - an L
 
 The following models are what I developed with and should work for most. Other models may work (planned to support more in the future).
 
-- Llama 3 (Q2_K) - Download [Here]](https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct-Q2_K.gguf?download=true) or [Here](https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct.Q2_K.gguf?download=true)
+- Llama 3 (Q2_K) - Download [Here](https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct-Q2_K.gguf?download=true) or [Here](https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct.Q2_K.gguf?download=true)
 - Toonify SD 1.5 - [Download Here](https://civitai.com/api/download/models/244831)
 
 Grab a drink while you wait for these to download.
