@@ -12,6 +12,11 @@ import {
 import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import urls from '@/lib/api/urls';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
@@ -102,19 +107,20 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 
 <template>
 	<!-- TODO when server is off, change delay (+ figure out what delay to use) -->
-	<HoverCard :close-delay="250" :open-delay="50">
-		<HoverCardTrigger as-child>
+	<Popover>
+		<PopoverTrigger as-child>
 			<div
 				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center"
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
 				<Button variant="link">Chat {{ isRunning ? 'Online' : 'Offline' }}</Button>
 			</div>
-		</HoverCardTrigger>
-		<HoverCardContent class="w-40" :hide-when-detached="true" side="right">
+		</PopoverTrigger>
+		<PopoverContent class="w-72" :hide-when-detached="true" side="right">
 			<div class="flex items-center space-x-4">
 				<div class="space-y-1">
 					<p v-if="lastModel" class="text-sm text-gray-500">
+						<span class="font-semibold">Model:</span>
 						{{ lastModel }}
 					</p>
 					<div class="flex items-center space-x-2">
@@ -131,6 +137,6 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 					</div>
 				</div>
 			</div>
-		</HoverCardContent>
-	</HoverCard>
+		</PopoverContent>
+	</Popover>
 </template>
