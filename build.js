@@ -24,7 +24,7 @@ if (!isVersionsSet) {
 /**
  * @type {import('electron-builder').CompressionLevel}
  */
-const compression = 'store';
+const compression = 'maximum';
 // set to 'maximum' for production builds
 
 console.time(`build (${compression} compression-level)`);
