@@ -16,10 +16,6 @@ const reload = () => {
 	window.location.reload();
 };
 
-const goAppSettings = async () => {
-	await navigateTo('/settings');
-};
-
 const goToCredits = async () => {
 	await navigateTo('/credits');
 };
@@ -39,9 +35,6 @@ const handleKeyDown = ((id) => async (e: KeyboardEvent) => {
 	} else if (e.key === 'i' && holdingCtrl && holdingShift && toggleDevTools) {
 		e.preventDefault();
 		toggleDevTools();
-	} else if (e.key === ',' && holdingCtrl && !holdingShift) {
-		e.preventDefault();
-		await goAppSettings();
 	}
 })((window as any).latestKeyDownHandlerId);
 
@@ -58,15 +51,8 @@ window.addEventListener('keydown', handleKeyDown);
 					Reload
 					<MenubarShortcut>Ctrl + R</MenubarShortcut>
 				</MenubarItem>
-				<MenubarItem @select="toggleDevTools">
-					DevTools
-					<MenubarShortcut>Ctrl + Shift + I</MenubarShortcut>
-				</MenubarItem>
+				<MenubarItem @select="toggleDevTools">DevTools</MenubarItem>
 				<MenubarSeparator />
-				<MenubarItem @select="goAppSettings">
-					App Settings
-					<MenubarShortcut>Ctrl + ,</MenubarShortcut>
-				</MenubarItem>
 				<MenubarItem @select="goToCredits">Credits</MenubarItem>
 			</MenubarContent>
 		</MenubarMenu>

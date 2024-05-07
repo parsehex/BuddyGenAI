@@ -34,6 +34,8 @@ let hasResolved = false;
 
 // TODO i think error 3221225781 means vcredist is needed
 
+let isReady = false;
+
 function startServer(model: string, gpuLayers: number) {
 	return new Promise<void>(async (resolve, reject) => {
 		model = path.normalize(model);
@@ -73,6 +75,7 @@ function startServer(model: string, gpuLayers: number) {
 					console.error(`Llama.cpp-Server error: ${error.message}`);
 					if (reject) {
 						hasResolved = false;
+						isReady = false;
 						reject();
 					}
 				}
@@ -88,6 +91,7 @@ function startServer(model: string, gpuLayers: number) {
 			log.error(`Llama.cpp-Server Error: ${error.message}`);
 			if (reject) {
 				hasResolved = false;
+				isReady = false;
 				reject();
 			}
 		});
@@ -99,11 +103,14 @@ function startServer(model: string, gpuLayers: number) {
 			if (signal) {
 				log.warn(`Llama.cpp-Server killed with signal: ${signal}`);
 			}
+			isReady = false;
 		});
 
 		process.stdin.resume(); // so the program will not close instantly
 
 		async function exitHandler(options: any, exitCode: any) {
+			// TODO clean up all the onReadys
+			isReady = false;
 			await stopServer();
 			if (options.cleanup) console.log('clean');
 			if (exitCode || exitCode === 0) console.log(exitCode);
@@ -122,6 +129,7 @@ function startServer(model: string, gpuLayers: number) {
 			if (!hasResolved && str?.includes('all slots are idle')) {
 				log.info('Llama.cpp-Server ready');
 				hasResolved = true;
+				isReady = true;
 				resolve();
 			}
 		});
@@ -139,10 +147,7 @@ async function stopServer() {
 }
 
 async function isServerRunning() {
-	if (commandObj.cmd) {
-		return true;
-	}
-	return false;
+	return isReady;
 }
 
 export default function llamaCppModule(mainWindow: BrowserWindow) {
@@ -151,6 +156,10 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 	ipcMain.handle(
 		'llamacpp/start',
 		async (_, modelPath: string, nGpuLayers: number) => {
+			if (await isServerRunning()) {
+				return { message: 'Server already running' };
+			}
+			lastModel = modelPath;
 			await startServer(modelPath, nGpuLayers);
 			return { message: 'Server started' };
 		}

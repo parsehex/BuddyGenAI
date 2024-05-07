@@ -2,6 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
+import SettingsPanel from './SettingsPanel.vue';
 
 const route = useRoute();
 
@@ -24,12 +25,16 @@ watch(
 		<TabsList class="w-full">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
+			<TabsTrigger value="settings">Settings</TabsTrigger>
 		</TabsList>
 		<TabsContent value="chat">
 			<ThreadsList />
 		</TabsContent>
 		<TabsContent value="buddy">
 			<BuddyList />
+		</TabsContent>
+		<TabsContent value="settings">
+			<SettingsPanel />
 		</TabsContent>
 	</Tabs>
 </template>

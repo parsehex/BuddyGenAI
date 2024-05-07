@@ -244,15 +244,18 @@ const createDescription = async () => {
 const randomizedBuddy = ref(
 	null as { name: string; description: string } | null
 );
+const creatingKeywords = ref(false);
 const randomizeKeywords = async () => {
 	let promptStr = `Your task is to generate a name and a description for someone${
 		buddyName.value ? ' named ' + buddyName.value : ''
 	}.\n\nReturn a JSON object with the keys "name" and "description".\n\nRandom seed: ${Math.random()}`;
 	let value = '';
 	try {
+		creatingKeywords.value = true;
 		value = (await complete(promptStr, {
 			body: { max_tokens: 150, temperature: 0.15 },
 		})) as string;
+		creatingKeywords.value = false;
 	} catch (e) {
 		console.error(e);
 		value = '';
@@ -278,14 +281,17 @@ const randomizeKeywords = async () => {
 	}
 };
 
+const creatingSuggestKeywords = ref(false);
 const suggestKeywords = async () => {
 	const descVal = newBuddy.value?.description || acceptedBuddyDesc.value || '';
 	const promptStr = keywordsFromNameAndDescription(buddyName.value, descVal);
 	let value = '';
 	try {
+		creatingSuggestKeywords.value = true;
 		value = (await complete(promptStr, {
 			body: { max_tokens: 75, temperature: 0.75 },
 		})) as string;
+		creatingSuggestKeywords.value = false;
 	} catch (e) {
 		console.error(e);
 		value = '';
@@ -332,8 +338,8 @@ const acceptPicKeywords = () => {
 				<img src="/assets/logo.png" alt="BuddyGen Logo" />
 			</Avatar>
 
-			<p>
-				If you get stuck, please
+			<p v-if="newHere" class="text-center mt-2">
+				For setup instructions, please
 				<span
 					class="text-blue-500 cursor-pointer"
 					@click="
@@ -506,7 +512,7 @@ const acceptPicKeywords = () => {
 												>
 													Randomize
 												</Button>
-												<Spinner v-if="creatingDescription" />
+												<Spinner v-if="creatingKeywords || creatingDescription" />
 											</div>
 											<p class="mt-4" v-if="createdDescription">
 												Created Description:
@@ -639,6 +645,7 @@ const acceptPicKeywords = () => {
 											>
 												Suggest {{ profilePicturePrompt.length ? 'More' : '' }} Keywords
 											</Button>
+											<Spinner v-if="creatingSuggestKeywords" />
 
 											<p v-if="createdKeywords" class="my-4">
 												<span class="text-sm">AI Suggestion:</span>
@@ -682,7 +689,7 @@ const acceptPicKeywords = () => {
 					<Button
 						v-if="acceptedBuddy"
 						@click="handleSave"
-						class="mt-4 p-2 bg-blue-500 text-white rounded"
+						class="mt-4 p-2 success rounded"
 					>
 						Save
 					</Button>

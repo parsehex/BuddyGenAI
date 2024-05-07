@@ -240,9 +240,9 @@ const acceptKeywords = () => {
 		<h1 class="text-2xl font-bold">Edit Buddy</h1>
 		<div class="flex items-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
-			</NuxtLink>
+			</NuxtLink> -->
 		</div>
 		<Card class="whitespace-pre-wrap w-full md:w-5/6 p-2 pt-6">
 			<CardContent>

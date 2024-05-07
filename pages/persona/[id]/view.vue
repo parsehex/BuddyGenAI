@@ -73,9 +73,9 @@ const createThread = async () => {
 		</h1>
 		<div class="flex items-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
-			</NuxtLink>
+			</NuxtLink> -->
 		</div>
 		<Card class="w-full md:w-2/3">
 			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
