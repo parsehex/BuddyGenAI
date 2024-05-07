@@ -18,10 +18,9 @@ Linux is my daily driver, so I haven't kept the Windows bulid scripts in `./scri
 Node v18 is recommended.
 
 ```bash
-# clone the repo
+git clone https://github.com/parsehex/BuddyGenAI
 
-# TODO repo name
-cd buddygen-ai
+cd BuddyGenAI
 
 # Install dependencies
 npm install

@@ -6,6 +6,10 @@
   "version": "0.1.0",
   "private": true,
   "main": "electron/background.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parsehex/BuddyGenAI"
+  },
   "scripts": {
     "dev": "nuxt dev -o",
     "build": "nuxt build",
