@@ -393,10 +393,10 @@ const canReload = computed(() => {
 		</ScrollArea>
 
 		<form
-			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl"
+			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white shadow-md"
 		>
 			<Textarea
-				class="p-2 border border-gray-300 rounded shadow-xl text-lg"
+				class="p-2 border border-gray-300 rounded shadow-sm text-lg"
 				tabindex="1"
 				v-model="input"
 				placeholder="Say something..."
@@ -428,7 +428,7 @@ const canReload = computed(() => {
 			</div>
 		</form>
 		<p
-			class="mt-6 text-sm text-gray-400 select-none"
+			class="mt-4 text-sm text-gray-400 select-none"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
 			<u><i>Friendly Reminder</i></u>
