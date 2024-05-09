@@ -345,7 +345,7 @@ const canReload = computed(() => {
 		class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen"
 		v-if="threadId !== ''"
 	>
-		<div class="flex items-center justify-between mt-8 py-4">
+		<div class="flex items-center justify-between py-4">
 			<h2 class="text-2xl font-bold">
 				{{ threadTitle }}
 			</h2>
