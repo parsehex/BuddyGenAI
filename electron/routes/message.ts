@@ -74,6 +74,7 @@ router.post('/api/completion', async (req, res) => {
 		top_p: 1,
 		frequency_penalty: 1,
 		presence_penalty: 1,
+		stop: ['<|eot_id|>'],
 	});
 
 	const stream = OpenAIStream(response);
