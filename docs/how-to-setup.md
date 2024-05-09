@@ -61,3 +61,5 @@ Click "Accept & Make Picture" and wait for the picture to be generated. You can 
 Start talking with your Buddy:
 
 ![BuddyGen AI setup 8](./img/chat.png)
+
+## GPU Support
