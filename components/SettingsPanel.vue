@@ -230,6 +230,10 @@ const nglBlur = async () => {
 				</SelectContent>
 			</Select>
 		</div>
+
+		<div class="mt-4">
+			<NuxtLink to="/credits">App Credits</NuxtLink>
+		</div>
 	</div>
 </template>
 

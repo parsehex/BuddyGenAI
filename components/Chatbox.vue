@@ -70,6 +70,8 @@ const scrollToBottom = () => {
 	if (lastMessage) {
 		lastMessage.scrollIntoView();
 	}
+
+	document.body.scrollTop = 0;
 };
 
 interface Message {
@@ -339,86 +341,14 @@ const canReload = computed(() => {
 </script>
 
 <template>
-	<div class="flex flex-col w-full pb-32 mx-auto stretch" v-if="threadId !== ''">
-		<h2
-			class="fixed text-2xl font-bold grow self-center bg-white shadow-sm p-1 rounded-md z-10 w-full text-center opacity-90"
-		>
-			{{ threadTitle }}
-		</h2>
-		<div class="flex items-center justify-between mt-10">
-			<div class="my-2 w-full inline-flex items-center justify-start">
-				<RadioGroup
-					v-model="threadMode"
-					v-if="!uiMessages.length && !currentBuddy && threadTitle"
-					class="mx-4"
-				>
-					<p>Chat Mode</p>
-					<div class="flex items-center space-x-5 justify-center">
-						<Label class="cursor-pointer">
-							<RadioGroupItem class="px-1" value="custom" />
-							Custom
-						</Label>
-						<TooltipProvider :delay-duration="100">
-							<Tooltip>
-								<TooltipTrigger>
-									<Label :class="{ 'cursor-pointer': buddies.length }">
-										<RadioGroupItem
-											class="px-1"
-											value="persona"
-											:disabled="!buddies.length"
-										/>
-										Buddy
-									</Label>
-								</TooltipTrigger>
-								<TooltipContent v-if="!buddies.length">
-									<p>
-										No Buddies available ☹️
-										<br />
-										<Button type="button" @click="navigateTo('/create-buddy')">
-											Create one 😊
-										</Button>
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
-				</RadioGroup>
-				<div
-					v-if="uiMessages.length && threadTitle"
-					class="flex items-center space-x-2"
-				>
-					<!-- <Label
-						v-if="threadMode === 'persona' && buddies.length"
-						class="mx-4 cursor-pointer flex items-center"
-					>
-						<Switch
-							class="mr-1"
-							:checked="buddyModeUseCurrent"
-							@update:checked="handleBuddyModeUseCurrentChange"
-						/>
-						Keep Buddy updated
-					</Label>
-					<Button
-						type="button"
-						size="xs"
-						title="Update system message from current Buddy version"
-						v-if="threadMode === 'persona' && !buddyModeUseCurrent"
-						@click="updateSysFromBuddy"
-					>
-						<RefreshCw />
-					</Button> -->
-				</div>
-				<BuddySelect
-					v-if="
-						threadMode === 'persona' &&
-						!uiMessages.length &&
-						buddies.length &&
-						threadTitle
-					"
-					v-model="selectedBuddy"
-					class="my-2"
-				/>
-			</div>
+	<div
+		class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen"
+		v-if="threadId !== ''"
+	>
+		<div class="flex items-center justify-between mt-8 py-4">
+			<h2 class="text-2xl font-bold">
+				{{ threadTitle }}
+			</h2>
 			<BuddyCard
 				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
 				:persona="currentBuddy"
@@ -446,22 +376,24 @@ const canReload = computed(() => {
 				</Card>
 			</CollapsibleContent>
 		</Collapsible>
-		<div class="flex flex-col gap-1 mt-1" id="chatbox">
-			<Message
-				v-for="m in uiMessages"
-				:key="m.id"
-				:thread-id="threadId"
-				:thread-mode="threadMode"
-				:current-persona="currentBuddy"
-				:message="m"
-				@edit="refreshMessages"
-				@delete="refreshMessages"
-				@clearThread="refreshMessages"
-			/>
-		</div>
+		<ScrollArea style="height: 100%" id="messages-scroll">
+			<div class="flex flex-col gap-1 mt-1" id="chatbox">
+				<Message
+					v-for="m in uiMessages"
+					:key="m.id"
+					:thread-id="threadId"
+					:thread-mode="threadMode"
+					:current-persona="currentBuddy"
+					:message="m"
+					@edit="refreshMessages"
+					@delete="refreshMessages"
+					@clearThread="refreshMessages"
+				/>
+			</div>
+		</ScrollArea>
 
 		<form
-			class="w-full fixed bottom-0 flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl"
+			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white shadow-xl"
 		>
 			<Textarea
 				class="p-2 border border-gray-300 rounded shadow-xl text-lg"
@@ -496,7 +428,7 @@ const canReload = computed(() => {
 			</div>
 		</form>
 		<p
-			class="mt-4 text-sm text-gray-400 select-none"
+			class="mt-6 text-sm text-gray-400 select-none"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
 			<u><i>Friendly Reminder</i></u>
@@ -507,10 +439,5 @@ const canReload = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-h2,
-div,
-form,
-div > form > input {
-	max-width: 40rem;
-}
+//
 </style>

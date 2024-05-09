@@ -14,6 +14,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from './ui/dialog';
+import { ScrollArea } from './ui/scroll-area';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAppStore } from '../stores/main';
@@ -107,53 +108,55 @@ watch(route, async () => {
 			/>
 			<Button @click="doCreateThread">+</Button>
 		</div>
-		<ul>
-			<Dialog>
-				<ContextMenu>
-					<ContextMenuTrigger>
-						<li
-							v-for="thread in threads"
-							:key="thread.id"
-							:class="[
-								'cursor-pointer',
-								'hover:bg-gray-200',
-								'rounded',
-								'border-b-2',
-								isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
-							]"
-							@contextmenu="rightClickedId = thread.id"
-						>
-							<NuxtLink :to="`/chat/${thread.id}`" class="block p-2">
-								{{ thread.name }}
-							</NuxtLink>
-						</li>
-					</ContextMenuTrigger>
-					<ContextMenuContent>
-						<!-- TODO fix to not use selected thread -->
-						<DialogTrigger asChild>
-							<ContextMenuItem @click="renameClicked(rightClickedId)">
-								Rename
+		<ScrollArea class="h-screen">
+			<ul>
+				<Dialog>
+					<ContextMenu>
+						<ContextMenuTrigger>
+							<li
+								v-for="thread in threads"
+								:key="thread.id"
+								:class="[
+									'cursor-pointer',
+									'hover:bg-gray-200',
+									'rounded',
+									'border-b-2',
+									isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
+								]"
+								@contextmenu="rightClickedId = thread.id"
+							>
+								<NuxtLink :to="`/chat/${thread.id}`" class="block p-2">
+									{{ thread.name }}
+								</NuxtLink>
+							</li>
+						</ContextMenuTrigger>
+						<ContextMenuContent>
+							<!-- TODO fix to not use selected thread -->
+							<DialogTrigger asChild>
+								<ContextMenuItem @click="renameClicked(rightClickedId)">
+									Rename
+								</ContextMenuItem>
+							</DialogTrigger>
+							<ContextMenuItem @click="doDeleteThread(rightClickedId)">
+								Delete
 							</ContextMenuItem>
-						</DialogTrigger>
-						<ContextMenuItem @click="doDeleteThread(rightClickedId)">
-							Delete
-						</ContextMenuItem>
-					</ContextMenuContent>
-				</ContextMenu>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>New Name</DialogTitle>
-					</DialogHeader>
-					<DialogDescription>
-						<Input v-model="editingThreadName" placeholder="Thread name" />
-					</DialogDescription>
-					<DialogFooter>
-						<DialogClose as-child>
-							<Button @click="handleRename" type="button">Confirm</Button>
-						</DialogClose>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-		</ul>
+						</ContextMenuContent>
+					</ContextMenu>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>New Name</DialogTitle>
+						</DialogHeader>
+						<DialogDescription>
+							<Input v-model="editingThreadName" placeholder="Thread name" />
+						</DialogDescription>
+						<DialogFooter>
+							<DialogClose as-child>
+								<Button @click="handleRename" type="button">Confirm</Button>
+							</DialogClose>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			</ul>
+		</ScrollArea>
 	</div>
 </template>

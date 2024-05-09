@@ -236,15 +236,15 @@ const acceptKeywords = () => {
 </script>
 
 <template>
-	<div class="flex flex-col items-center">
-		<h1 class="text-2xl font-bold">Edit Buddy</h1>
-		<div class="flex items-center mb-2">
+	<ScrollArea class="h-screen flex flex-col items-center">
+		<h1 class="text-2xl font-bold text-center">Edit Buddy</h1>
+		<div class="flex items-center justify-center mb-2">
 			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
 			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
 			</NuxtLink> -->
 		</div>
-		<Card class="whitespace-pre-wrap w-full md:w-5/6 p-2 pt-6">
+		<Card class="whitespace-pre-wrap w-full">
 			<CardContent>
 				<div class="flex flex-col items-center">
 					<Input
@@ -423,7 +423,7 @@ const acceptKeywords = () => {
 				</Card>
 			</CardContent>
 		</Card>
-	</div>
+	</ScrollArea>
 </template>
 
 <style>

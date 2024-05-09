@@ -269,52 +269,54 @@ const openLink = (link: string) => {
 </script>
 
 <template>
-	<div class="container flex flex-col items-center pb-8">
-		<h1 class="text-2xl font-bold">BuddyGen AI Credits</h1>
+	<ScrollArea class="h-screen">
+		<div class="container flex flex-col items-center pb-8">
+			<h1 class="text-2xl font-bold">BuddyGen AI Credits</h1>
 
-		<div class="mt-4">
-			<p class="text-lg">BuddyGen AI was made using the following software:</p>
-			<ul class="list-disc list-inside mt-2">
-				<li v-for="dep in deps" :key="dep.name">
-					<span @click="openLink(dep.link)" class="text-blue-500 cursor-pointer">
-						{{ dep.name }}
-					</span>
-					by
-					<b>{{ dep.author }}</b>
-					{{ ' - ' }}
+			<div class="mt-4">
+				<p class="text-lg">BuddyGen AI was made using the following software:</p>
+				<ul class="list-disc list-inside mt-2">
+					<li v-for="dep in deps" :key="dep.name">
+						<span @click="openLink(dep.link)" class="text-blue-500 cursor-pointer">
+							{{ dep.name }}
+						</span>
+						by
+						<b>{{ dep.author }}</b>
+						{{ ' - ' }}
+						<span
+							v-for="license in dep.license.split(',')"
+							:key="license"
+							class="text-sm bg-gray-200 px-2 rounded-full ml-1"
+						>
+							{{ license }}&nbsp;license
+						</span>
+					</li>
+				</ul>
+
+				<p class="text-lg mt-4">
 					<span
-						v-for="license in dep.license.split(',')"
-						:key="license"
-						class="text-sm bg-gray-200 px-2 rounded-full ml-1"
+						class="text-blue-500 cursor-pointer"
+						@click="openLink('https://github.com/parsehex/BuddyGenAI')"
 					>
-						{{ license }}&nbsp;license
+						BuddyGen AI
 					</span>
-				</li>
-			</ul>
-
-			<p class="text-lg mt-4">
-				<span
-					class="text-blue-500 cursor-pointer"
-					@click="openLink('https://github.com/parsehex/BuddyGenAI')"
-				>
-					BuddyGen AI
-				</span>
-				is a project by
-				<b>Thomas Mays</b>
-				(
-				<span
-					class="text-blue-500 cursor-pointer"
-					@click="openLink('https://github.com/parsehex')"
-				>
-					parsehex
-				</span>
-				)
-				<span class="text-sm bg-gray-200 px-2 rounded-full ml-1">
-					AGPL-3.0 license
-				</span>
-			</p>
+					is a project by
+					<b>Thomas Mays</b>
+					(
+					<span
+						class="text-blue-500 cursor-pointer"
+						@click="openLink('https://github.com/parsehex')"
+					>
+						parsehex
+					</span>
+					)
+					<span class="text-sm bg-gray-200 px-2 rounded-full ml-1">
+						AGPL-3.0 license
+					</span>
+				</p>
+			</div>
 		</div>
-	</div>
+	</ScrollArea>
 </template>
 
 <style lang="scss"></style>

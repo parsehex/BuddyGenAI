@@ -1,34 +1,43 @@
 <script setup lang="ts">
-import Toaster from '~/components/ui/toast/Toaster.vue';
-import Sidebar from '~/components/Sidebar.vue';
-import AppMenubar from '~/components/AppMenubar.vue';
-
-// TODO add alert if not setup yet
+import Toaster from '@/components/ui/toast/Toaster.vue';
+import Sidebar from '@/components/Sidebar.vue';
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from '@/components/ui/resizable';
+import AppMenubar from '@/components/AppMenubar.vue';
 </script>
 
 <template>
 	<Body
-		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950 h-screen"
+		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950"
 	>
-		<div class="fixed top-0 left-0 w-full z-50">
-			<AppMenubar />
-		</div>
-		<Suspense>
-			<div class="pt-8">
+		<ResizablePanelGroup direction="horizontal">
+			<ResizablePanel
+				class="min-w-min"
+				:default-size="22"
+				:min-size="20"
+				:max-size="35"
+			>
 				<Sidebar />
+			</ResizablePanel>
+			<ResizableHandle />
+			<ResizablePanel>
 				<NuxtLayout>
 					<NuxtLoadingIndicator />
-					<div id="page-container">
-						<NuxtPage />
-					</div>
+					<NuxtPage />
 				</NuxtLayout>
-				<Toaster />
-			</div>
-		</Suspense>
+			</ResizablePanel>
+		</ResizablePanelGroup>
 	</Body>
 </template>
 
 <style>
+html,
+body {
+	@apply h-screen w-screen overflow-y-hidden;
+}
 .info {
 	@apply bg-blue-400 text-white font-bold;
 }

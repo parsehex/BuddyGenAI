@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { ScrollArea } from './ui/scroll-area';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './SettingsPanel.vue';
@@ -21,45 +22,24 @@ watch(
 </script>
 
 <template>
-	<Tabs v-model:model-value="modelValue" class="fixed">
+	<Tabs v-model:model-value="modelValue">
 		<TabsList class="w-full">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<TabsTrigger value="settings">Settings</TabsTrigger>
 		</TabsList>
-		<TabsContent value="chat">
-			<ThreadsList />
-		</TabsContent>
-		<TabsContent value="buddy">
-			<BuddyList />
-		</TabsContent>
-		<TabsContent value="settings">
-			<SettingsPanel />
-		</TabsContent>
+		<ScrollArea class="h-screen">
+			<TabsContent value="chat">
+				<ThreadsList />
+			</TabsContent>
+			<TabsContent value="buddy">
+				<BuddyList />
+			</TabsContent>
+			<TabsContent value="settings">
+				<SettingsPanel />
+			</TabsContent>
+		</ScrollArea>
 	</Tabs>
 </template>
 
-<style>
-#page-container {
-	/* putting this here to keep nearby */
-	margin-left: 250px;
-}
-.sidebar {
-	width: 250px;
-	height: 100vh;
-	background-color: #f5f5f5;
-
-	/* why does removing this line break the file? */
-	padding-top: 5px;
-}
-
-.sidebar ul {
-	list-style-type: none;
-	padding: 0;
-}
-
-.sidebar a {
-	text-decoration: none;
-	color: #333;
-}
-</style>
+<style></style>
