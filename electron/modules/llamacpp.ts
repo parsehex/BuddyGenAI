@@ -36,12 +36,18 @@ let hasResolved = false;
 
 let isReady = false;
 
-function startServer(model: string, gpuLayers: number) {
+function startServer(model: string, gpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
 		model = path.normalize(model);
 		gpuLayers = Math.floor(+gpuLayers);
-		const serverPath = await findBinaryPath('llama.cpp', 'server');
-		const args = ['--model', model, '--n-gpu-layers', gpuLayers + ''];
+		const serverPath = await findBinaryPath('llamafile', 'llamafile-0.8.1');
+		const args = [
+			'--nobrowser',
+			'--model',
+			model,
+			'--n-gpu-layers',
+			gpuLayers + '',
+		];
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			model.includes(key)

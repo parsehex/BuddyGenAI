@@ -14,10 +14,15 @@ export function updateModel(modelName: string) {
 
 const openai = new OpenAI({
 	apiKey: 'sk-1234',
-	baseURL: 'http://localhost:8080',
+	baseURL: 'http://localhost:8080/v1',
 });
 
 router.use(json());
+
+// long term, i think we need to not use openai pkg with llamafile/local LLMs
+//   1. construct prompt from jinja template js-side (llamafile has no templating)
+//   2. create & use wrapper to make ReadableStream from response
+//   3. use openai pkg for 3rd party apis later (e.g. openrouter)
 
 router.options('/api/message', cors());
 router.post('/api/message', async (req, res) => {
@@ -35,6 +40,7 @@ router.post('/api/message', async (req, res) => {
 		max_tokens,
 		temperature,
 		seed,
+		stop: ['<|eot_id|>'],
 	});
 
 	const stream = OpenAIStream(aiResponse);

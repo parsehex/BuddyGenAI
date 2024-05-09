@@ -59,11 +59,16 @@ function tryBinary(p: string) {
 	});
 }
 
-type ProjectName = 'llama.cpp' | 'stable-diffusion.cpp' | 'whisper.cpp'; // bark.cpp?
+type ProjectName =
+	| 'llama.cpp'
+	| 'stable-diffusion.cpp'
+	| 'whisper.cpp'
+	| 'llamafile'; // bark.cpp?
 type Binaries = {
 	'llama.cpp': 'main' | 'server';
 	'stable-diffusion.cpp': 'sd';
 	'whisper.cpp': 'main' | 'server';
+	llamafile: 'llamafile-0.8.1';
 };
 type BinaryName<T extends ProjectName> = Binaries[T];
 export async function findBinaryPath<T extends ProjectName>(
@@ -75,6 +80,13 @@ export async function findBinaryPath<T extends ProjectName>(
 	if (process.platform === 'win32') exe += '.exe';
 
 	let resPath = await findResourcesPath();
+
+	if (projectName === 'llamafile') {
+		let binPath = path.join(resPath, 'binaries/', exe);
+		await fs.access(binPath);
+		return binPath;
+	}
+
 	let binPath = path.join(resPath, 'binaries/build', projectName, exe);
 
 	// TODO pull these in dynamically at runtime + have preferred order like below (out of available)
