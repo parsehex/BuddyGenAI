@@ -22,7 +22,7 @@ import AppMenubar from '@/components/AppMenubar.vue';
 			>
 				<Sidebar />
 			</ResizablePanel>
-			<ResizableHandle />
+			<ResizableHandle with-handle />
 			<ResizablePanel>
 				<NuxtLayout>
 					<NuxtLoadingIndicator />
