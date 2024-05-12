@@ -122,7 +122,7 @@ const options = {
 	},
 	extraResources: [
 		'./binaries/build/**/*',
-		'./binaries/llamafile-0.8.1*',
+		'./binaries/llamafile*',
 		'./licenses/**/*',
 		'./migrations/**/*',
 	],

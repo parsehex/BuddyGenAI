@@ -68,7 +68,7 @@ type Binaries = {
 	'llama.cpp': 'main' | 'server';
 	'stable-diffusion.cpp': 'sd';
 	'whisper.cpp': 'main' | 'server';
-	llamafile: 'llamafile-0.8.1';
+	llamafile: 'llamafile';
 };
 type BinaryName<T extends ProjectName> = Binaries[T];
 export async function findBinaryPath<T extends ProjectName>(

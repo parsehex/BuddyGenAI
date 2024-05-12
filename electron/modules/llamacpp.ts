@@ -40,7 +40,7 @@ function startServer(model: string, gpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
 		model = path.normalize(model);
 		gpuLayers = Math.floor(+gpuLayers);
-		const serverPath = await findBinaryPath('llamafile', 'llamafile-0.8.1');
+		const serverPath = await findBinaryPath('llamafile', 'llamafile');
 		const args = [
 			'--nobrowser',
 			'--model',
