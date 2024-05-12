@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { ScrollArea } from './ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './SettingsPanel.vue';
+import ColorMode from './ColorMode.vue';
 
 const route = useRoute();
 
@@ -27,6 +28,7 @@ watch(
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<TabsTrigger value="settings">Settings</TabsTrigger>
+			<ColorMode />
 		</TabsList>
 		<ScrollArea class="h-screen">
 			<TabsContent value="chat">

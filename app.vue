@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Toaster from '@/components/ui/toast/Toaster.vue';
-import Sidebar from '@/components/Sidebar.vue';
+import { Sidebar } from '@/components/sidebar';
 import {
 	ResizableHandle,
 	ResizablePanel,

@@ -4,7 +4,7 @@ import {
 	ContextMenuContent,
 	ContextMenuItem,
 	ContextMenuTrigger,
-} from './ui/context-menu';
+} from '@/components/ui/context-menu';
 import {
 	Dialog,
 	DialogContent,
@@ -13,11 +13,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from './ui/dialog';
-import { ScrollArea } from './ui/scroll-area';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { useAppStore } from '../stores/main';
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useAppStore } from '../../stores/main';
 import type { ChatThread } from '~/lib/api/types-db';
 import { api } from '~/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
@@ -118,7 +118,7 @@ watch(route, async () => {
 								:key="thread.id"
 								:class="[
 									'cursor-pointer',
-									'hover:bg-gray-200',
+									'hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors',
 									'rounded',
 									'border-b-2',
 									isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',

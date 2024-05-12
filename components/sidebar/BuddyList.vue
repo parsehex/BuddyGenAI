@@ -5,10 +5,10 @@ import {
 	ContextMenuContent,
 	ContextMenuItem,
 	ContextMenuTrigger,
-} from './ui/context-menu';
+} from '@/components/ui/context-menu';
 import { useAppStore } from '@/stores/main';
-import { Button } from './ui/button';
-import BuddyAvatar from './BuddyAvatar.vue';
+import { Button } from '@/components/ui/button';
+import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { api } from '~/lib/api';
 
 const { updateBuddies } = useAppStore();
@@ -55,7 +55,7 @@ const editBuddy = (id: string) => {
 						v-for="persona in buddies"
 						:key="persona.id"
 						:class="[
-							'cursor-pointer hover:bg-gray-200 rounded border-b-2',
+							'cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded border-b-2',
 							isBuddySelected(persona.id) ? 'font-bold bg-gray-200' : '',
 						]"
 						@contextmenu="rightClickedId = persona.id"
