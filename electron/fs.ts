@@ -93,6 +93,7 @@ export async function findBinaryPath<T extends ProjectName>(
 	const directories = [
 		'cuda12',
 		'cuda11',
+		'rocm5.5',
 		'clblast',
 		'vulkan',
 		'avx512',
