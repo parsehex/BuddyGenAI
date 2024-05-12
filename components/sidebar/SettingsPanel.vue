@@ -104,6 +104,14 @@ const nglBlur = async () => {
 	// 	await doStartServer();
 	// }
 };
+
+const isExternal = computed({
+	get: () => settings.selected_provider_chat === 'external',
+	set: (val) => {
+		settings.selected_provider_chat = val ? 'external' : 'local';
+		settings.selected_provider_image = val ? 'external' : 'local';
+	},
+});
 </script>
 
 <template>
@@ -122,7 +130,39 @@ const nglBlur = async () => {
 				class="w-full border border-gray-300 rounded-md p-2 mt-1"
 			/>
 		</div>
-		<div class="flex w-full items-center justify-between gap-1.5 mt-4">
+
+		<div class="mt-4">
+			<Label for="selected_provider_chat" class="block">Model Provider</Label>
+			<input
+				v-model="settings.selected_provider_chat"
+				type="radio"
+				id="selected_provider_chat_external"
+				name="selected_provider_chat"
+				value="external"
+			/>
+			<label for="selected_provider_chat_external">External</label>
+			<input
+				v-model="settings.selected_provider_chat"
+				type="radio"
+				id="selected_provider_chat_local"
+				name="selected_provider_chat"
+				value="local"
+			/>
+			<label for="selected_provider_chat_local">Local</label>
+		</div>
+		<div class="mt-4" v-if="isExternal">
+			<Label for="external_api_key" class="block">OpenAI API Key</Label>
+			<Input
+				v-model="settings.external_api_key"
+				type="text"
+				id="external_api_key"
+				class="w-full border border-gray-300 rounded-md p-2 mt-1"
+			/>
+		</div>
+		<div
+			class="flex w-full items-center justify-between gap-1.5 mt-4"
+			v-if="!isExternal"
+		>
 			<Label for="local_model_directory" class="w-full">
 				Model Folder
 				<Input
@@ -143,36 +183,6 @@ const nglBlur = async () => {
 				Choose
 			</Button>
 		</div>
-		<!-- <div class="flex justify-evenly">
-			<div class="mt-4">
-				<Label for="selected_provider_chat" class="block">Chat Provider</Label>
-				<select
-					v-model="settings.selected_provider_chat"
-					id="selected_provider_chat"
-					name="selected_provider_chat"
-					class="w-full border border-gray-300 rounded-md p-2 mt-1"
-					disabled
-				>
-					<option value="external">External</option>
-					<option value="local">Local</option>
-					<option value="custom">Custom</option>
-				</select>
-			</div>
-			<div class="mt-4">
-				<Label for="selected_provider_image" class="block">Image Provider</Label>
-				<select
-					v-model="settings.selected_provider_image"
-					id="selected_provider_image"
-					name="selected_provider_image"
-					class="w-full border border-gray-300 rounded-md p-2 mt-1"
-					disabled
-				>
-					<option value="external">External</option>
-					<option value="local">Local</option>
-					<option value="custom">Custom</option>
-				</select>
-			</div>
-		</div> -->
 		<div class="mt-4">
 			<Label for="chat-model" class="mb-1">Chat Model</Label>
 			<Alert variant="info" class="my-2" v-if="needsRestart">
@@ -198,7 +208,7 @@ const nglBlur = async () => {
 					</SelectGroup>
 				</SelectContent>
 			</Select>
-			<div class="mt-2">
+			<div class="mt-2" v-if="!isExternal">
 				<Label for="n-gpu-layers" class="block">Number of GPU Layers</Label>
 				<Input
 					v-model="settings.n_gpu_layers"

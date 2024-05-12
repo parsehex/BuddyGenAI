@@ -34,6 +34,7 @@ interface Settings {
 	selected_provider_image: Provider;
 	selected_model_chat: string;
 	selected_model_image: string;
+	external_api_key: string;
 	fresh_db: number;
 	n_gpu_layers: number;
 	auto_start_server: number;

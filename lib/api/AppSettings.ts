@@ -10,6 +10,7 @@ type AppSettingsKeys =
 	| 'selected_provider_image'
 	| 'selected_model_chat'
 	| 'selected_model_image'
+	| 'external_api_key'
 	| 'fresh_db'
 	| 'n_gpu_layers'
 	| 'auto_start_server';
@@ -21,6 +22,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_provider_image: 'local', // not implemented
 	selected_model_chat: '', // depends on selected_chat_api_provider
 	selected_model_image: '',
+	external_api_key: '',
 	fresh_db: 0,
 	n_gpu_layers: 0,
 	auto_start_server: 0,
