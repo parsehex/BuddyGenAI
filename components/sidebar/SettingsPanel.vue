@@ -107,7 +107,7 @@ const nglBlur = async () => {
 </script>
 
 <template>
-	<div class="sidebar px-2">
+	<div class="sidebar p-3">
 		<Alert v-if="error" variant="destructive">
 			<AlertTitle>Error</AlertTitle>
 			<AlertDescription>{{ error }}</AlertDescription>

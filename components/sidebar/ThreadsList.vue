@@ -103,6 +103,7 @@ watch(route, async () => {
 			<!-- TODO replace with buddyselect, make thread title "Chat with X" -->
 			<Input
 				v-model="newThreadName"
+				class="mt-2"
 				placeholder="Chat name"
 				@keyup.enter="doCreateThread"
 			/>

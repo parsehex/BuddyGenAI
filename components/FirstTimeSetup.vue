@@ -327,12 +327,15 @@ const acceptPicKeywords = () => {
 <template>
 	<div>
 		<div class="flex flex-col items-center">
-			<NuxtLink class="text-xl font-bold mb-2" to="/">
+			<NuxtLink
+				class="text-xl font-bold mb-2 dark:bg-gray-600 p-1 pt-0 rounded-b"
+				to="/"
+			>
 				{{ newHere ? 'Welcome to' : '' }}
-				<span class="underline">
+				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
-				</span>
+				</div>
 			</NuxtLink>
 
 			<Avatar v-if="newHere" size="base">

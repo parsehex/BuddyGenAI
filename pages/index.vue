@@ -147,12 +147,12 @@ const sortedThreads = computed(() => {
 
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
-		<h1 class="text-xl font-bold mb-0">
+		<h1 class="text-xl font-bold mb-2">
 			{{ newHere ? 'Welcome to' : '' }}
-			<span class="underline">
+			<div class="underline inline dark:bg-gray-600 p-1 rounded">
 				<span style="color: #61dafb">BuddyGen</span>
 				<span style="color: #111">AI</span>
-			</span>
+			</div>
 		</h1>
 		<div class="flex flex-col items-center gap-2">
 			<h2 class="text-lg">Your Chats</h2>
