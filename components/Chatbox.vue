@@ -393,7 +393,7 @@ const canReload = computed(() => {
 		</ScrollArea>
 
 		<form
-			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white shadow-md"
+			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white dark:bg-gray-800 shadow-md"
 		>
 			<Textarea
 				class="p-2 border border-gray-300 rounded shadow-sm text-lg"

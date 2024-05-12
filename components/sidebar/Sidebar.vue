@@ -24,7 +24,7 @@ watch(
 
 <template>
 	<Tabs v-model:model-value="modelValue">
-		<TabsList class="w-full">
+		<TabsList class="w-full dark:bg-gray-800">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<TabsTrigger value="settings">Settings</TabsTrigger>

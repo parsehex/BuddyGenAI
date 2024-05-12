@@ -113,6 +113,12 @@ const handleSave = async () => {
 };
 
 const picQuality = ref(2 as ProfilePicQuality);
+const picQual = computed({
+	get: () => picQuality.value + '',
+	set: (val: string) => {
+		picQuality.value = parseInt(val) as ProfilePicQuality;
+	},
+});
 
 const refreshProfilePicture = async () => {
 	if (!persona.value) {
@@ -259,11 +265,11 @@ const acceptKeywords = () => {
 					<Collapsible
 						v-if="allProfilePics.length > 1"
 						v-model:open="allPicsOpen"
-						class="space-y-2 w-full my-2 border border-gray-200 rounded-lg"
+						class="space-y-2 w-full my-2 border-2 border-gray-200 rounded-lg"
 					>
 						<CollapsibleTrigger as-child>
 							<div
-								class="text-md flex items-center justify-center cursor-pointer hover:bg-gray-100"
+								class="text-md flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg p-1 w-full"
 							>
 								Other Pictures
 								<Button variant="ghost" size="sm" class="w-9 p-0 hover:bg-transparent">
@@ -367,11 +373,19 @@ const acceptKeywords = () => {
 
 					<div class="flex flex-col items-center justify-center my-1">
 						<Label class="text-lg">Picture Quality</Label>
-						<select v-model="picQuality">
-							<option :value="1">Low</option>
-							<option :value="2">Medium</option>
-							<option :value="3">High</option>
-						</select>
+						<Select v-model:model-value="picQual" class="my-2">
+							<SelectTrigger>
+								<SelectValue placeholder="Buddy" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectLabel>Quality</SelectLabel>
+								<SelectGroup>
+									<SelectItem value="1">Low</SelectItem>
+									<SelectItem value="2">Medium</SelectItem>
+									<SelectItem value="3">High</SelectItem>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
 					</div>
 					<div class="flex flex-col items-center justify-center">
 						<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
