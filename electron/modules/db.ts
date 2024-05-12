@@ -1,8 +1,9 @@
-import Database from 'better-sqlite3';
+import Database, { Database as DB } from 'better-sqlite3';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import { findDirectoryInPath, getDirname } from '../fs';
+import { initAppSettings } from '../AppSettings';
 
 const VERBOSE = false;
 
@@ -66,6 +67,14 @@ function fixParams(arr: any[]) {
 	});
 }
 
+let sqlDb: DB | null = null;
+export function getDb() {
+	if (!sqlDb) {
+		throw new Error('Database not initialized');
+	}
+	return sqlDb;
+}
+
 export default async (mainWindow: BrowserWindow) => {
 	console.log('[-] MODULE::db Initializing');
 	const migrationsDir = await getMigrationsDir();
@@ -88,7 +97,7 @@ export default async (mainWindow: BrowserWindow) => {
 
 	const verbose = isDev && VERBOSE ? console.log.bind(console) : undefined;
 
-	const sqlDb = new Database(dbPath, { verbose });
+	sqlDb = new Database(dbPath, { verbose });
 
 	// run migrations
 	for (const migration of migrations) {
@@ -129,6 +138,9 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:run', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const tx = sqlDb.transaction(() => {
@@ -147,6 +159,9 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:get', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.get(params);
@@ -158,6 +173,9 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:all', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.all(params);
@@ -166,6 +184,8 @@ export default async (mainWindow: BrowserWindow) => {
 			return error;
 		}
 	});
+
+	initAppSettings();
 
 	console.log('[-] MODULE::db Initialized');
 };
