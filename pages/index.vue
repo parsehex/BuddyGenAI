@@ -160,12 +160,12 @@ const sortedThreads = computed(() => {
 				<Card
 					v-for="thread in sortedThreads"
 					:key="thread.id"
-					class="w-full hover:bg-gray-100"
+					class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 				>
 					<!-- sort by latest first -->
 					<NuxtLink
 						:to="`/chat/${thread.id}`"
-						class="w-full h-full flex items-center justify-center p-4"
+						class="w-full h-full flex items-center justify-start p-4"
 					>
 						<!-- TODO this is a good idea: show buddy info in thread list -->
 						<div v-if="thread.selected_buddy">

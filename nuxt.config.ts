@@ -8,7 +8,12 @@ export default defineNuxtConfig({
 	devtools: {
 		enabled: true,
 	},
-	modules: ['@nuxtjs/tailwindcss', 'shadcn-nuxt', '@pinia/nuxt'],
+	modules: [
+		'@nuxtjs/tailwindcss',
+		'@nuxtjs/color-mode',
+		'shadcn-nuxt',
+		'@pinia/nuxt',
+	],
 	shadcn: {
 		/**
 		 * Prefix for all the imported component

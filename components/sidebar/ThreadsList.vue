@@ -118,10 +118,12 @@ watch(route, async () => {
 								:key="thread.id"
 								:class="[
 									'cursor-pointer',
-									'hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors',
+									'hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors',
 									'rounded',
 									'border-b-2',
-									isThreadSelected(thread.id) ? 'font-bold bg-gray-200' : '',
+									isThreadSelected(thread.id)
+										? 'font-bold bg-gray-200 dark:bg-gray-800'
+										: '',
 								]"
 								@contextmenu="rightClickedId = thread.id"
 							>

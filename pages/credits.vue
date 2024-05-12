@@ -139,6 +139,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: '@nuxtjs/color-mode',
+		link: 'https://github.com/nuxt-modules/color-mode',
+		author: 'Nuxt Team',
+		license: 'MIT',
+	},
+	{
 		name: '@nuxtjs/i18n',
 		link: 'https://github.com/nuxt-modules/i18n',
 		author:
