@@ -89,7 +89,7 @@ export async function findBinaryPath<T extends ProjectName>(
 
 	let binPath = path.join(resPath, 'binaries/build', projectName, exe);
 
-	// TODO pull these in dynamically at runtime + have preferred order like below (out of available)
+	// NOTE as of now, this only affects using SDCPP since we're using llamafile instead of llama.cpp
 	const directories = [
 		'cuda12',
 		'cuda11',

@@ -21,6 +21,8 @@ import {
 	keywordsFromNameAndDescription,
 } from '~/lib/prompt/sd';
 
+// NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
+
 const props = defineProps<{
 	newHere: boolean;
 	serverStarting: boolean;
