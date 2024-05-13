@@ -30,6 +30,7 @@ import AppMenubar from '@/components/AppMenubar.vue';
 				</NuxtLayout>
 			</ResizablePanel>
 		</ResizablePanelGroup>
+		<Toaster />
 	</Body>
 </template>
 
