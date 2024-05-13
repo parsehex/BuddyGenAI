@@ -133,7 +133,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				const msg1 = messages.value[0];
 				const msg2 = messages.value[1];
 				const msg3 = messages.value[2];
-				const prompt = `Your task is to write a generic and impersonal title in 5 words or less for the following chat.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
+				const prompt = `Your task is to write a title in 5 words or less for the following chat. When in doubt, write a generic title.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
 				isLoading.value = true;
 				let value = await complete(prompt, {
 					body: { max_tokens: 20, temperature: 0.01 },
