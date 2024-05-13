@@ -19,7 +19,7 @@ export function keywordsFromNameAndDescription(
 	existingKeywords?: string
 ) {
 	let prompt = `The following is a description of someone named ${name}. Your task is to list visual keywords that would be fitting for ${name} based on their description.
-Keywords should be visually descriptive and comma-separated. For example: "brown hair, glasses, smiling".`;
+Keywords should be visually descriptive of an individual and be comma-separated. Keywords should NOT be abstract concepts. For example: "brown hair, glasses, smiling".`;
 	if (existingKeywords)
 		prompt += `\nExisting keywords (do not include):\n${existingKeywords}`;
 	prompt += `\n\nInput:\n${description}`;
