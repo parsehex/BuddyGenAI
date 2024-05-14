@@ -7,6 +7,7 @@ import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { useTitle } from '@vueuse/core';
+import { AppSettings } from '@/lib/api/AppSettings';
 
 useTitle('BuddyGen');
 
@@ -27,7 +28,9 @@ const buddies: BuddyVersionMerged[] = useAppStore().buddies;
 const { startServer } = useLlamaCpp();
 
 onMounted(async () => {
+	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
 	if (
+		!isExternal &&
 		!store.chatServerRunning &&
 		settings.local_model_directory &&
 		settings.selected_model_chat

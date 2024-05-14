@@ -26,8 +26,8 @@ const route = useRoute();
 const isThreadSelected = (threadId: string) =>
 	route.path.includes(`/chat`) && route.params.id === threadId;
 
-const { updateThreads, isExternalProvider } = useAppStore();
-const threads = useAppStore().threads as ChatThread[];
+const { updateThreads } = useAppStore();
+const store = useAppStore();
 
 // TODO add option to fork a thread
 
@@ -40,7 +40,9 @@ onBeforeMount(async () => {
 });
 
 const renameClicked = (threadId: string) => {
-	const thread = threads.find((thread) => thread.id === threadId);
+	const thread = store.threads.find(
+		(thread: ChatThread) => thread.id === threadId
+	);
 	if (!thread) {
 		console.error(`Couldn't find thread with id ${threadId} to rename`);
 		editingThreadName.value = '';
@@ -97,13 +99,12 @@ watch(route, async () => {
 
 <template>
 	<div class="sidebar">
-		<!-- maybe allow managing external here too -->
-		<ChatServerStatus v-if="!isExternalProvider" />
-		<div class="flex w-full mb-4">
+		<ChatServerStatus v-if="!store.isExternalProvider" />
+		<div class="flex w-full px-2 mb-2 items-end">
 			<!-- TODO replace with buddyselect, make thread title "Chat with X" -->
 			<Input
 				v-model="newThreadName"
-				class="mt-2"
+				class="mt-2 mr-1"
 				placeholder="Chat name"
 				@keyup.enter="doCreateThread"
 			/>
@@ -115,7 +116,7 @@ watch(route, async () => {
 					<ContextMenu>
 						<ContextMenuTrigger>
 							<li
-								v-for="thread in threads"
+								v-for="thread in store.threads"
 								:key="thread.id"
 								:class="[
 									'cursor-pointer',

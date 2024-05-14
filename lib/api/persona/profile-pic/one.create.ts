@@ -65,22 +65,27 @@ export default async function createProfilePic(
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
-	const modelDir = AppSettings.get('local_model_directory') as string;
-	if (!modelDir) {
-		throw new Error('Model directory not set');
-	}
+	const isExternal = AppSettings.get('selected_provider_image') === 'external';
 
+	const modelDir = AppSettings.get('local_model_directory') as string;
 	const selectedImageModel = AppSettings.get('selected_model_image') as string;
+	let modelPath = '';
+
 	if (!selectedImageModel) {
 		throw new Error('No image model selected');
 	}
+	if (!isExternal) {
+		if (!modelDir) {
+			throw new Error('Model directory not set');
+		}
 
-	const modelPath = await pathJoin(modelDir, 'image', selectedImageModel);
-	try {
-		const exists = await fsAccess(modelPath);
-		if (!exists) throw new Error('Image model file not found');
-	} catch (e) {
-		throw new Error('Image model file not found');
+		modelPath = await pathJoin(modelDir, 'image', selectedImageModel);
+		try {
+			const exists = await fsAccess(modelPath);
+			if (!exists) throw new Error('Image model file not found');
+		} catch (e) {
+			throw new Error('Image model file not found');
+		}
 	}
 
 	const sqlPersona = select('persona', ['*'], { id });

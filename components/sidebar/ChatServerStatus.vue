@@ -17,6 +17,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
+import { useToast } from '@/components/ui/toast';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
@@ -27,6 +28,8 @@ const {
 	updateChatServerRunning,
 } = useAppStore();
 
+const { toast } = useToast();
+
 const isRunning = ref(false);
 const isStarting = ref(false);
 const lastModel = ref<string | null>(null);
@@ -34,10 +37,19 @@ const lastModel = ref<string | null>(null);
 const doStartServer = async () => {
 	const modelPath = getChatModelPath();
 	const nGpuLayers = getNGpuLayers();
+	console.log('Starting server with model:', modelPath, nGpuLayers);
+	if (!modelPath) {
+		toast({
+			variant: 'destructive',
+			title: 'No chat model selected',
+			description: 'Please select a chat model in the settings panel',
+		});
+		return;
+	}
 	isStarting.value = true;
 	await startServer(modelPath, nGpuLayers);
 
-	isStarting.value = false;
+	// isStarting.value = false;
 	// lastModel.value = modelPath;
 };
 
@@ -94,6 +106,9 @@ onBeforeMount(async () => {
 watch(
 	() => isRunning.value,
 	async () => {
+		if (isStarting.value && isRunning.value) {
+			isStarting.value = false;
+		}
 		lastModel.value = await getLastModel();
 		updateChatServerRunning(isRunning.value);
 	}

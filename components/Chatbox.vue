@@ -323,14 +323,24 @@ const updateSysFromBuddy = async () => {
 };
 
 const canSend = computed(() => {
-	if (!store.chatServerRunning) {
+	if (!store.isExternalProvider) {
+		if (!store.chatServerRunning) {
+			return false;
+		}
+	}
+	if (!store.settings.selected_model_chat) {
 		return false;
 	}
 	return input.value !== '' && !isLoading.value;
 });
 
 const canReload = computed(() => {
-	if (!store.chatServerRunning) {
+	if (!store.isExternalProvider) {
+		if (!store.chatServerRunning) {
+			return false;
+		}
+	}
+	if (!store.settings.selected_model_chat) {
 		return false;
 	}
 	return messages.value.length >= 2 && !isLoading.value;

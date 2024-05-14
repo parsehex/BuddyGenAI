@@ -20,6 +20,9 @@ import {
 	genderFromName,
 	keywordsFromNameAndDescription,
 } from '~/lib/prompt/sd';
+import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
+import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
+import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -325,7 +328,7 @@ const acceptPicKeywords = () => {
 </script>
 
 <template>
-	<div>
+	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center">
 			<NuxtLink
 				class="text-xl font-bold mb-2 dark:bg-gray-600 p-1 pt-0 rounded-b"
@@ -369,7 +372,7 @@ const acceptPicKeywords = () => {
 
 			<!-- TODO implement external models using OpenRouter (idk how for images) -->
 			<!-- Model Source -- External or Local -->
-			<!-- <Card
+			<Card
 				v-if="!isModelsSetup"
 				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4"
 			>
@@ -386,11 +389,30 @@ const acceptPicKeywords = () => {
 						<ul class="mb-2">
 							<li>
 								<b>External</b>
-								-- such as ChatGPT
+								-- only OpenAI/ChatGPT supported for now
 							</li>
 							<li>
 								<b>Local</b>
-								-- your chats never leave your computer
+								-- uses
+								<span
+									class="text-blue-500 cursor-pointer"
+									@click="
+										openExternalLink &&
+											openExternalLink('https://github.com/Mozilla-Ocho/llamafile')
+									"
+								>
+									LlamaFile
+								</span>
+								+
+								<span
+									class="text-blue-500 cursor-pointer"
+									@click="
+										openExternalLink &&
+											openExternalLink('https://github.com/leejet/stable-diffusion.cpp')
+									"
+								>
+									Stable-Diffusion.cpp
+								</span>
 							</li>
 						</ul>
 						<Label for="chat-model-provider" class="w-full">
@@ -410,7 +432,12 @@ const acceptPicKeywords = () => {
 						</Label>
 					</div>
 				</CardContent>
-			</Card> -->
+			</Card>
+
+			<ExternalModelSettingsCard
+				v-if="!isModelsSetup && modelProvider === 'external'"
+				:first-time="newHere"
+			/>
 
 			<LocalModelSettingsCard
 				v-if="!isModelsSetup && modelProvider === 'local'"
@@ -479,7 +506,7 @@ const acceptPicKeywords = () => {
 										:open="keywordsPopover"
 										@update:open="
 											($event) => {
-												if (!store.chatServerRunning) return;
+												if (!store.isExternalProvider && !store.chatServerRunning) return;
 												keywordsPopover = $event;
 											}
 										"
@@ -490,7 +517,7 @@ const acceptPicKeywords = () => {
 												type="button"
 												class="magic"
 												title="Create a description"
-												:disabled="!store.chatServerRunning"
+												:disabled="!store.isExternalProvider && !store.chatServerRunning"
 											>
 												<Sparkles />
 											</Button>
@@ -623,7 +650,7 @@ const acceptPicKeywords = () => {
 										:open="profilePicPopover"
 										@update:open="
 											($event) => {
-												if (!store.chatServerRunning) return;
+												if (!store.isExternalProvider && !store.chatServerRunning) return;
 												profilePicPopover = $event;
 											}
 										"
@@ -633,7 +660,7 @@ const acceptPicKeywords = () => {
 												type="button"
 												class="magic"
 												title="Suggest keywords"
-												:disabled="!store.chatServerRunning"
+												:disabled="!store.isExternalProvider && !store.chatServerRunning"
 											>
 												<Sparkles />
 											</Button>
@@ -667,7 +694,7 @@ const acceptPicKeywords = () => {
 										</PopoverContent>
 									</Popover>
 								</div>
-								<Label class="mt-2">
+								<Label class="mt-2" v-id="!store.isExternalProvider">
 									<span class="text-lg">Picture Quality</span>
 									<!-- rename Decent/Good/Best -->
 									<select v-model="picQuality">
@@ -707,5 +734,5 @@ const acceptPicKeywords = () => {
 				</CardContent>
 			</Card>
 		</div>
-	</div>
+	</ScrollArea>
 </template>

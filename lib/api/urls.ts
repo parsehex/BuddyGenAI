@@ -7,6 +7,12 @@ const other = {
 		}
 		return '/health';
 	},
+	openaiModels: () => {
+		if (isDev) {
+			return 'http://localhost:8079/api/openai-models';
+		}
+		return '/api/openai-models';
+	},
 };
 
 const message = {

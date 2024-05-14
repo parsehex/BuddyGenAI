@@ -257,7 +257,7 @@ const acceptKeywords = () => {
 						v-model="nameValue"
 						placeholder="Persona name"
 						size="lg"
-						class="mb-2 w-2/5"
+						class="my-2 w-2/5"
 					/>
 					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
 
@@ -314,7 +314,10 @@ const acceptKeywords = () => {
 							:open="keywordsPopover"
 							@update:open="
 								($event) => {
-									if (creatingKeywords || !store.chatServerRunning) {
+									if (
+										creatingKeywords ||
+										(!store.isExternalProvider && !store.chatServerRunning)
+									) {
 										return;
 									}
 									keywordsPopover = $event;
@@ -326,7 +329,10 @@ const acceptKeywords = () => {
 									type="button"
 									class="magic"
 									title="Suggest keywords"
-									:disabled="creatingKeywords || !store.chatServerRunning"
+									:disabled="
+										creatingKeywords ||
+										(!store.isExternalProvider && !store.chatServerRunning)
+									"
 								>
 									<Sparkles />
 								</Button>
@@ -371,7 +377,10 @@ const acceptKeywords = () => {
 						</Popover>
 					</div>
 
-					<div class="flex flex-col items-center justify-center my-1">
+					<div
+						class="flex flex-col items-center justify-center my-1"
+						v-if="!store.isExternalProvider"
+					>
 						<Label class="text-lg">Picture Quality</Label>
 						<Select v-model:model-value="picQual" class="my-2">
 							<SelectTrigger>
@@ -388,7 +397,7 @@ const acceptKeywords = () => {
 						</Select>
 					</div>
 					<div class="flex flex-col items-center justify-center">
-						<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
+						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>

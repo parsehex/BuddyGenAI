@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/stores/main';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { useTitle } from '@vueuse/core';
+import { RefreshCw } from 'lucide-vue-next';
 
 useTitle('Settings | BuddyGen');
 
-const { pickDirectory, verifyModelDirectory } = useElectron();
+const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
 const {
 	chatModels,
 	imageModels,
@@ -34,8 +37,9 @@ if (settings.local_model_directory) {
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
 
-	const directory = await pickDirectory();
+	let directory = await pickDirectory();
 	if (!directory) return;
+	directory = await pathJoin(directory, 'BuddyGen Models');
 
 	const verified = await verifyModelDirectory(directory);
 	if (!verified) {
@@ -55,6 +59,10 @@ const needsRestart = ref(false);
 const updateChatModel = async (model: string) => {
 	console.log('Update chat model:', model);
 
+	if (settings.selected_provider_chat === 'external') {
+		settings.selected_model_chat = model;
+		return;
+	}
 	if (settings.selected_model_chat === model) return;
 
 	settings.selected_model_chat = model;
@@ -112,6 +120,22 @@ const isExternal = computed({
 		settings.selected_provider_image = val ? 'external' : 'local';
 	},
 });
+
+const externalOrLocal = computed({
+	get: () => (isExternal.value ? 'external' : 'local'),
+	set: (val) => {
+		isExternal.value = val === 'external';
+	},
+});
+
+const prvNeedsRestart = ref(false);
+const prvLastVal = ref(isExternal.value);
+watch(isExternal, (newVal) => {
+	if (newVal === prvLastVal.value) return;
+	prvLastVal.value = newVal;
+	prvNeedsRestart.value = newVal && store.chatServerRunning;
+	updateModels();
+});
 </script>
 
 <template>
@@ -131,26 +155,29 @@ const isExternal = computed({
 			/>
 		</div>
 
-		<div class="mt-4">
-			<Label for="selected_provider_chat" class="block">Model Provider</Label>
-			<input
-				v-model="settings.selected_provider_chat"
-				type="radio"
-				id="selected_provider_chat_external"
-				name="selected_provider_chat"
-				value="external"
-			/>
-			<label for="selected_provider_chat_external">External</label>
-			<input
-				v-model="settings.selected_provider_chat"
-				type="radio"
-				id="selected_provider_chat_local"
-				name="selected_provider_chat"
-				value="local"
-			/>
-			<label for="selected_provider_chat_local">Local</label>
-		</div>
-		<div class="mt-4" v-if="isExternal">
+		<Alert variant="info" class="my-2" v-if="prvNeedsRestart">
+			<AlertTitle>Heads up!</AlertTitle>
+			<AlertDescription>
+				The local chat model will stay online until you restart this app.
+			</AlertDescription>
+		</Alert>
+		<Label class="block mt-2 mb-1">Model Provider</Label>
+		<RadioGroup
+			:default-value="isExternal ? 'external' : 'local'"
+			v-model="externalOrLocal"
+			class="flex flex-row mb-3"
+		>
+			<div class="flex items-center space-x-2">
+				<RadioGroupItem id="external" value="external">External</RadioGroupItem>
+				<Label for="external" class="block">External</Label>
+			</div>
+			<div class="flex items-center space-x-2">
+				<RadioGroupItem id="local" value="local">Local</RadioGroupItem>
+				<Label for="local" class="block">Local</Label>
+			</div>
+		</RadioGroup>
+		<OpenAIAPIKeyHelpButton v-if="isExternal" />
+		<div class="mt-1" v-if="isExternal">
 			<Label for="external_api_key" class="block">OpenAI API Key</Label>
 			<Input
 				v-model="settings.external_api_key"
@@ -160,7 +187,7 @@ const isExternal = computed({
 			/>
 		</div>
 		<div
-			class="flex w-full items-center justify-between gap-1.5 mt-4"
+			class="flex w-full items-end justify-between gap-1.5 mt-4"
 			v-if="!isExternal"
 		>
 			<Label for="local_model_directory" class="w-full">
@@ -184,6 +211,14 @@ const isExternal = computed({
 			</Button>
 		</div>
 		<div class="mt-4">
+			<Button
+				@click="updateModels"
+				class="px-4 py-2 rounded-md"
+				title="Refresh Models"
+			>
+				<RefreshCw class="w-4 h-4" />
+			</Button>
+			<br />
 			<Label for="chat-model" class="mb-1">Chat Model</Label>
 			<Alert variant="info" class="my-2" v-if="needsRestart">
 				<AlertTitle>Heads up!</AlertTitle>

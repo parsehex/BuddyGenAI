@@ -44,7 +44,7 @@ const editBuddy = (id: string) => {
 <template>
 	<div class="sidebar">
 		<div class="flex justify-around">
-			<Button type="button" @click="navigateTo('/create-buddy')">
+			<Button type="button" @click="navigateTo('/create-buddy')" class="mt-2">
 				Create a Buddy
 			</Button>
 		</div>

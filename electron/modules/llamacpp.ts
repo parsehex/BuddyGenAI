@@ -5,6 +5,7 @@ import path from 'path';
 import { updateModel } from '../routes/message';
 // @ts-ignore
 import log from 'electron-log/main';
+import { AppSettings } from '../AppSettings';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
@@ -38,6 +39,27 @@ let isReady = false;
 
 function startServer(model: string, gpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
+		const isExternal =
+			(await AppSettings.get('selected_provider_chat')) === 'external';
+		const apiKey = (await AppSettings.get('external_api_key')) as string;
+		const selectedChatModel = (await AppSettings.get(
+			'selected_model_chat'
+		)) as string;
+
+		if (isExternal) {
+			if (!apiKey) {
+				log.error('External API key not set');
+				reject();
+				return;
+			}
+			if (!selectedChatModel) {
+				log.error('External model not set');
+				reject();
+				return;
+			}
+			return;
+		}
+
 		model = path.normalize(model);
 		gpuLayers = Math.floor(+gpuLayers);
 		const serverPath = await findBinaryPath('llamafile', 'llamafile');
