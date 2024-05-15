@@ -4,7 +4,6 @@ import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
-// @ts-ignore
 import log from 'electron-log/main';
 import { AppSettings } from '../AppSettings';
 
