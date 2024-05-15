@@ -18,7 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '../../stores/main';
-import type { ChatThread } from '~/lib/api/types-db';
+import type { BuddyVersionMerged, ChatThread } from '~/lib/api/types-db';
 import { api } from '~/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
 
@@ -31,7 +31,6 @@ const store = useAppStore();
 
 // TODO add option to fork a thread
 
-const newThreadName = ref('');
 const editingThreadName = ref('');
 const rightClickedId = ref('');
 
@@ -61,13 +60,36 @@ const handleRename = async () => {
 	await updateThreads();
 };
 
-const doCreateThread = async () => {
-	if (!newThreadName.value) return;
+const selectedBuddy = ref('');
 
-	const newThread = await api.thread.createOne({
-		name: newThreadName.value,
-		mode: 'custom',
-	});
+const doCreateThread = async () => {
+	let name = '';
+	let mode = '' as 'persona' | 'custom';
+	let buddy_id = '';
+	console.log('selected buddy', selectedBuddy.value);
+	if (selectedBuddy.value) {
+		const buddy = store.buddies.find(
+			(buddy: BuddyVersionMerged) => buddy.id === selectedBuddy.value
+		);
+		if (buddy) {
+			name = `Chat with ${buddy.name}`;
+			mode = 'persona';
+			buddy_id = buddy.id;
+		}
+	} else {
+		name = 'Custom Chat';
+		mode = 'custom';
+	}
+
+	const options = {
+		name,
+		mode,
+	} as any;
+	if (mode === 'persona') {
+		options.persona_id = buddy_id;
+	}
+
+	const newThread = await api.thread.createOne(options);
 	await updateThreads();
 	navigateTo(`/chat/${newThread.id}`);
 };
@@ -86,7 +108,7 @@ const doDeleteThread = async (threadId: string) => {
 		if (newThread) {
 			navigateTo(`/chat/${newThread.id}`);
 		} else {
-			navigateTo(`/chat`);
+			navigateTo(`/`);
 		}
 	}
 };
@@ -101,14 +123,8 @@ watch(route, async () => {
 	<div class="sidebar">
 		<ChatServerStatus v-if="!store.isExternalProvider" />
 		<div class="flex w-full px-2 mb-2 items-end">
-			<!-- TODO replace with buddyselect, make thread title "Chat with X" -->
-			<Input
-				v-model="newThreadName"
-				class="mt-2 mr-1"
-				placeholder="Chat name"
-				@keyup.enter="doCreateThread"
-			/>
-			<Button @click="doCreateThread">+</Button>
+			<BuddySelect v-model="selectedBuddy" />
+			<Button class="ml-1" @click="doCreateThread">+</Button>
 		</div>
 		<ScrollArea class="h-screen">
 			<ul>

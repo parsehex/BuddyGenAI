@@ -13,18 +13,18 @@ import { useAppStore } from '~/stores/main';
 
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 
-const model = defineModel<string>({ required: true });
+const model = defineModel<string>({ required: false });
 </script>
 
 <template>
 	<Select v-model:model-value="model" class="my-2">
 		<SelectTrigger>
-			<SelectValue placeholder="Buddy" />
+			<SelectValue placeholder="Select a Buddy" />
 		</SelectTrigger>
 		<SelectContent>
 			<SelectLabel>Buddies</SelectLabel>
 			<SelectGroup>
-				<SelectItem v-for="buddy in buddies" :key="buddy.id" :value="buddy.id + ''">
+				<SelectItem v-for="buddy in buddies" :key="buddy.id" :value="buddy.id">
 					{{ buddy.name }}
 				</SelectItem>
 			</SelectGroup>
