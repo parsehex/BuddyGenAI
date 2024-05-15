@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAppStore } from '@/stores/main';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './SettingsPanel.vue';
 import ColorMode from './ColorMode.vue';
 
+const store = useAppStore();
 const route = useRoute();
 
 const modelValue = ref(route.path.includes('/persona') ? 'buddy' : 'chat');
@@ -27,7 +29,7 @@ watch(
 		<TabsList class="w-full dark:bg-gray-800">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger value="settings">Settings</TabsTrigger>
+			<TabsTrigger v-if="!store.newHere" value="settings">Settings</TabsTrigger>
 			<ColorMode />
 		</TabsList>
 		<ScrollArea class="h-screen">
@@ -37,7 +39,7 @@ watch(
 			<TabsContent value="buddy">
 				<BuddyList />
 			</TabsContent>
-			<TabsContent value="settings">
+			<TabsContent v-if="!store.newHere" value="settings">
 				<SettingsPanel />
 			</TabsContent>
 		</ScrollArea>

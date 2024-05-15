@@ -46,10 +46,6 @@ const userNameValue = ref(
 	settings.user_name === 'User' ? '' : settings.user_name
 );
 
-const newHere = computed(
-	() => !!+settings.fresh_db || (!threads.length && !buddies.length)
-);
-
 await updateSettings();
 if (settings.user_name && settings.user_name !== 'User') {
 	userNameValue.value = settings.user_name;
@@ -151,7 +147,7 @@ const sortedThreads = computed(() => {
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">
-			{{ newHere ? 'Welcome to' : '' }}
+			{{ store.newHere ? 'Welcome to' : '' }}
 			<div class="underline inline dark:bg-gray-600 p-1 rounded">
 				<span style="color: #61dafb">BuddyGen</span>
 				<span style="color: #111">AI</span>
@@ -214,8 +210,8 @@ const sortedThreads = computed(() => {
 
 	<FirstTimeSetup
 		v-if="!threads.length && !buddies.length"
-		:new-here="newHere"
-		:is-models-setup="isModelsSetup"
+		:new-here="store.newHere"
+		:is-models-setup="calcIsModelsSetup"
 		:server-starting="serverStarting"
 		:handle-model-change="handleModelChange"
 	/>
