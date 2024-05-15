@@ -155,14 +155,6 @@ function textToHslColor(t: string, s: number, l: number) {
 					placeholder="Message content..."
 					class="w-full min-h-48"
 				/>
-				<p class="py-1 text-sm text-muted-foreground">
-					<b>Warning</b>
-					: Clicking outside to cancel is broken --
-					<u>use the X button above instead</u>
-					.
-					<br />
-					(If the textarea is empty then click Close above and try again)
-				</p>
 			</DialogDescription>
 			<DialogFooter>
 				<DialogClose as-child>
