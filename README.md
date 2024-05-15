@@ -1,6 +1,4 @@
-# BuddyGen AI
-
-Electron app using llama.cpp and stable-diffusion.cpp to generate Buddies to talk to.
+BuddyGenAI is a chat application designed to create and interact with virtual buddies
 
 ## ✅ Features
 
