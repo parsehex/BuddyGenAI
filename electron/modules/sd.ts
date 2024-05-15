@@ -15,6 +15,11 @@ interface SDOptions {
 	size?: number;
 }
 
+// TODO catch diff errors && bubble them up to the UI
+// - invalid API key
+// - invalid model
+// - content policy violation
+
 function removeAccents(input: string): string {
 	return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
