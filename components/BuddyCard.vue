@@ -72,7 +72,7 @@ watch(
 </script>
 
 <template>
-	<HoverCard :close-delay="250">
+	<HoverCard>
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground rounded-lg">
 				<BuddyAvatar :persona="props.persona" size="sm" />

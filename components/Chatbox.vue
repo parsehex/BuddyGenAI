@@ -398,7 +398,9 @@ const canReload = computed(() => {
 		class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen"
 		v-if="threadId !== ''"
 	>
-		<div class="flex items-center justify-between py-4">
+		<div
+			class="flex items-center justify-between py-4 border-b-2 border-gray-100"
+		>
 			<h2 class="text-2xl font-bold">
 				{{ threadTitle }}
 			</h2>
@@ -430,7 +432,7 @@ const canReload = computed(() => {
 			</CollapsibleContent>
 		</Collapsible>
 		<ScrollArea style="height: 100%" id="messages-scroll">
-			<div class="flex flex-col gap-1 mt-1" id="chatbox">
+			<div class="flex flex-col gap-1 my-1" id="chatbox">
 				<Message
 					v-for="m in uiMessages"
 					:key="m.id"
@@ -445,11 +447,9 @@ const canReload = computed(() => {
 			</div>
 		</ScrollArea>
 
-		<form
-			class="w-full flex gap-1.5 items-center justify-center p-2 bg-white dark:bg-gray-800 shadow-md"
-		>
+		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
 			<Textarea
-				class="p-2 border border-gray-300 rounded shadow-sm text-lg"
+				class="p-2 border border-gray-300 rounded shadow-sm text-lg max-h-52"
 				tabindex="1"
 				v-model="input"
 				placeholder="Say something..."
@@ -484,9 +484,9 @@ const canReload = computed(() => {
 			class="mt-4 text-sm text-gray-400 select-none"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
-			<u><i>Friendly Reminder</i></u>
-			Buddies in this app are AI -- they make mistakes sometimes and are not real
-			people.
+			<u><i>Reminder</i></u>
+			Buddies in this app are AI -- they make mistakes sometimes and they're not
+			real people.
 		</p>
 	</div>
 </template>
