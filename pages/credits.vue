@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { useTitle } from '@vueuse/core';
-
 const { openExternalLink } = useElectron();
-
-useTitle('Credits | BuddyGen');
 
 const deps = [
 	{

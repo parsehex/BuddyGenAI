@@ -31,7 +31,6 @@ import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
-import { useTitle } from '@vueuse/core';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();

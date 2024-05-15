@@ -54,7 +54,7 @@ async function createWindow() {
 		// frame: platform === 'darwin',
 		frame: true,
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
-		title: 'BuddyGen',
+		title: 'BuddyGenAI',
 	});
 
 	await db(mainWindow);

@@ -11,7 +11,6 @@ import type {
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '~/components/BuddyAvatar.vue';
-import { useTitle } from '@vueuse/core';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -52,8 +51,6 @@ onBeforeMount(async () => {
 	}
 
 	threads.value = await api.thread.getAll(id);
-
-	useTitle(`${name.value} | BuddyGen`);
 });
 
 const createThread = async () => {

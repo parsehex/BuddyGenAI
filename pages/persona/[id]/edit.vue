@@ -18,7 +18,6 @@ import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import Spinner from '@/components/Spinner.vue';
-import { useTitle } from '@vueuse/core';
 import { useAppStore } from '@/stores/main';
 import type { ProfilePicQuality } from '@/lib/api/types-api';
 import { descriptionFromKeywords } from '@/lib/prompt/persona';
@@ -98,7 +97,6 @@ onBeforeMount(async () => {
 	if (persona.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = persona.value.profile_pic_prompt;
 	}
-	useTitle(`Edit ${persona.value?.name || 'Buddy'} | BuddyGen`);
 
 	allProfilePics.value = await api.buddy.profilePic.getAll(id);
 });

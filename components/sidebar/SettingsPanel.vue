@@ -4,10 +4,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/stores/main';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import { useTitle } from '@vueuse/core';
 import { RefreshCw } from 'lucide-vue-next';
 
-useTitle('Settings | BuddyGen');
 
 const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
 const {

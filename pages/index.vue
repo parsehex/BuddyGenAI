@@ -6,10 +6,8 @@ import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
-import { useTitle } from '@vueuse/core';
 import { AppSettings } from '@/lib/api/AppSettings';
 
-useTitle('BuddyGen');
 
 const store = useAppStore();
 const {
