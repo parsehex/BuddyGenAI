@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import { BrowserWindow, ipcMain } from 'electron';
 import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 import { AppSettings } from '../AppSettings';
+import log from 'electron-log/main';
 
 // @/lib/api/types-api
 interface SDOptions {
@@ -42,7 +43,7 @@ async function runOpenai(
 		const n = 1;
 
 		try {
-			console.log('Running OpenAI:', model, prompt, output);
+			log.info('Running OpenAI:', model, prompt, output);
 			const response = await openai.images.generate({
 				model,
 				prompt,
@@ -57,14 +58,13 @@ async function runOpenai(
 				return;
 			}
 
-
 			const image = await fetch(image_url);
 			const buffer = await image.arrayBuffer();
 			await fs.writeFile(output, Buffer.from(buffer));
 
 			resolve(output);
 		} catch (error) {
-			console.error('OpenAI error:', error);
+			log.error('OpenAI error:', error);
 			reject(error);
 		}
 	});
@@ -99,21 +99,21 @@ async function runSD(
 			args.push('-n', removeAccents(neg));
 		}
 
-		console.log('SD Path:', sdPath);
-		console.log('Running SD:', args);
+		log.info('SD Path:', sdPath);
+		log.info('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
 		command.on('error', (error) => {
-			console.error(`SD Error: ${error.message}`);
+			log.error(`SD Error: ${error.message}`);
 			hasResolved = true;
 			stopGenerating();
 			reject(error);
 		});
 
 		command.on('exit', (code, signal) => {
-			if (code) console.log(`SD Process exited with code: ${code}`);
-			if (signal) console.log(`SD Process killed with signal: ${signal}`);
+			if (code) log.info(`SD Process exited with code: ${code}`);
+			if (signal) log.info(`SD Process killed with signal: ${signal}`);
 			hasResolved = true;
 			stopGenerating();
 			resolve(output);
@@ -145,10 +145,10 @@ async function runSD(
 }
 
 export default function sdModule(mainWindow: BrowserWindow) {
-	console.log('[-] MODULE::SD Initializing');
+	log.log('[-] MODULE::SD Initializing');
 
 	ipcMain.handle('SD/run', async (_, options: SDOptions) => {
-		console.log('[-] MODULE::SD Running');
+		log.log('[-] MODULE::SD Running');
 
 		const isExternal =
 			(await AppSettings.get('selected_provider_image')) === 'external';
