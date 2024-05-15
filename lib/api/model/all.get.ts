@@ -1,8 +1,6 @@
 import { AppSettings } from '@/lib/api/AppSettings';
-import urls from '../urls';
-import axios from 'axios';
 
-const { dbGet, pathJoin, listDirectory, mkdir } = useElectron();
+const { dbGet, listDirectory } = useElectron();
 
 export default async function getAll(
 	type: 'chat' | 'image'
@@ -24,8 +22,6 @@ export default async function getAll(
 		console.log('No directory');
 		return [];
 	}
-	const subDir = await pathJoin(directory, type);
-	await mkdir(subDir);
 
 	const files = await listDirectory(directory);
 
