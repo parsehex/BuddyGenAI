@@ -1,4 +1,4 @@
-import { exec, spawn, execFile, ChildProcess } from 'child_process';
+import { execFile, ChildProcess } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
@@ -33,7 +33,7 @@ let lastModel = '';
 let pid = 0;
 let hasResolved = false;
 
-// TODO i think error 3221225781 means vcredist is needed
+// TODO i think error 3221225781 means dll not found
 
 let isReady = false;
 
@@ -47,6 +47,7 @@ function startServer(model: string, gpuLayers = 99) {
 		)) as string;
 
 		if (isExternal) {
+			// this shouldnt happen right?
 			if (!apiKey) {
 				log.error('External API key not set');
 				reject();
