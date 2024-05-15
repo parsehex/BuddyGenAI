@@ -35,6 +35,10 @@ if (settings.local_model_directory) {
 	await refreshModels();
 }
 
+const reloadPage = () => {
+	window.location.reload();
+};
+
 const openModels = async () => {
 	if (!openModelsDirectory) return console.error('Electron not available');
 
@@ -300,7 +304,8 @@ watch(isExternal, (newVal) => {
 			</Select>
 		</div>
 
-		<div class="mt-4">
+		<div class="mt-4 flex flex-col items-center">
+			<Button @click="reloadPage" class="px-4 py-2 rounded-md">Reload Page</Button>
 			<NuxtLink to="/credits">App Credits</NuxtLink>
 		</div>
 	</div>

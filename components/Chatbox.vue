@@ -39,6 +39,36 @@ const threads = useAppStore().threads as MergedChatThread[];
 const store = useAppStore();
 const { complete } = useCompletion({ api: urls.message.completion() });
 
+const isDev = import.meta.env.DEV;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// https://github.com/parsehex/BuddyGenAI/issues/2
+// there is a bug where if you unfocus the window while buddy is responding,
+// the message won't finish loading and it leads to the thread being in a broken state
+// TODO fix this
+// in the meantime, this is a workaround
+window.addEventListener('focus', async () => {
+	if (isDev && messages.value.length === 0) {
+		window.location.reload();
+	}
+
+	if (isLoading.value) {
+		const lastMessage = messages.value[messages.value.length - 1];
+		if (lastMessage.role !== 'assistant') {
+			window.location.reload();
+		}
+
+		const content1 = lastMessage.content;
+		await delay(500);
+		const content2 = messages.value[messages.value.length - 1].content;
+
+		if (content1 === content2) {
+			window.location.reload();
+		}
+	}
+});
+
 const props = defineProps<{
 	threadId: string;
 }>();
@@ -91,6 +121,20 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		onFinish: async () => {
 			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {
+				// TODO NOTE below is part of workaround https://github.com/parsehex/BuddyGenAI/issues/2
+				const reloadingMsg = messages.value.find((m) => m.id === reloadingId.value);
+				if (reloadingMsg?.role === 'user') {
+					// add the assistant's response to the last user message
+					const lastMessage = messages.value[messages.value.length - 1];
+					await api.message.createOne(threadId.value, {
+						role: 'assistant',
+						content: lastMessage.content,
+					});
+					await refreshMessages();
+					reloadingId.value = '';
+					return;
+				}
+
 				let lastMessage = messages.value[messages.value.length - 1];
 				lastMessage = { ...lastMessage, content: lastMessage.content };
 				await api.message.updateOne(reloadingId.value, lastMessage.content);
