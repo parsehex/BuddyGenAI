@@ -9,7 +9,7 @@ export function posPromptFromName(name: string, extra: string, gender = '') {
 }
 export function negPromptFromName(name: string) {
 	// TODO take extra
-	return `disfigured, distorted, thick frame, floating debris, square`;
+	return `disfigured, distorted, thick frame, floating debris, square, child`;
 }
 
 /** Returns prompt for LLM to generate keyword suggestions. */
