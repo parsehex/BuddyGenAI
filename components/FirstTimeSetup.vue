@@ -168,7 +168,7 @@ const handleSave = async () => {
 	await navigateTo(`/chat/${newThread.id}`);
 };
 
-const picQuality = ref(2 as ProfilePicQuality);
+const picQuality = ref('2');
 
 const refreshProfilePicture = async () => {
 	if (!newBuddy.value) {
@@ -197,7 +197,11 @@ const refreshProfilePicture = async () => {
 	}
 	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
-	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
+	const res = await api.buddy.profilePic.createOne(
+		id,
+		+picQuality.value,
+		gender
+	);
 
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
@@ -706,15 +710,25 @@ const acceptPicKeywords = () => {
 										</PopoverContent>
 									</Popover>
 								</div>
-								<Label class="mt-2" v-if="!store.isExternalProvider">
-									<span class="text-lg">Picture Quality</span>
-									<!-- rename Decent/Good/Best -->
-									<select v-model="picQuality">
-										<option :value="1">Low</option>
-										<option :value="2">Medium</option>
-										<option :value="3">High</option>
-									</select>
-								</Label>
+								<div
+									class="flex flex-col items-center justify-center my-1"
+									v-if="!store.isExternalProvider"
+								>
+									<Label class="text-lg">Picture Quality</Label>
+									<Select v-model:model-value="picQuality" class="my-2">
+										<SelectTrigger>
+											<SelectValue placeholder="Buddy" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectLabel>Quality</SelectLabel>
+											<SelectGroup>
+												<SelectItem value="1">Low</SelectItem>
+												<SelectItem value="2">Medium</SelectItem>
+												<SelectItem value="3">High</SelectItem>
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								</div>
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button
 									@click="refreshProfilePicture"
