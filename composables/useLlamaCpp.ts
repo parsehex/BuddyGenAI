@@ -12,7 +12,11 @@ export default function useLlamaCpp() {
 
 	const startServer = async (modelPath: string, gpuLayers = 35) => {
 		console.log('Starting server', modelPath);
-		await electron.ipcRenderer.invoke('llamacpp/start', modelPath, gpuLayers);
+		return await electron.ipcRenderer.invoke(
+			'llamacpp/start',
+			modelPath,
+			gpuLayers
+		);
 	};
 
 	const stopServer = async () => {

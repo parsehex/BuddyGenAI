@@ -5,7 +5,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/stores/main';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { RefreshCw } from 'lucide-vue-next';
+import { useToast } from '@/components/ui/toast';
 
+const { toast } = useToast();
 
 const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
 const {
@@ -80,7 +82,14 @@ const updateImageModel = async (model: string) => {
 };
 
 const doStartServer = async () => {
-	await startServer(getChatModelPath(), getNGpuLayers());
+	const result = await startServer(getChatModelPath(), getNGpuLayers());
+	if (result.error) {
+		toast({
+			variant: 'destructive',
+			title: 'Error starting chat server',
+			description: result.error,
+		});
+	}
 };
 
 const doStopServer = async () => {

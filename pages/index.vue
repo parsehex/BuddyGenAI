@@ -7,7 +7,9 @@ import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { AppSettings } from '@/lib/api/AppSettings';
+import { useToast } from '@/components/ui/toast';
 
+const { toast } = useToast();
 
 const store = useAppStore();
 const {
@@ -33,7 +35,14 @@ onMounted(async () => {
 		settings.local_model_directory &&
 		settings.selected_model_chat
 	) {
-		await startServer(getChatModelPath(), getNGpuLayers());
+		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		if (result.error) {
+			toast({
+				variant: 'destructive',
+				title: 'Error starting chat server',
+				description: result.error,
+			});
+		}
 	}
 });
 
@@ -53,6 +62,13 @@ if (settings.user_name && settings.user_name !== 'User') {
 const isModelsSetup = ref(false);
 
 const calcIsModelsSetup = computed(() => {
+	if (store.isExternalProvider) {
+		return (
+			!!settings.external_api_key &&
+			!!settings.selected_model_chat &&
+			!!settings.selected_model_image
+		);
+	}
 	const hasModelDir = !!settings.local_model_directory;
 	const hasChatModel = !!settings.selected_model_chat;
 	const hasImageModel = !!settings.selected_model_image;
@@ -67,15 +83,21 @@ isModelsSetup.value = calcIsModelsSetup.value;
 const serverStarting = ref(false);
 const handleModelChange = async () => {
 	setTimeout(async () => {
-		const hasModelDir = !!settings.local_model_directory;
-		const hasChatModel = !!settings.selected_model_chat;
-		const hasImageModel = !!settings.selected_model_image;
-		const isSetup = hasModelDir && hasChatModel && hasImageModel;
+		const isSetup = calcIsModelsSetup.value;
+
+		console.log('isSetup', isSetup);
 
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			serverStarting.value = true;
-			await startServer(getChatModelPath(), getNGpuLayers());
+			const result = await startServer(getChatModelPath(), getNGpuLayers());
+			if (result.error) {
+				toast({
+					variant: 'destructive',
+					title: 'Error starting chat server',
+					description: result.error,
+				});
+			}
 			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;

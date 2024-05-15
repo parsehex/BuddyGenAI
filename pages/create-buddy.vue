@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
+import { useToast } from '@/components/ui/toast';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { useAppStore } from '@/stores/main';
 
+const { toast } = useToast();
 
 const {
 	settings,
@@ -52,7 +54,14 @@ const handleModelChange = async () => {
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			serverStarting.value = true;
-			await startServer(getChatModelPath(), getNGpuLayers());
+			const result = await startServer(getChatModelPath(), getNGpuLayers());
+			if (result.error) {
+				toast({
+					variant: 'destructive',
+					title: 'Error starting chat server',
+					description: result.error,
+				});
+			}
 			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;

@@ -21,12 +21,9 @@ import { useToast } from '@/components/ui/toast';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const {
-	getNGpuLayers,
-	getChatModelPath,
-	chatServerRunning,
-	updateChatServerRunning,
-} = useAppStore();
+const { getNGpuLayers, getChatModelPath, updateChatServerRunning } =
+	useAppStore();
+const store = useAppStore();
 
 const { toast } = useToast();
 
@@ -47,7 +44,14 @@ const doStartServer = async () => {
 		return;
 	}
 	isStarting.value = true;
-	await startServer(modelPath, nGpuLayers);
+	const result = await startServer(modelPath, nGpuLayers);
+	if (result.error) {
+		toast({
+			variant: 'destructive',
+			title: 'Error starting chat server',
+			description: result.error,
+		});
+	}
 
 	// isStarting.value = false;
 	// lastModel.value = modelPath;
@@ -78,9 +82,8 @@ const intervalIdKey = 'refreshServerStatusIntervalId';
 
 const doRefreshServerStatus = async () => {
 	try {
-		const isRunningValue = await refreshServerStatus();
-		isRunning.value = isRunningValue;
-		updateChatServerRunning(isRunning.value);
+		await updateChatServerRunning();
+		isRunning.value = store.chatServerRunning;
 	} catch (error) {
 		console.error('Error refreshing server status:', error);
 		if ((window as any)[intervalIdKey]) {

@@ -2,6 +2,7 @@ import { execFile, ChildProcess } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
 // @ts-ignore
 import log from 'electron-log/main';
@@ -37,7 +38,7 @@ let hasResolved = false;
 
 let isReady = false;
 
-function startServer(model: string, gpuLayers = 99) {
+function startServer(modelPath: string, nGpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
 		const isExternal =
 			(await AppSettings.get('selected_provider_chat')) === 'external';
@@ -61,19 +62,27 @@ function startServer(model: string, gpuLayers = 99) {
 			return;
 		}
 
-		model = path.normalize(model);
-		gpuLayers = Math.floor(+gpuLayers);
+		modelPath = path.normalize(modelPath);
+		try {
+			await fs.access(modelPath);
+		} catch (e) {
+			log.error('Model file not found:', modelPath);
+			reject();
+			return;
+		}
+
+		nGpuLayers = Math.floor(+nGpuLayers);
 		const serverPath = await findBinaryPath('llamafile', 'llamafile');
 		const args = [
 			'--nobrowser',
 			'--model',
-			model,
+			modelPath,
 			'--n-gpu-layers',
-			gpuLayers + '',
+			nGpuLayers + '',
 		];
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
-			model.includes(key)
+			modelPath.includes(key)
 		);
 		if (chatTemplate) {
 			args.push('--chat-template', chatTemplateMap[chatTemplate]);
@@ -81,7 +90,7 @@ function startServer(model: string, gpuLayers = 99) {
 		}
 
 		const contextLength = Object.keys(contextLengthMap).find((key) =>
-			model.includes(key)
+			modelPath.includes(key)
 		);
 		if (contextLength && contextLengthMap[contextLength]) {
 			args.push('-c', contextLengthMap[contextLength] + '');
@@ -114,7 +123,7 @@ function startServer(model: string, gpuLayers = 99) {
 		);
 		pid = commandObj.cmd.pid || 0;
 		commandObj.cmd.stdin?.end();
-		updateModel(model);
+		updateModel(modelPath);
 
 		commandObj.cmd.on('error', (error: any) => {
 			log.error(`Llama.cpp-Server Error: ${error.message}`);
@@ -186,11 +195,15 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 		'llamacpp/start',
 		async (_, modelPath: string, nGpuLayers: number) => {
 			if (await isServerRunning()) {
-				return { message: 'Server already running' };
+				return { message: 'Server already running', error: false };
 			}
 			lastModel = modelPath;
-			await startServer(modelPath, nGpuLayers);
-			return { message: 'Server started' };
+			try {
+				await startServer(modelPath, nGpuLayers);
+				return { message: 'Server started', error: false };
+			} catch (e) {
+				return { message: 'Server failed to start', error: true };
+			}
 		}
 	);
 
