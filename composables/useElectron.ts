@@ -48,11 +48,8 @@ export default function useElectron() {
 		return result;
 	};
 
-	const verifyModelDirectory = async (directory: string) => {
-		const result = await electron.ipcRenderer.invoke(
-			'verifyModelDirectory:app',
-			directory
-		);
+	const verifyModelDirectory = async () => {
+		const result = await electron.ipcRenderer.invoke('verifyModelDirectory:app');
 		return result;
 	};
 
@@ -131,6 +128,11 @@ export default function useElectron() {
 		await electron.ipcRenderer.invoke('openExternalLink', url);
 	};
 
+	const openModelsDirectory = async () => {
+		const result = await electron.ipcRenderer.invoke('openModelDirectory:app');
+		return result;
+	};
+
 	return {
 		copyToClipboard,
 		isElectron,
@@ -153,5 +155,6 @@ export default function useElectron() {
 		fileURLToPath,
 		getDataPath,
 		openExternalLink,
+		openModelsDirectory,
 	};
 }

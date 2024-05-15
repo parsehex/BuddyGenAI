@@ -27,7 +27,7 @@ export default async function getAll(
 	const subDir = await pathJoin(directory, type);
 	await mkdir(subDir);
 
-	const files = await listDirectory(subDir);
+	const files = await listDirectory(directory);
 
 	const ext = type === 'chat' ? '.gguf' : '.safetensors';
 	const filteredFiles = files.filter((file) => file.endsWith(ext));

@@ -9,11 +9,9 @@ import type {
 
 import { api } from '@/lib/api';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import urls from '~/lib/api/urls';
-import axios from 'axios';
 
 // @ts-ignore
-const { startServer, stopServer, isServerRunning } = useLlamaCpp();
+const { isServerRunning } = useLlamaCpp();
 
 const lastFetchMap: Record<string, number> = {};
 function shouldGet(name: string, interval: number) {
@@ -147,7 +145,7 @@ export const useAppStore = defineStore('app', () => {
 		const slash = settings.value.local_model_directory.includes('\\')
 			? '\\'
 			: '/';
-		return `${settings.value.local_model_directory}${slash}chat${slash}${settings.value.selected_model_chat}`;
+		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_chat}`;
 	};
 
 	watch(route, async (newVal) => {
@@ -242,8 +240,6 @@ export const useAppStore = defineStore('app', () => {
 		getNGpuLayers,
 		getChatModelPath,
 
-		startServer,
-		stopServer,
 		isExternalProvider,
 
 		chatServerRunning,

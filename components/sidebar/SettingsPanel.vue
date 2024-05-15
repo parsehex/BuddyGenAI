@@ -9,7 +9,8 @@ import { useToast } from '@/components/ui/toast';
 
 const { toast } = useToast();
 
-const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
+const { pickDirectory, verifyModelDirectory, openModelsDirectory } =
+	useElectron();
 const {
 	chatModels,
 	imageModels,
@@ -34,17 +35,26 @@ if (settings.local_model_directory) {
 	await refreshModels();
 }
 
+const openModels = async () => {
+	if (!openModelsDirectory) return console.error('Electron not available');
+
+	await openModelsDirectory();
+};
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
 
-	let directory = await pickDirectory();
-	if (!directory) return;
-	directory = await pathJoin(directory, 'BuddyGen Models');
+	if (settings.local_model_directory) {
+		console.log(
+			'Local model directory already set:',
+			settings.local_model_directory
+		);
+		return;
+	}
 
-	const verified = await verifyModelDirectory(directory);
-	if (!verified) {
+	const directory = await verifyModelDirectory();
+	if (!directory) {
 		error.value =
-			'Invalid model directory (should contain chat and image folders)';
+			'Cound not find a valid model directory. Please select a valid directory.';
 		return;
 	} else {
 		error.value = '';
@@ -53,6 +63,11 @@ const pickModelDirectory = async () => {
 
 	await refreshModels();
 };
+onMounted(() => {
+	if (!settings.local_model_directory) {
+		pickModelDirectory();
+	}
+});
 
 const needsRestart = ref(false);
 
@@ -211,10 +226,11 @@ watch(isExternal, (newVal) => {
 				/>
 			</Label>
 			<Button
-				@click="pickModelDirectory"
-				class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+				@click="openModels"
+				class="mt-2 px-4 py-2 rounded-md"
+				variant="outline"
 			>
-				Choose
+				Open
 			</Button>
 		</div>
 		<div class="mt-4">

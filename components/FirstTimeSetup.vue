@@ -97,18 +97,28 @@ const updateName = async () => {
 	settings.user_name = userNameValue.value;
 };
 
-const { pickDirectory, verifyModelDirectory, pathJoin } = useElectron();
+const { pickDirectory, verifyModelDirectory, openModelsDirectory } =
+	useElectron();
+const openModelDirectory = () => {
+	if (!openModelsDirectory) return console.error('Electron not available');
+	openModelsDirectory();
+};
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
 
-	const directory = await pickDirectory();
-	if (!directory) return;
-
-	await verifyModelDirectory(directory);
-	settings.local_model_directory = await pathJoin(directory, 'BuddyGen Models');
+	const dir = await verifyModelDirectory();
+	if (!dir) {
+		throw new Error('Invalid model directory');
+	}
+	settings.local_model_directory = dir;
 
 	await updateModels();
 };
+onMounted(() => {
+	if (!settings.local_model_directory) {
+		pickModelDirectory();
+	}
+});
 
 const modelProvider = computed({
 	get: () => {
@@ -425,7 +435,7 @@ const acceptPicKeywords = () => {
 									<SelectGroup>
 										<SelectLabel>Model Providers</SelectLabel>
 										<SelectItem value="external">External</SelectItem>
-										<SelectItem value="local">Local</SelectItem>
+										<SelectItem value="local">Local (experimental)</SelectItem>
 									</SelectGroup>
 								</SelectContent>
 							</Select>
@@ -442,7 +452,7 @@ const acceptPicKeywords = () => {
 			<LocalModelSettingsCard
 				v-if="!isModelsSetup && modelProvider === 'local'"
 				:first-time="newHere"
-				@pick-model-directory="pickModelDirectory"
+				@open-model-directory="openModelDirectory"
 				@model-change="handleModelChange"
 			/>
 
@@ -498,6 +508,7 @@ const acceptPicKeywords = () => {
 									<Input
 										id="persona-keywords"
 										v-model="buddyKeywords"
+										@keyup.enter="acceptBuddy('keywords')"
 										class="p-2 border border-gray-300 rounded"
 										placeholder="friendly, helpful, funny"
 									/>
@@ -642,6 +653,7 @@ const acceptPicKeywords = () => {
 									<Input
 										id="profile-picture"
 										v-model="profilePicturePrompt"
+										@keyup.enter="refreshProfilePicture"
 										class="p-2 border border-gray-300 rounded"
 										placeholder="tan suit, sunglasses"
 									/>
@@ -694,7 +706,7 @@ const acceptPicKeywords = () => {
 										</PopoverContent>
 									</Popover>
 								</div>
-								<Label class="mt-2" v-id="!store.isExternalProvider">
+								<Label class="mt-2" v-if="!store.isExternalProvider">
 									<span class="text-lg">Picture Quality</span>
 									<!-- rename Decent/Good/Best -->
 									<select v-model="picQuality">

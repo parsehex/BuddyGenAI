@@ -79,7 +79,7 @@ export default async function createProfilePic(
 			throw new Error('Model directory not set');
 		}
 
-		modelPath = await pathJoin(modelDir, 'image', selectedImageModel);
+		modelPath = await pathJoin(modelDir, selectedImageModel);
 		try {
 			const exists = await fsAccess(modelPath);
 			if (!exists) throw new Error('Image model file not found');

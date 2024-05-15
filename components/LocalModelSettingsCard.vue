@@ -3,10 +3,7 @@
 		<CardHeader class="text-lg pt-0 pb-2">Local Model Setup</CardHeader>
 		<CardContent>
 			<p v-if="firstTime">
-				You'll need to download models to let your Buddies chat with you and have a
-				profile picture.
-				<br />
-				Please visit
+				Visit
 				<span
 					@click="openExternalLink && openExternalLink('https://buddygenai.com')"
 					class="text-blue-500 cursor-pointer"
@@ -28,10 +25,10 @@
 					/>
 				</Label>
 				<Button
-					@click="emits('pickModelDirectory')"
+					@click="emits('openModelDirectory')"
 					class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
 				>
-					Pick Directory
+					Open Folder
 				</Button>
 			</div>
 
@@ -100,7 +97,7 @@ const props = defineProps<{
 	firstTime: boolean;
 }>();
 
-const emits = defineEmits(['pickModelDirectory', 'modelChange']);
+const emits = defineEmits(['openModelDirectory', 'modelChange']);
 
 const { settings, chatModels, imageModels, updateModels } = useAppStore();
 

@@ -1,4 +1,4 @@
-import { execFile, spawn } from 'child_process';
+import { execFile } from 'child_process';
 import OpenAI from 'openai';
 import { findBinaryPath } from '../fs';
 import fs from 'fs-extra';
