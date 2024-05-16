@@ -1,14 +1,8 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref, onBeforeMount, watch } from 'vue';
-import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-	HoverCard,
-	HoverCardContent,
-	HoverCardTrigger,
-} from '@/components/ui/hover-card';
 import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import urls from '@/lib/api/urls';
@@ -113,7 +107,6 @@ watch(
 			isStarting.value = false;
 		}
 		lastModel.value = await getLastModel();
-		updateChatServerRunning(isRunning.value);
 	}
 );
 

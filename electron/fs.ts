@@ -87,7 +87,7 @@ export async function findBinaryPath<T extends ProjectName>(
 		return binPath;
 	}
 
-	let binPath = path.join(resPath, 'binaries/build', projectName, exe);
+	let binPath = path.join(resPath, 'binaries/', projectName, exe);
 
 	// NOTE as of now, this only affects using SDCPP since we're using llamafile instead of llama.cpp
 	const directories = [
@@ -104,13 +104,7 @@ export async function findBinaryPath<T extends ProjectName>(
 
 	for (let i = 0; i < directories.length; i++) {
 		try {
-			binPath = path.join(
-				resPath,
-				'binaries/build',
-				projectName,
-				directories[i],
-				exe
-			);
+			binPath = path.join(resPath, 'binaries/', projectName, directories[i], exe);
 			// console.log('checking', binPath);
 			await fs.access(binPath);
 			// console.log('found', binPath);

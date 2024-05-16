@@ -9,6 +9,7 @@ export function posPromptFromName(name: string, extra: string, gender = '') {
 }
 export function negPromptFromName(name: string) {
 	// TODO take extra
+	// TODO idea: use more aggressive negative when quality set to low
 	return `disfigured, distorted, thick frame, floating debris, square, child`;
 }
 

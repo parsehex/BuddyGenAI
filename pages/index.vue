@@ -230,7 +230,6 @@ const sortedThreads = computed(() => {
 
 	<FirstTimeSetup
 		v-if="!threads.length && !buddies.length"
-		:new-here="store.newHere"
 		:is-models-setup="calcIsModelsSetup"
 		:server-starting="serverStarting"
 		:handle-model-change="handleModelChange"

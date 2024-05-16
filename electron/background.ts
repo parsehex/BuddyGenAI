@@ -140,8 +140,11 @@ async function createWindow() {
 		const dir = modelsLocations[platform];
 		let modelsPath = '';
 		if (isDev) {
-			const userData = app.getPath('userData');
-			modelsPath = path.join(userData, 'BuddyGen Models');
+			if (platform === 'win32') {
+				modelsPath = 'C:/Users/User/BuddyGen Models';
+			} else {
+				modelsPath = path.join('/home/user/BuddyGen Models');
+			}
 		} else {
 			modelsPath = path.join(dir);
 			// resolve ~ and %APPDATA%

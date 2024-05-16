@@ -27,7 +27,6 @@ import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
 const props = defineProps<{
-	newHere: boolean;
 	serverStarting: boolean;
 	isModelsSetup: boolean;
 	handleModelChange: () => void;
@@ -89,6 +88,10 @@ const acceptBuddy = async (
 	acceptedBuddy.value = descriptionOrKeywords;
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
+
+	setTimeout(() => {
+		document.getElementById('buddyCard')?.scrollIntoView({ behavior: 'smooth' });
+	}, 250);
 };
 
 const updateName = async () => {
@@ -132,7 +135,7 @@ const modelProvider = computed({
 });
 
 const handleSave = async () => {
-	if (props.newHere && !userNameValue.value) {
+	if (store.newHere && !userNameValue.value) {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
 		return;
 	}
@@ -348,19 +351,19 @@ const acceptPicKeywords = () => {
 				class="text-xl font-bold mb-2 dark:bg-gray-600 p-1 pt-0 rounded-b"
 				to="/"
 			>
-				{{ newHere ? 'Welcome to' : '' }}
+				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
 				</div>
 			</NuxtLink>
 
-			<Avatar v-if="newHere" size="base">
+			<Avatar v-if="store.newHere" size="base">
 				<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
 				<img src="/assets/logo.png" alt="BuddyGen Logo" />
 			</Avatar>
 
-			<p v-if="newHere" class="text-center mt-2">
+			<p v-if="store.newHere" class="text-center mt-2">
 				For setup instructions, please
 				<span
 					class="text-blue-500 cursor-pointer"
@@ -450,12 +453,12 @@ const acceptPicKeywords = () => {
 
 			<ExternalModelSettingsCard
 				v-if="!isModelsSetup && modelProvider === 'external'"
-				:first-time="newHere"
+				:first-time="store.newHere"
 			/>
 
 			<LocalModelSettingsCard
 				v-if="!isModelsSetup && modelProvider === 'local'"
-				:first-time="newHere"
+				:first-time="store.newHere"
 				@open-model-directory="openModelDirectory"
 				@model-change="handleModelChange"
 			/>
@@ -465,17 +468,18 @@ const acceptPicKeywords = () => {
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">
-					<h2 v-if="newHere" class="text-lg text-center underline mb-0 pb-3">
+					<h2 v-if="store.newHere" class="text-lg text-center underline mb-0 pb-3">
 						{{ 'What do we call you?' }}
 					</h2>
 					<Label
-						v-if="newHere"
+						v-if="store.newHere"
 						class="mb-0 pb-3 text-center flex items-center justify-center"
 					>
 						Your Name
 						<Input
 							v-model="userNameValue"
 							@blur="updateName"
+							autofocus
 							class="p-2 border border-gray-300 rounded text-center w-1/2 ml-2"
 							@keyup.enter="handleSave"
 						/>
@@ -492,6 +496,10 @@ const acceptPicKeywords = () => {
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
+							<p class="text-sm text-gray-400">
+								Choose a name that feels friendly and relatable, like "Alex" or "Sam."
+								Your buddy's name helps shape their personality!
+							</p>
 							<Input
 								v-model="buddyName"
 								class="my-2 p-2 border border-gray-300 rounded w-1/2"
@@ -635,9 +643,9 @@ const acceptPicKeywords = () => {
 							</div>
 						</CardContent>
 					</Card>
-					<Card v-else class="mt-4 p-2 w-full">
+					<Card v-else class="mt-4 p-2 w-full" id="buddyCard">
 						<CardContent>
-							<h2 v-if="newHere" class="text-lg mt-4 text-center underline">
+							<h2 v-if="store.newHere" class="text-lg mt-4 text-center underline">
 								Your first Buddy
 							</h2>
 							<p class="my-2 text-center">
@@ -653,13 +661,16 @@ const acceptPicKeywords = () => {
 								<Label for="profile-picture" class="flex flex-col items-center">
 									<span class="text-lg">Appearance</span>
 								</Label>
+								<p class="text-sm text-gray-500">
+									You can use keywords -- e.g.
+									<b><i>tan suit, sunglasses</i></b>
+								</p>
 								<div class="flex w-full items-center gap-1.5">
 									<Input
 										id="profile-picture"
 										v-model="profilePicturePrompt"
 										@keyup.enter="refreshProfilePicture"
 										class="p-2 border border-gray-300 rounded"
-										placeholder="tan suit, sunglasses"
 									/>
 
 									<Popover
@@ -710,6 +721,7 @@ const acceptPicKeywords = () => {
 										</PopoverContent>
 									</Popover>
 								</div>
+
 								<div
 									class="flex flex-col items-center justify-center my-1"
 									v-if="!store.isExternalProvider"
@@ -751,7 +763,7 @@ const acceptPicKeywords = () => {
 					>
 						Save
 					</Button>
-					<Alert v-if="newHere" class="mt-4 p-2" variant="info">
+					<Alert v-if="store.newHere" class="mt-4 p-2" variant="info">
 						<AlertTitle>Tip</AlertTitle>
 						<AlertDescription>
 							You can make a Custom chat without a Buddy from the sidebar.
