@@ -1,27 +1,38 @@
 # How to setup for the first time
 
-## Requirements
+You can use BuddyGenAI using OpenAI's models or you can bring-your-own-models and run them on your own PC.
+
+Open the app if you haven't already. You'll see the setup screen:
+
+![BuddyGen AI setup 1](./img/v2/setup%20-%20external.png)
+
+Do you want to use OpenAI's models or run your own?
+
+## OpenAI Models Setup
+
+First, you'll need to [Sign Up](https://platform.openai.com/signup) or [Log In](https://platform.openai.com/login) to your OpenAI account.
+
+Now go to the [API Keys](https://platform.openai.com/account/api-keys) page and click "Create new secret key". Give it a name if you want to and click "Create secret key". Now click Copy
+
+![BuddyGen AI setup 2](./img/v2/setup%20-%20external%20add%20key.png)
+
+## Local Models Setup
+
+### Requirements
 
 [Microsoft Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
-(NVIDIA GPUs) [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
+- (NVIDIA GPUs) [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
+- (AMD GPUs) [ROCm SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html) -- I haven't tested on an AMD GPU yet
 
-You'll need to download a couple AI models if you don't already have them - an LLM like Llama 3 and a Stable Diffusion (1.5) model.
+You'll need to download a couple AI models if you don't already have them - a chat model like Llama 3 and a Stable Diffusion (1.5) model.
 
 The following models are what I developed with and should work for most. Other models may work (planned to support more in the future).
 
 - Llama 3 (Q2_K) - Download [Here](https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct-Q2_K.gguf?download=true) or [Here](https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct.Q2_K.gguf?download=true)
 - Toonify SD 1.5 - [Download Here](https://civitai.com/api/download/models/244831)
 
-Grab a drink while you wait for these to download.
-
-## Start BuddyGen AI
-
-Open the app if you haven't already.
-
-<!-- pic -->
-
-![BuddyGen AI setup 1](./img/model-setup_1.png)
+### Start BuddyGen AI
 
 First, pick where you want models to be stored. Don't pick somewhere that will get synced to the cloud (like Dropbox or Google Drive) as the models are large and you don't want to accidentally upload them.
 
