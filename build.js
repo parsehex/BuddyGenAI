@@ -30,14 +30,7 @@ const compression = 'maximum';
 console.time(`build (${compression} compression-level)`);
 
 // check for the required binaries
-const binPath = path.join(__dirname, 'binaries/build');
-const LCPP = path.join(binPath, 'llama.cpp', 'cuda12');
-const LCPPmainBin =
-	platform === 'WINDOWS' ? path.join(LCPP, 'main.exe') : path.join(LCPP, 'main');
-const LCPPserverBin =
-	platform === 'WINDOWS'
-		? path.join(LCPP, 'server.exe')
-		: path.join(LCPP, 'server');
+const binPath = path.join(__dirname, 'binaries/');
 
 const sdCPP = path.join(binPath, 'stable-diffusion.cpp', 'cuda12');
 const sdCPPbin =
@@ -45,28 +38,16 @@ const sdCPPbin =
 		? path.join(sdCPP, 'sd.exe')
 		: path.join(sdCPP, 'sd');
 
-if (!fs.existsSync(LCPPmainBin)) {
-	console.error(`Required binary not found: ${LCPPmainBin}`);
-	process.exit(1);
-}
 
-if (!fs.existsSync(LCPPserverBin)) {
-	console.error(`Required binary not found: ${LCPPserverBin}`);
-	process.exit(1);
-}
 
 if (!fs.existsSync(sdCPPbin)) {
 	console.error(`Required binary not found: ${sdCPPbin}`);
 	process.exit(1);
 }
 
-const llamaVersionExists = fs.existsSync(
-	path.join(binPath, 'build', 'llama.cpp', 'version ' + versions.llamaCpp)
-);
 const sdVersionExists = fs.existsSync(
 	path.join(
 		binPath,
-		'build',
 		'stable-diffusion.cpp',
 		'version ' + versions.stabeDiffusionCpp
 	)
@@ -74,19 +55,6 @@ const sdVersionExists = fs.existsSync(
 
 // copy version folders to binaries/build under their project names
 // add file to folder called `version ${ver}`
-if (!llamaVersionExists) {
-	fs.copySync(
-		LCPP.replace('cuda12', ''),
-		path.join(binPath, 'build', 'llama.cpp')
-	);
-	const verPath = path.join(
-		binPath,
-		'build',
-		'llama.cpp',
-		'version ' + versions.llamaCpp
-	);
-	fs.writeFileSync(verPath, '');
-}
 if (!sdVersionExists) {
 	fs.copySync(
 		sdCPP.replace('cuda12', ''),
@@ -94,7 +62,6 @@ if (!sdVersionExists) {
 	);
 	const verPath = path.join(
 		binPath,
-		'build',
 		'stable-diffusion.cpp',
 		'version ' + versions.stabeDiffusionCpp
 	);
@@ -121,7 +88,7 @@ const options = {
 		app: '.output',
 	},
 	extraResources: [
-		'./binaries/build/**/*',
+		'./binaries/stable-diffusion.cpp/**/*',
 		'./binaries/llamafile*',
 		'./licenses/**/*',
 		'./migrations/**/*',
