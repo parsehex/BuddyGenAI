@@ -1,15 +1,23 @@
 BuddyGenAI is a chat application designed to create and interact with virtual buddies
 
-# ✅ Features
+## ✅ Features
 
 - Generate Buddies to talk to 🤖
 - Create a detailed Buddy from just a few words 📝
   - Or customize your Buddy to behave exactly how you want 🎨
 - Generate profile pictures for your Buddy 🖼️
 
-# ⚙️ Setup
+## ⚙️ Setup
 
-## Acquiring Binaries
+BuddyGenAI is in pre-release stage and so the experience will be unstable at times. If you encounter any issues, please report them on the [issues page](https://github.com/parsehex/BuddyGenAI/issues).
+
+You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app.
+
+## Building
+
+(section is incomplete)
+
+### Acquiring Binaries
 
 First you'll need to place binaries in the `./binaries/` folder. You can build them yourself or download them from their releases page. You'll need:
 
@@ -23,7 +31,7 @@ First you'll need to place binaries in the `./binaries/` folder. You can build t
   - avx
   - noavx
 
-## Steps to Setup BuddyGenAI
+### Steps to Build BuddyGenAI
 
 Node v18 is recommended. I personally use [nvm](https://github.com/nvm-sh/nvm) or [NVM for Windows](https://github.com/coreybutler/nvm-windows) to manage Node versions.
 
@@ -73,6 +81,6 @@ npm run dev
 
 # License
 
-BuddyGen AI - An app to generate AI-powered companions to talk to. Copyright (C) 2024 Thomas Mays
+BuddyGenAI Copyright (C) 2024 Thomas Mays
 
 This program is licensed under the GNU Affero General Public License version 3. See the LICENSE file for more details.
