@@ -2,6 +2,19 @@
 	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
 		<CardHeader class="text-lg pt-0 pb-2">External Model Setup</CardHeader>
 		<CardContent>
+			<p class="text-center">
+				<span
+					class="text-blue-500 cursor-pointer"
+					@click="
+						openExternalLink &&
+							openExternalLink(
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#openai-models-setup'
+							)
+					"
+				>
+					Help / Instructions
+				</span>
+			</p>
 			<p v-if="firstTime">
 				If you choose External models above, we'll use OpenAI to run models for you.
 				You'll need to sign up for an OpenAI account and set billing information to
@@ -9,6 +22,7 @@
 				<br />
 				See OpenAI's
 				<a
+					class="text-blue-500 cursor-pointer"
 					@click="
 						openExternalLink &&
 							openExternalLink(
@@ -18,8 +32,8 @@
 				>
 					API data privacy page
 				</a>
-				for information about usage of your data through OpenAI's API (which is what
-				this app uses).
+				for info about usage of your data through OpenAI's API (which is what this
+				app uses).
 			</p>
 
 			<OpenAIAPIKeyHelpButton />

@@ -363,21 +363,6 @@ const acceptPicKeywords = () => {
 				<img src="/assets/logo.png" alt="BuddyGen Logo" />
 			</Avatar>
 
-			<p v-if="store.newHere" class="text-center mt-2">
-				For setup instructions, please
-				<span
-					class="text-blue-500 cursor-pointer"
-					@click="
-						openExternalLink &&
-							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md'
-							)
-					"
-				>
-					go here
-				</span>
-			</p>
-
 			<!-- Server Starting Spinner -->
 			<div
 				v-if="serverStarting"
@@ -394,19 +379,19 @@ const acceptPicKeywords = () => {
 				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4"
 			>
 				<CardHeader class="pt-0 pb-0 text-center">
-					Please answer some questions before you create your first Buddy.
+					Please answer some questions before you create a Buddy.
 				</CardHeader>
 				<CardContent>
 					<div
 						class="flex flex-col w-full items-center justify-between gap-1.5 mt-4"
 					>
 						<h2 class="text-lg text-center underline">
-							Where will you get models from?
+							{{ 'Where will you use models from?' }}
 						</h2>
 						<ul class="mb-2">
 							<li>
 								<b>External</b>
-								-- only OpenAI/ChatGPT supported for now
+								-- currently only OpenAI/ChatGPT is supported
 							</li>
 							<li>
 								<b>Local</b>
@@ -433,7 +418,7 @@ const acceptPicKeywords = () => {
 							</li>
 						</ul>
 						<Label for="chat-model-provider" class="w-full">
-							Model Provider
+							External (OpenAI) or Local Models?
 							<Select v-model="modelProvider" id="chat-model-provider">
 								<SelectTrigger>
 									<SelectValue placeholder="Select a chat model provider" />
@@ -441,7 +426,7 @@ const acceptPicKeywords = () => {
 								<SelectContent>
 									<SelectGroup>
 										<SelectLabel>Model Providers</SelectLabel>
-										<SelectItem value="external">External</SelectItem>
+										<SelectItem value="external">External (OpenAI)</SelectItem>
 										<SelectItem value="local">Local (experimental)</SelectItem>
 									</SelectGroup>
 								</SelectContent>
