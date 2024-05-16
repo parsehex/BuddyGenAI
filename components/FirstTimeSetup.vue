@@ -496,7 +496,7 @@ const acceptPicKeywords = () => {
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
-							<p class="text-sm text-gray-400">
+							<p class="text-sm text-gray-500">
 								Choose a name that feels friendly and relatable, like "Alex" or "Sam."
 								Your buddy's name helps shape their personality!
 							</p>
@@ -513,8 +513,12 @@ const acceptPicKeywords = () => {
 								>
 									Use a few words to describe your Buddy
 								</Label>
-								<p class="text-sm text-gray-500">
+								<p class="text-sm text-gray-500 text-center mb-1">
 									This affects how {{ buddyName || 'your Buddy' }} talks with you.
+									<br />
+									You can use keywords like
+									<b><i>friendly, helpful, funny,</i></b>
+									etc.
 								</p>
 								<div class="flex w-full items-center gap-1.5">
 									<Input
@@ -522,7 +526,6 @@ const acceptPicKeywords = () => {
 										v-model="buddyKeywords"
 										@keyup.enter="acceptBuddy('keywords')"
 										class="p-2 border border-gray-300 rounded"
-										placeholder="friendly, helpful, funny"
 									/>
 
 									<Popover
@@ -663,7 +666,8 @@ const acceptPicKeywords = () => {
 								</Label>
 								<p class="text-sm text-gray-500">
 									You can use keywords -- e.g.
-									<b><i>tan suit, sunglasses</i></b>
+									<b><i>tan suit, sunglasses,</i></b>
+									etc.
 								</p>
 								<div class="flex w-full items-center gap-1.5">
 									<Input

@@ -300,12 +300,16 @@ const acceptKeywords = () => {
 					<Label for="profile-picture" class="flex flex-col items-center">
 						<span class="text-lg">Appearance</span>
 					</Label>
+					<p class="text-sm text-gray-500">
+						You can use keywords -- e.g.
+						<b><i>tan suit, sunglasses,</i></b>
+						etc.
+					</p>
 					<div class="flex w-full items-center gap-1.5">
 						<Input
 							id="profile-picture"
 							v-model="profilePicturePrompt"
 							class="p-2 border border-gray-300 rounded"
-							placeholder="tan suit, sunglasses"
 						/>
 
 						<Popover
