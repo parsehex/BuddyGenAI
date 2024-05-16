@@ -2,25 +2,29 @@
 	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
 		<CardHeader class="text-lg pt-0 pb-2">Local Model Setup</CardHeader>
 		<CardContent>
-			<p v-if="firstTime">
-				Visit
+			<p class="text-center">
 				<span
-					@click="openExternalLink && openExternalLink('https://buddygenai.com')"
 					class="text-blue-500 cursor-pointer"
+					@click="
+						openExternalLink &&
+							openExternalLink(
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
+							)
+					"
 				>
-					buddygenai.com
+					Help / Instructions
 				</span>
-				for model recommendations and instructions.
 			</p>
 			<div class="flex w-full items-end justify-between gap-1.5 mt-4">
 				<Label for="local_model_directory" class="w-full">
-					Choose where to keep your models
+					Model Folder
 					<Input
 						v-model="settings.local_model_directory"
 						type="text"
 						id="local_model_directory"
 						name="local_model_directory"
 						class="w-full border border-gray-300 rounded-md p-2 mt-1"
+						style="cursor: default !important"
 						disabled
 					/>
 				</Label>

@@ -195,7 +195,7 @@ watch(isExternal, (newVal) => {
 		>
 			<div class="flex items-center space-x-2">
 				<RadioGroupItem id="external" value="external">External</RadioGroupItem>
-				<Label for="external" class="block">External</Label>
+				<Label for="external" class="block">External (OpenAI)</Label>
 			</div>
 			<div class="flex items-center space-x-2">
 				<RadioGroupItem id="local" value="local">Local</RadioGroupItem>
