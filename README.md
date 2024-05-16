@@ -1,8 +1,10 @@
+![BuddyGenAI](./docs/img/home-page.png)
+
 BuddyGenAI is a chat application designed to create and interact with virtual buddies
 
 ## ✅ Features
 
-- Generate Buddies to talk to 🤖
+- Generate Buddies to chat with 🤖
 - Create a detailed Buddy from just a few words 📝
   - Or customize your Buddy to behave exactly how you want 🎨
 - Generate profile pictures for your Buddy 🖼️
@@ -11,7 +13,7 @@ BuddyGenAI is a chat application designed to create and interact with virtual bu
 
 BuddyGenAI is in pre-release stage and so the experience will be unstable at times. If you encounter any issues, please report them on the [issues page](https://github.com/parsehex/BuddyGenAI/issues).
 
-You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app.
+You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app, or follow the section below to build it yourself.
 
 ## Building
 
