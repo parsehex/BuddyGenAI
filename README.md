@@ -1,6 +1,6 @@
 BuddyGenAI is a chat application designed to create and interact with virtual buddies
 
-## ✅ Features
+# ✅ Features
 
 - Generate Buddies to talk to 🤖
 - Create a detailed Buddy from just a few words 📝
@@ -9,7 +9,23 @@ BuddyGenAI is a chat application designed to create and interact with virtual bu
 
 # ⚙️ Setup
 
-Node v18 is recommended.
+## Acquiring Binaries
+
+First you'll need to place binaries in the `./binaries/` folder. You can build them yourself or download them from their releases page. You'll need:
+
+- [LlamaFile](https://github.com/Mozilla-Ocho/llamafile) - `./binaries/llamafile` or `./binaries/llamafile.exe`
+- [Stable-Diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp) - You should at least have a `./binaries/stable-diffusion.cpp/cuda12` folder with the `stable-diffusion` binary in it. Besides `cuda12`, the following are also checked at runtime in this order:
+  - rocm5.5
+  - clblast
+  - vulkan
+  - avx512
+  - avx2
+  - avx
+  - noavx
+
+## Steps to Setup BuddyGenAI
+
+Node v18 is recommended. I personally use [nvm](https://github.com/nvm-sh/nvm) or [NVM for Windows](https://github.com/coreybutler/nvm-windows) to manage Node versions.
 
 You'll need to download the latest release of [LlamaFile](https://github.com/Mozilla-Ocho/llamafile). Place the binary at `./binaries/llamafile` and make it executable (for Windows: add ".exe" to the end of the file's name).
 
