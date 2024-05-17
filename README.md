@@ -87,6 +87,6 @@ npm run dev
 
 # License
 
-BuddyGenAI Copyright (C) 2024 Thomas Mays
+This program is licensed under the MIT License. See the LICENSE file for more details.
 
-This program is licensed under the GNU Affero General Public License version 3. See the LICENSE file for more details.
+Copyright (C) 2024 Thomas Mays

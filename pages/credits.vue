@@ -313,7 +313,7 @@ const openLink = (link: string) => {
 					</span>
 					)
 					<span class="text-sm bg-gray-200 px-2 rounded-full ml-1">
-						AGPL-3.0 license
+						MIT license
 					</span>
 				</p>
 			</div>
