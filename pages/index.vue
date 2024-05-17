@@ -217,8 +217,8 @@ const sortedThreads = computed(() => {
 										thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
 								}"
 							>
-								<b>{{ getMessageName(thread) }}</b>
-								:
+								<b>{{ getMessageName(thread) }}</b
+								>:
 								{{ getMessageContent(thread) }}
 							</p>
 						</div>
