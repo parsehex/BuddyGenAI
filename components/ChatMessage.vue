@@ -121,7 +121,7 @@ function textToHslColor(t: string, s: number, l: number) {
 						</span>
 					</CardHeader>
 					<CardHeader class="p-3" v-else>
-						{{ message.role === 'user' ? 'User' : 'AI' }}
+						{{ message.role === 'user' ? userName : 'AI' }}
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0">{{ message.content }}</CardContent>
 				</Card>

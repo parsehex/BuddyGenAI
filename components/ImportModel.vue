@@ -89,8 +89,9 @@ const doLinkFile = async () => {
 					</span>
 				</div>
 				<p class="mt-2">
-					<b>Tip</b>: Choosing <u>Link</u> will keep the Model file in the same
-					location and will make a link to it instead.
+					<b>Tip</b>: Choosing <u>Link</u> will leave the Model file in the same
+					location and will make a link to it instead. You should keep the file in
+					the same location.
 				</p>
 			</DialogDescription>
 			<DialogFooter>

@@ -63,14 +63,16 @@ export default async function createOne({
 	await dbRun(sqlInsert[0], sqlInsert[1]);
 	const sqlThread2 = select('chat_thread', ['*'], { id });
 	const thread = (await dbGet(sqlThread2[0], sqlThread2[1])) as ChatThread;
+	const userName = AppSettings.get('user_name') as string;
 
 	if (mode === 'custom') {
 		const sqlMessage = insert('chat_message', {
 			id: uuidv4(),
 			created: new Date().getTime(),
 			role: 'system',
-			content:
-				'The following is a chat between a human User and an embodied AI Assistant.',
+			content: `The following is a chat between a User${
+				userName && userName.toLowerCase() !== 'user' ? ' named ' + userName : ''
+			} and an AI Assistant.`,
 			thread_id: thread.id,
 			thread_index: 0,
 		});
@@ -89,7 +91,6 @@ export default async function createOne({
 			if (!personaVersion) {
 				throw new Error('Current version of persona not found');
 			}
-			const userName = AppSettings.get('user_name') as string;
 			const sqlMessage = insert('chat_message', {
 				id: uuidv4(),
 				created: new Date().getTime(),

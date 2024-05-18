@@ -192,8 +192,9 @@ const sortedThreads = computed(() => {
 						class="w-full h-full flex items-center justify-start p-4"
 					>
 						<!-- TODO this is a good idea: show buddy info in thread list -->
-						<div v-if="thread.selected_buddy">
+						<div>
 							<BuddyAvatar
+								v-if="thread.selected_buddy"
 								:style="{
 									visibility:
 										thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
@@ -201,6 +202,9 @@ const sortedThreads = computed(() => {
 								:persona="thread.selected_buddy"
 								size="base"
 							/>
+							<Avatar v-else size="base">
+								<AvatarFallback>AI</AvatarFallback>
+							</Avatar>
 							<Avatar v-if="thread.latest_message.role === 'user'">
 								<AvatarFallback>{{ userInitials }}</AvatarFallback>
 							</Avatar>
