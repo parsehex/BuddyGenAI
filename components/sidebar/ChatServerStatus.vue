@@ -12,6 +12,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/toast';
+import { delay } from '@/lib/utils';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
@@ -60,16 +61,10 @@ const doStopServer = async () => {
 	lastModel.value = null;
 };
 
-const refreshServerStatus = async (): Promise<boolean> => {
-	const url = urls.other.llamacppHealth();
-	try {
-		const response = await axios.get(url, {
-			timeout: 3500,
-		});
-		return !!response.data.isRunning;
-	} catch (error) {
-		return false;
-	}
+const doRestartServer = async () => {
+	await doStopServer();
+	await delay(500);
+	await doStartServer();
 };
 
 const intervalIdKey = 'refreshServerStatusIntervalId';
@@ -144,6 +139,13 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 							Start
 						</Button>
 						<Button v-else variant="destructive" @click="doStopServer">Stop</Button>
+						<Button
+							class="warning"
+							@click="doRestartServer"
+							:disabled="isStarting || !isRunning"
+						>
+							Restart
+						</Button>
 						<Spinner v-if="isStarting" />
 					</div>
 				</div>
