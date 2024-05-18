@@ -61,7 +61,7 @@ const { openExternalLink } = useElectron();
 						(set a name like "BuddyGenAI" if you'd like).
 					</p>
 					<p class="text-sm text-muted-foreground">
-						Finally, copy the key and paste it into this app.
+						Finally, copy the key and paste it into the box below.
 					</p>
 				</div>
 			</div>

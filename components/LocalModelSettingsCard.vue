@@ -1,21 +1,21 @@
 <template>
-	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
-		<CardHeader class="text-lg pt-0 pb-2">Local Model Setup</CardHeader>
+	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
+		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
+			Local Models Setup
+			<span
+				class="text-blue-500 cursor-pointer hover:underline"
+				@click="
+					openExternalLink &&
+						openExternalLink(
+							'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
+						)
+				"
+			>
+				{{ 'Instructions' }}
+			</span>
+		</CardHeader>
 		<CardContent>
-			<p class="text-center">
-				<span
-					class="text-blue-500 cursor-pointer"
-					@click="
-						openExternalLink &&
-							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
-							)
-					"
-				>
-					Help / Instructions
-				</span>
-			</p>
-			<div class="flex w-full items-end justify-between gap-1.5 mt-4">
+			<div class="flex w-full items-end justify-between gap-1.5 mt-2">
 				<Label for="local_model_directory" class="w-full">
 					Model Folder
 					<Input
@@ -36,20 +36,21 @@
 				</Button>
 			</div>
 
-			<div
-				class="mt-4"
-				:style="{
-					visibility: settings.local_model_directory ? 'visible' : 'hidden',
-				}"
-			>
+			<div class="mt-4 flex items-center gap-2">
+				<ImportModel />
 				<Button
 					@click="updateModels"
 					class="bg-green-500 text-white px-4 py-2 rounded-md"
 				>
 					Update Models
 				</Button>
-				<br />
-				<br />
+			</div>
+			<div
+				class="mt-4"
+				:style="{
+					visibility: settings.local_model_directory ? 'visible' : 'hidden',
+				}"
+			>
 				<Label for="chat-model" class="mb-1">Chat Model</Label>
 				<Select
 					v-model="settings.selected_model_chat"

@@ -87,7 +87,7 @@ const doCreateThread = async () => {
 		</TabsList>
 		<div class="h-screen">
 			<TabsContent value="chat">
-				<div class="bg-background">
+				<div class="bg-background my-1">
 					<ChatServerStatus v-if="!store.isExternalProvider" />
 					<div class="flex w-full px-2 mb-2 items-end">
 						<BuddySelect v-model="selectedBuddy" include-ai />

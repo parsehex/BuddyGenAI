@@ -1,28 +1,29 @@
 <template>
-	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
-		<CardHeader class="text-lg pt-0 pb-2">External Model Setup</CardHeader>
+	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
+		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
+			External (OpenAI) Models Setup
+			<span
+				class="text-blue-500 cursor-pointer hover:underline"
+				@click="
+					openExternalLink &&
+						openExternalLink(
+							'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#openai-models-setup'
+						)
+				"
+			>
+				{{ 'Instructions' }}
+			</span>
+		</CardHeader>
 		<CardContent>
-			<p class="text-center">
-				<span
-					class="text-blue-500 cursor-pointer"
-					@click="
-						openExternalLink &&
-							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#openai-models-setup'
-							)
-					"
-				>
-					Help / Instructions
-				</span>
-			</p>
 			<p v-if="firstTime">
-				If you choose External models above, we'll use OpenAI to run models for you.
+				We'll use OpenAI to run models for you once you add an API Key below.
+				<br />
 				You'll need to sign up for an OpenAI account and set billing information to
 				use external models.
 				<br />
 				See OpenAI's
 				<a
-					class="text-blue-500 cursor-pointer"
+					class="text-blue-500 cursor-pointer hover:underline"
 					@click="
 						openExternalLink &&
 							openExternalLink(
@@ -30,16 +31,16 @@
 							)
 					"
 				>
-					API data privacy page
+					{{ 'API data privacy page' }}
 				</a>
-				for info about usage of your data through OpenAI's API (which is what this
-				app uses).
+				for info about usage of your data when you use External (OpenAI) models.
 			</p>
 
-			<OpenAIAPIKeyHelpButton />
-
 			<div class="mt-4">
-				<Label for="external_api_key" class="mb-1">OpenAI API Key</Label>
+				<Label for="external_api_key" class="mb-1 flex items-center gap-2">
+					OpenAI API Key
+					<OpenAIAPIKeyHelpButton />
+				</Label>
 				<Input
 					v-model="settings.external_api_key"
 					@update:model-value="emits('modelChange', 'external_api_key')"
