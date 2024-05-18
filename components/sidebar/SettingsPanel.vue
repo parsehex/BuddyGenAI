@@ -219,15 +219,18 @@ watch(isExternal, (newVal) => {
 				Open
 			</Button>
 		</div>
-		<div class="mt-4">
+		<div class="mt-2 flex items-center" v-if="!isExternal">
+			<ImportModel />
 			<Button
 				@click="updateModels"
-				class="px-4 py-2 rounded-md"
+				class="px-4 py-2 ml-2 rounded-md"
 				title="Refresh Models"
+				variant="secondary"
 			>
 				<RefreshCw class="w-4 h-4" />
 			</Button>
-			<br />
+		</div>
+		<div class="mt-4">
 			<Label for="chat-model" class="mb-1">Chat Model</Label>
 			<Alert variant="info" class="my-2" v-if="needsRestart">
 				<AlertTitle>Heads up!</AlertTitle>
