@@ -12,6 +12,7 @@ const chatProviderUrls = {
 
 const router = Router();
 
+const stop = ['<|eot_id|>', 'USER:', '</s>'];
 let currentModel = '';
 
 export function updateModel(modelName: string) {
@@ -86,7 +87,7 @@ router.post('/api/message', async (req, res) => {
 		max_tokens,
 		temperature,
 		seed,
-		stop: ['<|eot_id|>'],
+		stop,
 	});
 
 	const stream = OpenAIStream(aiResponse);
@@ -121,7 +122,7 @@ router.post('/api/completion', async (req, res) => {
 		top_p: 1,
 		frequency_penalty: 1,
 		presence_penalty: 1,
-		stop: ['<|eot_id|>'],
+		stop,
 	});
 
 	const stream = OpenAIStream(response);

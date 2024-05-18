@@ -65,7 +65,6 @@ const handleModelChange = async () => {
 					description: result.error,
 				});
 			}
-			serverStarting.value = false;
 		} else {
 			isModelsSetup.value = false;
 		}
@@ -85,7 +84,7 @@ watch(
 	<FirstTimeSetup
 		:new-here="false"
 		:is-models-setup="isModelsSetup"
-		:server-starting="serverStarting"
+		:server-starting="store.chatServerStarting"
 		:handle-model-change="handleModelChange"
 	/>
 </template>

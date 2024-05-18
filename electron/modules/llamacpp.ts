@@ -24,6 +24,7 @@ const chatTemplateMap: { [key: string]: string } = {
 
 const contextLengthMap: { [key: string]: number } = {
 	'WizardLM-2': 4096,
+	Moistral: 8192,
 	'Lexi-': 8192,
 	'Llama-3': 8192,
 	'llama-3': 8192,
