@@ -128,7 +128,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					const lastMessage = messages.value[messages.value.length - 1];
 					await api.message.createOne(threadId.value, {
 						role: 'assistant',
-						content: lastMessage.content,
+						content: lastMessage.content.trim(),
 					});
 					await refreshMessages();
 					reloadingId.value = '';
@@ -136,8 +136,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				}
 
 				let lastMessage = messages.value[messages.value.length - 1];
-				lastMessage = { ...lastMessage, content: lastMessage.content };
-				await api.message.updateOne(reloadingId.value, lastMessage.content);
+				lastMessage = { ...lastMessage, content: lastMessage.content.trim() };
+				await api.message.updateOne(reloadingId.value, lastMessage.content.trim());
 				await refreshMessages();
 				reloadingId.value = '';
 
@@ -151,7 +151,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (lastMessage.role === 'assistant') {
 				const msg = {
 					role: 'assistant',
-					content: lastMessage.content,
+					content: lastMessage.content.trim(),
 				};
 				msgsToSave.push(msg as any);
 			} else {
@@ -454,6 +454,7 @@ const canReload = computed(() => {
 				v-model="input"
 				placeholder="Say something..."
 				@keydown.enter="doSubmit"
+				autofocus
 			/>
 			<div class="flex flex-col items-center gap-1">
 				<Button
