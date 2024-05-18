@@ -122,7 +122,7 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 	<Popover>
 		<PopoverTrigger as-child>
 			<div
-				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center"
+				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center cursor-pointer"
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
 				<span class="p-2"
@@ -133,7 +133,10 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 		<PopoverContent class="w-72" :hide-when-detached="true" side="right">
 			<div class="flex items-center space-x-4">
 				<div class="space-y-1">
-					<p v-if="lastModel" class="text-sm text-gray-500">
+					<p
+						v-if="lastModel && store.chatServerRunning"
+						class="text-sm text-gray-500 mb-4"
+					>
 						<span class="font-semibold">Model:</span>
 						{{ lastModel }}
 					</p>
@@ -150,7 +153,6 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 						<Button
 							class="warning"
 							@click="doRestartServer"
-							:disabled="isStarting || !isRunning"
 							:disabled="store.chatServerStarting || !store.chatServerRunning"
 						>
 							Restart
