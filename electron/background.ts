@@ -128,11 +128,11 @@ async function createWindow() {
 
 	ipcMain.handle('pickFile:app', async () => {
 		const result = await dialog.showOpenDialog({
-			properties: ['openFile'],
+			properties: ['openFile', 'multiSelections'],
 			filters: [{ name: 'Model files', extensions: ['safetensors', 'gguf'] }],
 		});
 
-		return result.filePaths[0];
+		return result.filePaths;
 	});
 
 	ipcMain.handle(

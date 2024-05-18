@@ -9,6 +9,7 @@ import { useAppStore } from '@/stores/main';
 import BuddyAvatar from './BuddyAvatar.vue';
 
 const filePath = ref<string>('');
+const filePaths = ref<string[]>([]);
 
 const detectedModelType = ref<string>(''); // chat or image
 
@@ -18,51 +19,68 @@ const store = useAppStore();
 const doPickFile = async () => {
 	if (!pickFile) return console.error('Electron not available');
 
-	const file = await pickFile();
-	if (!file) return;
+	const files = await pickFile();
+	if (!files) return;
 
-	filePath.value = file;
+	filePaths.value = files;
 };
 const doMoveFile = async () => {
 	if (!moveFile) return console.error('Electron not available');
 
 	console.log('Moving file:', filePath);
-	let modelPath = store.getChatModelPath();
-	if (!modelPath) {
-		console.error('No chat model selected');
+	const modelsPath = store.settings.local_model_directory;
+
+	if (!modelsPath) {
+		console.error('No model directory');
 		return;
 	}
-	modelPath = await pathJoin(modelPath, '..');
 
-	const fileName = await basename(filePath.value);
-	const path = await pathJoin(modelPath, fileName);
-	console.log('Path:', path);
+	for (const filePath of filePaths.value) {
+		const fileName = await basename(filePath);
+		const newPath = await pathJoin(modelsPath, fileName);
+		console.log('New Model Path:', newPath);
 
-	await moveFile(filePath.value, path);
+		await moveFile(filePath, newPath);
+	}
 
-	filePath.value = '';
+	filePaths.value = [];
 	store.updateModels();
 };
 const doLinkFile = async () => {
 	if (!moveFile) return console.error('Electron not available');
 
 	console.log('Linking file:', filePath);
-	let modelPath = store.getChatModelPath();
-	if (!modelPath) {
-		console.error('No chat model selected');
+	const modelsPath = store.settings.local_model_directory;
+
+	if (!modelsPath) {
+		console.error('No model directory');
 		return;
 	}
-	modelPath = await pathJoin(modelPath, '..');
 
-	const fileName = await basename(filePath.value);
-	const path = await pathJoin(modelPath, fileName);
-	console.log('Path:', path);
+	for (const filePath of filePaths.value) {
+		const fileName = await basename(filePath);
+		const newPath = await pathJoin(modelsPath, fileName);
+		console.log('New Model Path:', newPath);
 
-	await linkFile(filePath.value, path);
+		await linkFile(filePath, newPath);
+	}
 
-	filePath.value = '';
+	filePaths.value = [];
 	store.updateModels();
 };
+
+const slash = process.platform === 'win32' ? '\\' : '/';
+const maxLength = 25;
+
+const fileNames = computed(() => {
+	const names = filePaths.value.map((path) => path.split(slash).pop() as string);
+
+	return names.map((name) => {
+		const truncated =
+			name.length > maxLength ? name.slice(0, maxLength) + '...' : name;
+		return { name, truncated };
+	});
+});
 </script>
 
 <template>
@@ -72,10 +90,14 @@ const doLinkFile = async () => {
 		</DialogTrigger>
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle>Import a Model</DialogTitle>
+				<DialogTitle>Import Chat or Image Model(s)</DialogTitle>
 			</DialogHeader>
 			<DialogDescription>
-				<div>
+				<p class="my-1 italic">
+					Chat models should be <code>.gguf</code> and Image models should be
+					<code>.safetensors</code>.
+				</p>
+				<div class="flex items-end">
 					<Button
 						type="button"
 						@click="doPickFile"
@@ -84,14 +106,41 @@ const doLinkFile = async () => {
 					>
 						Choose file...
 					</Button>
-					<span id="file-name" class="ml-2">
-						{{ filePath ? filePath.split('\\').pop() : 'No file selected' }}
+				</div>
+				<div
+					id="file-name"
+					class="mt-1 px-2 py-1 rounded border"
+					v-if="filePaths.length > 0"
+				>
+					<span class="block text-gray-400 select-none">
+						Selected file(s):
+						<Button
+							type="button"
+							@click="filePaths = []"
+							variant="link"
+							class="ml-4 p-0"
+						>
+							Reset
+						</Button>
+					</span>
+					<span
+						v-for="name in fileNames"
+						:key="name.name"
+						:class="{ 'ml-2': name === fileNames[0] }"
+					>
+						<b :title="name.name">{{ name.truncated }}</b>
+						<span
+							v-if="name !== fileNames[fileNames.length - 1]"
+							class="text-xs text-gray-400 select-none"
+						>
+							&amp;
+						</span>
 					</span>
 				</div>
-				<p class="mt-2">
-					<b>Tip</b>: Choosing <u>Link</u> will leave the Model file in the same
-					location and will make a link to it instead. You should keep the file in
-					the same location.
+				<p class="mt-4">
+					<b>Tip</b>: Choosing <u>Link</u> will leave the Model(s) in the same
+					location and will make a link to them instead. You should keep the file(s)
+					in the same location.
 				</p>
 			</DialogDescription>
 			<DialogFooter>
