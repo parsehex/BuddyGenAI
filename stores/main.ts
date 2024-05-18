@@ -175,6 +175,7 @@ export const useAppStore = defineStore('app', () => {
 	);
 
 	const chatServerRunning = ref(false);
+	const chatServerStarting = ref(false);
 	const updateChatServerRunning = async () => {
 		const running: { isRunning: boolean } = await isServerRunning();
 		chatServerRunning.value = running.isRunning;
@@ -243,6 +244,7 @@ export const useAppStore = defineStore('app', () => {
 		isExternalProvider,
 
 		chatServerRunning,
+		chatServerStarting,
 		updateChatServerRunning,
 
 		imgGenerating,

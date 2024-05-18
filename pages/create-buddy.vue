@@ -15,6 +15,7 @@ const {
 	getChatModelPath,
 	getNGpuLayers,
 } = useAppStore();
+const store = useAppStore();
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();
@@ -43,7 +44,6 @@ if (settings.local_model_directory) {
 }
 isModelsSetup.value = calcIsModelsSetup.value;
 
-const serverStarting = ref(false);
 const handleModelChange = async () => {
 	setTimeout(async () => {
 		const hasModelDir = !!settings.local_model_directory;
@@ -53,8 +53,11 @@ const handleModelChange = async () => {
 
 		if (isSetup) {
 			isModelsSetup.value = true; // hide model setup while waiting
-			serverStarting.value = true;
+			store.chatServerStarting = true;
 			const result = await startServer(getChatModelPath(), getNGpuLayers());
+			store.chatServerRunning = !result.error;
+			store.chatServerStarting = false;
+
 			if (result.error) {
 				toast({
 					variant: 'destructive',

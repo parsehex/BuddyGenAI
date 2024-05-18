@@ -31,11 +31,16 @@ onMounted(async () => {
 	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
 	if (
 		!isExternal &&
+		!store.chatServerStarting &&
 		!store.chatServerRunning &&
 		settings.local_model_directory &&
 		settings.selected_model_chat
 	) {
+		store.chatServerStarting = true;
 		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		store.chatServerRunning = !result.error;
+		store.chatServerStarting = false;
+
 		if (result.error) {
 			toast({
 				variant: 'destructive',
@@ -228,6 +233,7 @@ const sortedThreads = computed(() => {
 		</div>
 	</div>
 
+	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
 	<FirstTimeSetup
 		v-if="!threads.length && !buddies.length"
 		:is-models-setup="calcIsModelsSetup"

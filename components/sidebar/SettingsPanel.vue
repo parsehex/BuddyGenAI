@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/stores/main';
-import useLlamaCpp from '@/composables/useLlamaCpp';
 import { RefreshCw } from 'lucide-vue-next';
 import { useToast } from '@/components/ui/toast';
 
@@ -21,9 +20,6 @@ const {
 	getNGpuLayers,
 } = useAppStore();
 const store = useAppStore();
-
-// @ts-ignore
-const { startServer, stopServer } = useLlamaCpp();
 
 const error = ref('');
 
@@ -85,6 +81,7 @@ const updateChatModel = async (model: string) => {
 	if (settings.selected_model_chat === model) return;
 
 	settings.selected_model_chat = model;
+	if (store.chatServerRunning) return;
 	needsRestart.value = true;
 	// await updateChatServerRunning();
 	// if (store.chatServerRunning) {
@@ -98,21 +95,6 @@ const updateImageModel = async (model: string) => {
 	if (settings.selected_model_image === model) return;
 
 	settings.selected_model_image = model;
-};
-
-const doStartServer = async () => {
-	const result = await startServer(getChatModelPath(), getNGpuLayers());
-	if (result.error) {
-		toast({
-			variant: 'destructive',
-			title: 'Error starting chat server',
-			description: result.error,
-		});
-	}
-};
-
-const doStopServer = async () => {
-	await stopServer();
 };
 
 // const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
