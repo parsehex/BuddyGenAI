@@ -8,6 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
+import { delay } from '~/lib/utils';
+import NewFirstTimeSetup from '~/components/NewFirstTimeSetup.vue';
 
 const { toast } = useToast();
 
@@ -69,36 +71,21 @@ if (settings.local_model_directory) {
 }
 
 const handleModelChange = async () => {
-	setTimeout(async () => {
-		const isSetup = calcIsModelsSetup.value;
+	await delay(10);
 
-		console.log('isSetup', isSetup);
-
-		if (isSetup) {
-			isModelsSetup.value = true; // hide model setup while waiting
-			serverStarting.value = true;
-			const result = await startServer(getChatModelPath(), getNGpuLayers());
-			if (result.error) {
-				toast({
-					variant: 'destructive',
-					title: 'Error starting chat server',
-					description: result.error,
-				});
-			}
-			serverStarting.value = false;
-		} else {
-			isModelsSetup.value = false;
+	if (store.isModelsSetup) {
+		store.chatServerStarting = true;
+		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		if (result.error) {
+			toast({
+				variant: 'destructive',
+				title: 'Error starting chat server',
+				description: result.error,
+			});
 		}
-	}, 10);
-};
-
-watch(
-	() => settings.local_model_directory,
-	async () => {
-		await updateModels();
-		await handleModelChange();
+		store.chatServerRunning = !result.error;
 	}
-);
+};
 
 const getMessageName = (thread: MergedChatThread) => {
 	if (thread.latest_message?.role === 'user') {
@@ -220,12 +207,7 @@ const sortedThreads = computed(() => {
 	</div>
 
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
-	<FirstTimeSetup
-		v-if="!threads.length && !buddies.length"
-		:is-models-setup="calcIsModelsSetup"
-		:server-starting="serverStarting"
-		:handle-model-change="handleModelChange"
-	/>
+	<NewFirstTimeSetup v-if="!threads.length && !buddies.length" />
 	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
 		<!-- TODO improve -->
 		You have no chats yet. Create one to get started!

@@ -27,12 +27,6 @@ import { delay } from '~/lib/utils';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
-const props = defineProps<{
-	serverStarting: boolean;
-	isModelsSetup: boolean;
-	handleModelChange: () => void;
-}>();
-
 const { openExternalLink } = useElectron();
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });

@@ -12,7 +12,7 @@ const chatProviderUrls = {
 
 const router = Router();
 
-const stop = ['<|eot_id|>', 'USER:', '</s>'];
+const stop = ['<|eot_id|>', 'USER:', 'user:', '</s>'];
 let currentModel = '';
 
 export function updateModel(modelName: string) {
