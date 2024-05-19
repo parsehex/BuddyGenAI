@@ -290,8 +290,19 @@ watch(isExternal, (newVal) => {
 		</div>
 
 		<div class="mt-4 flex flex-col items-center">
-			<Button @click="reloadPage" class="px-4 py-2 rounded-md">Reload Page</Button>
+			<Button
+				type="button"
+				@click="reloadPage"
+				class="px-4 py-2 rounded-md"
+				variant="default"
+				>Reload Page</Button
+			>
 			<NuxtLink to="/credits">App Credits</NuxtLink>
+			<DevOnly>
+				<Button type="button" class="px-4 py-2 rounded-md" variant="destructive"
+					>Reset & Close App</Button
+				>
+			</DevOnly>
 		</div>
 	</div>
 </template>

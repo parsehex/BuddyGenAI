@@ -223,6 +223,31 @@ export const useAppStore = defineStore('app', () => {
 			(!threads.value.length && !buddies.value.length)
 	);
 
+	const isModelsSetup = computed(() => {
+		if (isExternalProvider.value) {
+			return (
+				!!settings.value.external_api_key &&
+				!!settings.value.selected_model_chat &&
+				!!settings.value.selected_model_image
+			);
+		}
+		const hasModelDir = !!settings.value.local_model_directory;
+		const hasChatModel = !!settings.value.selected_model_chat;
+		const hasImageModel = !!settings.value.selected_model_image;
+		return hasModelDir && hasChatModel && hasImageModel;
+	});
+
+	const modelProvider = computed({
+		get: () => {
+			// should be the same for both
+			return settings.value.selected_provider_chat;
+		},
+		set: (value) => {
+			settings.value.selected_provider_chat = value;
+			settings.value.selected_provider_image = value;
+		},
+	});
+
 	return {
 		selectedBuddyId,
 		threadMessages,
@@ -232,6 +257,7 @@ export const useAppStore = defineStore('app', () => {
 		settings,
 		threads,
 		newHere,
+		modelProvider,
 
 		updateModels,
 		updateBuddies,
@@ -242,6 +268,7 @@ export const useAppStore = defineStore('app', () => {
 		getChatModelPath,
 
 		isExternalProvider,
+		isModelsSetup,
 
 		chatServerRunning,
 		chatServerStarting,

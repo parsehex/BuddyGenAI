@@ -64,28 +64,10 @@ if (settings.user_name && settings.user_name !== 'User') {
 	console.log(settings);
 }
 
-const isModelsSetup = ref(false);
-
-const calcIsModelsSetup = computed(() => {
-	if (store.isExternalProvider) {
-		return (
-			!!settings.external_api_key &&
-			!!settings.selected_model_chat &&
-			!!settings.selected_model_image
-		);
-	}
-	const hasModelDir = !!settings.local_model_directory;
-	const hasChatModel = !!settings.selected_model_chat;
-	const hasImageModel = !!settings.selected_model_image;
-	return hasModelDir && hasChatModel && hasImageModel;
-});
-
 if (settings.local_model_directory) {
 	await updateModels();
 }
-isModelsSetup.value = calcIsModelsSetup.value;
 
-const serverStarting = ref(false);
 const handleModelChange = async () => {
 	setTimeout(async () => {
 		const isSetup = calcIsModelsSetup.value;

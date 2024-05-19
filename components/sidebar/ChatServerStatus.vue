@@ -126,7 +126,14 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
 				<span class="p-2"
-					>Chat {{ store.chatServerRunning ? 'Online' : 'Offline' }}</span
+					>Chat
+					{{
+						store.chatServerRunning
+							? 'Online'
+							: store.chatServerStarting
+							? 'Starting'
+							: 'Offline'
+					}}</span
 				>
 			</div>
 		</PopoverTrigger>

@@ -15,35 +15,38 @@
 			</span>
 		</CardHeader>
 		<CardContent>
-			<div class="flex w-full items-end justify-between gap-1.5 mt-2">
-				<Label for="local_model_directory" class="w-full">
-					Model Folder
-					<Input
-						v-model="settings.local_model_directory"
-						type="text"
-						id="local_model_directory"
-						name="local_model_directory"
-						class="w-full border border-gray-300 rounded-md p-2 mt-1"
-						style="cursor: default !important"
-						disabled
-					/>
-				</Label>
-				<Button
-					@click="emits('openModelDirectory')"
-					class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+			<p class="my-1 italic">
+				Download models and then click <b>Import Models</b> below to choose them.
+				<br />
+				<span
+					class="text-blue-500 cursor-pointer hover:underline"
+					@click="
+						openExternalLink &&
+							openExternalLink(
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#download-ai-models'
+							)
+					"
 				>
-					Open Folder
-				</Button>
-			</div>
-
+					{{ 'Example Models' }}
+				</span>
+			</p>
 			<div class="mt-4 flex items-center gap-2">
-				<ImportModel />
-				<Button
+				<!-- model type doesnt matter: -->
+				<ImportModel @model-import="emits('modelChange', 'chat')" />
+				<!-- <Button
 					@click="updateModels"
 					class="bg-green-500 text-white px-4 py-2 rounded-md"
 				>
 					Update Models
-				</Button>
+				</Button> -->
+				<!-- <Button
+					type="button"
+					@click="emits('openModelDirectory')"
+					class="mt-2 px-4 py-2 rounded-md self-center"
+					variant="secondary"
+				>
+					Open Models Folder
+				</Button> -->
 			</div>
 			<div
 				class="mt-4"

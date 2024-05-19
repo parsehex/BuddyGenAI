@@ -7,14 +7,33 @@ import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import BuddyAvatar from './BuddyAvatar.vue';
+import { delay } from '~/lib/utils';
 
 const filePath = ref<string>('');
 const filePaths = ref<string[]>([]);
 
 const detectedModelType = ref<string>(''); // chat or image
 
+// TODO may want to refactor so that the user chooses to import a chat or image model specifically
+
 const { pathJoin, pickFile, moveFile, linkFile, basename } = useElectron();
 const store = useAppStore();
+
+const emit = defineEmits(['modelImport']);
+
+const tryToAutoSelectModels = () => {
+	const selectedChatModel = store.settings.selected_model_chat;
+	const selectedImageModel = store.settings.selected_model_image;
+	const chatModels = store.chatModels;
+	const imageModels = store.imageModels;
+
+	if (!selectedChatModel && chatModels.length === 1) {
+		store.settings.selected_model_chat = chatModels[0];
+	}
+	if (!selectedImageModel && imageModels.length === 1) {
+		store.settings.selected_model_image = imageModels[0];
+	}
+};
 
 const doPickFile = async () => {
 	if (!pickFile) return console.error('Electron not available');
@@ -44,7 +63,13 @@ const doMoveFile = async () => {
 	}
 
 	filePaths.value = [];
+	await delay(50);
 	store.updateModels();
+	await delay(50);
+
+	tryToAutoSelectModels();
+
+	emit('modelImport');
 };
 const doLinkFile = async () => {
 	if (!moveFile) return console.error('Electron not available');
@@ -66,7 +91,13 @@ const doLinkFile = async () => {
 	}
 
 	filePaths.value = [];
+	await delay(50);
 	store.updateModels();
+	await delay(50);
+
+	tryToAutoSelectModels();
+
+	emit('modelImport');
 };
 
 const slash = process.platform === 'win32' ? '\\' : '/';
@@ -86,7 +117,7 @@ const fileNames = computed(() => {
 <template>
 	<Dialog :modal="true">
 		<DialogTrigger as-child>
-			<Button variant="default"> Import Model </Button>
+			<Button variant="default" class="self-center"> Import Models </Button>
 		</DialogTrigger>
 		<DialogContent>
 			<DialogHeader>
@@ -140,7 +171,7 @@ const fileNames = computed(() => {
 				<p class="mt-4">
 					<b>Tip</b>: Choosing <u>Link</u> will leave the Model(s) in the same
 					location and will make a link to them instead. You should keep the file(s)
-					in the same location.
+					in the same location (don't delete them!).
 				</p>
 			</DialogDescription>
 			<DialogFooter>

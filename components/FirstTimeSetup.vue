@@ -89,10 +89,6 @@ const acceptBuddy = async (
 	acceptedBuddy.value = descriptionOrKeywords;
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
-
-	setTimeout(() => {
-		document.getElementById('buddyCard')?.scrollIntoView({ behavior: 'smooth' });
-	}, 250);
 };
 
 const updateName = async () => {
@@ -349,7 +345,7 @@ const acceptPicKeywords = () => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
-			<NuxtLink class="text-xl font-bold dark:bg-gray-600 rounded-b" to="/">
+			<NuxtLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
@@ -365,17 +361,19 @@ const acceptPicKeywords = () => {
 				alt="BuddyGen Logo"
 			/>
 
-			<!-- Server Starting Spinner -->
 			<div
-				v-if="serverStarting"
-				class="text-center flex flex-col items-center justify-center"
+				v-if="store.chatServerStarting"
+				class="text-center flex flex-col items-center justify-center gap-y-2"
 			>
 				<Spinner />
 				Getting ready...
 			</div>
 
 			<!-- TODO implement external models using OpenRouter (idk how for images) -->
-			<Card v-if="!isModelsSetup" class="whitespace-pre-wrap w-full p-2 pt-4 pb-0">
+			<Card
+				v-if="!store.isModelsSetup"
+				class="whitespace-pre-wrap w-full p-2 pt-4 pb-0"
+			>
 				<CardHeader class="pt-0 pb-0 text-center">
 					Welcome! Please answer a few questions before we get started. First...
 				</CardHeader>
@@ -446,20 +444,23 @@ const acceptPicKeywords = () => {
 
 			<ExternalModelSettingsCard
 				v-if="
-					!isModelsSetup && selectedModelProvider && modelProvider === 'external'
+					!store.isModelsSetup &&
+					selectedModelProvider &&
+					modelProvider === 'external'
 				"
 				:first-time="store.newHere"
 			/>
 
 			<LocalModelSettingsCard
-				v-if="!isModelsSetup && selectedModelProvider && modelProvider === 'local'"
+				v-if="
+					!store.isModelsSetup && selectedModelProvider && modelProvider === 'local'
+				"
 				:first-time="store.newHere"
 				@open-model-directory="openModelDirectory"
-				@model-change="handleModelChange"
 			/>
 
 			<Card
-				v-if="!serverStarting && isModelsSetup"
+				v-if="!store.chatServerStarting && store.isModelsSetup"
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">
