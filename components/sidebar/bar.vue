@@ -82,9 +82,7 @@ const doCreateThread = async () => {
 		<TabsList class="w-full dark:bg-gray-800">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger v-if="!store.isModelsSetup" value="settings"
-				>Settings</TabsTrigger
-			>
+			<TabsTrigger v-if="!store.newHere" value="settings">Settings</TabsTrigger>
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">
