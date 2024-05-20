@@ -150,58 +150,60 @@ const sortedThreads = computed(() => {
 		<div class="flex flex-col items-center gap-2">
 			<h2 class="text-lg">Your Chats</h2>
 			<div class="flex flex-col items-center gap-1">
-				<Card
-					v-for="thread in sortedThreads"
-					:key="thread.id"
-					class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-				>
-					<!-- sort by latest first -->
-					<NuxtLink
-						:to="`/chat/${thread.id}`"
-						class="w-full h-full flex items-center justify-start p-4"
+				<ScrollArea class="h-screen pb-20">
+					<Card
+						v-for="thread in sortedThreads"
+						:key="thread.id"
+						class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-1"
 					>
-						<!-- TODO this is a good idea: show buddy info in thread list -->
-						<div>
-							<BuddyAvatar
-								v-if="thread.selected_buddy"
-								:style="{
-									visibility:
-										thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
-								}"
-								:persona="thread.selected_buddy"
-								size="base"
-							/>
-							<Avatar v-else size="base">
-								<AvatarFallback>AI</AvatarFallback>
-							</Avatar>
-							<Avatar v-if="thread.latest_message.role === 'user'">
-								<AvatarFallback>{{ userInitials }}</AvatarFallback>
-							</Avatar>
-						</div>
-						<div class="ml-2">
-							<p class="flex items-baseline">
-								<span>
-									{{ thread.name }}
-								</span>
-								<span class="text-xs text-gray-500 italic ml-2">
-									{{ getMessageTime(thread) }}
-								</span>
-							</p>
-							<p
-								v-if="thread.latest_message"
-								class="text-sm mt-2"
-								:style="{
-									visibility:
-										thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
-								}"
-							>
-								<b>{{ getMessageName(thread) }}</b
-								>:
-								{{ getMessageContent(thread) }}
-							</p>
-						</div>
-					</NuxtLink>
-				</Card>
+						<!-- sort by latest first -->
+						<NuxtLink
+							:to="`/chat/${thread.id}`"
+							class="w-full h-full flex items-center justify-start p-4"
+						>
+							<!-- TODO this is a good idea: show buddy info in thread list -->
+							<div>
+								<BuddyAvatar
+									v-if="thread.selected_buddy"
+									:style="{
+										visibility:
+											thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
+									}"
+									:persona="thread.selected_buddy"
+									size="base"
+								/>
+								<Avatar v-else size="base">
+									<AvatarFallback>AI</AvatarFallback>
+								</Avatar>
+								<Avatar v-if="thread.latest_message.role === 'user'">
+									<AvatarFallback>{{ userInitials }}</AvatarFallback>
+								</Avatar>
+							</div>
+							<div class="ml-2">
+								<p class="flex items-baseline">
+									<span>
+										{{ thread.name }}
+									</span>
+									<span class="text-xs text-gray-500 italic ml-2">
+										{{ getMessageTime(thread) }}
+									</span>
+								</p>
+								<p
+									v-if="thread.latest_message"
+									class="text-sm mt-2"
+									:style="{
+										visibility:
+											thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
+									}"
+								>
+									<b>{{ getMessageName(thread) }}</b
+									>:
+									{{ getMessageContent(thread) }}
+								</p>
+							</div>
+						</NuxtLink>
+					</Card>
+				</ScrollArea>
 			</div>
 		</div>
 	</div>
