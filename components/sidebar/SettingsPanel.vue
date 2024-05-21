@@ -147,6 +147,13 @@ watch(isExternal, (newVal) => {
 </script>
 
 <template>
+	<!--
+		TODO
+		- add sections to reduce clutter
+		- add parental control(s) to moderate and prevent inappropriate content
+		- (unrelated) add option to Buddies to specify a certain model
+		-   if the currently active model is not the one specified, switch to it and restart server
+	 -->
 	<div class="sidebar p-3">
 		<Alert v-if="error" variant="destructive">
 			<AlertTitle>Error</AlertTitle>

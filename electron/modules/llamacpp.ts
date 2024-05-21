@@ -13,6 +13,7 @@ const commandObj = {
 
 // by default, llamacpp uses template embedded in gguf if available
 // TODO any way to get this from the model?
+// https://github.com/ahoylabs/gguf.js
 const chatTemplateMap: { [key: string]: string } = {
 	Moistral: 'vicuna',
 	'WizardLM-2': 'vicuna',

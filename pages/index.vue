@@ -138,6 +138,8 @@ const sortedThreads = computed(() => {
 	<!-- allow editing description (or something to fix broken generations) -->
 	<!-- instructions to acquire models -->
 
+	<!-- show spinner while chat is starting -->
+
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">

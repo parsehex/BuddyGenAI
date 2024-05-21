@@ -41,6 +41,7 @@ window.addEventListener('keydown', handleAppKeyDown);
 				:min-size="20"
 				:max-size="35"
 			>
+				<!-- hide if setting up -->
 				<Sidebar />
 			</ResizablePanel>
 			<ResizableHandle with-handle />
