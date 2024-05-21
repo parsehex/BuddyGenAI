@@ -1,10 +1,17 @@
 <script setup lang="ts">
+import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
 import { useChat, useCompletion } from 'ai/vue';
 import { RefreshCw, RefreshCcwDot } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardFooter,
+} from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -22,6 +29,7 @@ import type {
 	ChatThread,
 	MergedChatThread,
 	BuddyVersionMerged,
+	ChatMessage,
 } from '@/lib/api/types-db';
 import Message from './ChatMessage.vue';
 import BuddySelect from './BuddySelect.vue';
@@ -31,12 +39,13 @@ import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
+import router from '@/lib/router';
+import { storeToRefs } from 'pinia';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
-const buddies = useAppStore().buddies as BuddyVersionMerged[];
-const threads = useAppStore().threads as MergedChatThread[];
 const store = useAppStore();
+const { buddies, threads } = storeToRefs(store);
 const { complete } = useCompletion({ api: urls.message.completion() });
 
 const isDev = import.meta.env.DEV;
@@ -71,8 +80,9 @@ window.addEventListener('focus', async () => {
 
 const props = defineProps<{
 	threadId: string;
+	initialMessages: Promise<ChatMessage[]>;
 }>();
-const { threadId } = toRefs(props);
+const { threadId, initialMessages } = toRefs(props);
 
 const sysIsOpen = ref(false);
 const hasSysMessage = computed(() =>
@@ -84,7 +94,7 @@ const sysMessage = computed(() =>
 const newSysMessage = ref('');
 
 const threadTitle = computed(() => {
-	const thread = threads.find((t) => t.id === threadId.value);
+	const thread = threads.value.find((t) => t.id === threadId.value);
 	return thread?.name || '';
 });
 
@@ -111,11 +121,18 @@ const msgsToSave = [] as Message[];
 
 const reloadingId = ref('');
 
+console.log('hey, we have a new id', threadId.value);
+
 // TODO if first time, generate first message to user
 // TODO figure out solution to stream completion response
 
+await initialMessages.value;
+
+console.log('initial messages', await initialMessages.value);
+
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
+		initialMessages: await initialMessages.value,
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
@@ -206,6 +223,25 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			toast({ variant: 'destructive', description: e.message });
 		},
 	});
+watch(
+	() => threadId.value,
+	async () => {
+		const thread = await api.thread.getOne(threadId.value);
+		threadMode.value = thread.mode;
+		if (thread.mode === 'persona' && thread.persona_id) {
+			console.log('thread has persona', thread.persona_id);
+			selectedBuddy.value = thread.persona_id;
+		}
+
+		const initMsgs = await initialMessages.value;
+		if (initMsgs.length) {
+			setMessages(apiMsgsToOpenai(initMsgs));
+		} else {
+			await refreshMessages();
+		}
+	}
+);
+
 watch(
 	() => messages.value.length,
 	() => {
@@ -298,17 +334,6 @@ const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
 watch(threadMode, handleThreadModeChange);
 
 const buddyModeUseCurrent = ref(false);
-const handleBuddyModeUseCurrentChange = async () => {
-	if (!threadId) return;
-	const newValue = !buddyModeUseCurrent.value;
-	buddyModeUseCurrent.value = newValue;
-
-	await api.thread.updateOne(threadId.value, {
-		persona_mode_use_current: newValue,
-	});
-
-	await refreshMessages();
-};
 
 const selectedBuddy = ref(thread.value?.persona_id || '');
 const handleBuddyChange = async () => {
@@ -329,7 +354,7 @@ const handleBuddyChange = async () => {
 	await refreshBuddies();
 };
 const currentBuddy = computed(() =>
-	buddies.find((p) => p.id === selectedBuddy.value)
+	buddies.value.find((p) => p.id === selectedBuddy.value)
 );
 watch(selectedBuddy, handleBuddyChange);
 
@@ -340,7 +365,7 @@ try {
 	t = await updateThread();
 	console.log('thread', t);
 } catch (e) {
-	await navigateTo('/');
+	await router.push('/');
 }
 refreshed.value = true;
 threadMode.value = t?.mode || 'custom';

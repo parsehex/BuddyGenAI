@@ -9,6 +9,7 @@ import {
 	MenubarTrigger,
 } from '@/components/ui/menubar';
 import useElectron from '@/composables/useElectron';
+import router from '@/lib/router';
 
 const { toggleDevTools } = useElectron();
 
@@ -17,11 +18,11 @@ const reload = () => {
 };
 
 const goToCredits = async () => {
-	await navigateTo('/credits');
+	await router.push('/credits');
 };
 
 const goHome = async () => {
-	await navigateTo('/');
+	await router.push('/');
 };
 
 (window as any).latestKeyDownHandlerId = Math.random();

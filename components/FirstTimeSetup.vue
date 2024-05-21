@@ -1,15 +1,31 @@
 <script setup lang="ts">
+import { ref, onMounted, watch, computed } from 'vue';
 import { useCompletion } from 'ai/vue';
+import router from '@/lib/router';
 import { useToast } from '@/components/ui/toast';
-import { useAppStore } from '~/stores/main';
-import urls from '~/lib/api/urls';
-import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import { api } from '~/lib/api';
+import { useAppStore } from '@/stores/main';
+import urls from '@/lib/api/urls';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectLabel,
+	SelectGroup,
+	SelectItem,
+} from '@/components/ui/select';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { api } from '@/lib/api';
 import { Sparkles } from 'lucide-vue-next';
 import BuddyAvatar from './BuddyAvatar.vue';
-import type { ProfilePicQuality } from '~/lib/api/types-api';
 import { Progress } from '@/components/ui/progress';
-import { descriptionFromKeywords } from '~/lib/prompt/persona';
+import useElectron from '@/composables/useElectron';
+import { descriptionFromKeywords } from '@/lib/prompt/persona';
 import {
 	Popover,
 	PopoverContent,
@@ -19,11 +35,10 @@ import Spinner from './Spinner.vue';
 import {
 	genderFromName,
 	keywordsFromNameAndDescription,
-} from '~/lib/prompt/sd';
+} from '@/lib/prompt/sd';
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
-import { delay } from '~/lib/utils';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -160,7 +175,7 @@ const handleSave = async () => {
 
 	await updateThreads();
 
-	await navigateTo(`/chat/${newThread.id}`);
+	await router.push(`/chat/${newThread.id}`);
 };
 
 const picQuality = ref('2');
@@ -339,13 +354,13 @@ const acceptPicKeywords = () => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
-			<NuxtLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
+			<RouterLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
 				</div>
-			</NuxtLink>
+			</RouterLink>
 
 			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
 			<img

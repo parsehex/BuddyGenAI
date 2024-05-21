@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia';
+import { ref, computed, watch, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router/auto';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -44,6 +46,10 @@ export const useAppStore = defineStore('app', () => {
 
 	const selectedBuddyId = ref<string>('');
 	const threadMessages = ref<ChatMessage[]>([]);
+	const setThreadMessages = (messages: ChatMessage[]) => {
+		threadMessages.value.length = 0;
+		threadMessages.value.push(...messages);
+	};
 
 	const chatModels = ref([] as string[]);
 	const imageModels = ref([] as string[]);
@@ -148,16 +154,19 @@ export const useAppStore = defineStore('app', () => {
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_chat}`;
 	};
 
-	watch(route, async (newVal) => {
-		// if we're on a chat thread, get its messages
-		if (newVal.path.includes('chat')) {
-			const threadId = newVal.params.id as string;
-			const res = await api.message.getAll(threadId);
-			if (!res) return;
-			threadMessages.value.length = 0;
-			threadMessages.value.push(...res);
-		}
-	});
+	// watch(
+	// 	() => route,
+	// 	async (newVal) => {
+	// 		// if we're on a chat thread, get its messages
+	// 		if (newVal.path.includes('chat')) {
+	// 			const threadId = newVal.params.id as string;
+	// 			const res = await api.message.getAll(threadId);
+	// 			if (!res) return;
+	// 			threadMessages.value.length = 0;
+	// 			threadMessages.value.push(...res);
+	// 		}
+	// 	}
+	// );
 
 	watch(
 		settings.value,
@@ -251,6 +260,7 @@ export const useAppStore = defineStore('app', () => {
 	return {
 		selectedBuddyId,
 		threadMessages,
+		setThreadMessages,
 		chatModels,
 		imageModels,
 		buddies,

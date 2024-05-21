@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router/auto';
+import router from '@/lib/router';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import {
 	ContextMenu,
@@ -9,7 +12,7 @@ import {
 import { useAppStore } from '@/stores/main';
 import { Button } from '@/components/ui/button';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
-import { api } from '~/lib/api';
+import { api } from '@/lib/api';
 
 const { updateBuddies } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
@@ -32,19 +35,19 @@ const removeBuddy = async (id: string) => {
 	await api.buddy.removeOne(id);
 	await updateBuddies();
 	if (shouldRedirect) {
-		navigateTo('/');
+		router.push('/');
 	}
 };
 
 const editBuddy = (id: string) => {
-	navigateTo(`/persona/${id}/edit`);
+	router.push(`/persona/${id}/edit`);
 };
 </script>
 
 <template>
 	<div class="sidebar">
 		<div class="flex justify-around">
-			<Button type="button" @click="navigateTo('/create-buddy')" class="mt-2">
+			<Button type="button" @click="$router.push('/create-buddy')" class="mt-2">
 				Create a Buddy
 			</Button>
 		</div>
@@ -62,13 +65,13 @@ const editBuddy = (id: string) => {
 						]"
 						@contextmenu="rightClickedId = persona.id"
 					>
-						<NuxtLink
+						<RouterLink
 							class="p-2 flex items-center"
 							:to="`/persona/${persona.id}/view`"
 						>
 							<BuddyAvatar :persona="persona" />
 							<span class="ml-1">{{ persona.name }}</span>
-						</NuxtLink>
+						</RouterLink>
 					</li>
 				</ContextMenuTrigger>
 				<ContextMenuContent>

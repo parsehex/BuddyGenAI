@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import { useToast } from '@/components/ui/toast';
 import useLlamaCpp from '@/composables/useLlamaCpp';

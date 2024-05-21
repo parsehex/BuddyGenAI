@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
 import { useChat, useCompletion } from 'ai/vue';
 import urls from '@/lib/api/urls';
 import { delay } from '@/lib/utils';

@@ -1,4 +1,5 @@
 import { AppSettings } from '@/lib/api/AppSettings';
+import useElectron from '@/composables/useElectron';
 
 const { dbGet, listDirectory } = useElectron();
 

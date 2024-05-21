@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { ref, onBeforeMount, watch } from 'vue';
+import { ref, onBeforeMount, watch, computed } from 'vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
+import useLlamaCpp from '@/composables/useLlamaCpp';
 import urls from '@/lib/api/urls';
 import {
 	Popover,

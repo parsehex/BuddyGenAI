@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useAppStore } from '~/stores/main';
+import { ref, onMounted } from 'vue';
+import { useAppStore } from '@/stores/main';
 import ModelProviderSetupCard from './ModelProviderSetupCard.vue';
 import { useToast } from './ui/toast';
 import useElectron from '@/composables/useElectron';
@@ -64,13 +65,13 @@ const checkToStartServer = async () => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
-			<NuxtLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
+			<RouterLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
 				</div>
-			</NuxtLink>
+			</RouterLink>
 
 			<img
 				v-if="store.newHere"

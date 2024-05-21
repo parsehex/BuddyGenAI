@@ -1,3 +1,5 @@
+import useElectron from '@/composables/useElectron';
+
 const {
 	listDirectory,
 	pathJoin,

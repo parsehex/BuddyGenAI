@@ -1,3 +1,5 @@
+import useElectron from '@/composables/useElectron';
+
 const { listDirectory, getDataPath } = useElectron();
 
 export default async function getAllProfilePics(personaId: string) {

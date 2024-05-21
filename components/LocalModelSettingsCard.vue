@@ -1,3 +1,35 @@
+<script setup lang="ts">
+import { onBeforeMount } from 'vue';
+import useElectron from '@/composables/useElectron';
+import { useAppStore } from '@/stores/main';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectTrigger,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
+	SelectValue,
+} from '@/components/ui/select';
+import ImportModel from '@/components/ImportModel.vue';
+
+const { openExternalLink } = useElectron();
+
+const props = defineProps<{
+	firstTime: boolean;
+}>();
+
+const emits = defineEmits(['openModelDirectory', 'modelChange']);
+
+const { settings, chatModels, imageModels, updateModels } = useAppStore();
+
+onBeforeMount(() => {
+	updateModels();
+});
+</script>
+
 <template>
 	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
 		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
@@ -95,23 +127,5 @@
 		</CardContent>
 	</Card>
 </template>
-
-<script setup lang="ts">
-import { useAppStore } from '@/stores/main';
-
-const { openExternalLink } = useElectron();
-
-const props = defineProps<{
-	firstTime: boolean;
-}>();
-
-const emits = defineEmits(['openModelDirectory', 'modelChange']);
-
-const { settings, chatModels, imageModels, updateModels } = useAppStore();
-
-onBeforeMount(() => {
-	updateModels();
-});
-</script>
 
 <style lang="scss"></style>

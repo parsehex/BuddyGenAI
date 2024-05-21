@@ -3,6 +3,7 @@ import { AppSettings } from '@/lib/api/AppSettings';
 import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
 import * as prompt from '@/lib/prompt/persona';
 import { del, insert, select, update } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 
 const { dbGet, dbRun } = useElectron();
 

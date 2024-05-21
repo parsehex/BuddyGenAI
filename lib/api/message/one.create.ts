@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { insert, select } from '~/lib/sql';
+import useElectron from '@/composables/useElectron';
+import { insert, select } from '@/lib/sql';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 

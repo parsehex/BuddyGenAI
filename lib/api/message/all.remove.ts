@@ -1,4 +1,5 @@
 import { del, select } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 import type { DeleteResponse } from '@/lib/api/types-api';
 
 const { dbRun, dbGet } = useElectron();

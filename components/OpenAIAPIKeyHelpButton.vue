@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import useElectron from '@/composables/useElectron';
 import {
 	Popover,
 	PopoverContent,

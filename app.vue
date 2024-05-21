@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import './assets/css/index.css';
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import { Sidebar } from '@/components/sidebar';
 import {
@@ -6,6 +7,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import useElectron from '@/composables/useElectron';
 
 const { toggleDevTools } = useElectron();
 
@@ -31,29 +33,27 @@ window.addEventListener('keydown', handleAppKeyDown);
 </script>
 
 <template>
-	<Body
+	<div
 		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950"
 	>
-		<ResizablePanelGroup direction="horizontal">
-			<ResizablePanel
-				class="min-w-min"
-				:default-size="22"
-				:min-size="20"
-				:max-size="35"
-			>
-				<!-- hide if setting up -->
-				<Sidebar />
-			</ResizablePanel>
-			<ResizableHandle with-handle />
-			<ResizablePanel>
-				<NuxtLayout>
-					<NuxtLoadingIndicator />
-					<NuxtPage />
-				</NuxtLayout>
-			</ResizablePanel>
-		</ResizablePanelGroup>
+		<Suspense>
+			<ResizablePanelGroup direction="horizontal">
+				<ResizablePanel
+					class="min-w-min"
+					:default-size="22"
+					:min-size="20"
+					:max-size="35"
+				>
+					<Sidebar />
+				</ResizablePanel>
+				<ResizableHandle with-handle />
+				<ResizablePanel>
+					<RouterView />
+				</ResizablePanel>
+			</ResizablePanelGroup>
+		</Suspense>
 		<Toaster />
-	</Body>
+	</div>
 </template>
 
 <style>

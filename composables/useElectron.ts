@@ -1,3 +1,5 @@
+import { ref } from 'vue';
+
 export default function useElectron() {
 	const isServer =
 		process.server ||

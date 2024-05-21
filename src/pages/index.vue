@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
@@ -8,14 +11,13 @@ import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
-import { delay } from '~/lib/utils';
-import NewFirstTimeSetup from '~/components/NewFirstTimeSetup.vue';
+import { delay } from '@/lib/utils';
+import { storeToRefs } from 'pinia';
 
 const { toast } = useToast();
 
 const store = useAppStore();
 const {
-	settings,
 	updateModels,
 	updateBuddies,
 	updateSettings,
@@ -23,8 +25,7 @@ const {
 	getChatModelPath,
 	getNGpuLayers,
 } = useAppStore();
-const threads: MergedChatThread[] = useAppStore().threads;
-const buddies: BuddyVersionMerged[] = useAppStore().buddies;
+const { buddies, settings, threads } = storeToRefs(store);
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();
@@ -35,11 +36,22 @@ onMounted(async () => {
 		!isExternal &&
 		!store.chatServerStarting &&
 		!store.chatServerRunning &&
-		settings.local_model_directory &&
-		settings.selected_model_chat
+		settings.value.local_model_directory &&
+		settings.value.selected_model_chat
 	) {
 		store.chatServerStarting = true;
 		const result = await startServer(getChatModelPath(), getNGpuLayers());
+
+		if (!result) {
+			toast({
+				variant: 'destructive',
+				title: 'Error starting chat server',
+				description: 'No response from server',
+			});
+			// add error state
+			return;
+		}
+
 		store.chatServerRunning = !result.error;
 		store.chatServerStarting = false;
 
@@ -57,16 +69,16 @@ await updateBuddies();
 await updateThreads();
 
 const userNameValue = ref(
-	settings.user_name === 'User' ? '' : settings.user_name
+	settings.value.user_name === 'User' ? '' : settings.value.user_name
 );
 
 await updateSettings();
-if (settings.user_name && settings.user_name !== 'User') {
-	userNameValue.value = settings.user_name;
-	console.log(settings);
+if (settings.value.user_name && settings.value.user_name !== 'User') {
+	userNameValue.value = settings.value.user_name;
+	console.log(settings.value);
 }
 
-if (settings.local_model_directory) {
+if (settings.value.local_model_directory) {
 	await updateModels();
 }
 
@@ -121,7 +133,7 @@ const userInitials = computed(() => {
 });
 
 const sortedThreads = computed(() => {
-	return threads.sort((a, b) => {
+	return threads.value.sort((a, b) => {
 		if (!a.latest_message || !b.latest_message) {
 			return 0;
 		}
@@ -159,7 +171,7 @@ const sortedThreads = computed(() => {
 						class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-1"
 					>
 						<!-- sort by latest first -->
-						<NuxtLink
+						<RouterLink
 							:to="`/chat/${thread.id}`"
 							class="w-full h-full flex items-center justify-start p-4"
 						>
@@ -169,7 +181,7 @@ const sortedThreads = computed(() => {
 									v-if="thread.selected_buddy"
 									:style="{
 										visibility:
-											thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
+											thread.latest_message?.role !== 'user' ? 'visible' : 'hidden',
 									}"
 									:persona="thread.selected_buddy"
 									size="base"
@@ -177,7 +189,7 @@ const sortedThreads = computed(() => {
 								<Avatar v-else size="base">
 									<AvatarFallback>AI</AvatarFallback>
 								</Avatar>
-								<Avatar v-if="thread.latest_message.role === 'user'">
+								<Avatar v-if="thread.latest_message?.role === 'user'">
 									<AvatarFallback>{{ userInitials }}</AvatarFallback>
 								</Avatar>
 							</div>
@@ -203,7 +215,7 @@ const sortedThreads = computed(() => {
 									{{ getMessageContent(thread) }}
 								</p>
 							</div>
-						</NuxtLink>
+						</RouterLink>
 					</Card>
 				</ScrollArea>
 			</div>

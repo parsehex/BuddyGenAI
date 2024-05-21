@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import Button from '@/components/ui/button/Button.vue';
+import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
 
 const { openExternalLink } = useElectron();

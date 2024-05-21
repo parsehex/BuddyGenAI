@@ -1,15 +1,14 @@
 <script setup lang="ts">
+import { ref, onBeforeMount, watch } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { api } from '~/lib/api';
-import urls from '~/lib/api/urls';
-import type { BuddyVersionMerged } from '~/lib/api/types-db';
+import urls from '@/lib/api/urls';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import BuddyAvatar from './BuddyAvatar.vue';
 
 const props = defineProps<{
@@ -84,8 +83,8 @@ watch(
 				<BuddyAvatar :persona="props.persona" size="base" />
 				<div class="space-y-1">
 					<div class="flex justify-around">
-						<NuxtLink :to="`/persona/${id}/edit`">Edit</NuxtLink>
-						<NuxtLink :to="`/persona/${id}/view`">View</NuxtLink>
+						<RouterLink :to="`/persona/${id}/edit`">Edit</RouterLink>
+						<RouterLink :to="`/persona/${id}/view`">View</RouterLink>
 					</div>
 					<p class="text-sm">{{ description }}</p>
 					<div class="flex items-center pt-2">

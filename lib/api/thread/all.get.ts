@@ -3,8 +3,10 @@ import type {
 	ChatThread,
 	MergedChatThread,
 	Buddy,
+	BuddyVersion,
 } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 
 const { dbAll, dbGet } = useElectron();
 
@@ -17,10 +19,10 @@ export default async function getAll(
 		const sql = select('chat_thread', ['*'], { persona_id });
 		const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
 
-		const messages = await Promise.all(
+		const threadsMessages = await Promise.all(
 			threads.map((thread) => {
 				const sql = select('chat_message', ['*'], { thread_id: thread.id });
-				return dbAll(sql[0], sql[1]);
+				return dbAll(sql[0], sql[1]) as Promise<ChatMessage[]>;
 			})
 		);
 
@@ -30,15 +32,16 @@ export default async function getAll(
 		const sqlPersonaVersion = select('persona_version', ['*'], {
 			id: persona.current_version_id,
 		});
-		const personaVersion = await dbGet(
+		const personaVersion = (await dbGet(
 			sqlPersonaVersion[0],
 			sqlPersonaVersion[1]
-		);
+		)) as BuddyVersion;
 
 		const mergedThreads = threads.map((thread, i) => {
+			const threadMessages = threadsMessages[i];
 			return {
 				...thread,
-				latest_message: messages[i][messages[i].length - 1],
+				latest_message: threadMessages[threadMessages.length - 1],
 				selected_buddy: {
 					...persona,
 					name: personaVersion.name,
@@ -48,15 +51,21 @@ export default async function getAll(
 				},
 			};
 		});
+		mergedThreads.sort((a, b) => {
+			if (!a.latest_message || !b.latest_message) {
+				return 0;
+			}
+			return b.latest_message.created - a.latest_message.created;
+		});
 		return mergedThreads;
 	} else {
 		const sql = select('chat_thread', ['*']);
 		const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
 
-		const messages = await Promise.all(
+		const threadsMessages = await Promise.all(
 			threads.map((thread) => {
 				const sql = select('chat_message', ['*'], { thread_id: thread.id });
-				return dbAll(sql[0], sql[1]);
+				return dbAll(sql[0], sql[1]) as Promise<ChatMessage[]>;
 			})
 		);
 
@@ -68,16 +77,21 @@ export default async function getAll(
 					id: thread.current_persona_version_id,
 				});
 				const personaVersion = dbGet(sqlPersonaVersion[0], sqlPersonaVersion[1]);
-				return Promise.all([persona, personaVersion]);
+				return Promise.all([persona, personaVersion]) as Promise<
+					[Buddy, BuddyVersion]
+				>;
 			})
 		);
+
+		console.log(threadsMessages);
 
 		const mergedThreads = threads.map((thread, i) => {
 			const persona = personas[i][0];
 			const personaVersion = personas[i][1];
+			const threadMessages = threadsMessages[i];
 			return {
 				...thread,
-				latest_message: messages[i][messages[i].length - 1],
+				latest_message: threadMessages[threadMessages.length - 1],
 				selected_buddy: persona
 					? {
 							...persona,

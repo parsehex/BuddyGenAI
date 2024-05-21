@@ -1,5 +1,6 @@
 import type { BuddyVersion } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 
 const { dbGet } = useElectron();
 

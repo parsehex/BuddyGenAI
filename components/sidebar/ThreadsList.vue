@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, onBeforeMount, watch } from 'vue';
+import { useRoute } from 'vue-router/auto';
+
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -13,12 +16,14 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
+	DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/main';
 import type { ChatThread } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
+import router from '@/lib/router';
 
 const route = useRoute();
 const isThreadSelected = (threadId: string) =>
@@ -70,9 +75,9 @@ const doDeleteThread = async (threadId: string) => {
 	if (shouldRedirect(threadId)) {
 		const newThread = newThreads[0];
 		if (newThread) {
-			navigateTo(`/chat/${newThread.id}`);
+			router.push(`/chat/${newThread.id}`);
 		} else {
-			navigateTo(`/`);
+			router.push(`/`);
 		}
 	}
 };
@@ -81,6 +86,16 @@ const doDeleteThread = async (threadId: string) => {
 watch(route, async () => {
 	await updateThreads();
 });
+
+const goToThread = async (threadId: string) => {
+	// router.push(`/chat/${threadId}`);
+	const messages = await api.message.getAll(threadId);
+	if (!messages) return;
+	console.log('setting thread messages', messages);
+	// store.setThreadMessages(messages);
+
+	router.push(`/chat/${threadId}`);
+};
 </script>
 
 <template>
@@ -102,9 +117,12 @@ watch(route, async () => {
 						]"
 						@contextmenu="rightClickedId = thread.id"
 					>
-						<NuxtLink :to="`/chat/${thread.id}`" class="block p-2">
+						<!-- <RouterLink :to="`/chat/${thread.id}`" class="block p-2">
 							{{ thread.name }}
-						</NuxtLink>
+						</RouterLink> -->
+						<div @click="goToThread(thread.id)" class="block p-2">
+							{{ thread.name }}
+						</div>
 					</li>
 				</ContextMenuTrigger>
 				<ContextMenuContent>

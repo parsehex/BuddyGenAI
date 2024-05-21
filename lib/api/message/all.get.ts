@@ -1,3 +1,4 @@
+import useElectron from '@/composables/useElectron';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -32,7 +33,8 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
 		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
 		if (!persona) {
-			throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
+			// throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
+			throw new Error('Persona not found');
 		}
 
 		const sqlPersonaVersion = select('persona_version', ['*'], {
@@ -43,10 +45,11 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 			sqlPersonaVersion[1]
 		)) as BuddyVersion;
 		if (!personaVersion) {
-			throw createError({
-				statusCode: 404,
-				statusMessage: 'Persona version not found',
-			});
+			// throw createError({
+			// 	statusCode: 404,
+			// 	statusMessage: 'Persona version not found',
+			// });
+			throw new Error('Persona version not found');
 		}
 
 		if (!hasSystemMessage) {

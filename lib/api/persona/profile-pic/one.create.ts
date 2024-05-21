@@ -6,7 +6,7 @@ import { select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
 import { useAppStore } from '@/stores/main';
-import urls from '@/lib/api/urls';
+import useElectron from '@/composables/useElectron';
 
 // @ts-ignore
 const { runSD } = useSD();

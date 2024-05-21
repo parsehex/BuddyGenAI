@@ -24,7 +24,7 @@ export async function findResourcesPath() {
 	// if we're in dev then find dir containing .nuxt
 	if (process.env.NODE_ENV === 'development') {
 		let dir = await getDirname();
-		let p = await findDirectoryInPath('.nuxt', dir);
+		let p = await findDirectoryInPath('binaries', dir);
 		if (p) return path.resolve(p, '..');
 	}
 
@@ -80,6 +80,8 @@ export async function findBinaryPath<T extends ProjectName>(
 	if (process.platform === 'win32') exe += '.exe';
 
 	let resPath = await findResourcesPath();
+
+	console.log('resPath', resPath);
 
 	if (projectName === 'llamafile') {
 		let binPath = path.join(resPath, 'binaries/', exe);

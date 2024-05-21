@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import urls from '~/lib/api/urls';
+import { computed, ref, watch, onMounted } from 'vue';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import urls from '@/lib/api/urls';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const props = defineProps<{
 	persona: BuddyVersionMerged;

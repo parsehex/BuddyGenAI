@@ -8,8 +8,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import { useAppStore } from '~/stores/main';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import { useAppStore } from '@/stores/main';
 
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 

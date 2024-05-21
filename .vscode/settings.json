@@ -14,5 +14,9 @@
     "**/.output": true,
   },
   "scss.lint.unknownAtRules": "ignore",
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+
+  // to prevent auto import of vue-router (should use vue-router/auto instead)
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.autoImportFileExcludePatterns": ["vue-router$"]
 }

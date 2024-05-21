@@ -1,7 +1,28 @@
 <script setup lang="ts">
+import { ref, computed, toRefs } from 'vue';
 import type { Message } from 'ai/vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
@@ -108,7 +129,7 @@ function textToHslColor(t: string, s: number, l: number) {
 							{{ userName }}
 						</span>
 						<span v-else>
-							<NuxtLink
+							<RouterLink
 								:to="`/persona/${currentPersona?.id}/view`"
 								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
 							>
@@ -117,7 +138,7 @@ function textToHslColor(t: string, s: number, l: number) {
 									:persona="currentPersona"
 								/>
 								{{ currentPersona?.name }}
-							</NuxtLink>
+							</RouterLink>
 						</span>
 					</CardHeader>
 					<CardHeader class="p-3" v-else>

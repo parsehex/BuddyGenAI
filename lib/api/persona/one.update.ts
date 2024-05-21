@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 

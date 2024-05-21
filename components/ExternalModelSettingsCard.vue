@@ -101,6 +101,8 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeMount } from 'vue';
+import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
 
 const { openExternalLink } = useElectron();

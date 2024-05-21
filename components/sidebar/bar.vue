@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router/auto';
+import router from '@/lib/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/stores/main';
@@ -7,9 +10,11 @@ import BuddyList from './BuddyList.vue';
 import SettingsPanel from './SettingsPanel.vue';
 import ColorMode from './ColorMode.vue';
 import { useToast } from '../ui/toast';
-import type { BuddyVersionMerged } from '~/lib/api/types-db';
-import { api } from '~/lib/api';
+import Button from '../ui/button/Button.vue';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import { api } from '@/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
+import BuddySelect from '../BuddySelect.vue';
 
 const { toast } = useToast();
 
@@ -73,7 +78,7 @@ const doCreateThread = async () => {
 
 	const newThread = await api.thread.createOne(options);
 	await store.updateThreads();
-	navigateTo(`/chat/${newThread.id}`);
+	router.push(`/chat/${newThread.id}`);
 };
 </script>
 

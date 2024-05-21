@@ -1,4 +1,5 @@
 import { insert, select, update } from '@/lib/sql';
+import useElectron from '@/composables/useElectron';
 import type { SQLiteVal } from './types-db';
 
 const { dbGet, dbAll, dbRun } = useElectron();

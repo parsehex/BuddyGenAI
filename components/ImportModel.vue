@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import type { Message } from 'ai/vue';
-import type { BuddyVersionMerged } from '@/lib/api/types-db';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ref, computed } from 'vue';
 import useElectron from '@/composables/useElectron';
-import { api } from '@/lib/api';
-import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
-import BuddyAvatar from './BuddyAvatar.vue';
-import { delay } from '~/lib/utils';
+import { delay } from '@/lib/utils';
+import {
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogFooter,
+	DialogClose,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 const filePath = ref<string>('');
 const filePaths = ref<string[]>([]);

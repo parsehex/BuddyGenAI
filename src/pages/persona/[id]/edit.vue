@@ -1,7 +1,25 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Sparkles, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { ref, onBeforeMount, watch, computed } from 'vue';
+import { useRoute } from 'vue-router/auto';
+import router from '@/lib/router';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -24,7 +42,7 @@ import { descriptionFromKeywords } from '@/lib/prompt/persona';
 import {
 	genderFromName,
 	keywordsFromNameAndDescription,
-} from '~/lib/prompt/sd';
+} from '@/lib/prompt/sd';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -107,7 +125,7 @@ const handleSave = async () => {
 		name: nameValue.value,
 		description: descriptionValue.value,
 	});
-	await navigateTo(`./view`);
+	await router.push(`./view`);
 };
 
 const picQuality = ref(2 as ProfilePicQuality);
@@ -245,14 +263,14 @@ const acceptKeywords = () => {
 		<div class="flex items-center justify-center mb-2">
 			<Button
 				type="button"
-				@click="navigateTo(`/persona/${id}/view`)"
+				@click="router.push(`/persona/${id}/view`)"
 				variant="outline"
 			>
 				View
 			</Button>
-			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+			<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
-			</NuxtLink> -->
+			</RouterLink> -->
 		</div>
 		<Card class="whitespace-pre-wrap w-full">
 			<CardContent>
@@ -404,7 +422,7 @@ const acceptKeywords = () => {
 							</SelectContent>
 						</Select>
 					</div>
-					<div class="flex flex-col items-center justify-center">
+					<div class="flex flex-col items-center justify-center w-full">
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}

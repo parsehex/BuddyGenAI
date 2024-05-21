@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { ref, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router/auto';
 import { Plus } from 'lucide-vue-next';
 import { formatDistanceToNow } from 'date-fns';
+import router from '@/lib/router';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Button from '@/components/ui/button/Button.vue';
 import type {
@@ -10,7 +13,7 @@ import type {
 } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
-import BuddyAvatar from '~/components/BuddyAvatar.vue';
+import BuddyAvatar from '@/components/BuddyAvatar.vue';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -59,7 +62,7 @@ const createThread = async () => {
 		persona_id: id,
 		mode: 'persona',
 	});
-	navigateTo(`/chat/${newThread.id}`);
+	router.push(`/chat/${newThread.id}`);
 };
 </script>
 
@@ -71,14 +74,14 @@ const createThread = async () => {
 		<div class="flex items-center my-2">
 			<Button
 				type="button"
-				@click="navigateTo(`/persona/${id}/edit`)"
+				@click="router.push(`/persona/${id}/edit`)"
 				variant="outline"
 			>
 				Edit
 			</Button>
-			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
+			<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
-			</NuxtLink> -->
+			</RouterLink> -->
 		</div>
 		<Card class="w-full md:w-2/3">
 			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
@@ -88,9 +91,9 @@ const createThread = async () => {
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
 					No description &nbsp;&mdash;&nbsp;
-					<NuxtLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">
+					<RouterLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">
 						Add description
-					</NuxtLink>
+					</RouterLink>
 				</span>
 				<br />
 				<br />
@@ -123,9 +126,9 @@ const createThread = async () => {
 		</div>
 		<div v-else>
 			<div v-for="thread in threads" :key="thread.id" class="mt-2">
-				<NuxtLink :to="`/chat/${thread.id}`" class="text-blue-500 underline">
+				<RouterLink :to="`/chat/${thread.id}`" class="text-blue-500 underline">
 					{{ thread.name }}
-				</NuxtLink>
+				</RouterLink>
 			</div>
 		</div>
 	</div>

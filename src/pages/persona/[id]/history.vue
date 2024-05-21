@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router/auto';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +34,8 @@ onBeforeMount(async () => {
 	<div class="container flex flex-col items-center">
 		<h1 class="text-2xl font-bold">Persona Version History</h1>
 		<div>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
-			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
+			<RouterLink class="ml-4" :to="`/persona/${id}/view`">View</RouterLink>
+			<RouterLink class="ml-4" :to="`/persona/${id}/edit`">Edit</RouterLink>
 		</div>
 	</div>
 </template>
