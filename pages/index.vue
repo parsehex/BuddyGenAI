@@ -211,7 +211,7 @@ const sortedThreads = computed(() => {
 	</div>
 
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
-	<NewFirstTimeSetup v-if="!threads.length && !buddies.length" />
+	<FirstTimeSetup v-if="!threads.length && !buddies.length" />
 	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
 		<!-- TODO improve -->
 		You have no chats yet. Create one to get started!
