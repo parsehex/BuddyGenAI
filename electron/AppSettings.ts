@@ -17,8 +17,8 @@ type AppSettingsKeys =
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
 	local_model_directory: '',
-	selected_provider_chat: 'external',
-	selected_provider_image: 'external',
+	selected_provider_chat: 'local',
+	selected_provider_image: 'local',
 	selected_model_chat: '',
 	selected_model_image: '',
 	external_api_key: '',

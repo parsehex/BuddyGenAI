@@ -19,8 +19,8 @@ type AppSettingsKeys =
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
 	local_model_directory: '', // should have chat/ and image/ subdirectories
-	selected_provider_chat: 'external',
-	selected_provider_image: 'external',
+	selected_provider_chat: 'local',
+	selected_provider_image: 'local',
 	selected_model_chat: '', // depends on selected_chat_api_provider
 	selected_model_image: '',
 	external_api_key: '',
