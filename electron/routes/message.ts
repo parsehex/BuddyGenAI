@@ -133,7 +133,7 @@ router.get('/health', async (req, res) => {
 	try {
 		const response = await fetch('http://localhost:8080/health');
 		const data = await response.json();
-		res.json({ isRunning: true, currentModel });
+		res.json({ isRunning: data.status === 'ok', currentModel });
 	} catch (error) {
 		res.status(200).json({ isRunning: false, currentModel });
 	}
