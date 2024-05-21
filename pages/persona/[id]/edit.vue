@@ -243,7 +243,13 @@ const acceptKeywords = () => {
 	<ScrollArea class="h-screen flex flex-col items-center">
 		<h1 class="text-2xl font-bold text-center">Edit Buddy</h1>
 		<div class="flex items-center justify-center mb-2">
-			<NuxtLink class="ml-4" :to="`/persona/${id}/view`">View</NuxtLink>
+			<Button
+				type="button"
+				@click="navigateTo(`/persona/${id}/view`)"
+				variant="outline"
+			>
+				View
+			</Button>
 			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
 			</NuxtLink> -->
