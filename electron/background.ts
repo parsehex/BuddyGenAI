@@ -126,6 +126,39 @@ async function createWindow() {
 		return result.filePaths[0];
 	});
 
+	ipcMain.handle('pickFile:app', async () => {
+		const result = await dialog.showOpenDialog({
+			properties: ['openFile', 'multiSelections'],
+			filters: [{ name: 'Model files', extensions: ['safetensors', 'gguf'] }],
+		});
+
+		return result.filePaths;
+	});
+
+	ipcMain.handle(
+		'moveFile:app',
+		async (_, source: string, destination: string) => {
+			try {
+				await fs.rename(source, destination);
+				return true;
+			} catch (err) {
+				return false;
+			}
+		}
+	);
+
+	ipcMain.handle(
+		'linkFile:app',
+		async (_, source: string, destination: string) => {
+			try {
+				await fs.symlink(source, destination);
+				return true;
+			} catch (err) {
+				return false;
+			}
+		}
+	);
+
 	ipcMain.handle('verifyModelDirectory:app', async (_) => {
 		console.log('verifyModelDirectory:app');
 		const modelsLocations = {

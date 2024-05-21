@@ -12,6 +12,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/toast';
+import { delay } from '@/lib/utils';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
@@ -21,8 +22,6 @@ const store = useAppStore();
 
 const { toast } = useToast();
 
-const isRunning = ref(false);
-const isStarting = ref(false);
 const lastModel = ref<string | null>(null);
 
 const doStartServer = async () => {
@@ -37,8 +36,13 @@ const doStartServer = async () => {
 		});
 		return;
 	}
-	isStarting.value = true;
+
+	store.chatServerStarting = true;
 	const result = await startServer(modelPath, nGpuLayers);
+	console.log('Server start result:', result);
+	store.chatServerRunning = !result.error;
+	store.chatServerStarting = false;
+
 	if (result.error) {
 		toast({
 			variant: 'destructive',
@@ -60,24 +64,20 @@ const doStopServer = async () => {
 	lastModel.value = null;
 };
 
-const refreshServerStatus = async (): Promise<boolean> => {
-	const url = urls.other.llamacppHealth();
-	try {
-		const response = await axios.get(url, {
-			timeout: 3500,
-		});
-		return !!response.data.isRunning;
-	} catch (error) {
-		return false;
-	}
+const doRestartServer = async () => {
+	await doStopServer();
+	await delay(1500);
+	await doStartServer();
 };
 
 const intervalIdKey = 'refreshServerStatusIntervalId';
 
 const doRefreshServerStatus = async () => {
 	try {
+		if (store.chatServerStarting) {
+			return;
+		}
 		await updateChatServerRunning();
-		isRunning.value = store.chatServerRunning;
 	} catch (error) {
 		console.error('Error refreshing server status:', error);
 		if ((window as any)[intervalIdKey]) {
@@ -87,7 +87,6 @@ const doRefreshServerStatus = async () => {
 	}
 };
 
-// Clear any existing interval when the component is loaded
 if ((window as any)[intervalIdKey]) {
 	clearInterval((window as any)[intervalIdKey]);
 	(window as any)[intervalIdKey] = null;
@@ -96,24 +95,26 @@ if ((window as any)[intervalIdKey]) {
 doRefreshServerStatus();
 (window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 5000);
 
-onBeforeMount(async () => {
-	// lastModel.value = await getLastModel();
-});
-
 watch(
-	() => isRunning.value,
+	() => store.chatServerRunning,
 	async () => {
-		if (isStarting.value && isRunning.value) {
-			isStarting.value = false;
+		if (store.chatServerStarting && store.chatServerRunning) {
+			store.chatServerStarting = false;
 		}
 		lastModel.value = await getLastModel();
 	}
 );
 
-const bgColor = computed(() =>
-	isRunning.value ? 'bg-green-500' : 'bg-red-500'
-);
-const color = computed(() => (isRunning.value ? 'green' : 'red'));
+const bgColor = computed(() => {
+	if (store.chatServerRunning) {
+		return 'bg-green-500';
+	} else if (store.chatServerStarting) {
+		return 'bg-yellow-500';
+	} else {
+		return 'bg-red-500';
+	}
+});
+const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 </script>
 
 <template>
@@ -121,30 +122,49 @@ const color = computed(() => (isRunning.value ? 'green' : 'red'));
 	<Popover>
 		<PopoverTrigger as-child>
 			<div
-				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center"
+				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center cursor-pointer"
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
-				<Button variant="link">Chat {{ isRunning ? 'Online' : 'Offline' }}</Button>
+				<span class="p-2"
+					>Chat
+					{{
+						store.chatServerRunning
+							? 'Online'
+							: store.chatServerStarting
+							? 'Starting'
+							: 'Offline'
+					}}</span
+				>
 			</div>
 		</PopoverTrigger>
 		<PopoverContent class="w-72" :hide-when-detached="true" side="right">
 			<div class="flex items-center space-x-4">
 				<div class="space-y-1">
-					<p v-if="lastModel" class="text-sm text-gray-500">
+					<p
+						v-if="lastModel && store.chatServerRunning"
+						class="text-sm text-gray-500 mb-4"
+					>
 						<span class="font-semibold">Model:</span>
 						{{ lastModel }}
 					</p>
 					<div class="flex items-center space-x-2">
 						<Button
-							v-if="!isRunning"
+							v-if="!store.chatServerRunning"
 							class="success"
 							@click="doStartServer"
-							:disabled="isStarting"
+							:disabled="store.chatServerStarting"
 						>
 							Start
 						</Button>
 						<Button v-else variant="destructive" @click="doStopServer">Stop</Button>
-						<Spinner v-if="isStarting" />
+						<Button
+							class="warning"
+							@click="doRestartServer"
+							:disabled="store.chatServerStarting || !store.chatServerRunning"
+						>
+							Restart
+						</Button>
+						<Spinner v-if="store.chatServerStarting" />
 					</div>
 				</div>
 			</div>

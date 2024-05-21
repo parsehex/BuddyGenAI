@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAppStore } from '@/stores/main';
-import useLlamaCpp from '@/composables/useLlamaCpp';
 import { RefreshCw } from 'lucide-vue-next';
 import { useToast } from '@/components/ui/toast';
 
@@ -21,9 +20,6 @@ const {
 	getNGpuLayers,
 } = useAppStore();
 const store = useAppStore();
-
-// @ts-ignore
-const { startServer, stopServer } = useLlamaCpp();
 
 const error = ref('');
 
@@ -85,6 +81,7 @@ const updateChatModel = async (model: string) => {
 	if (settings.selected_model_chat === model) return;
 
 	settings.selected_model_chat = model;
+	if (store.chatServerRunning) return;
 	needsRestart.value = true;
 	// await updateChatServerRunning();
 	// if (store.chatServerRunning) {
@@ -98,21 +95,6 @@ const updateImageModel = async (model: string) => {
 	if (settings.selected_model_image === model) return;
 
 	settings.selected_model_image = model;
-};
-
-const doStartServer = async () => {
-	const result = await startServer(getChatModelPath(), getNGpuLayers());
-	if (result.error) {
-		toast({
-			variant: 'destructive',
-			title: 'Error starting chat server',
-			description: result.error,
-		});
-	}
-};
-
-const doStopServer = async () => {
-	await stopServer();
 };
 
 // const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -165,6 +147,13 @@ watch(isExternal, (newVal) => {
 </script>
 
 <template>
+	<!--
+		TODO
+		- add sections to reduce clutter
+		- add parental control(s) to moderate and prevent inappropriate content
+		- (unrelated) add option to Buddies to specify a certain model
+		-   if the currently active model is not the one specified, switch to it and restart server
+	 -->
 	<div class="sidebar p-3">
 		<Alert v-if="error" variant="destructive">
 			<AlertTitle>Error</AlertTitle>
@@ -237,15 +226,18 @@ watch(isExternal, (newVal) => {
 				Open
 			</Button>
 		</div>
-		<div class="mt-4">
+		<div class="mt-2 flex items-center" v-if="!isExternal">
+			<ImportModel />
 			<Button
 				@click="updateModels"
-				class="px-4 py-2 rounded-md"
+				class="px-4 py-2 ml-2 rounded-md"
 				title="Refresh Models"
+				variant="secondary"
 			>
 				<RefreshCw class="w-4 h-4" />
 			</Button>
-			<br />
+		</div>
+		<div class="mt-4">
 			<Label for="chat-model" class="mb-1">Chat Model</Label>
 			<Alert variant="info" class="my-2" v-if="needsRestart">
 				<AlertTitle>Heads up!</AlertTitle>
@@ -305,8 +297,19 @@ watch(isExternal, (newVal) => {
 		</div>
 
 		<div class="mt-4 flex flex-col items-center">
-			<Button @click="reloadPage" class="px-4 py-2 rounded-md">Reload Page</Button>
+			<Button
+				type="button"
+				@click="reloadPage"
+				class="px-4 py-2 rounded-md"
+				variant="default"
+				>Reload Page</Button
+			>
 			<NuxtLink to="/credits">App Credits</NuxtLink>
+			<DevOnly>
+				<Button type="button" class="px-4 py-2 rounded-md" variant="destructive"
+					>Reset & Close App</Button
+				>
+			</DevOnly>
 		</div>
 	</div>
 </template>

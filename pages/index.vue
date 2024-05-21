@@ -8,6 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
+import { delay } from '~/lib/utils';
+import NewFirstTimeSetup from '~/components/NewFirstTimeSetup.vue';
 
 const { toast } = useToast();
 
@@ -31,11 +33,16 @@ onMounted(async () => {
 	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
 	if (
 		!isExternal &&
+		!store.chatServerStarting &&
 		!store.chatServerRunning &&
 		settings.local_model_directory &&
 		settings.selected_model_chat
 	) {
+		store.chatServerStarting = true;
 		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		store.chatServerRunning = !result.error;
+		store.chatServerStarting = false;
+
 		if (result.error) {
 			toast({
 				variant: 'destructive',
@@ -59,59 +66,26 @@ if (settings.user_name && settings.user_name !== 'User') {
 	console.log(settings);
 }
 
-const isModelsSetup = ref(false);
-
-const calcIsModelsSetup = computed(() => {
-	if (store.isExternalProvider) {
-		return (
-			!!settings.external_api_key &&
-			!!settings.selected_model_chat &&
-			!!settings.selected_model_image
-		);
-	}
-	const hasModelDir = !!settings.local_model_directory;
-	const hasChatModel = !!settings.selected_model_chat;
-	const hasImageModel = !!settings.selected_model_image;
-	return hasModelDir && hasChatModel && hasImageModel;
-});
-
 if (settings.local_model_directory) {
 	await updateModels();
 }
-isModelsSetup.value = calcIsModelsSetup.value;
 
-const serverStarting = ref(false);
 const handleModelChange = async () => {
-	setTimeout(async () => {
-		const isSetup = calcIsModelsSetup.value;
+	await delay(10);
 
-		console.log('isSetup', isSetup);
-
-		if (isSetup) {
-			isModelsSetup.value = true; // hide model setup while waiting
-			serverStarting.value = true;
-			const result = await startServer(getChatModelPath(), getNGpuLayers());
-			if (result.error) {
-				toast({
-					variant: 'destructive',
-					title: 'Error starting chat server',
-					description: result.error,
-				});
-			}
-			serverStarting.value = false;
-		} else {
-			isModelsSetup.value = false;
+	if (store.isModelsSetup) {
+		store.chatServerStarting = true;
+		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		if (result.error) {
+			toast({
+				variant: 'destructive',
+				title: 'Error starting chat server',
+				description: result.error,
+			});
 		}
-	}, 10);
-};
-
-watch(
-	() => settings.local_model_directory,
-	async () => {
-		await updateModels();
-		await handleModelChange();
+		store.chatServerRunning = !result.error;
 	}
-);
+};
 
 const getMessageName = (thread: MergedChatThread) => {
 	if (thread.latest_message?.role === 'user') {
@@ -164,6 +138,8 @@ const sortedThreads = computed(() => {
 	<!-- allow editing description (or something to fix broken generations) -->
 	<!-- instructions to acquire models -->
 
+	<!-- show spinner while chat is starting -->
+
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">
@@ -176,64 +152,66 @@ const sortedThreads = computed(() => {
 		<div class="flex flex-col items-center gap-2">
 			<h2 class="text-lg">Your Chats</h2>
 			<div class="flex flex-col items-center gap-1">
-				<Card
-					v-for="thread in sortedThreads"
-					:key="thread.id"
-					class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-				>
-					<!-- sort by latest first -->
-					<NuxtLink
-						:to="`/chat/${thread.id}`"
-						class="w-full h-full flex items-center justify-start p-4"
+				<ScrollArea class="h-screen pb-20">
+					<Card
+						v-for="thread in sortedThreads"
+						:key="thread.id"
+						class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-1"
 					>
-						<!-- TODO this is a good idea: show buddy info in thread list -->
-						<div v-if="thread.selected_buddy">
-							<BuddyAvatar
-								:style="{
-									visibility:
-										thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
-								}"
-								:persona="thread.selected_buddy"
-								size="base"
-							/>
-							<Avatar v-if="thread.latest_message.role === 'user'">
-								<AvatarFallback>{{ userInitials }}</AvatarFallback>
-							</Avatar>
-						</div>
-						<div class="ml-2">
-							<p class="flex items-baseline">
-								<span>
-									{{ thread.name }}
-								</span>
-								<span class="text-xs text-gray-500 italic ml-2">
-									{{ getMessageTime(thread) }}
-								</span>
-							</p>
-							<p
-								v-if="thread.latest_message"
-								class="text-sm mt-2"
-								:style="{
-									visibility:
-										thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
-								}"
-							>
-								<b>{{ getMessageName(thread) }}</b>
-								:
-								{{ getMessageContent(thread) }}
-							</p>
-						</div>
-					</NuxtLink>
-				</Card>
+						<!-- sort by latest first -->
+						<NuxtLink
+							:to="`/chat/${thread.id}`"
+							class="w-full h-full flex items-center justify-start p-4"
+						>
+							<!-- TODO this is a good idea: show buddy info in thread list -->
+							<div>
+								<BuddyAvatar
+									v-if="thread.selected_buddy"
+									:style="{
+										visibility:
+											thread.latest_message.role !== 'user' ? 'visible' : 'hidden',
+									}"
+									:persona="thread.selected_buddy"
+									size="base"
+								/>
+								<Avatar v-else size="base">
+									<AvatarFallback>AI</AvatarFallback>
+								</Avatar>
+								<Avatar v-if="thread.latest_message.role === 'user'">
+									<AvatarFallback>{{ userInitials }}</AvatarFallback>
+								</Avatar>
+							</div>
+							<div class="ml-2">
+								<p class="flex items-baseline">
+									<span>
+										{{ thread.name }}
+									</span>
+									<span class="text-xs text-gray-500 italic ml-2">
+										{{ getMessageTime(thread) }}
+									</span>
+								</p>
+								<p
+									v-if="thread.latest_message"
+									class="text-sm mt-2"
+									:style="{
+										visibility:
+											thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
+									}"
+								>
+									<b>{{ getMessageName(thread) }}</b
+									>:
+									{{ getMessageContent(thread) }}
+								</p>
+							</div>
+						</NuxtLink>
+					</Card>
+				</ScrollArea>
 			</div>
 		</div>
 	</div>
 
-	<FirstTimeSetup
-		v-if="!threads.length && !buddies.length"
-		:is-models-setup="calcIsModelsSetup"
-		:server-starting="serverStarting"
-		:handle-model-change="handleModelChange"
-	/>
+	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
+	<FirstTimeSetup v-if="!threads.length && !buddies.length" />
 	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
 		<!-- TODO improve -->
 		You have no chats yet. Create one to get started!

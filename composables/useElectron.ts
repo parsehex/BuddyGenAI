@@ -133,6 +133,27 @@ export default function useElectron() {
 		return result;
 	};
 
+	const pickFile = async () => {
+		const result = await electron.ipcRenderer.invoke('pickFile:app', null);
+		return result;
+	};
+	const moveFile = async (source: string, destination: string) => {
+		const result = await electron.ipcRenderer.invoke(
+			'moveFile:app',
+			source,
+			destination
+		);
+		return result;
+	};
+	const linkFile = async (source: string, destination: string) => {
+		const result = await electron.ipcRenderer.invoke(
+			'linkFile:app',
+			source,
+			destination
+		);
+		return result;
+	};
+
 	return {
 		copyToClipboard,
 		isElectron,
@@ -140,6 +161,9 @@ export default function useElectron() {
 		windowStats,
 		toggleDevTools,
 		pickDirectory,
+		pickFile,
+		moveFile,
+		linkFile,
 		verifyModelDirectory,
 		pathJoin,
 		pathResolve,

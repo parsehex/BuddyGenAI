@@ -22,3 +22,7 @@ export function getVideoCardInfo() {
 				error: 'no WEBGL_debug_renderer_info',
 		  };
 }
+
+export function delay(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}

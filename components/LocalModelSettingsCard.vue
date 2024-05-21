@@ -1,55 +1,59 @@
 <template>
-	<Card class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4">
-		<CardHeader class="text-lg pt-0 pb-2">Local Model Setup</CardHeader>
+	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
+		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
+			Local Models Setup
+			<span
+				class="text-blue-500 cursor-pointer hover:underline"
+				@click="
+					openExternalLink &&
+						openExternalLink(
+							'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
+						)
+				"
+			>
+				{{ 'Instructions' }}
+			</span>
+		</CardHeader>
 		<CardContent>
-			<p class="text-center">
+			<p class="my-1 italic">
+				Download models and then click <b>Import Models</b> below to choose them.
+				<br />
 				<span
-					class="text-blue-500 cursor-pointer"
+					class="text-blue-500 cursor-pointer hover:underline"
 					@click="
 						openExternalLink &&
 							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#download-ai-models'
 							)
 					"
 				>
-					Help / Instructions
+					{{ 'Example Models' }}
 				</span>
 			</p>
-			<div class="flex w-full items-end justify-between gap-1.5 mt-4">
-				<Label for="local_model_directory" class="w-full">
-					Model Folder
-					<Input
-						v-model="settings.local_model_directory"
-						type="text"
-						id="local_model_directory"
-						name="local_model_directory"
-						class="w-full border border-gray-300 rounded-md p-2 mt-1"
-						style="cursor: default !important"
-						disabled
-					/>
-				</Label>
-				<Button
-					@click="emits('openModelDirectory')"
-					class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+			<div class="mt-4 flex items-center gap-2">
+				<!-- model type doesnt matter: -->
+				<ImportModel @model-import="emits('modelChange', 'chat')" />
+				<!-- <Button
+					@click="updateModels"
+					class="bg-green-500 text-white px-4 py-2 rounded-md"
 				>
-					Open Folder
-				</Button>
+					Update Models
+				</Button> -->
+				<!-- <Button
+					type="button"
+					@click="emits('openModelDirectory')"
+					class="mt-2 px-4 py-2 rounded-md self-center"
+					variant="secondary"
+				>
+					Open Models Folder
+				</Button> -->
 			</div>
-
 			<div
 				class="mt-4"
 				:style="{
 					visibility: settings.local_model_directory ? 'visible' : 'hidden',
 				}"
 			>
-				<Button
-					@click="updateModels"
-					class="bg-green-500 text-white px-4 py-2 rounded-md"
-				>
-					Update Models
-				</Button>
-				<br />
-				<br />
 				<Label for="chat-model" class="mb-1">Chat Model</Label>
 				<Select
 					v-model="settings.selected_model_chat"

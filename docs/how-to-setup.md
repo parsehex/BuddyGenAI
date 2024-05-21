@@ -1,6 +1,7 @@
 # Troubleshooting
 
-- Try closing the app and opening it again
+- Most of the time, closing the app and opening it again will fix any issues.
+- Chat can take a while to start up. If the sidebar says Chat Starting for more than 30s, try restarting the app.
 
 # How to setup for the first time
 
@@ -32,7 +33,9 @@ You should download and install the following before continuing:
 - (if you have NVIDIA GPU) [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
 - (if you have AMD GPU) [ROCm SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html) -- not tested yet
 
-You'll also need to download a couple AI models if you don't already have them - a chat model like Llama 3 and a Stable Diffusion (1.5) model.
+### Download AI Models
+
+You'll also need to download some AI models if you don't already have them - a chat model like Llama 3 and a Stable Diffusion (1.5) model.
 
 The following are the models that I've mainly used while making the app. Support for more models will be added in the future.
 

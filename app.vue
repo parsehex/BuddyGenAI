@@ -6,7 +6,28 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import AppMenubar from '@/components/AppMenubar.vue';
+
+const { toggleDevTools } = useElectron();
+
+(window as any).latestAppKeyDownHandlerId = Math.random();
+const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
+	if (!toggleDevTools) return console.error('useElectron not available');
+	if (id !== (window as any).latestAppKeyDownHandlerId) return;
+	const key = e.key.toLowerCase();
+
+	const holdingCtrl = e.metaKey || e.ctrlKey;
+	const holdingShift = e.altKey || e.shiftKey;
+
+	if (key === 'r' && holdingCtrl && !holdingShift) {
+		e.preventDefault();
+		window.location.reload();
+	} else if (key === 'i' && holdingCtrl && holdingShift) {
+		e.preventDefault();
+		toggleDevTools();
+	}
+})((window as any).latestAppKeyDownHandlerId);
+
+window.addEventListener('keydown', handleAppKeyDown);
 </script>
 
 <template>
@@ -20,6 +41,7 @@ import AppMenubar from '@/components/AppMenubar.vue';
 				:min-size="20"
 				:max-size="35"
 			>
+				<!-- hide if setting up -->
 				<Sidebar />
 			</ResizablePanel>
 			<ResizableHandle with-handle />

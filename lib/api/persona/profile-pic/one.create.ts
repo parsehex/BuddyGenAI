@@ -21,6 +21,9 @@ const {
 	getDataPath,
 } = useElectron();
 
+// TODO handle needing to shut off chat server and restarting after generating image
+//   i think this looks like an option to unload chat while generating image
+
 // TODO rewrite
 
 /*

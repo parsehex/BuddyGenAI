@@ -1,9 +1,10 @@
 import { Router, json } from 'express';
 import OpenAI from 'openai';
-import { OpenAIStream, streamToResponse } from 'ai';
+import { OpenAIStream, streamToResponse, AIStream } from 'ai';
 import cors from 'cors';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { AppSettings } from '../AppSettings';
+import { Message } from 'openai/resources/beta/threads/messages/messages';
 
 const chatProviderUrls = {
 	external: 'https://api.openai.com/v1',
@@ -12,6 +13,7 @@ const chatProviderUrls = {
 
 const router = Router();
 
+const stop = ['<|eot_id|>', 'USER:', 'user:', '</s>', '<|end|>'];
 let currentModel = '';
 
 export function updateModel(modelName: string) {
@@ -42,6 +44,76 @@ async function updateOpenai() {
 }
 
 router.use(json());
+
+function convertToPhi3Format(messages: Message[]): string {
+	// phi-3 template (may be incorrect):
+	// <s><|user|>
+	// {system_prompt}<|end|>
+	// <|user|>
+	// {prompt}<|end|>
+	// <|assistant|>
+
+	// might need newlines before <|end|>
+
+	// after {system_prompt}<|end|>, can have pairs of
+	//   <|user|>\n{prompt}<|end|> and <|assistant|>\n{response}<|end|>
+
+	// return '';
+
+	let prompt = '';
+
+	// first message is always system (phi3 uses user tag for system prompt)
+	prompt += `<|user|>\n${messages[0].content}\n<|end|>\n`;
+
+	for (let i = 1; i < messages.length; i++) {
+		const message = messages[i];
+		const role = message.role.toLowerCase();
+		prompt += `<|${role}|>\n${message.content}\n<|end|>\n`;
+	}
+
+	return prompt.trim();
+}
+
+async function useAlternateCompletion(options: any, res: any) {
+	// POST /completion with the same options
+	// include stream: true
+	// convert messages to correct format for model (phi3)
+	//   pass `prompt` instead of `messages`
+	// how does stream work?
+	//   when true, returns an event stream
+	// as far as the ai sdk stuff,
+	//   i think we can do pretty much everything normally
+	// maybe follow note below a bit, basically we still end up using streamToResponse
+
+	const { messages, max_tokens, temperature } = options;
+
+	const payload = {
+		prompt: convertToPhi3Format(messages),
+		n_predict: max_tokens,
+		temperature,
+		stream: true,
+	};
+
+	const url = 'http://localhost:8080/completion';
+	const response = await fetch(url, {
+		method: 'POST',
+		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	let i = 0;
+	const stream = AIStream(response, (data) => {
+		// if (i < 15) {
+		// 	console.log(data);
+		// 	i++;
+		// }
+		const parsed = JSON.parse(data);
+		return parsed.content;
+	});
+	streamToResponse(stream, res);
+}
 
 // long term, i think we need to not use openai pkg with llamafile/local LLMs
 //   1. construct prompt from jinja template js-side (llamafile has no templating)
@@ -79,6 +151,11 @@ router.post('/api/message', async (req, res) => {
 		return;
 	}
 
+	if (selectedChatModel.toLowerCase().includes('phi-3')) {
+		useAlternateCompletion(req.body, res);
+		return;
+	}
+
 	const aiResponse = await openai.chat.completions.create({
 		model: selectedChatModel,
 		stream: true,
@@ -86,7 +163,7 @@ router.post('/api/message', async (req, res) => {
 		max_tokens,
 		temperature,
 		seed,
-		stop: ['<|eot_id|>'],
+		stop,
 	});
 
 	const stream = OpenAIStream(aiResponse);
@@ -98,30 +175,44 @@ router.post('/api/completion', async (req, res) => {
 	const selectedChatModel = await updateOpenai();
 	const { prompt, max_tokens, temperature } = req.body;
 
+	const messages: ChatCompletionMessageParam[] = [
+		{
+			role: 'system',
+			content:
+				"Assistant's task is to answer the following immediately and without further prose.",
+		},
+		{
+			role: 'user',
+			content: prompt,
+		},
+		{
+			role: 'assistant',
+			content: 'Output:',
+		},
+	];
+
+	if (selectedChatModel.toLowerCase().includes('phi-3')) {
+		useAlternateCompletion(
+			{
+				messages,
+				max_tokens,
+				temperature,
+			},
+			res
+		);
+		return;
+	}
+
 	const response = await openai.chat.completions.create({
 		model: selectedChatModel,
 		stream: true,
-		messages: [
-			{
-				role: 'system',
-				content:
-					'Answer the following immediately and without further prose, and write the answer in the third person.',
-			},
-			{
-				role: 'user',
-				content: prompt,
-			},
-			{
-				role: 'assistant',
-				content: 'Output:',
-			},
-		],
+		messages,
 		max_tokens,
 		temperature,
 		top_p: 1,
 		frequency_penalty: 1,
 		presence_penalty: 1,
-		stop: ['<|eot_id|>'],
+		stop,
 	});
 
 	const stream = OpenAIStream(response);
@@ -132,7 +223,7 @@ router.get('/health', async (req, res) => {
 	try {
 		const response = await fetch('http://localhost:8080/health');
 		const data = await response.json();
-		res.json({ isRunning: true, currentModel });
+		res.json({ isRunning: data.status === 'ok', currentModel });
 	} catch (error) {
 		res.status(200).json({ isRunning: false, currentModel });
 	}

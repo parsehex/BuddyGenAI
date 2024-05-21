@@ -6,6 +6,12 @@ import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './SettingsPanel.vue';
 import ColorMode from './ColorMode.vue';
+import { useToast } from '../ui/toast';
+import type { BuddyVersionMerged } from '~/lib/api/types-db';
+import { api } from '~/lib/api';
+import ChatServerStatus from './ChatServerStatus.vue';
+
+const { toast } = useToast();
 
 const store = useAppStore();
 const route = useRoute();
@@ -22,6 +28,53 @@ watch(
 		}
 	}
 );
+
+const selectedBuddy = ref('');
+
+const doCreateThread = async () => {
+	let name = '';
+	let mode = '' as 'persona' | 'custom';
+	let buddy_id = '';
+	console.log('selected buddy', selectedBuddy.value);
+	let errorMsg = '';
+	if (selectedBuddy.value) {
+		const buddy = store.buddies.find(
+			(buddy: BuddyVersionMerged) => buddy.id === selectedBuddy.value
+		);
+		if (buddy) {
+			name = `Chat with ${buddy.name}`;
+			mode = 'persona';
+			buddy_id = buddy.id;
+		} else if (selectedBuddy.value === 'ai') {
+			name = 'Chat with AI';
+			mode = 'custom';
+		} else {
+			errorMsg = 'Could not find buddy' + selectedBuddy.value;
+		}
+	} else {
+		errorMsg = 'Please select a buddy';
+	}
+	if (errorMsg) {
+		toast({
+			variant: 'destructive',
+			title: 'Error creating thread',
+			description: errorMsg,
+		});
+		return;
+	}
+
+	const options = {
+		name,
+		mode,
+	} as any;
+	if (mode === 'persona') {
+		options.persona_id = buddy_id;
+	}
+
+	const newThread = await api.thread.createOne(options);
+	await store.updateThreads();
+	navigateTo(`/chat/${newThread.id}`);
+};
 </script>
 
 <template>
@@ -32,9 +85,18 @@ watch(
 			<TabsTrigger v-if="!store.newHere" value="settings">Settings</TabsTrigger>
 			<ColorMode />
 		</TabsList>
-		<ScrollArea class="h-screen">
+		<div class="h-screen">
 			<TabsContent value="chat">
-				<ThreadsList />
+				<div class="bg-background my-1">
+					<ChatServerStatus v-if="!store.isExternalProvider" />
+					<div class="flex w-full px-2 mb-2 items-end">
+						<BuddySelect v-model="selectedBuddy" include-ai />
+						<Button class="ml-1" @click="doCreateThread">+</Button>
+					</div>
+				</div>
+				<ScrollArea class="h-screen">
+					<ThreadsList />
+				</ScrollArea>
 			</TabsContent>
 			<TabsContent value="buddy">
 				<BuddyList />
@@ -42,7 +104,7 @@ watch(
 			<TabsContent v-if="!store.newHere" value="settings">
 				<SettingsPanel />
 			</TabsContent>
-		</ScrollArea>
+		</div>
 	</Tabs>
 </template>
 

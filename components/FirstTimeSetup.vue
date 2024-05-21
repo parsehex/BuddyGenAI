@@ -23,14 +23,9 @@ import {
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
+import { delay } from '~/lib/utils';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
-
-const props = defineProps<{
-	serverStarting: boolean;
-	isModelsSetup: boolean;
-	handleModelChange: () => void;
-}>();
 
 const { openExternalLink } = useElectron();
 const { toast } = useToast();
@@ -88,10 +83,6 @@ const acceptBuddy = async (
 	acceptedBuddy.value = descriptionOrKeywords;
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
-
-	setTimeout(() => {
-		document.getElementById('buddyCard')?.scrollIntoView({ behavior: 'smooth' });
-	}, 250);
 };
 
 const updateName = async () => {
@@ -123,6 +114,7 @@ onMounted(() => {
 	}
 });
 
+const selectedModelProvider = ref('');
 const modelProvider = computed({
 	get: () => {
 		// should be the same for both
@@ -346,11 +338,8 @@ const acceptPicKeywords = () => {
 
 <template>
 	<ScrollArea class="h-screen">
-		<div class="flex flex-col items-center">
-			<NuxtLink
-				class="text-xl font-bold mb-2 dark:bg-gray-600 p-1 pt-0 rounded-b"
-				to="/"
-			>
+		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
+			<NuxtLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
@@ -358,98 +347,114 @@ const acceptPicKeywords = () => {
 				</div>
 			</NuxtLink>
 
-			<Avatar v-if="store.newHere" size="base">
-				<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
-				<img src="/assets/logo.png" alt="BuddyGen Logo" />
-			</Avatar>
+			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
+			<img
+				v-if="store.newHere"
+				class="w-[50px] mb-2"
+				src="/assets/logo.png"
+				alt="BuddyGen Logo"
+			/>
 
-			<!-- Server Starting Spinner -->
 			<div
-				v-if="serverStarting"
-				class="text-center flex flex-col items-center justify-center"
+				v-if="store.chatServerStarting"
+				class="text-center flex flex-col items-center justify-center gap-y-2"
 			>
 				<Spinner />
 				Getting ready...
 			</div>
 
 			<!-- TODO implement external models using OpenRouter (idk how for images) -->
-			<!-- Model Source -- External or Local -->
 			<Card
-				v-if="!isModelsSetup"
-				class="whitespace-pre-wrap w-full md:w-2/3 p-2 pt-4"
+				v-if="!store.isModelsSetup"
+				class="whitespace-pre-wrap w-full p-2 pt-4 pb-0"
 			>
 				<CardHeader class="pt-0 pb-0 text-center">
-					Please answer some questions before you create a Buddy.
+					Welcome! Please answer a few questions before we get started. First...
 				</CardHeader>
 				<CardContent>
 					<div
-						class="flex flex-col w-full items-center justify-between gap-1.5 mt-4"
+						class="flex flex-col w-full items-center justify-between gap-1.5 mt-4 pb-0"
 					>
-						<h2 class="text-lg text-center underline">
-							{{ 'Where will you use models from?' }}
+						<h2 class="text-lg text-center">
+							Would you like to use <b>External (OpenAI)</b> or <b>Local</b> Models?
 						</h2>
-						<ul class="mb-2">
+						<ul class="my-2">
 							<li>
-								<b>External</b>
+								<u>External</u>
 								-- currently only OpenAI/ChatGPT is supported
 							</li>
 							<li>
-								<b>Local</b>
+								<u>Local</u>
 								-- uses
 								<span
-									class="text-blue-500 cursor-pointer"
+									class="text-blue-500 cursor-pointer hover:underline"
 									@click="
 										openExternalLink &&
 											openExternalLink('https://github.com/Mozilla-Ocho/llamafile')
 									"
 								>
-									LlamaFile
+									{{ 'LlamaFile' }}
 								</span>
 								+
 								<span
-									class="text-blue-500 cursor-pointer"
+									class="text-blue-500 cursor-pointer hover:underline"
 									@click="
 										openExternalLink &&
 											openExternalLink('https://github.com/leejet/stable-diffusion.cpp')
 									"
 								>
-									Stable-Diffusion.cpp
+									{{ 'Stable-Diffusion.cpp' }}
 								</span>
 							</li>
 						</ul>
-						<Label for="chat-model-provider" class="w-full">
-							External (OpenAI) or Local Models?
-							<Select v-model="modelProvider" id="chat-model-provider">
-								<SelectTrigger>
-									<SelectValue placeholder="Select a chat model provider" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Model Providers</SelectLabel>
-										<SelectItem value="external">External (OpenAI)</SelectItem>
-										<SelectItem value="local">Local (experimental)</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</Label>
+
+						<div class="flex items-center justify-center gap-2">
+							<Button
+								@click="
+									() => {
+										selectedModelProvider = 'external';
+										modelProvider = 'external';
+									}
+								"
+								:variant="selectedModelProvider === 'external' ? 'default' : 'outline'"
+							>
+								External
+							</Button>
+							<Button
+								@click="
+									() => {
+										selectedModelProvider = 'local';
+										modelProvider = 'local';
+									}
+								"
+								:variant="selectedModelProvider === 'local' ? 'default' : 'outline'"
+							>
+								Local
+							</Button>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
 
 			<ExternalModelSettingsCard
-				v-if="!isModelsSetup && modelProvider === 'external'"
+				v-if="
+					!store.isModelsSetup &&
+					selectedModelProvider &&
+					modelProvider === 'external'
+				"
 				:first-time="store.newHere"
 			/>
 
 			<LocalModelSettingsCard
-				v-if="!isModelsSetup && modelProvider === 'local'"
+				v-if="
+					!store.isModelsSetup && selectedModelProvider && modelProvider === 'local'
+				"
 				:first-time="store.newHere"
 				@open-model-directory="openModelDirectory"
-				@model-change="handleModelChange"
 			/>
 
 			<Card
-				v-if="!serverStarting && isModelsSetup"
+				v-if="!store.chatServerStarting && store.isModelsSetup"
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">

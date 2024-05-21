@@ -68,8 +68,14 @@ const createThread = async () => {
 		<h1 class="text-2xl font-bold">
 			<span class="text-blue-500">{{ name }}</span>
 		</h1>
-		<div class="flex items-center mb-2">
-			<NuxtLink class="ml-4" :to="`/persona/${id}/edit`">Edit</NuxtLink>
+		<div class="flex items-center my-2">
+			<Button
+				type="button"
+				@click="navigateTo(`/persona/${id}/edit`)"
+				variant="outline"
+			>
+				Edit
+			</Button>
 			<!-- <NuxtLink class="ml-4" :to="`/persona/${id}/history`">
 				Version History
 			</NuxtLink> -->
