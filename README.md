@@ -1,5 +1,3 @@
-![BuddyGenAI](./docs/img/home-page.png)
-
 BuddyGenAI is a chat application designed to create and interact with virtual buddies
 
 ## ✅ Features
