@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './app.vue';
-import router from './lib/router';
+import router from '@/lib/router';
 
 const appDiv = document.getElementById('app');
 

@@ -103,6 +103,20 @@
 <script setup lang="ts">
 import { onBeforeMount } from 'vue';
 import useElectron from '@/composables/useElectron';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
+} from '@/components/ui/select';
+import OpenAIAPIKeyHelpButton from '@/components/OpenAIAPIKeyHelpButton.vue';
 import { useAppStore } from '@/stores/main';
 
 const { openExternalLink } = useElectron();
