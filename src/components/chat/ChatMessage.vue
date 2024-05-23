@@ -31,6 +31,7 @@ import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import { textToHslColor } from '@/src/lib/utils';
+import MessageImage from './MessageImage.vue';
 
 const { copyToClipboard } = useElectron();
 const store = useAppStore();
@@ -67,7 +68,6 @@ watch(
 
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
-
 
 const userName = computed(() => {
 	if (isUser.value) return store.settings.user_name;
@@ -159,36 +159,8 @@ const imgLoading = computed(() => {
 						<div class="">
 							{{ message.content }}
 						</div>
-						<div
-							v-if="imgValue"
-							class="mt-2 mx-3 rounded-lg transition-all"
-							@contextmenu.prevent
-							:style="{
-								maxHeight: imgMaximized ? '512px' : '256px',
-							}"
-						>
-							<Progress
-								v-if="imgLoading"
-								:model-value="store.imgProgress * 100"
-								:style="{
-									opacity: store.imgGenerating ? 1 : 0,
-								}"
-							/>
-							<img v-if="imgLoading" class="shadow-md" src="/assets/placeholder.png" />
-							<img
-								v-if="!imgLoading"
-								@click="imgMaximized = !imgMaximized"
-								:src="imgValue"
-								:class="[
-									'shadow-md',
-									'cursor-pointer',
-									'hover:shadow-lg',
-									imgMaximized ? 'hover:scale-95' : 'hover:scale-105',
-									imgMaximized ? 'min-w-64' : 'max-w-32',
-									'transition-transform',
-								]"
-							/>
-						</div>
+						<MessageImage v-if="imgValue" :imgValue="imgValue" />
+						<!--  -->
 					</CardContent>
 				</Card>
 			</ContextMenuTrigger>
