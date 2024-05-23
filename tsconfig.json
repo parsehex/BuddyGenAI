@@ -32,10 +32,10 @@
         "./src/stores/*"
       ],
       "assets": [
-        "../assets"
+        "./assets"
       ],
       "assets/*": [
-        "../assets/*"
+        "./assets/*"
       ],
       "public": [
         "../public"

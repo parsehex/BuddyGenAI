@@ -354,21 +354,23 @@ const acceptPicKeywords = () => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
-			<RouterLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
+			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
+			<img
+				v-if="store.newHere"
+				class="w-[50px]"
+				src="/assets/logo.png"
+				alt="BuddyGen Logo"
+			/>
+			<RouterLink
+				class="text-xl font-bold dark:bg-gray-600 rounded-b px-1 mb-2"
+				to="/"
+			>
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
 				</div>
 			</RouterLink>
-
-			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
-			<img
-				v-if="store.newHere"
-				class="w-[50px] mb-2"
-				src="/assets/logo.png"
-				alt="BuddyGen Logo"
-			/>
 
 			<div
 				v-if="store.chatServerStarting"
@@ -647,7 +649,7 @@ const acceptPicKeywords = () => {
 									</Popover>
 								</div>
 
-								<div
+								<!-- <div
 									class="flex flex-col items-center justify-center my-1"
 									v-if="!store.isExternalProvider"
 								>
@@ -665,7 +667,7 @@ const acceptPicKeywords = () => {
 											</SelectGroup>
 										</SelectContent>
 									</Select>
-								</div>
+								</div> -->
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button
 									@click="refreshProfilePicture"

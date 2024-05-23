@@ -15,7 +15,7 @@ const progress = ref<ProgressInfo>();
 const readyToInstall = ref(false);
 const alreadyInitialized = ref(false);
 
-export default function useElectron() {
+export default function useUpdater() {
 	const isServer =
 		process.server ||
 		typeof window === 'undefined' ||

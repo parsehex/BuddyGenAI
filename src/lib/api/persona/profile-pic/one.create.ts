@@ -1,25 +1,12 @@
-import { useCompletion } from 'ai/vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
-import useSD from '@/composables/useSD';
 import { select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
-import { useAppStore } from '@/stores/main';
 import useElectron from '@/composables/useElectron';
+import { makePicture } from '@/src/lib/ai/img';
 
-// @ts-ignore
-const { runSD } = useSD();
-const {
-	dbGet,
-	dbRun,
-	fsAccess,
-	pathJoin,
-	mkdir,
-	basename,
-	fsUnlink,
-	getDataPath,
-} = useElectron();
+const { dbGet, dbRun, fsAccess, pathJoin } = useElectron();
 
 // TODO handle needing to shut off chat server and restarting after generating image
 //   i think this looks like an option to unload chat while generating image
@@ -32,34 +19,6 @@ TODO notes about profile pic versioning:
 - would also keep the pictures themselves
 - need to update naming to include the version id
 */
-
-function getSDProgress() {
-	const { imgGenerating, updateImgGenerating, imgProgress, updateImgProgress } =
-		useAppStore();
-	const eventSource = new EventSource('http://localhost:8079/api/sd/progress');
-
-	eventSource.onmessage = function (event) {
-		const data = JSON.parse(event.data);
-		if (data.type === 'start') {
-			updateImgProgress(0);
-			updateImgGenerating(true);
-		} else if (data.type === 'stop') {
-			updateImgProgress(1);
-			updateImgGenerating(false);
-			eventSource.close();
-		} else if (data.type === 'progress') {
-			if (!imgGenerating) updateImgGenerating(true);
-			updateImgProgress(data.progress);
-		}
-	};
-
-	eventSource.onerror = function (error) {
-		updateImgGenerating(false);
-		updateImgProgress(0);
-		eventSource.close();
-		// console.error('EventSource failed:', error);
-	};
-}
 
 export default async function createProfilePic(
 	id: string,
@@ -74,13 +33,9 @@ export default async function createProfilePic(
 	const selectedImageModel = AppSettings.get('selected_model_image') as string;
 	let modelPath = '';
 
-	if (!selectedImageModel) {
-		throw new Error('No image model selected');
-	}
+	if (!selectedImageModel) throw new Error('No image model selected');
 	if (!isExternal) {
-		if (!modelDir) {
-			throw new Error('Model directory not set');
-		}
+		if (!modelDir) throw new Error('Model directory not set');
 
 		modelPath = await pathJoin(modelDir, selectedImageModel);
 		try {
@@ -106,50 +61,38 @@ export default async function createProfilePic(
 		sqlCurrentVersion[1]
 	)) as BuddyVersion;
 
-	if (!currentVersion) {
-		throw new Error('Persona version not found');
-	}
+	if (!currentVersion) throw new Error('Persona version not found');
 
 	let extraPrompt = '';
 	if (persona.profile_pic_prompt) {
 		extraPrompt = persona.profile_pic_prompt;
 	}
 
-	const posPrompt = posPromptFromName(currentVersion.name, extraPrompt, gender);
+	let animated = false;
+
+	// does model name contain "illuminati"?
+	if (selectedImageModel.includes('illuminati')) {
+		animated = true;
+	}
+
+	const posPrompt = posPromptFromName(
+		currentVersion.name,
+		extraPrompt,
+		gender,
+		animated
+	);
 	const negPrompt = negPromptFromName(currentVersion.name);
 
-	// find path to save image
-	const dataPath = await getDataPath('images/' + persona.id);
-	console.log('profile pic dataPath', dataPath);
-	await mkdir(dataPath);
-
-	const now = Date.now();
-	const output = await pathJoin(dataPath, `${now}.png`);
-	let outputExists = false;
-	try {
-		await fsAccess(output);
-		outputExists = true;
-	} catch (e) {}
-	if (outputExists) {
-		await fsUnlink(output);
-	}
-
-	let size = 256;
-	if (quality === ProfilePicQuality.LOW) {
-		size = 128;
-	} else if (quality === ProfilePicQuality.HIGH) {
-		size = 512;
-	}
-
-	await runSD({
-		model: modelPath,
-		pos: posPrompt,
-		output,
-		neg: negPrompt,
-		size,
+	const filename = `${Date.now()}.png`;
+	await makePicture({
+		absModelPath: modelPath,
+		outputSubDir: persona.id,
+		outputFilename: filename,
+		posPrompt,
+		negPrompt,
+		size: 512, // TODO un-hardcode High quality
 	});
 
-	const filename = `${now}.png`;
 	const sqlUpdate = update('persona', { profile_pic: filename }, { id });
 	await dbRun(sqlUpdate[0], sqlUpdate[1]);
 

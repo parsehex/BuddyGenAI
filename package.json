@@ -3,7 +3,7 @@
   "author": "parsehex",
   "email": "",
   "description": "Everyone needs a buddy -- make one and chat with them using BuddyGenAI",
-  "version": "0.1.3",
+  "version": "0.2.0-pre1",
   "private": true,
   "main": "electron/background.js",
   "repository": {

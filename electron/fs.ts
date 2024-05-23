@@ -24,7 +24,8 @@ export async function findResourcesPath() {
 	// if we're in dev then find dir containing .nuxt
 	if (process.env.NODE_ENV === 'development') {
 		let dir = await getDirname();
-		let p = await findDirectoryInPath('binaries', dir);
+		let p = await findDirectoryInPath('.vscode', dir);
+		console.log('p', p);
 		if (p) return path.resolve(p, '..');
 	}
 

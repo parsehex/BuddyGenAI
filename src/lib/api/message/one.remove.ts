@@ -31,7 +31,6 @@ export default async function removeOne(id: string): Promise<DeleteResponse> {
 	await dbRun(sqlMessageDelete[0], sqlMessageDelete[1]);
 	if (nextMessage) {
 		// possible if failed to get response?
-		console.log('Deleting next message', nextMessage);
 		const sqlNextMessageDelete = del('chat_message', { id: nextMessage.id });
 		await dbRun(sqlNextMessageDelete[0], sqlNextMessageDelete[1]);
 	}

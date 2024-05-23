@@ -36,6 +36,7 @@ let pid = 0;
 let hasResolved = false;
 
 // TODO i think error 3221225781 means dll not found
+// error 35504 is bad args?
 
 let isReady = false;
 
@@ -73,10 +74,11 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 		}
 
 		nGpuLayers = Math.floor(+nGpuLayers);
-		const serverPath = await findBinaryPath('llamafile', 'llamafile');
-		console.log('serverPath', serverPath);
+		const llamaFilePath = await findBinaryPath('llamafile', 'llamafile');
+		const llamaCppPath = await findBinaryPath('llama.cpp', 'server');
+		console.log('serverPath', llamaFilePath);
 		const args = [
-			'--nobrowser',
+			// '--nobrowser', // llamafile arg
 			'--model',
 			modelPath,
 			'--n-gpu-layers',
@@ -102,11 +104,11 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 			log.info('Using default context length:', 4096);
 		}
 
-		log.info('Llama.cpp Server Path:', serverPath);
+		log.info('Llama.cpp Server Path:', llamaCppPath);
 		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
-			serverPath,
+			llamaCppPath,
 			args,
 			{ windowsHide: true, killSignal: 'SIGKILL' },
 			(error: any, stdout: any, stderr: any) => {

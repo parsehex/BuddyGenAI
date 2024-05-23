@@ -81,6 +81,12 @@ async function runSD(
 ) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
 	return new Promise((resolve, reject) => {
+		let W = size;
+		let H = size;
+		if (size === 768) {
+			W = 512;
+			H = 768;
+		}
 		const args = [
 			'-m',
 			model,
@@ -90,13 +96,17 @@ async function runSD(
 			output,
 			'--seed',
 			'-1',
-			'-H',
-			`${size}`,
+			// '--cfg-scale',
+			// '2.5',
+			// '--clip-skip',
+			// '2',
 			'-W',
-			`${size}`,
+			`${W}`,
+			'-H',
+			`${H}`,
 		];
 		if (neg) {
-			args.push('-n', removeAccents(neg));
+			args.splice(4, 0, '-n', removeAccents(neg));
 		}
 
 		log.info('SD Path:', sdPath);

@@ -146,12 +146,20 @@ export const useAppStore = defineStore('app', () => {
 	};
 
 	const getChatModelPath = () => {
-		if (!settings.value.local_model_directory) return;
-		if (!settings.value.selected_model_chat) return;
+		if (!settings.value.local_model_directory) return '';
+		if (!settings.value.selected_model_chat) return '';
 		const slash = settings.value.local_model_directory.includes('\\')
 			? '\\'
 			: '/';
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_chat}`;
+	};
+	const getImageModelPath = () => {
+		if (!settings.value.local_model_directory) return '';
+		if (!settings.value.selected_model_image) return '';
+		const slash = settings.value.local_model_directory.includes('\\')
+			? '\\'
+			: '/';
+		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
 	};
 
 	// watch(
@@ -276,6 +284,7 @@ export const useAppStore = defineStore('app', () => {
 		updateThreads,
 		getNGpuLayers,
 		getChatModelPath,
+		getImageModelPath,
 
 		isExternalProvider,
 		isModelsSetup,

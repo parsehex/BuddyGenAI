@@ -189,7 +189,7 @@ watch(isExternal, (newVal) => {
 				/>
 			</div>
 
-			<Alert variant="info" class="my-2" v-if="prvNeedsRestart">
+			<!-- <Alert variant="info" class="my-2" v-if="prvNeedsRestart">
 				<AlertTitle>Heads up!</AlertTitle>
 				<AlertDescription>
 					The local chat model will stay online until you restart this app.
@@ -219,7 +219,7 @@ watch(isExternal, (newVal) => {
 					id="external_api_key"
 					class="w-full border border-gray-300 rounded-md p-2 mt-1"
 				/>
-			</div>
+			</div> -->
 			<div
 				class="flex w-full items-end justify-between gap-1.5 mt-4"
 				v-if="!isExternal"

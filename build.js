@@ -38,8 +38,6 @@ const sdCPPbin =
 		? path.join(sdCPP, 'sd.exe')
 		: path.join(sdCPP, 'sd');
 
-
-
 if (!fs.existsSync(sdCPPbin)) {
 	console.error(`Required binary not found: ${sdCPPbin}`);
 	process.exit(1);
@@ -68,6 +66,10 @@ if (!sdVersionExists) {
 	fs.writeFileSync(verPath, '');
 }
 
+// copy binaries to the output folder
+const outputBinPath = path.join(__dirname, '.output', 'binaries');
+fs.copySync(binPath, outputBinPath);
+
 /**
  * @type {import('electron-builder').Configuration}
  */
@@ -88,7 +90,11 @@ const options = {
 		app: '.output',
 	},
 	extraResources: [
+		// TODO restructure binaries so that the root are types (cuda12, etc)
+		//   each contains LCPP and SD
+		// (this way cuda12 binaries can use the same cudart files)
 		'./binaries/stable-diffusion.cpp/**/*',
+		'./binaries/llama.cpp/**/*',
 		'./binaries/llamafile*',
 		'./licenses/**/*',
 		'./migrations/**/*',

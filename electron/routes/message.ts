@@ -85,16 +85,24 @@ async function useAlternateCompletion(options: any, res: any) {
 	//   i think we can do pretty much everything normally
 	// maybe follow note below a bit, basically we still end up using streamToResponse
 
-	const { messages, max_tokens, temperature } = options;
+	const { messages, max_tokens, temperature, jsonSchema } = options;
+	console.log(max_tokens, temperature);
 
 	const payload = {
-		prompt: convertToPhi3Format(messages),
-		n_predict: max_tokens,
+		// prompt: convertToPhi3Format(messages),
+		messages,
+		max_tokens,
 		temperature,
 		stream: true,
-	};
+	} as any;
 
-	const url = 'http://localhost:8080/completion';
+	if (jsonSchema) {
+		payload.json_schema = jsonSchema;
+	}
+
+	// console.log('payload', payload);
+
+	const url = 'http://localhost:8080/v1/chat/completions';
 	const response = await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify(payload),
@@ -109,8 +117,14 @@ async function useAlternateCompletion(options: any, res: any) {
 		// 	console.log(data);
 		// 	i++;
 		// }
+
+		// when using /completion:
+		// const parsed = JSON.parse(data);
+		// return parsed.content;
+
+		// /v1/chat/completions:
 		const parsed = JSON.parse(data);
-		return parsed.content;
+		return parsed.choices[0].delta.content;
 	});
 	streamToResponse(stream, res);
 }
@@ -173,9 +187,9 @@ router.post('/api/message', async (req, res) => {
 router.options('/api/completion', cors());
 router.post('/api/completion', async (req, res) => {
 	const selectedChatModel = await updateOpenai();
-	const { prompt, max_tokens, temperature } = req.body;
+	const { prompt, max_tokens, temperature, json_schema, messages } = req.body;
 
-	const messages: ChatCompletionMessageParam[] = [
+	const messagesToComplete: ChatCompletionMessageParam[] = [
 		{
 			role: 'system',
 			content:
@@ -191,22 +205,33 @@ router.post('/api/completion', async (req, res) => {
 		},
 	];
 
-	if (selectedChatModel.toLowerCase().includes('phi-3')) {
-		useAlternateCompletion(
-			{
-				messages,
-				max_tokens,
-				temperature,
-			},
-			res
-		);
-		return;
+	let messagesToPass = messagesToComplete;
+
+	if (messages) {
+		messagesToPass = messages.slice();
+		// set the first/system message to prompt
+		messagesToPass[0].content = prompt;
 	}
+
+	// console.log('messagesToPass', messagesToPass);
+
+	// if (selectedChatModel.toLowerCase().includes('phi-3')) {
+	useAlternateCompletion(
+		{
+			messages: messagesToPass,
+			max_tokens,
+			temperature,
+			jsonSchema: json_schema,
+		},
+		res
+	);
+	return;
+	// }
 
 	const response = await openai.chat.completions.create({
 		model: selectedChatModel,
 		stream: true,
-		messages,
+		messages: messagesToComplete,
 		max_tokens,
 		temperature,
 		top_p: 1,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router/auto';
-import Chatbox from '@/components/Chatbox.vue';
+import Chatbox from '@/components/chat/Chatbox.vue';
 import { api } from '@/lib/api';
 import { computed } from 'vue';
 

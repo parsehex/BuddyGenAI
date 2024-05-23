@@ -27,6 +27,7 @@ CREATE TABLE chat_message (
 	updated TIMESTAMP,
 	role TEXT NOT NULL CHECK(role IN ('user', 'assistant', 'system')),
 	content TEXT NOT NULL,
+	image TEXT,
 	thread_id TEXT NOT NULL,
 	thread_index INTEGER NOT NULL,
 	FOREIGN KEY(thread_id) REFERENCES chat_thread(id) ON DELETE CASCADE

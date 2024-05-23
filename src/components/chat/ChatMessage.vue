@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, watch } from 'vue';
 import type { Message } from 'ai/vue';
-import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import type { BuddyVersionMerged, ChatMessage } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -23,18 +23,20 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
+import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
-import BuddyAvatar from './BuddyAvatar.vue';
 
 const { copyToClipboard } = useElectron();
-const { settings } = useAppStore();
+const store = useAppStore();
 
 const props = defineProps<{
 	threadId: string;
-	message: Message;
+	message: Message | ChatMessage;
 	threadMode: 'persona' | 'custom';
 	currentPersona?: BuddyVersionMerged;
 }>();
@@ -48,14 +50,27 @@ const emit = defineEmits<{
 const { threadId, message, threadMode, currentPersona } = toRefs(props);
 const isUser = computed(() => message.value.role === 'user');
 
+// @ts-ignore
+const imgValue = ref(message.value.image || '');
+watch(
+	() => message.value,
+	async (newVal) => {
+		// @ts-ignore
+		if (!newVal.image) return;
+		console.log('newVal', newVal);
+		// @ts-ignore
+		imgValue.value = newVal.image;
+	}
+);
+// console.log(message.value);
+
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
 
 const userName = ref('User');
 
 if (isUser.value) {
-	const { user_name } = settings;
-	userName.value = user_name;
+	userName.value = store.settings.user_name;
 }
 
 const triggerEdit = async () => {
@@ -101,6 +116,12 @@ function textToHslColor(t: string, s: number, l: number) {
 	var h = hash % 360;
 	return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
 }
+
+const imgMaximized = ref(false);
+
+const imgLoading = computed(() => {
+	return imgValue.value === 'loading';
+});
 </script>
 
 <template>
@@ -113,12 +134,12 @@ function textToHslColor(t: string, s: number, l: number) {
 				>
 					<CardHeader
 						v-if="threadMode === 'persona'"
-						class="p-3 flex flex-row items-center space-x-2"
+						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
 					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar
 							v-if="isUser"
-							class="text-lg"
+							class="text-lg mt-2"
 							:style="{
 								backgroundColor: textToHslColor(userName, 60, 80),
 							}"
@@ -144,7 +165,43 @@ function textToHslColor(t: string, s: number, l: number) {
 					<CardHeader class="p-3" v-else>
 						{{ message.role === 'user' ? userName : 'AI' }}
 					</CardHeader>
-					<CardContent class="p-3 pl-6 pt-0">{{ message.content }}</CardContent>
+					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between">
+						<div class="">
+							{{ message.content }}
+						</div>
+						<!-- img is 512x768, so aspect ratio is 2:3
+						 -->
+						<div
+							v-if="imgValue"
+							class="mt-2 mx-3 rounded-lg transition-all"
+							:style="{
+								maxHeight: imgMaximized ? '512px' : '256px',
+							}"
+						>
+							<Progress
+								v-if="imgLoading"
+								:model-value="store.imgProgress * 100"
+								:style="{
+									// visibility: store.imgGenerating ? 'visible' : 'hidden',
+									opacity: store.imgGenerating ? 1 : 0,
+								}"
+								class="mt-2"
+							/>
+							<img v-if="imgLoading" class="shadow-md" src="/assets/placeholder.png" />
+							<img
+								v-if="!imgLoading"
+								@click="imgMaximized = !imgMaximized"
+								:src="imgValue"
+								:class="[
+									'shadow-md',
+									'cursor-pointer',
+									'hover:shadow-lg',
+									imgMaximized ? 'hover:scale-95' : 'hover:scale-105',
+									'transition-all',
+								]"
+							/>
+						</div>
+					</CardContent>
 				</Card>
 			</ContextMenuTrigger>
 			<ContextMenuContent>

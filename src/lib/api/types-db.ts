@@ -46,6 +46,7 @@ export interface ChatMessage {
 	updated: number | null;
 	role: 'user' | 'assistant' | 'system';
 	content: string;
+	image: string | null;
 	thread_id: string;
 	thread_index: number;
 }

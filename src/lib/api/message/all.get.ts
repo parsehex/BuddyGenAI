@@ -64,6 +64,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 					personaVersion.name,
 					personaVersion.description
 				),
+				image: null,
 				thread_id: threadId,
 				thread_index: 0,
 			});

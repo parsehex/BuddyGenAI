@@ -23,7 +23,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_model_image: '',
 	external_api_key: '',
 	fresh_db: 0,
-	n_gpu_layers: 0,
+	n_gpu_layers: 99,
 	auto_start_server: 0,
 };
 

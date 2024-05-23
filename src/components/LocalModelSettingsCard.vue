@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, onMounted } from 'vue';
 import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -25,8 +25,11 @@ const emits = defineEmits(['openModelDirectory', 'modelChange']);
 
 const { settings, chatModels, imageModels, updateModels } = useAppStore();
 
-onBeforeMount(() => {
-	updateModels();
+onMounted(() => {
+	// updateModels();
+	setTimeout(() => {
+		updateModels();
+	}, 250);
 });
 </script>
 

@@ -65,20 +65,22 @@ const checkToStartServer = async () => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
-			<RouterLink class="text-xl font-bold dark:bg-gray-600 rounded-b px-1" to="/">
+			<img
+				v-if="store.newHere"
+				class="w-[50px]"
+				src="/assets/logo.png"
+				alt="BuddyGen Logo"
+			/>
+			<RouterLink
+				class="text-xl font-bold dark:bg-gray-600 rounded-b px-1 mb-2"
+				to="/"
+			>
 				{{ store.newHere ? 'Welcome to' : '' }}
 				<div class="underline inline">
 					<span style="color: #61dafb">BuddyGen</span>
 					<span style="color: #111">AI</span>
 				</div>
 			</RouterLink>
-
-			<img
-				v-if="store.newHere"
-				class="w-[50px] mb-2"
-				src="/assets/logo.png"
-				alt="BuddyGen Logo"
-			/>
 
 			<div
 				v-if="store.chatServerStarting"

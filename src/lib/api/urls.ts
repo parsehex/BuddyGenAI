@@ -20,7 +20,6 @@ const message = {
 	deleteAll: (threadId: string) => `/api/message/all?threadId=${threadId}`,
 	create: () => {
 		if (isDev) {
-			console.log('using dev endpoint');
 			return 'http://localhost:8079/api/message';
 		}
 		return '/api/message';
