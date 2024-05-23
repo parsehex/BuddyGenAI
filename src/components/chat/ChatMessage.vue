@@ -192,6 +192,9 @@ const imgLoading = computed(() => {
 								v-if="!imgLoading"
 								@click="imgMaximized = !imgMaximized"
 								:src="imgValue"
+								:style="{
+									minWidth: imgMaximized ? '200px' : '',
+								}"
 								:class="[
 									'shadow-md',
 									'cursor-pointer',

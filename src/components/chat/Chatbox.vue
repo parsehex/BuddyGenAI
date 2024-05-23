@@ -213,7 +213,7 @@ picture of Jenny, female, long dark brown hair, blue-colored eyes, petite body, 
 					console.log('p', p);
 					if (p) p = JSON.parse(p);
 
-					const filename = `${Date.now()}`;
+					const filename = `${Date.now()}.png`;
 
 					await makePicture({
 						absModelPath: store.getImageModelPath(),
