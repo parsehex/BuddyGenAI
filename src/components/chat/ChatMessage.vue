@@ -134,7 +134,7 @@ const imgLoading = computed(() => {
 				>
 					<CardHeader
 						v-if="threadMode === 'persona'"
-						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
+						class="p-3 flex flex-row items-baseline space-x-2 pt-1 pb-2"
 					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar
