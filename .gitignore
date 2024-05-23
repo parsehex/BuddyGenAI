@@ -24,3 +24,4 @@ build/config.gypi
 
 /*.old
 bark.cpp
+llama.log
