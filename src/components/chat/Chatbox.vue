@@ -34,6 +34,12 @@ import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName } from '@/lib/prompt/sd';
 import { makePicture } from '@/lib/ai/img';
 import Message from './ChatMessage.vue';
+import {
+	imgDescriptionFromChat,
+	imgPromptFromDescription,
+	shouldSendImg,
+} from '@/src/lib/prompt/img/chat';
+import { titleFromMessages } from '@/src/lib/prompt/chat';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -123,7 +129,7 @@ await initialMessages.value;
 
 console.log('initial messages', await initialMessages.value);
 
-const userName = AppSettings.get('user_name');
+const userName = AppSettings.get('user_name') as string;
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
@@ -133,22 +139,23 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		body: apiPartialBody.value,
 		onFinish: async () => {
 			console.log('onFinish', messages.value.length);
-			const cmdPrompt = `The following is a chat between ${userName} and ${currentBuddy.value?.name}. The task is to determine whether or not to send an image to ${userName} on behalf of ${currentBuddy.value?.name}, given the latest message.\nDo not send an image unless prompted by either ${currentBuddy.value?.name} or ${userName}.\n\nRespond with a valid JSON object containing the keys "reasoning" with brief logical reasoning, "send_image" with a boolean, and "description" with a description of the image.\n\nRespond without further prose.`;
-			// const cmdPrompt = `The following is a chat between ${userName} and ${currentBuddy.value?.name}. Assistant's task is to determine: did ${currentBuddy.value?.name} decide to send an image to ${userName}, or did ${userName} request one?\n\nRespond with a valid string containing one word (yes or no).`;
 
 			const assistant = currentBuddy.value?.name;
 			const user = userName;
 
-			let cmd = (await complete(cmdPrompt, {
-				body: {
-					max_tokens: 512,
-					temperature: 0.05,
-					messages: messages.value.slice().map((m) => ({
-						role: m.role === 'user' ? user : assistant,
-						content: m.content,
-					})),
-				},
-			})) as string;
+			let cmd = (await complete(
+				shouldSendImg(userName, currentBuddy.value?.name || ''),
+				{
+					body: {
+						max_tokens: 512,
+						temperature: 0.05,
+						messages: messages.value.slice().map((m) => ({
+							role: m.role === 'user' ? user : assistant,
+							content: m.content,
+						})),
+					},
+				}
+			)) as string;
 			cmd = cmd.trim();
 
 			// check for missing end bracket
@@ -171,16 +178,15 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			let explicit = cmd?.includes('explicit') && !isValidJSON;
 			if (cmdObj.send_image && !explicit) {
 				if (!cmdObj.description) {
-					const imgPrompt = `The following is a chat between ${userName} and ${currentBuddy.value?.name}. Given the latest message, Assistant's task is to create a description of a single image involving ${currentBuddy.value?.name} to send to ${userName}. Respond with a valid JSON object containing the key "description".`;
-
-					const img = await complete(imgPrompt, {
-						body: { max_tokens: 100, temperature: 0.1, messages: messages.value },
-					});
+					const img = await complete(
+						imgDescriptionFromChat(userName, currentBuddy.value?.name || ''),
+						{
+							body: { max_tokens: 100, temperature: 0.1, messages: messages.value },
+						}
+					);
 					console.log('img', img);
 					if (img) {
 						explicit = img?.includes('explicit');
-						// const imgObj = JSON.parse(img);
-						// cmdObj.description = imgObj.description;
 						cmdObj.description = img;
 					}
 				}
@@ -199,15 +205,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					console.log('newMessages', newMessages);
 					setMessages(newMessages);
 
-					const pPrompt = `The following is a description of an image. Assistant's task is to write a relevant keyword-based prompt based on the description. Respond with the prompt in quotes, without further prose.
-
-Description:
-${cmdObj.description}
-
-Example prompt for a profile picture:
-picture of Jenny, female, long dark brown hair, blue-colored eyes, petite body, flowing blouse, facing the viewer, centered, thin circle frame, cartoon, digital art`;
-
-					let p = (await complete(pPrompt, {
+					let p = (await complete(imgPromptFromDescription(cmdObj.description), {
 						body: { max_tokens: 50, temperature: 0.1 },
 					})) as string;
 					console.log('p', p);
@@ -298,12 +296,9 @@ picture of Jenny, female, long dark brown hair, blue-colored eyes, petite body, 
 				// 3 incl. system message
 				console.log('generating title');
 				console.time('completion');
-				const msg1 = messages.value[0];
-				const msg2 = messages.value[1];
-				const msg3 = messages.value[2];
-				const prompt = `Your task is to write a title in 5 words or less for the following chat. When in doubt, write a generic title.\n\nContext: ${msg1.content}\n\n${msg2.role}: ${msg2.content}\n\n${msg3.role}: ${msg3.content}`;
+				const [msg1, msg2, msg3] = messages.value;
 				isLoading.value = true;
-				let value = await complete(prompt, {
+				let value = await complete(titleFromMessages(msg1, msg2, msg3), {
 					body: { max_tokens: 20, temperature: 0.01 },
 				});
 				if (value) {

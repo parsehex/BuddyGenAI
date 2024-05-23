@@ -169,11 +169,10 @@ const imgLoading = computed(() => {
 						<div class="">
 							{{ message.content }}
 						</div>
-						<!-- img is 512x768, so aspect ratio is 2:3
-						 -->
 						<div
 							v-if="imgValue"
 							class="mt-2 mx-3 rounded-lg transition-all"
+							@contextmenu.prevent
 							:style="{
 								maxHeight: imgMaximized ? '512px' : '256px',
 							}"
@@ -182,10 +181,8 @@ const imgLoading = computed(() => {
 								v-if="imgLoading"
 								:model-value="store.imgProgress * 100"
 								:style="{
-									// visibility: store.imgGenerating ? 'visible' : 'hidden',
 									opacity: store.imgGenerating ? 1 : 0,
 								}"
-								class="mt-2"
 							/>
 							<img v-if="imgLoading" class="shadow-md" src="/assets/placeholder.png" />
 							<img
