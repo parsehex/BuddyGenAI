@@ -30,6 +30,7 @@ import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
+import { textToHslColor } from '@/src/lib/utils';
 
 const { copyToClipboard } = useElectron();
 const store = useAppStore();
@@ -57,7 +58,7 @@ watch(
 	async (newVal) => {
 		// @ts-ignore
 		if (!newVal.image) return;
-		console.log('newVal', newVal);
+		// console.log('newVal', newVal);
 		// @ts-ignore
 		imgValue.value = newVal.image;
 	}
@@ -67,11 +68,11 @@ watch(
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
 
-const userName = ref('User');
 
-if (isUser.value) {
-	userName.value = store.settings.user_name;
-}
+const userName = computed(() => {
+	if (isUser.value) return store.settings.user_name;
+	return '';
+});
 
 const triggerEdit = async () => {
 	editingMessageTitle.value = `Editing Message`;
@@ -106,17 +107,6 @@ const msgInitials = computed(() => {
 	return firstName[0];
 });
 
-// https://medium.com/@pppped/compute-an-arbitrary-color-for-user-avatar-starting-from-his-username-with-javascript-cd0675943b66
-function textToHslColor(t: string, s: number, l: number) {
-	var hash = 0;
-	for (var i = 0; i < t.length; i++) {
-		hash = t.charCodeAt(i) + ((hash << 5) - hash);
-	}
-
-	var h = hash % 360;
-	return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
-}
-
 const imgMaximized = ref(false);
 
 const imgLoading = computed(() => {
@@ -139,7 +129,7 @@ const imgLoading = computed(() => {
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar
 							v-if="isUser"
-							class="text-lg mt-2"
+							class="text-md mt-2 font-bold"
 							:style="{
 								backgroundColor: textToHslColor(userName, 60, 80),
 							}"
@@ -189,15 +179,13 @@ const imgLoading = computed(() => {
 								v-if="!imgLoading"
 								@click="imgMaximized = !imgMaximized"
 								:src="imgValue"
-								:style="{
-									minWidth: imgMaximized ? '200px' : '',
-								}"
 								:class="[
 									'shadow-md',
 									'cursor-pointer',
 									'hover:shadow-lg',
 									imgMaximized ? 'hover:scale-95' : 'hover:scale-105',
-									'transition-all',
+									imgMaximized ? 'min-w-64' : 'max-w-32',
+									'transition-transform',
 								]"
 							/>
 						</div>

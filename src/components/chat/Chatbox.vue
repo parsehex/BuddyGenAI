@@ -140,22 +140,22 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		onFinish: async () => {
 			console.log('onFinish', messages.value.length);
 
-			const assistant = currentBuddy.value?.name;
+			const assistant =
+				threadMode.value === 'persona'
+					? currentBuddy.value?.name || ''
+					: 'Assistant';
 			const user = userName;
 
-			let cmd = (await complete(
-				shouldSendImg(userName, currentBuddy.value?.name || ''),
-				{
-					body: {
-						max_tokens: 512,
-						temperature: 0.05,
-						messages: messages.value.slice().map((m) => ({
-							role: m.role === 'user' ? user : assistant,
-							content: m.content,
-						})),
-					},
-				}
-			)) as string;
+			let cmd = (await complete(shouldSendImg(userName, assistant), {
+				body: {
+					max_tokens: 512,
+					temperature: 0.05,
+					messages: messages.value.slice().map((m) => ({
+						role: m.role === 'user' ? user : assistant,
+						content: m.content,
+					})),
+				},
+			})) as string;
 			cmd = cmd.trim();
 
 			// check for missing end bracket
@@ -211,20 +211,22 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					console.log('p', p);
 					if (p) p = JSON.parse(p);
 
+					const outputSubDir =
+						threadMode.value === 'persona'
+							? currentBuddy.value?.id || ''
+							: 'AI-Assistant';
 					const filename = `${Date.now()}.png`;
 
 					await makePicture({
 						absModelPath: store.getImageModelPath(),
-						outputSubDir: currentBuddy.value?.id || '',
+						outputSubDir,
 						outputFilename: filename,
 						posPrompt: p,
 						negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
 						size: 768,
 					});
 
-					const imgPath = urls.buddy.getProfilePic(
-						currentBuddy.value?.id + '/' + filename
-					);
+					const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);
 					imgToSave = imgPath;
 				}
 			}
@@ -410,7 +412,16 @@ const handleSysMessageOpen = async () => {
 	newSysMessage.value = sysMessage.value.content;
 };
 const updateSysMessage = async () => {
-	if (!sysMessage.value) return;
+	if (!sysMessage.value) {
+		await api.message.createOne(threadId.value, {
+			// @ts-ignore
+			role: 'system',
+			content: newSysMessage.value,
+			thred_index: 0,
+		});
+		await refreshMessages();
+		return;
+	}
 	await api.message.updateOne(sysMessage.value.id, newSysMessage.value);
 	const newMessages = await refreshMessages();
 	const newSys = newMessages.find((m) => m.role === 'system');
@@ -539,7 +550,7 @@ const canReload = computed(() => {
 			/>
 		</div>
 		<Collapsible
-			v-if="hasSysMessage && threadMode === 'custom'"
+			v-if="threadMode === 'custom'"
 			class="my-2"
 			v-model:open="sysIsOpen"
 			:defaultOpen="false"
