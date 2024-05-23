@@ -1,21 +1,6 @@
 {
   "compilerOptions": {
     "paths": {
-      "nitropack": [
-        "./node_modules/nitropack"
-      ],
-      "defu": [
-        "./node_modules/defu"
-      ],
-      "h3": [
-        "./node_modules/h3"
-      ],
-      "consola": [
-        "./node_modules/consola"
-      ],
-      "ofetch": [
-        "./node_modules/ofetch"
-      ],
       "@": [
         "."
       ],
@@ -24,6 +9,9 @@
       ],
       "@/components/*": [
         "./src/components/*"
+      ],
+      "@/composables/*": [
+        "./src/composables/*"
       ],
       "@/lib/*": [
         "./src/lib/*"
@@ -38,10 +26,10 @@
         "./assets/*"
       ],
       "public": [
-        "../public"
+        "./public"
       ],
       "public/*": [
-        "../public/*"
+        "./public/*"
       ],
     },
     "forceConsistentCasingInFileNames": true,
@@ -68,11 +56,11 @@
   },
   "include": [
 		"./typed-router.d.ts",
-    "../lib/**/*",
-    "../components/**/*",
-    "../composables/**/*",
-    "../pages/**/*",
-    "../store/**/*",
+    "./src/lib/**/*",
+    "./src/components/**/*",
+    "./src/composables/**/*",
+    "./src/pages/**/*",
+    "./src/store/**/*",
     "./"
   ],
   "exclude": [
