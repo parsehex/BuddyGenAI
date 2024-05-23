@@ -2,7 +2,7 @@
 import { ref, computed, toRefs, watch } from 'vue';
 import type { Message } from 'ai/vue';
 import type { BuddyVersionMerged, ChatMessage } from '@/lib/api/types-db';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -23,15 +23,13 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
-import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import { textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
+import { isDevMode } from '@/lib/utils';
 
 const { copyToClipboard } = useElectron();
 const store = useAppStore();
@@ -59,15 +57,14 @@ watch(
 	async (newVal) => {
 		// @ts-ignore
 		if (!newVal.image) return;
-		// console.log('newVal', newVal);
 		// @ts-ignore
 		imgValue.value = newVal.image;
 	}
 );
-// console.log(message.value);
 
 const editingMessageTitle = ref('');
 const editingMessage = ref('');
+const modalOpen = ref(false);
 
 const userName = computed(() => {
 	if (isUser.value) return store.settings.user_name;
@@ -77,11 +74,20 @@ const userName = computed(() => {
 const triggerEdit = async () => {
 	editingMessageTitle.value = `Editing Message`;
 	editingMessage.value = message.value.content;
+	modalOpen.value = true;
 };
-const handleEdit = async () => {
+const handleEdit = async (e: KeyboardEvent) => {
+	if (e.key !== 'Enter') return;
+	if (!e.ctrlKey) return;
+
 	await api.message.updateOne(message.value.id, editingMessage.value);
 	editingMessage.value = '';
 	emit('edit', message.value.id);
+	modalOpen.value = false;
+};
+const handleCancel = () => {
+	editingMessage.value = '';
+	modalOpen.value = false;
 };
 
 const doDelete = async () => {
@@ -106,16 +112,10 @@ const msgInitials = computed(() => {
 	const firstName = currentPersona.value.name.split(' ')[0];
 	return firstName[0];
 });
-
-const imgMaximized = ref(false);
-
-const imgLoading = computed(() => {
-	return imgValue.value === 'loading';
-});
 </script>
 
 <template>
-	<Dialog :modal="true">
+	<Dialog :modal="true" :open="modalOpen" @update:open="modalOpen = $event">
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<Card
@@ -160,7 +160,6 @@ const imgLoading = computed(() => {
 							{{ message.content }}
 						</div>
 						<MessageImage v-if="imgValue" :imgValue="imgValue" />
-						<!--  -->
 					</CardContent>
 				</Card>
 			</ContextMenuTrigger>
@@ -175,11 +174,12 @@ const imgLoading = computed(() => {
 					</ContextMenuItem>
 				</DialogTrigger>
 				<ContextMenuItem @click="doDelete" v-if="isUser">Delete</ContextMenuItem>
+
 				<!-- TODO confirm (reuse same dialog) -->
-				<!-- <ContextMenuSeparator />
-				<ContextMenuItem @click="doClearThread">
+				<ContextMenuSeparator v-if="isDevMode()" />
+				<ContextMenuItem v-if="isDevMode()" @click="doClearThread">
 					Delete All Messages
-				</ContextMenuItem> -->
+				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
 		<DialogContent>
@@ -187,15 +187,18 @@ const imgLoading = computed(() => {
 				<DialogTitle>{{ editingMessageTitle }}</DialogTitle>
 			</DialogHeader>
 			<DialogDescription>
-				<!-- TODO how to programmatically close dialog? (i.e. on ctrl+enter) -->
 				<Textarea
 					v-model="editingMessage"
+					@keydown.enter="handleEdit"
 					placeholder="Message content..."
 					class="w-full min-h-48"
 				/>
 			</DialogDescription>
 			<DialogFooter>
 				<DialogClose as-child>
+					<Button @click="handleCancel" type="button" variant="outline"
+						>Cancel</Button
+					>
 					<Button @click="handleEdit" type="button">Confirm</Button>
 				</DialogClose>
 			</DialogFooter>

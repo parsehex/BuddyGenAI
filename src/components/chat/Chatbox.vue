@@ -40,14 +40,13 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
+import { isDevMode } from '@/src/lib/utils';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
 const { complete } = useCompletion({ api: urls.message.completion() });
-
-const isDev = import.meta.env.DEV;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -57,7 +56,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // TODO fix this
 // in the meantime, this is a workaround
 window.addEventListener('focus', async () => {
-	if (isDev && messages.value.length === 0) {
+	if (isDevMode() && messages.value.length === 0) {
 		window.location.reload();
 	}
 

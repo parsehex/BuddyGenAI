@@ -1,11 +1,9 @@
 <script setup>
-import { ref } from 'vue';
-
-const isDevMode = ref(process.env.NODE_ENV === 'development');
+import { isDevMode } from '@/lib/utils';
 </script>
 
 <template>
-	<div v-if="!isDevMode">
+	<div v-if="isDevMode()">
 		<slot></slot>
 	</div>
 </template>

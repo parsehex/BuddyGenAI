@@ -37,3 +37,7 @@ export function textToHslColor(t: string, s: number, l: number) {
 	var h = hash % 360;
 	return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
 }
+
+export function isDevMode() {
+	return process.env.NODE_ENV === 'development' || import.meta.env.DEV;
+}
