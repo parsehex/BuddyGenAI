@@ -50,6 +50,7 @@ import {
 	jsonSchema,
 } from '@/src/lib/prompt/appearance';
 import DevOnly from '@/src/components/DevOnly.vue';
+import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -374,57 +375,16 @@ const setAppearanceOption = (key: string, value: string) => {
 					/>
 					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
 
-					<!-- TODO disclaimer about generated images -->
 					<p class="text-sm text-gray-500 select-none">
 						Images are created using AI and may have unexpected results.
 					</p>
 
-					<!-- TODO BuddyAvatarSelect :persona @select-pic -->
-					<Collapsible
-						v-if="allProfilePics.length > 1"
-						v-model:open="allPicsOpen"
-						class="space-y-2 w-full my-2 rounded-lg border-2 border-gray-300 dark:border-gray-700"
-					>
-						<CollapsibleTrigger as-child>
-							<div
-								class="text-md flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg p-1 w-full"
-							>
-								Other Pictures
-								<Button variant="ghost" size="sm" class="w-9 p-0 hover:bg-transparent">
-									<ChevronDown v-if="!allPicsOpen" />
-									<ChevronUp v-else />
-								</Button>
-							</div>
-						</CollapsibleTrigger>
-						<CollapsibleContent>
-							<ScrollArea class="w-full mx-auto">
-								<div class="flex flex-wrap justify-center w-max pb-2">
-									<div
-										v-for="pic in allProfilePics"
-										:key="pic"
-										@click="handleSelectProfilePic(pic)"
-										class="cursor-pointer w-16 h-16 m-2 rounded-full hover:shadow-lg hover:scale-105 hover:opacity-90"
-										:style="{
-											backgroundImage: `url(${urls.buddy.getProfilePic(
-												`${persona?.id}/${pic}`
-											)})`,
-											backgroundSize: 'cover',
-											userSelect: 'none',
-										}"
-									></div>
-								</div>
-								<ScrollBar orientation="horizontal" />
-							</ScrollArea>
-						</CollapsibleContent>
-					</Collapsible>
-					<!-- <Label for="profile-picture" class="flex flex-col items-center">
-						<span class="text-lg">Appearance</span>
-					</Label> -->
-					<!-- <p class="text-sm text-gray-500">
-						You can use keywords -- e.g.
-						<b><i>tan suit, sunglasses,</i></b>
-						etc.
-					</p> -->
+					<BuddyAvatarSelect
+						v-if="persona"
+						:persona="persona"
+						@select-profile-pic="handleSelectProfilePic"
+					/>
+
 					<div class="flex flex-col items-center justify-center w-full">
 						<!-- appearance options -->
 						<div class="flex flex-col items-center justify-center w-full">
