@@ -5,6 +5,7 @@ import cors from 'cors';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { AppSettings } from '../AppSettings';
 import { Message } from 'openai/resources/beta/threads/messages/messages';
+import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
 
 const chatProviderUrls = {
 	external: 'https://api.openai.com/v1',
@@ -22,7 +23,6 @@ export function updateModel(modelName: string) {
 
 const openai = new OpenAI({
 	apiKey: 'sk-1234',
-	// baseURL: 'http://localhost:8080/v1',
 });
 
 async function updateOpenai() {
@@ -33,12 +33,15 @@ async function updateOpenai() {
 		'selected_model_chat'
 	)) as string;
 
-	const baseURL = isExternal
-		? chatProviderUrls.external
-		: chatProviderUrls.local;
+	const llamaCppPort = getLlamaCppPort();
+	const llamaCppApiKey = getLlamaCppApiKey();
+	const llamaCppUrl = `http://localhost:${llamaCppPort}/v1`;
+
+	const baseURL = isExternal ? chatProviderUrls.external : llamaCppUrl;
 	openai.baseURL = baseURL;
+
 	if (isExternal) openai.apiKey = apiKey;
-	else openai.apiKey = 'sk-1234';
+	else openai.apiKey = llamaCppApiKey;
 
 	return selectedChatModel;
 }
@@ -100,15 +103,19 @@ async function useAlternateCompletion(options: any, res: any) {
 		payload.json_schema = jsonSchema;
 	}
 
+	const llamacppPort = getLlamaCppPort();
+	const url = `http://localhost:${llamacppPort}/v1/chat/completions`;
+	const apiKey = getLlamaCppApiKey();
+
 	// console.log('payload', payload);
 
-	const url = 'http://localhost:8080/v1/chat/completions';
 	const response = await fetch(url, {
 		method: 'POST',
-		body: JSON.stringify(payload),
 		headers: {
+			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
+		body: JSON.stringify(payload),
 	});
 
 	let i = 0;
@@ -246,7 +253,9 @@ router.post('/api/completion', async (req, res) => {
 
 router.get('/health', async (req, res) => {
 	try {
-		const response = await fetch('http://localhost:8080/health');
+		const port = getLlamaCppPort();
+		const url = `http://localhost:${port}/health`;
+		const response = await fetch(url);
 		const data = await response.json();
 		res.json({ isRunning: data.status === 'ok', currentModel });
 	} catch (error) {

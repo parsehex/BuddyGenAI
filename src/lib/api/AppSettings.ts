@@ -33,7 +33,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	fresh_db: 0,
 	n_gpu_layers: 99,
 	auto_send_stt: 0,
-	auto_read_chat: 1,
+	auto_read_chat: 0,
 	auto_start_server: 0,
 	// preferred_pic_quality (1 | 2 | 3)
 	// used_binary_type_llamacpp (avx2 | clblast | cuda12 | arm64 | etc.)

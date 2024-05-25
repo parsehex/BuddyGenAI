@@ -10,6 +10,7 @@ import type {
 
 import { api } from '@/lib/api';
 import useLlamaCpp from '@/composables/useLlamaCpp';
+import urls from '@/lib/api/urls';
 
 // @ts-ignore
 const { isServerRunning } = useLlamaCpp();
@@ -256,7 +257,7 @@ export const useAppStore = defineStore('app', () => {
 	};
 
 	function getSDProgress() {
-		const eventSource = new EventSource('http://localhost:8079/api/sd/progress');
+		const eventSource = new EventSource(urls.sd.progress());
 
 		eventSource.onmessage = function (event) {
 			const data = JSON.parse(event.data);

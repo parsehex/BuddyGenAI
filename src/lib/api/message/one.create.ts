@@ -41,10 +41,10 @@ export default async function createMessage(
 		created: new Date().getTime(),
 		role: message.role,
 		content: message.content,
-		image: image || null,
-		tts: tts || null,
+		image: image || '',
+		tts: tts || '',
 		thread_id: threadId,
 		thread_index: threadIndex,
 	});
-	await dbRun(sqlInsert[0], sqlInsert[1]);
+	const res = await dbRun(sqlInsert[0], sqlInsert[1]);
 }

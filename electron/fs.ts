@@ -63,6 +63,18 @@ function tryBinary(p: string) {
 	});
 }
 
+interface BinaryPaths {
+	gpu: string;
+	noGpu: string;
+}
+const binaryCache: Record<string, BinaryPaths> = {
+	'llama.cpp': { gpu: '', noGpu: '' },
+	'stable-diffusion.cpp': { gpu: '', noGpu: '' },
+	'whisper.cpp': { gpu: '', noGpu: '' },
+	piper: { gpu: '', noGpu: '' }, // only one binary (noGpu)
+};
+
+const gpuTypes = ['cuda12', 'rocm5.5', 'clblast'];
 type ProjectName =
 	| 'llama.cpp'
 	| 'stable-diffusion.cpp'
@@ -79,7 +91,8 @@ type Binaries = {
 type BinaryName<T extends ProjectName> = Binaries[T];
 export async function findBinaryPath<T extends ProjectName>(
 	projectName: T,
-	binaryName: BinaryName<T>
+	binaryName: BinaryName<T>,
+	gpu = true
 ) {
 	let exe = binaryName;
 	// @ts-ignore
@@ -87,13 +100,19 @@ export async function findBinaryPath<T extends ProjectName>(
 
 	let resPath = await findResourcesPath();
 
-	if (projectName === 'llamafile') {
+	const cached = binaryCache[projectName];
+	if (cached[gpu ? 'gpu' : 'noGpu']) {
+		console.log('using cached binary path for', projectName);
+		return cached[gpu ? 'gpu' : 'noGpu'];
+	}
+
+	if (projectName === 'llamafile' || projectName === 'piper') {
 		let binPath = path.join(resPath, 'binaries/', exe);
 		await fs.access(binPath);
 		return binPath;
 	}
 
-	let binPath = path.join(resPath, 'binaries/', projectName, exe);
+	let binPath = path.join(resPath, 'binaries/');
 
 	// NOTE as of now, this only affects using SDCPP since we're using llamafile instead of llama.cpp
 	const directories = [
@@ -111,20 +130,38 @@ export async function findBinaryPath<T extends ProjectName>(
 
 	for (let i = 0; i < directories.length; i++) {
 		try {
-			binPath = path.join(resPath, 'binaries/', projectName, directories[i], exe);
+			const dir = directories[i];
+			binPath = path.join(
+				resPath,
+				'binaries/',
+				dir,
+				projectName.replace('.', '') + '-' + exe
+			);
+
+			if (gpu && !gpuTypes.includes(dir)) {
+				continue;
+			}
+
 			// console.log('checking', binPath);
 			await fs.access(binPath);
 			// console.log('found', binPath);
 			await tryBinary(binPath);
 			console.log('using', directories[i], 'version of', projectName);
+			binaryCache[projectName][gpu ? 'gpu' : 'noGpu'] = binPath;
 			return binPath;
 		} catch (error) {}
 	}
+
+	if (gpu) {
+		throw new Error(`GPU-enabled binary ${exe} not found for ${projectName}`);
+	}
+
 	try {
 		await fs.access(binPath);
+		binaryCache[projectName][gpu ? 'gpu' : 'noGpu'] = binPath;
 		return binPath;
 	} catch (error) {
-		throw new Error(`Binary ${exe} not found for project ${projectName}`);
+		throw new Error(`Binary ${exe} not found for ${projectName}`);
 	}
 }
 export function getDataPath(subPath?: string) {

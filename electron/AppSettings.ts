@@ -31,7 +31,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	fresh_db: 0,
 	n_gpu_layers: 99,
 	auto_send_stt: 0,
-	auto_read_chat: 1,
+	auto_read_chat: 0,
 	auto_start_server: 0,
 };
 

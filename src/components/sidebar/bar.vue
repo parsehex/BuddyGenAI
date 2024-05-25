@@ -95,8 +95,8 @@ const doCreateThread = async () => {
 				<div class="bg-background mb-1">
 					<ChatServerStatus v-if="!store.isExternalProvider" />
 					<div class="flex w-full px-2 my-1 items-end">
-						<BuddySelect v-model="selectedBuddy" />
-						<!-- <BuddySelect v-model="selectedBuddy" include-ai /> -->
+						<!-- <BuddySelect v-model="selectedBuddy" /> -->
+						<BuddySelect v-model="selectedBuddy" include-ai />
 						<Button class="ml-1" @click="doCreateThread">+</Button>
 					</div>
 				</div>

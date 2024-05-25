@@ -110,7 +110,7 @@ async function runSD(
 		}
 
 		log.info('SD Path:', sdPath);
-		log.info('Running SD:', args);
+		// log.info('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
@@ -131,7 +131,7 @@ async function runSD(
 
 		command.stdout?.on('data', (data: any) => {
 			const str = data.toString();
-			console.log('SD stdout:', str);
+			// console.log('SD stdout:', str);
 			let isProgressLine = false;
 			isProgressLine = str.match(/(\d+\/\d+)/) !== null;
 			if (isProgressLine) {

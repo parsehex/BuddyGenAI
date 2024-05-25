@@ -85,4 +85,14 @@ const tts = {
 		return tts;
 	},
 };
-export default { other, message, model, buddy, setting, thread, tts };
+const sd = {
+	progress: () => {
+		const sd = `/api/sd/progress`;
+
+		if (isDev) {
+			return `http://localhost:8079${sd}`;
+		}
+		return sd;
+	},
+};
+export default { other, message, model, buddy, setting, thread, tts, sd };

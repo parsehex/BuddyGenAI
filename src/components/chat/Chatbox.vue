@@ -462,22 +462,22 @@ const updateSysMessage = async () => {
 const refreshed = ref(false);
 const thread = ref({} as ChatThread);
 const threadMode = ref('custom' as 'custom' | 'persona');
-const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
-	if (!threadId) return;
-	if (refreshed.value) {
-		setTimeout(() => {
-			refreshed.value = false;
-		}, 10);
-		return;
-	}
-	await api.message.removeAll(threadId.value);
-	await api.thread.updateOne(threadId.value, { mode: newMode });
+// const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
+// 	if (!threadId) return;
+// 	if (refreshed.value) {
+// 		setTimeout(() => {
+// 			refreshed.value = false;
+// 		}, 10);
+// 		return;
+// 	}
+// 	await api.message.removeAll(threadId.value);
+// 	await api.thread.updateOne(threadId.value, { mode: newMode });
 
-	await updateThread();
-	await refreshBuddies();
-	await refreshMessages();
-};
-watch(threadMode, handleThreadModeChange);
+// 	await updateThread();
+// 	await refreshBuddies();
+// 	await refreshMessages();
+// };
+// watch(threadMode, handleThreadModeChange);
 
 const buddyModeUseCurrent = ref(false);
 
@@ -657,7 +657,7 @@ const startRecording = async () => {
 		>
 			<CollapsibleTrigger @click="handleSysMessageOpen">
 				<Button type="button" variant="ghost" size="sm">
-					{{ sysIsOpen ? 'Hide' : 'Show' }} Custom Instructions
+					Instructions {{ sysIsOpen ? '▲' : '▼' }}
 				</Button>
 			</CollapsibleTrigger>
 			<CollapsibleContent>

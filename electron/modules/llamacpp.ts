@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
 import log from 'electron-log/main';
 import { AppSettings } from '../AppSettings';
+import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
@@ -42,27 +43,9 @@ let isReady = false;
 
 function startServer(modelPath: string, nGpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
-		const isExternal =
-			(await AppSettings.get('selected_provider_chat')) === 'external';
-		const apiKey = (await AppSettings.get('external_api_key')) as string;
-		const selectedChatModel = (await AppSettings.get(
-			'selected_model_chat'
-		)) as string;
-
-		if (isExternal) {
-			// this shouldnt happen right?
-			if (!apiKey) {
-				log.error('External API key not set');
-				reject();
-				return;
-			}
-			if (!selectedChatModel) {
-				log.error('External model not set');
-				reject();
-				return;
-			}
-			return;
-		}
+		const port = getLlamaCppPort();
+		const apiKey = getLlamaCppApiKey();
+		log.log('using port:', port, 'and api key:', apiKey);
 
 		modelPath = path.normalize(modelPath);
 		try {
@@ -77,11 +60,17 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 		const llamaCppPath = await findBinaryPath('llama.cpp', 'server');
 		const args = [
 			// '--nobrowser', // llamafile arg
+			'--port',
+			port + '',
 			'--model',
 			modelPath,
 			'--n-gpu-layers',
 			nGpuLayers + '',
 		];
+
+		if (apiKey) {
+			args.push('--api-key', apiKey);
+		}
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			modelPath.includes(key)

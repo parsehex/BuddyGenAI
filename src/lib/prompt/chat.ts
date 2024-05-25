@@ -10,6 +10,6 @@ export function defaultAIChatPrompt(userName: string) {
 
 	const prompt = `The following is a chat between a user${
 		userName && userName !== 'user' ? ' named ' + userName : ''
-	} and an AI Assistant.`;
+	} and an AI Assistant. Assistant has the ability to send pictures (1 per reply).`;
 	return prompt;
 }

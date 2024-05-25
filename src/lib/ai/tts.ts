@@ -45,5 +45,8 @@ export function cleanTextForTTS(text: string) {
 	// replace ... with . . .
 	cleanedText = cleanedText.replace(/\.{3}/g, '. . .');
 
+	// remove urls
+	cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/g, '');
+
 	return cleanedText;
 }

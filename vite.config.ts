@@ -1,10 +1,11 @@
-// vite.config.ts
 import { defineConfig } from 'vite';
 import Vue from '@vitejs/plugin-vue';
 import VueRouter from 'unplugin-vue-router/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwind from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
 	css: {
@@ -25,6 +26,6 @@ export default defineConfig({
 		dedupe: ['vue'],
 	},
 	build: {
-		sourcemap: true,
+		sourcemap: isDev,
 	},
 });
