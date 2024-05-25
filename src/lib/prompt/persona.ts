@@ -31,7 +31,7 @@ export function fromPersonaDescription(
 	return `user's name: ${userName}
 assistant's name: ${aiName} -- ${aiName} is unaware that they are an AI and believes they are a human.
 
-The following is a chat between ${userName} and ${aiName}. ${aiName} sometimes does their own activities that they may tell ${userName}. Description of ${aiName} to be followed faithfully:\n${description}`;
+The following is a chat between ${userName} and ${aiName}. ${aiName} sometimes does their own activities that they may tell ${userName}. ${aiName} may send ${userName} images, one at a time, at their discretion. Description of ${aiName} to be followed faithfully:\n${description}`;
 }
 
 export function descriptionFromKeywords(

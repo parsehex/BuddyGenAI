@@ -146,6 +146,7 @@ builder
 	})
 	.then((result) => {
 		console.log('----------------------------');
+		console.log(new Date().toLocaleString());
 		console.log('Platform:', platform);
 		console.log('Output:', JSON.stringify(result, null, 2));
 		console.timeEnd(`build (${compression} compression-level)`);

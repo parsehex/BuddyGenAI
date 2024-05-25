@@ -40,7 +40,7 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { isDevMode, playAudio } from '@/src/lib/utils';
+import { attemptToFixJson, isDevMode, playAudio } from '@/src/lib/utils';
 import usePiper from '@/src/composables/usePiper';
 import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
 import useWhisper from '@/src/composables/useWhisper';
@@ -179,12 +179,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					})),
 				},
 			})) as string;
-			cmd = cmd.trim();
+			cmd = attemptToFixJson(cmd);
 
-			// check for missing end bracket
-			if (cmd && cmd[0] === '{' && cmd[cmd.length - 1] !== '}') {
-				cmd += '}';
-			}
 			let imgToSave = '';
 			console.log('cmd', cmd.length, cmd);
 			let isValidJSON = false;
@@ -198,20 +194,26 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (isValidJSON) {
 				cmdObj = JSON.parse(cmd);
 			}
-			let explicit = cmd?.includes('explicit') && !isValidJSON;
+			let explicit = cmd?.includes('explicit') || !isValidJSON;
 			if (cmdObj.send_image && !explicit) {
-				if (!cmdObj.description) {
-					const img = await complete(
-						imgDescriptionFromChat(userName, currentBuddy.value?.name || ''),
-						{
-							body: { max_tokens: 100, temperature: 0.1, messages: messages.value },
-						}
-					);
-					console.log('img', img);
-					if (img) {
-						explicit = img?.includes('explicit');
-						cmdObj.description = img;
+				let buddyAppearance = '';
+				if (currentBuddy.value?.profile_pic_prompt) {
+					buddyAppearance = currentBuddy.value.profile_pic_prompt;
+				}
+				const img = await complete(
+					imgDescriptionFromChat(
+						userName,
+						currentBuddy.value?.name || '',
+						buddyAppearance
+					),
+					{
+						body: { max_tokens: 100, temperature: 0.1, messages: messages.value },
 					}
+				);
+				console.log('img', img);
+				if (img) {
+					explicit = img?.includes('explicit');
+					cmdObj.description = img;
 				}
 
 				if (cmdObj.description && !explicit) {
@@ -232,25 +234,28 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						body: { max_tokens: 50, temperature: 0.1 },
 					})) as string;
 					console.log('p', p);
-					if (p) p = JSON.parse(p);
+					if (p) {
+						p = attemptToFixJson(p);
+						p = JSON.parse(p);
 
-					const outputSubDir =
-						threadMode.value === 'persona'
-							? currentBuddy.value?.id || ''
-							: 'AI-Assistant';
-					const filename = `${Date.now()}.png`;
+						const outputSubDir =
+							threadMode.value === 'persona'
+								? currentBuddy.value?.id || ''
+								: 'AI-Assistant';
+						const filename = `${Date.now()}.png`;
 
-					await makePicture({
-						absModelPath: store.getImageModelPath(),
-						outputSubDir,
-						outputFilename: filename,
-						posPrompt: p,
-						negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
-						size: 768,
-					});
+						await makePicture({
+							absModelPath: store.getImageModelPath(),
+							outputSubDir,
+							outputFilename: filename,
+							posPrompt: p,
+							negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
+							size: 768,
+						});
 
-					const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);
-					imgToSave = imgPath;
+						const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);
+						imgToSave = imgPath;
+					}
 				}
 			}
 			if (explicit) {

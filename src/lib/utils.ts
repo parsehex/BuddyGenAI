@@ -62,3 +62,31 @@ export function blobToArrayBuffer(blob: Blob): Promise<Buffer> {
 		reader.readAsArrayBuffer(blob);
 	});
 }
+
+export function attemptToFixJson(json: string): string {
+	if (!json) {
+		return '';
+	}
+
+	json = json.trim();
+
+	const hasOpeningBracket = json.includes('{');
+	const hasClosingBracket = json.includes('}');
+	const hasBothBrackets = hasOpeningBracket && hasClosingBracket;
+	const firstIsOpeningBracket = json[0] === '{';
+	const lastIsClosingBracket = json[json.length - 1] === '}';
+
+	if (firstIsOpeningBracket && !hasClosingBracket) {
+		json += '}';
+	}
+
+	if (!firstIsOpeningBracket && hasBothBrackets) {
+		const firstBracketIndex = json.indexOf('{');
+		json = json.slice(firstBracketIndex);
+
+		const lastBracketIndex = json.lastIndexOf('}');
+		json = json.slice(0, lastBracketIndex + 1);
+	}
+
+	return json;
+}
