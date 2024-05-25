@@ -84,7 +84,7 @@ const doCreateThread = async () => {
 
 <template>
 	<Tabs v-model:model-value="modelValue">
-		<TabsList class="w-full dark:bg-gray-800">
+		<TabsList class="w-full dark:bg-gray-800 rounded-none">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<TabsTrigger value="settings">Settings</TabsTrigger>
@@ -92,10 +92,11 @@ const doCreateThread = async () => {
 		</TabsList>
 		<div class="h-screen">
 			<TabsContent value="chat">
-				<div class="bg-background my-1">
+				<div class="bg-background mb-1">
 					<ChatServerStatus v-if="!store.isExternalProvider" />
-					<div class="flex w-full px-2 mb-2 items-end">
-						<BuddySelect v-model="selectedBuddy" include-ai />
+					<div class="flex w-full px-2 my-1 items-end">
+						<BuddySelect v-model="selectedBuddy" />
+						<!-- <BuddySelect v-model="selectedBuddy" include-ai /> -->
 						<Button class="ml-1" @click="doCreateThread">+</Button>
 					</div>
 				</div>

@@ -61,7 +61,7 @@ const doStopServer = async () => {
 
 	setTimeout(() => {
 		doRefreshServerStatus();
-	}, 1000);
+	}, 500);
 	lastModel.value = null;
 };
 
@@ -105,6 +105,9 @@ watch(
 		lastModel.value = await getLastModel();
 	}
 );
+onBeforeMount(async () => {
+	lastModel.value = await getLastModel();
+});
 
 const bgColor = computed(() => {
 	if (store.chatServerRunning) {
@@ -123,7 +126,7 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 	<Popover>
 		<PopoverTrigger as-child>
 			<div
-				class="flex items-center bg-primary-foreground rounded-lg w-full justify-center cursor-pointer"
+				class="flex items-center bg-primary-foreground rounded-b-lg w-full justify-center cursor-pointer"
 			>
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
 				<span class="p-2"

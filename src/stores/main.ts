@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref, computed, watch, onBeforeMount } from 'vue';
-import { useRoute } from 'vue-router/auto';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -34,16 +33,18 @@ interface Settings {
 	selected_provider_image: Provider;
 	selected_model_chat: string;
 	selected_model_image: string;
+	selected_model_tts: string;
+	selected_model_whisper: string;
 	external_api_key: string;
 	fresh_db: number;
 	n_gpu_layers: number;
+	auto_send_stt: number;
+	auto_read_chat: number;
 	auto_start_server: number;
 }
 
 let firstRun = true;
 export const useAppStore = defineStore('app', () => {
-	const route = useRoute();
-
 	const selectedBuddyId = ref<string>('');
 	const threadMessages = ref<ChatMessage[]>([]);
 	const setThreadMessages = (messages: ChatMessage[]) => {
@@ -53,6 +54,8 @@ export const useAppStore = defineStore('app', () => {
 
 	const chatModels = ref([] as string[]);
 	const imageModels = ref([] as string[]);
+	const ttsModels = ref([] as string[]);
+	const whisperModels = ref([] as string[]);
 	const buddies = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
@@ -62,9 +65,11 @@ export const useAppStore = defineStore('app', () => {
 	);
 
 	onBeforeMount(async () => {
-		const [cM, iM, p, s, t] = await Promise.all([
+		const [cM, iM, tM, wM, p, s, t] = await Promise.all([
 			api.model.getAll('chat'),
 			api.model.getAll('image'),
+			api.model.getAll('tts'),
+			api.model.getAll('whisper'),
 			api.buddy.getAll(),
 			api.setting.getAll(),
 			api.thread.getAll(),
@@ -109,13 +114,40 @@ export const useAppStore = defineStore('app', () => {
 		imageModels.value.push(...res);
 		return res;
 	};
+	const updateTTSModels = async () => {
+		const res = await api.model.getAll('tts');
+		if (!res) {
+			console.log('no tts models found');
+			return [];
+		}
+		ttsModels.value.length = 0;
+		ttsModels.value.push(...res);
+		return res;
+	};
+	const updateWhisperModels = async () => {
+		const res = await api.model.getAll('whisper');
+		if (!res) {
+			console.log('no whisper models found');
+			return [];
+		}
+		whisperModels.value.length = 0;
+		whisperModels.value.push(...res);
+		return res;
+	};
 	const updateModels = async () => {
-		const [chat, image] = await Promise.all([
+		const [chat, image, tts, whisper] = await Promise.all([
 			updateChatModels(),
 			updateImageModels(),
+			updateTTSModels(),
+			updateWhisperModels(),
 		]);
 
-		return { chatModels: chat, imageModels: image };
+		return {
+			chatModels: chat,
+			imageModels: image,
+			ttsModels: tts,
+			whisperModels: whisper,
+		};
 	};
 	const updateBuddies = async () => {
 		const res = await api.buddy.getAll();
@@ -160,6 +192,22 @@ export const useAppStore = defineStore('app', () => {
 			? '\\'
 			: '/';
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
+	};
+	const getTTSModelPath = () => {
+		if (!settings.value.local_model_directory) return '';
+		if (!settings.value.selected_model_tts) return '';
+		const slash = settings.value.local_model_directory.includes('\\')
+			? '\\'
+			: '/';
+		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_tts}`;
+	};
+	const getWhisperModelPath = () => {
+		if (!settings.value.local_model_directory) return '';
+		if (!settings.value.selected_model_whisper) return '';
+		const slash = settings.value.local_model_directory.includes('\\')
+			? '\\'
+			: '/';
+		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_whisper}`;
 	};
 
 	// watch(
@@ -271,6 +319,8 @@ export const useAppStore = defineStore('app', () => {
 		setThreadMessages,
 		chatModels,
 		imageModels,
+		ttsModels,
+		whisperModels,
 		buddies,
 		settings,
 		threads,
@@ -285,6 +335,8 @@ export const useAppStore = defineStore('app', () => {
 		getNGpuLayers,
 		getChatModelPath,
 		getImageModelPath,
+		getTTSModelPath,
+		getWhisperModelPath,
 
 		isExternalProvider,
 		isModelsSetup,
@@ -300,6 +352,12 @@ export const useAppStore = defineStore('app', () => {
 
 		toggleAutoStartServer: () => {
 			settings.value.auto_start_server = settings.value.auto_start_server ? 0 : 1;
+		},
+		toggleAutoReadChat: () => {
+			settings.value.auto_read_chat = settings.value.auto_read_chat ? 0 : 1;
+		},
+		toggleAutoReadSTT: () => {
+			settings.value.auto_send_stt = settings.value.auto_send_stt ? 0 : 1;
 		},
 	};
 });

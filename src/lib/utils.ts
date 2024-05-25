@@ -41,3 +41,24 @@ export function textToHslColor(t: string, s: number, l: number) {
 export function isDevMode() {
 	return process.env.NODE_ENV === 'development' || import.meta.env.DEV;
 }
+
+export function playAudio(url: string) {
+	const audio = new Audio(url);
+	audio.playbackRate = 1.15;
+	audio.play();
+}
+
+export function blobToArrayBuffer(blob: Blob): Promise<Buffer> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onloadend = () => {
+			if (reader.result) {
+				resolve(reader.result as Buffer);
+			} else {
+				reject(new Error('Failed to read blob as array buffer'));
+			}
+		};
+		reader.onerror = reject;
+		reader.readAsArrayBuffer(blob);
+	});
+}

@@ -15,3 +15,14 @@ export interface SDOptions {
 	neg?: string;
 	size?: number;
 }
+
+export interface PiperOptions {
+	model: string;
+	output: string;
+	text: string;
+}
+
+export interface WhisperOptions {
+	model: string;
+	input: Buffer;
+}

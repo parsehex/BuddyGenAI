@@ -18,7 +18,8 @@ interface Message {
 export default async function createMessage(
 	threadId: string,
 	message: Message,
-	image?: string
+	image?: string,
+	tts?: string
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
@@ -41,6 +42,7 @@ export default async function createMessage(
 		role: message.role,
 		content: message.content,
 		image: image || null,
+		tts: tts || null,
 		thread_id: threadId,
 		thread_index: threadIndex,
 	});

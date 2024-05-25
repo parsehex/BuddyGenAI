@@ -2,7 +2,7 @@
 import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
 import { useChat, useCompletion } from 'ai/vue';
 import { storeToRefs } from 'pinia';
-import { RefreshCw, RefreshCcwDot } from 'lucide-vue-next';
+import { RefreshCw, RefreshCcwDot, Mic, MicOff } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -40,7 +40,10 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { isDevMode } from '@/src/lib/utils';
+import { isDevMode, playAudio } from '@/src/lib/utils';
+import usePiper from '@/src/composables/usePiper';
+import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
+import useWhisper from '@/src/composables/useWhisper';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -78,7 +81,7 @@ window.addEventListener('focus', async () => {
 
 const props = defineProps<{
 	threadId: string;
-	initialMessages: Promise<ChatMessage[]>;
+	initialMessages: Promise<ChatMessage[]> | ChatMessage[];
 }>();
 const { threadId, initialMessages } = toRefs(props);
 
@@ -86,9 +89,7 @@ const sysIsOpen = ref(false);
 const hasSysMessage = computed(() =>
 	messages.value.some((m) => m.role === 'system')
 );
-const sysMessage = computed(() =>
-	messages.value.find((m) => m.role === 'system')
-);
+const sysMessage = computed(() => messages.value[0]);
 const newSysMessage = ref('');
 
 const threadTitle = computed(() => {
@@ -98,7 +99,7 @@ const threadTitle = computed(() => {
 
 const apiPartialBody = ref({
 	threadId: threadId.value,
-	temperature: 0.95,
+	temperature: 0.75,
 	seed: -1,
 });
 
@@ -124,7 +125,7 @@ console.log('hey, we have a new id', threadId.value);
 // TODO if first time, generate first message to user
 // TODO figure out solution to stream completion response
 
-await initialMessages.value;
+// await initialMessages.value;
 
 console.log('initial messages', await initialMessages.value);
 
@@ -137,7 +138,30 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
-			console.log('onFinish', messages.value.length);
+			let ttsToSave = '';
+			const autoRead = store.settings.auto_read_chat;
+			console.log('autoRead', autoRead);
+			// @ts-ignore
+			if (autoRead === 1 || autoRead === '1.0') {
+				const lastMessage = messages.value[messages.value.length - 1];
+				const filename = `${Date.now()}.wav`;
+				const text = cleanTextForTTS(lastMessage.content);
+				console.log('tts text', text);
+				await makeTTS({
+					absModelPath: store.getTTSModelPath(),
+					outputFilename: filename,
+					text,
+				});
+
+				// @ts-ignore
+				lastMessage.tts = urls.tts.get(filename);
+				ttsToSave = urls.tts.get(filename);
+				const newMessages = [...messages.value].map((m) => m);
+				newMessages[messages.value.length - 1] = lastMessage;
+				setMessages(newMessages);
+
+				playAudio(urls.tts.get(filename));
+			}
 
 			const assistant =
 				threadMode.value === 'persona'
@@ -258,7 +282,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				await api.message.updateOne(
 					reloadingId.value,
 					lastMessage.content.trim(),
-					imgToSave
+					imgToSave,
+					ttsToSave
 				);
 				await refreshMessages();
 				reloadingId.value = '';
@@ -275,6 +300,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					role: 'assistant',
 					content: lastMessage.content.trim(),
 					image: imgToSave,
+					tts: ttsToSave,
 				};
 				msgsToSave.push(msg as any);
 			} else {
@@ -285,7 +311,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				for (const msg of msgsToSave) {
 					console.log('saving', msg);
 					// @ts-ignore
-					await api.message.createOne(threadId.value, msg, msg.image);
+					await api.message.createOne(threadId.value, msg, msg.image, msg.tts);
 				}
 				msgsToSave.length = 0;
 			}
@@ -407,6 +433,12 @@ const doReload = async () => {
 };
 
 const handleSysMessageOpen = async () => {
+	console.log(
+		'sysIsOpen',
+		sysIsOpen.value,
+		hasSysMessage.value,
+		sysMessage.value
+	);
 	if (!sysMessage.value) return;
 	newSysMessage.value = sysMessage.value.content;
 };
@@ -528,6 +560,75 @@ const canReload = computed(() => {
 	return messages.value.length >= 2 && !isLoading.value;
 });
 
+let mediaRecorder: MediaRecorder | null = null;
+let audioChunks: BlobPart[] = [];
+const recording = ref(false);
+const loadingTranscript = ref(false);
+const startRecording = async () => {
+	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+		console.log('getUserMedia not supported on your browser!');
+		return;
+	}
+
+	if (recording.value) {
+		console.log('already recording');
+		recording.value = false;
+		mediaRecorder?.stop();
+
+		return;
+	}
+
+	try {
+		const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		mediaRecorder = new MediaRecorder(stream);
+		audioChunks = [];
+
+		mediaRecorder.addEventListener('dataavailable', (event) => {
+			console.log('dataavailable', event.data);
+			audioChunks.push(event.data);
+
+			if (!recording.value) {
+				const audioBlob = new Blob(audioChunks);
+
+				const reader = new FileReader();
+				reader.onloadend = async function () {
+					// @ts-ignore
+					const buf = Buffer.from(reader.result);
+
+					const whisper = useWhisper();
+
+					if (!whisper?.runWhisper) {
+						throw new Error('Whisper not available');
+					}
+					loadingTranscript.value = true;
+					const result = await whisper.runWhisper({
+						model: store.getWhisperModelPath(),
+						input: buf,
+					});
+					console.log('whisper result', result);
+
+					loadingTranscript.value = false;
+					if (typeof result === 'string') {
+						input.value = result.trim();
+
+						const autoSend = store.settings.auto_send_stt;
+						// @ts-ignore
+						if (autoSend === '1.0' || autoSend === 1) {
+							doSubmit(new Event('submit'));
+						}
+					}
+				};
+				reader.readAsArrayBuffer(audioBlob);
+			}
+		});
+
+		mediaRecorder.start();
+		recording.value = true;
+	} catch (err) {
+		console.log('The following error occurred: ' + err);
+	}
+};
+
 // disjointed note:
 // TODO should save the keywords (extraPrompt) that we generate desc with
 </script>
@@ -538,7 +639,7 @@ const canReload = computed(() => {
 		v-if="threadId !== ''"
 	>
 		<div
-			class="flex items-center justify-between py-4 border-b-2 border-gray-100"
+			class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700"
 		>
 			<h2 class="text-2xl font-bold">
 				{{ threadTitle }}
@@ -555,8 +656,8 @@ const canReload = computed(() => {
 			:defaultOpen="false"
 		>
 			<CollapsibleTrigger @click="handleSysMessageOpen">
-				<Button type="button" size="sm">
-					{{ sysIsOpen ? 'Hide' : 'Show' }} System Message
+				<Button type="button" variant="ghost" size="sm">
+					{{ sysIsOpen ? 'Hide' : 'Show' }} Custom Instructions
 				</Button>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
@@ -587,8 +688,20 @@ const canReload = computed(() => {
 		</ScrollArea>
 
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
+			<Button
+				type="button"
+				size="sm"
+				@click="startRecording"
+				title="Start recording audio"
+				:variant="recording ? 'destructive' : 'default'"
+				:class="loadingTranscript ? 'opacity-75 cursor-not-allowed' : ''"
+				:disaled="loadingTranscript"
+			>
+				<Mic v-if="!recording" />
+				<MicOff v-else />
+			</Button>
 			<Textarea
-				class="p-2 border border-gray-300 rounded shadow-sm text-lg max-h-52"
+				class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700"
 				tabindex="1"
 				v-model="input"
 				placeholder="Say something..."

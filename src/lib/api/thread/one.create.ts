@@ -4,6 +4,7 @@ import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
 import useElectron from '@/composables/useElectron';
 import * as prompt from '@/lib/prompt/persona';
 import { insert, select } from '@/lib/sql';
+import { defaultAIChatPrompt } from '../../prompt/chat';
 
 const { dbGet, dbRun } = useElectron();
 
@@ -70,9 +71,9 @@ export default async function createOne({
 			id: uuidv4(),
 			created: new Date().getTime(),
 			role: 'system',
-			content: `The following is a chat between a User${
-				userName && userName.toLowerCase() !== 'user' ? ' named ' + userName : ''
-			} and an AI Assistant.`,
+			content: defaultAIChatPrompt(userName),
+			image: '',
+			tts: '',
 			thread_id: thread.id,
 			thread_index: 0,
 		});
@@ -100,6 +101,8 @@ export default async function createOne({
 					personaVersion.name,
 					personaVersion.description || ''
 				),
+				image: '',
+				tts: '',
 				thread_id: thread.id,
 				thread_index: 0,
 			});

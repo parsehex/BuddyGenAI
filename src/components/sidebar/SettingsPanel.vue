@@ -22,6 +22,7 @@ import ImportModel from '@/components/ImportModel.vue';
 import OpenAIAPIKeyHelpButton from '@/components/OpenAIAPIKeyHelpButton.vue';
 import DevOnly from '@/components/DevOnly.vue';
 import { ScrollArea } from '../ui/scroll-area';
+import { storeToRefs } from 'pinia';
 
 const { toast } = useToast();
 
@@ -29,9 +30,6 @@ const { pickDirectory, verifyModelDirectory, openModelsDirectory } =
 	useElectron();
 
 const {
-	chatModels,
-	imageModels,
-	settings,
 	updateChatServerRunning,
 	updateModels,
 	getChatModelPath,
@@ -39,13 +37,16 @@ const {
 } = useAppStore();
 const store = useAppStore();
 
+const { settings, chatModels, imageModels, ttsModels, whisperModels } =
+	storeToRefs(store);
+
 const error = ref('');
 
 const refreshModels = async () => {
 	await updateModels();
 };
 
-if (settings.local_model_directory) {
+if (settings.value.local_model_directory) {
 	await refreshModels();
 }
 
@@ -61,10 +62,10 @@ const openModels = async () => {
 const pickModelDirectory = async () => {
 	if (!pickDirectory) return console.error('Electron not available');
 
-	if (settings.local_model_directory) {
+	if (settings.value.local_model_directory) {
 		console.log(
 			'Local model directory already set:',
-			settings.local_model_directory
+			settings.value.local_model_directory
 		);
 		return;
 	}
@@ -77,12 +78,12 @@ const pickModelDirectory = async () => {
 	} else {
 		error.value = '';
 	}
-	settings.local_model_directory = directory;
+	settings.value.local_model_directory = directory;
 
 	await refreshModels();
 };
 onMounted(() => {
-	if (!settings.local_model_directory) {
+	if (!settings.value.local_model_directory) {
 		pickModelDirectory();
 	}
 });
@@ -92,13 +93,13 @@ const needsRestart = ref(false);
 const updateChatModel = async (model: string) => {
 	console.log('Update chat model:', model);
 
-	if (settings.selected_provider_chat === 'external') {
-		settings.selected_model_chat = model;
+	if (settings.value.selected_provider_chat === 'external') {
+		settings.value.selected_model_chat = model;
 		return;
 	}
-	if (settings.selected_model_chat === model) return;
+	if (settings.value.selected_model_chat === model) return;
 
-	settings.selected_model_chat = model;
+	settings.value.selected_model_chat = model;
 	if (store.chatServerRunning) return;
 	needsRestart.value = true;
 	// await updateChatServerRunning();
@@ -110,9 +111,23 @@ const updateChatModel = async (model: string) => {
 const updateImageModel = async (model: string) => {
 	console.log('Update image model:', model);
 
-	if (settings.selected_model_image === model) return;
+	if (settings.value.selected_model_image === model) return;
 
-	settings.selected_model_image = model;
+	settings.value.selected_model_image = model;
+};
+const updateTTSModel = async (model: string) => {
+	console.log('Update TTS model:', model);
+
+	if (settings.value.selected_model_tts === model) return;
+
+	settings.value.selected_model_tts = model;
+};
+const updateWhisperModel = async (model: string) => {
+	console.log('Update Whisper model:', model);
+
+	if (settings.value.selected_model_whisper === model) return;
+
+	settings.value.selected_model_whisper = model;
 };
 
 // const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -120,12 +135,12 @@ const updateImageModel = async (model: string) => {
 let initialNgl = null as null | number;
 
 const nglFocus = () => {
-	const val = settings.n_gpu_layers;
+	const val = settings.value.n_gpu_layers;
 	console.log('ngl Focus:', val);
 	initialNgl = val;
 };
 const nglBlur = async () => {
-	const val = settings.n_gpu_layers;
+	const val = settings.value.n_gpu_layers;
 	console.log('ngl Blur:', val);
 	if (val === initialNgl) return;
 
@@ -140,10 +155,10 @@ const nglBlur = async () => {
 };
 
 const isExternal = computed({
-	get: () => settings.selected_provider_chat === 'external',
+	get: () => settings.value.selected_provider_chat === 'external',
 	set: (val) => {
-		settings.selected_provider_chat = val ? 'external' : 'local';
-		settings.selected_provider_image = val ? 'external' : 'local';
+		settings.value.selected_provider_chat = val ? 'external' : 'local';
+		settings.value.selected_provider_image = val ? 'external' : 'local';
 	},
 });
 
@@ -161,6 +176,35 @@ watch(isExternal, (newVal) => {
 	prvLastVal.value = newVal;
 	prvNeedsRestart.value = newVal && store.chatServerRunning;
 	updateModels();
+});
+
+const autoReadChat = computed({
+	get: () =>
+		// @ts-ignore
+		settings.value.auto_read_chat === 1 || settings.value.auto_read_chat === '1.0'
+			? 'true'
+			: 'false',
+	set: (val: string) => {
+		if (val === settings.value.auto_read_chat + '') return;
+		const b = val === 'true';
+		const num = b ? 1 : 0;
+		if (num === settings.value.auto_read_chat) return;
+		settings.value.auto_read_chat = num;
+	},
+});
+const autoSendSTT = computed({
+	get: () =>
+		// @ts-ignore
+		settings.value.auto_send_stt === 1 || settings.value.auto_send_stt === '1.0'
+			? 'true'
+			: 'false',
+	set: (val: string) => {
+		if (val === settings.value.auto_send_stt + '') return;
+		const b = val === 'true';
+		const num = b ? 1 : 0;
+		if (num === settings.value.auto_send_stt) return;
+		settings.value.auto_send_stt = num;
+	},
 });
 </script>
 
@@ -185,7 +229,7 @@ watch(isExternal, (newVal) => {
 					v-model="settings.user_name"
 					type="text"
 					id="name"
-					class="w-full border border-gray-300 rounded-md p-2 mt-1"
+					class="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 mt-1"
 				/>
 			</div>
 
@@ -217,7 +261,7 @@ watch(isExternal, (newVal) => {
 					v-model="settings.external_api_key"
 					type="text"
 					id="external_api_key"
-					class="w-full border border-gray-300 rounded-md p-2 mt-1"
+					class="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 mt-1"
 				/>
 			</div> -->
 			<div
@@ -232,7 +276,7 @@ watch(isExternal, (newVal) => {
 						type="text"
 						id="local_model_directory"
 						name="local_model_directory"
-						class="w-full border border-gray-300 rounded-md p-2 mt-1"
+						class="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 mt-1"
 						style="cursor: default"
 						disabled
 					/>
@@ -290,7 +334,7 @@ watch(isExternal, (newVal) => {
 						type="number"
 						id="n-gpu-layers"
 						name="n-gpu-layers"
-						class="w-full border border-gray-300 rounded-md p-2 mt-1"
+						class="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 mt-1"
 					/>
 				</div>
 			</div>
@@ -314,13 +358,89 @@ watch(isExternal, (newVal) => {
 					</SelectContent>
 				</Select>
 			</div>
+			<div class="mt-4">
+				<Label for="tts-model" class="mb-1">TTS Model</Label>
+				<Select
+					:default-value="settings.selected_model_tts"
+					@update:model-value="updateTTSModel"
+					id="tts-model"
+				>
+					<SelectTrigger :title="settings.selected_model_image">
+						<SelectValue placeholder="Select a TTS model" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>TTS Models</SelectLabel>
+							<SelectItem v-for="model in ttsModels" :key="model" :value="model">
+								{{ model }}
+							</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+
+				<Label for="auto_read_chat" class="block mt-2">Auto Read Chat</Label>
+				<RadioGroup
+					:default-value="autoReadChat"
+					v-model="autoReadChat"
+					id="auto_read_chat"
+					class="flex flex-row mb-3"
+				>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem id="auto-tts-yes" value="true">Yes</RadioGroupItem>
+						<Label for="auto-tts-yes" class="block">Yes</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem id="auto-tts-no" value="false">No</RadioGroupItem>
+						<Label for="auto-tts-no" class="block">No</Label>
+					</div>
+				</RadioGroup>
+			</div>
+			<div class="mt-4">
+				<Label for="stt-model" class="mb-1">STT Model</Label>
+				<Select
+					:default-value="settings.selected_model_whisper"
+					@update:model-value="updateWhisperModel"
+					id="stt-model"
+				>
+					<SelectTrigger :title="settings.selected_model_whisper">
+						<SelectValue placeholder="Select a TTS model" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Speech-to-Text Models</SelectLabel>
+							<SelectItem v-for="model in whisperModels" :key="model" :value="model">
+								{{ model }}
+							</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+
+				<Label for="auto_send_stt" class="block mt-2"
+					>Auto-Send After Recording</Label
+				>
+				<RadioGroup
+					:default-value="autoSendSTT"
+					v-model="autoSendSTT"
+					id="auto_send_stt"
+					class="flex flex-row mt-2"
+				>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem id="auto-stt-yes" value="true">Yes</RadioGroupItem>
+						<Label for="auto-stt-yes" class="block">Yes</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroupItem id="auto-stt-no" value="false">No</RadioGroupItem>
+						<Label for="auto-stt-no" class="block">No</Label>
+					</div>
+				</RadioGroup>
+			</div>
 
 			<div class="mt-4 flex flex-col items-center">
 				<Button
 					type="button"
 					@click="reloadPage"
 					class="px-4 py-2 rounded-md"
-					variant="default"
+					variant="ghost"
 					>Reload Page</Button
 				>
 				<RouterLink to="/credits">App Credits</RouterLink>

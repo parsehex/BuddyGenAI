@@ -58,6 +58,7 @@ export default function (mainWindow: BrowserWindow) {
 			})
 		);
 		app.use('/images', serveStatic(imgPath));
+		app.use('/tts', serveStatic(imgPath.replace('images', 'tts')));
 		app.use(llamaCppRouter);
 		app.use(sdRouter);
 
@@ -72,6 +73,7 @@ export default function (mainWindow: BrowserWindow) {
 	const app = express();
 	app.use('/', serveStatic(path.join(__dirname, '../public')));
 	app.use('/images', serveStatic(imgPath));
+	app.use('/tts', serveStatic(imgPath.replace('images', 'tts')));
 
 	app.use(llamaCppRouter);
 	app.use(sdRouter);

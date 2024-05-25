@@ -14,6 +14,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import ImportModel from '@/components/ImportModel.vue';
+import useLlamaCpp from '../composables/useLlamaCpp';
 
 const { openExternalLink } = useElectron();
 
@@ -24,6 +25,7 @@ const props = defineProps<{
 const emits = defineEmits(['openModelDirectory', 'modelChange']);
 
 const { settings, chatModels, imageModels, updateModels } = useAppStore();
+const store = useAppStore();
 
 onMounted(() => {
 	// updateModels();
@@ -31,6 +33,18 @@ onMounted(() => {
 		updateModels();
 	}, 250);
 });
+
+const onChatModelChange = () => {
+	const selectedChatModel = store.getChatModelPath();
+	if (!selectedChatModel) return;
+
+	const llamaCpp = useLlamaCpp();
+	if (!llamaCpp) return;
+
+	const gpuLayers = store.getNGpuLayers();
+
+	llamaCpp.startServer(selectedChatModel, gpuLayers);
+};
 </script>
 
 <template>
@@ -92,7 +106,7 @@ onMounted(() => {
 				<Label for="chat-model" class="mb-1">Chat Model</Label>
 				<Select
 					v-model="settings.selected_model_chat"
-					@update:model-value="emits('modelChange', 'chat')"
+					@update:model-value="onChatModelChange"
 					id="chat-model"
 				>
 					<SelectTrigger>

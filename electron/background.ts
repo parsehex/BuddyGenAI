@@ -18,6 +18,8 @@ import sdModule from './modules/sd';
 import { getDataPath } from './fs';
 // @ts-ignore
 import log from 'electron-log/main';
+import piperModule from './modules/piper';
+import whisperModule from './modules/whisper';
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -60,6 +62,8 @@ async function createWindow() {
 	await db(mainWindow);
 	await llamaCppModule(mainWindow);
 	await sdModule(mainWindow);
+	await piperModule(mainWindow);
+	await whisperModule(mainWindow);
 
 	mainWindow.removeMenu();
 

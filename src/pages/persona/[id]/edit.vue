@@ -375,12 +375,15 @@ const setAppearanceOption = (key: string, value: string) => {
 					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
 
 					<!-- TODO disclaimer about generated images -->
+					<p class="text-sm text-gray-500 select-none">
+						Images are created using AI and may have unexpected results.
+					</p>
 
 					<!-- TODO BuddyAvatarSelect :persona @select-pic -->
 					<Collapsible
 						v-if="allProfilePics.length > 1"
 						v-model:open="allPicsOpen"
-						class="space-y-2 w-full my-2 border-2 border-gray-200 rounded-lg"
+						class="space-y-2 w-full my-2 rounded-lg border-2 border-gray-300 dark:border-gray-700"
 					>
 						<CollapsibleTrigger as-child>
 							<div
@@ -478,7 +481,7 @@ const setAppearanceOption = (key: string, value: string) => {
 							<Input
 								id="profile-picture"
 								v-model="profilePicturePrompt"
-								class="p-2 border border-gray-300 rounded mt-2"
+								class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
 								@keydown.enter="refreshProfilePicture"
 							/>
 						</DevOnly>

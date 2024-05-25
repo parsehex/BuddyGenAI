@@ -29,7 +29,10 @@ import { api } from '@/lib/api';
 import { useAppStore } from '@/stores/main';
 import { textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
-import { isDevMode } from '@/lib/utils';
+import { isDevMode, playAudio } from '@/lib/utils';
+import { Volume2 } from 'lucide-vue-next';
+import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
+import urls from '@/src/lib/api/urls';
 
 const { copyToClipboard } = useElectron();
 const store = useAppStore();
@@ -112,6 +115,41 @@ const msgInitials = computed(() => {
 	const firstName = currentPersona.value.name.split(' ')[0];
 	return firstName[0];
 });
+
+const hasTTS = computed(() => {
+	// @ts-ignore
+	if (!message.value.tts) return false;
+	// @ts-ignore
+	return message.value.tts;
+});
+const tts = computed(() => {
+	// @ts-ignore
+	return message.value.tts || '';
+});
+
+const doTTS = async () => {
+	if (isUser.value) return;
+
+	if (!hasTTS.value) {
+		const filename = `${Date.now()}.wav`;
+		const text = cleanTextForTTS(message.value.content);
+
+		await makeTTS({
+			absModelPath: store.getTTSModelPath(),
+			outputFilename: filename,
+			text,
+		});
+
+		const ttsUrl = urls.tts.get(filename);
+		playAudio(ttsUrl);
+
+		await api.message.updateOne(message.value.id, undefined, undefined, ttsUrl);
+		emit('edit', message.value.id);
+		return;
+	}
+
+	playAudio(tts.value);
+};
 </script>
 
 <template>
@@ -124,7 +162,7 @@ const msgInitials = computed(() => {
 				>
 					<CardHeader
 						v-if="threadMode === 'persona'"
-						class="p-3 flex flex-row items-baseline space-x-2 pt-1 pb-2"
+						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
 					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<Avatar
@@ -151,9 +189,32 @@ const msgInitials = computed(() => {
 								{{ currentPersona?.name }}
 							</RouterLink>
 						</span>
+
+						<Button
+							v-if="!isUser"
+							@click="doTTS"
+							variant="secondary"
+							size="sm"
+							class="ml-2"
+						>
+							<Volume2 />
+						</Button>
+						<!-- add audio speed control -->
 					</CardHeader>
-					<CardHeader class="p-3" v-else>
+					<CardHeader
+						v-else
+						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
+					>
 						{{ message.role === 'user' ? userName : 'AI' }}
+						<Button
+							v-if="!isUser"
+							@click="doTTS"
+							variant="secondary"
+							size="sm"
+							class="ml-2"
+						>
+							<Volume2 />
+						</Button>
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between">
 						<div class="">

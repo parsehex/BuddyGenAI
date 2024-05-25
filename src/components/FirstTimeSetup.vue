@@ -129,18 +129,6 @@ onMounted(() => {
 	}
 });
 
-const selectedModelProvider = ref('');
-const modelProvider = computed({
-	get: () => {
-		// should be the same for both
-		return settings.selected_provider_chat;
-	},
-	set: (value) => {
-		settings.selected_provider_chat = value;
-		settings.selected_provider_image = value;
-	},
-});
-
 const handleSave = async () => {
 	if (store.newHere && !userNameValue.value) {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
@@ -403,7 +391,7 @@ const acceptPicKeywords = () => {
 							v-model="userNameValue"
 							@blur="updateName"
 							autofocus
-							class="p-2 border border-gray-300 rounded text-center w-1/2 ml-2"
+							class="p-2 border border-gray-300 dark:border-gray-700 rounded text-center w-1/2 ml-2"
 							@keyup.enter="handleSave"
 						/>
 					</Label>
@@ -425,7 +413,7 @@ const acceptPicKeywords = () => {
 							</p>
 							<Input
 								v-model="buddyName"
-								class="my-2 p-2 border border-gray-300 rounded w-1/2"
+								class="my-2 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
 								placeholder="Name"
 							/>
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
@@ -448,7 +436,7 @@ const acceptPicKeywords = () => {
 										id="persona-keywords"
 										v-model="buddyKeywords"
 										@keyup.enter="acceptBuddy('keywords')"
-										class="p-2 border border-gray-300 rounded"
+										class="p-2 border border-gray-300 dark:border-gray-700 rounded"
 									/>
 
 									<Popover
@@ -597,7 +585,7 @@ const acceptPicKeywords = () => {
 										id="profile-picture"
 										v-model="profilePicturePrompt"
 										@keyup.enter="refreshProfilePicture"
-										class="p-2 border border-gray-300 rounded"
+										class="p-2 border border-gray-300 dark:border-gray-700 rounded"
 									/>
 
 									<Popover

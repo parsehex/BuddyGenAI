@@ -47,6 +47,7 @@ export interface ChatMessage {
 	role: 'user' | 'assistant' | 'system';
 	content: string;
 	image: string | null;
+	tts: string | null;
 	thread_id: string;
 	thread_index: number;
 }

@@ -4,7 +4,7 @@ import useElectron from '@/composables/useElectron';
 const { dbGet, listDirectory } = useElectron();
 
 export default async function getAll(
-	type: 'chat' | 'image'
+	type: 'chat' | 'image' | 'tts' | 'whisper'
 ): Promise<string[]> {
 	if (!dbGet) throw new Error('dbGet not available');
 
@@ -26,7 +26,19 @@ export default async function getAll(
 
 	const files = await listDirectory(directory);
 
-	const ext = type === 'chat' ? '.gguf' : '.safetensors';
+	// chat models: .gguf
+	// image: .safetensors
+	// tts: .onnx
+	// whisper: .bin
+
+	const ext =
+		type === 'chat'
+			? '.gguf'
+			: type === 'image'
+			? '.safetensors'
+			: type === 'tts'
+			? '.onnx'
+			: '.bin';
 	const filteredFiles = files.filter((file) => file.endsWith(ext));
 	return filteredFiles;
 }

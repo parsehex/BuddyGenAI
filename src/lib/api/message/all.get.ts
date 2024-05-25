@@ -29,6 +29,8 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 	)) as ChatMessage[];
 	const hasSystemMessage = messages[0]?.role === 'system';
 
+	console.log(messages);
+
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
 		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
@@ -65,6 +67,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 					personaVersion.description
 				),
 				image: null,
+				tts: null,
 				thread_id: threadId,
 				thread_index: 0,
 			});
@@ -77,6 +80,9 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 			);
 		}
 	}
+
+	// log whether last message has tts
+	// console.log(messages[messages.length - 1].tts);
 
 	return messages || [];
 }

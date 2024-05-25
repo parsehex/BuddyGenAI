@@ -42,6 +42,7 @@ export async function findResourcesPath() {
 
 const llamaGoodError = 'failed to load model';
 const sdGoodError = 'the following arguments are required';
+const whisperGoodError = 'no input';
 
 function tryBinary(p: string) {
 	return new Promise((resolve, reject) => {
@@ -49,7 +50,9 @@ function tryBinary(p: string) {
 			if (
 				error &&
 				!error.message.includes(llamaGoodError) &&
-				!error.message.includes(sdGoodError)
+				!error.message.includes(sdGoodError) &&
+				!error.message.includes(whisperGoodError) &&
+				error.code !== 3221226505 // good piper error
 			) {
 				console.log('execFile', error);
 				reject(error);
@@ -64,10 +67,12 @@ type ProjectName =
 	| 'llama.cpp'
 	| 'stable-diffusion.cpp'
 	| 'whisper.cpp'
+	| 'piper'
 	| 'llamafile'; // bark.cpp?
 type Binaries = {
 	'llama.cpp': 'main' | 'server';
 	'stable-diffusion.cpp': 'sd';
+	piper: 'piper';
 	'whisper.cpp': 'main' | 'server';
 	llamafile: 'llamafile';
 };
@@ -81,8 +86,6 @@ export async function findBinaryPath<T extends ProjectName>(
 	if (process.platform === 'win32') exe += '.exe';
 
 	let resPath = await findResourcesPath();
-
-	console.log('resPath', resPath);
 
 	if (projectName === 'llamafile') {
 		let binPath = path.join(resPath, 'binaries/', exe);
@@ -103,6 +106,7 @@ export async function findBinaryPath<T extends ProjectName>(
 		'avx2',
 		'avx',
 		'noavx',
+		'.',
 	];
 
 	for (let i = 0; i < directories.length; i++) {

@@ -75,4 +75,14 @@ const thread = {
 	updateSystemMessage: (threadId: string) =>
 		`/api/update-thread-from-persona?threadId=${threadId}`,
 };
-export default { other, message, model, buddy, setting, thread };
+const tts = {
+	get: (name: string) => {
+		const tts = `/tts/${name}`;
+
+		if (isDev) {
+			return `http://localhost:8079${tts}`;
+		}
+		return tts;
+	},
+};
+export default { other, message, model, buddy, setting, thread, tts };

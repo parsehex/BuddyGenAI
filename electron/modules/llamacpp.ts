@@ -74,9 +74,7 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 		}
 
 		nGpuLayers = Math.floor(+nGpuLayers);
-		const llamaFilePath = await findBinaryPath('llamafile', 'llamafile');
 		const llamaCppPath = await findBinaryPath('llama.cpp', 'server');
-		console.log('serverPath', llamaFilePath);
 		const args = [
 			// '--nobrowser', // llamafile arg
 			'--model',

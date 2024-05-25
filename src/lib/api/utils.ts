@@ -6,5 +6,6 @@ export function apiMsgsToOpenai(messages: ChatMessage[]) {
 		role: message.role,
 		content: message.content,
 		image: message.image,
+		tts: message.tts,
 	}));
 }

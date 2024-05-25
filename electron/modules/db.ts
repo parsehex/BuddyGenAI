@@ -5,7 +5,7 @@ import fs from 'fs/promises';
 import { findDirectoryInPath, getDirname } from '../fs';
 import { initAppSettings } from '../AppSettings';
 
-const VERBOSE = false;
+const VERBOSE = true;
 
 const isDev = process.env.NODE_ENV === 'development';
 

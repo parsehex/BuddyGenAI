@@ -9,9 +9,13 @@ type AppSettingsKeys =
 	| 'selected_provider_image'
 	| 'selected_model_chat'
 	| 'selected_model_image'
+	| 'selected_model_tts'
+	| 'selected_model_whisper'
 	| 'external_api_key'
 	| 'fresh_db'
 	| 'n_gpu_layers'
+	| 'auto_send_stt'
+	| 'auto_read_chat'
 	| 'auto_start_server';
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
@@ -21,9 +25,13 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_provider_image: 'local',
 	selected_model_chat: '',
 	selected_model_image: '',
+	selected_model_tts: 'en_GB-jenny_dioco-medium.onnx',
+	selected_model_whisper: 'ggml-distil-large-v3.bin',
 	external_api_key: '',
 	fresh_db: 0,
 	n_gpu_layers: 99,
+	auto_send_stt: 0,
+	auto_read_chat: 1,
 	auto_start_server: 0,
 };
 

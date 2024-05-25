@@ -25,6 +25,8 @@ import type { ChatThread } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import router from '@/lib/router';
 
+// TODO add option to make temporary chat
+
 const route = useRoute();
 const isThreadSelected = (threadId: string) =>
 	route.path.includes(`/chat`) && route.params.id === threadId;
@@ -94,7 +96,7 @@ const goToThread = async (threadId: string) => {
 	console.log('setting thread messages', messages);
 	// store.setThreadMessages(messages);
 
-	router.push(`/chat/${threadId}`);
+	await router.push(`/chat/${threadId}`);
 };
 </script>
 

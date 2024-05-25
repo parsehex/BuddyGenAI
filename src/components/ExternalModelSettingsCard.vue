@@ -45,7 +45,7 @@
 					v-model="settings.external_api_key"
 					@update:model-value="emits('modelChange', 'external_api_key')"
 					id="external_api_key"
-					class="w-full border border-gray-300 rounded-md p-2"
+					class="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2"
 				/>
 			</div>
 
