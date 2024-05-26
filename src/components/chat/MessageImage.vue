@@ -50,6 +50,7 @@ const imgLoading = computed(() => {
 				'transition-transform',
 				'mx-auto',
 			]"
+			draggable="false"
 		/>
 		<p v-if="!imgLoading" class="text-sm text-center text-gray-500 select-none">
 			AI-created images may have unexpected results

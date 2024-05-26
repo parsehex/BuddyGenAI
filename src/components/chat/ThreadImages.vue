@@ -44,6 +44,18 @@ const move = (e: MouseEvent) => {
 	const walk = x - startX;
 	scrollArea.scrollLeft = scrollLeft - walk;
 };
+
+const scrollFactor = 2;
+const wheel = (e: WheelEvent) => {
+	const scrollArea = getScrollArea();
+	if (!scrollArea) return;
+	e.preventDefault();
+	const newScrollPosition = scrollArea.scrollLeft + e.deltaY * scrollFactor;
+	scrollArea.scrollTo({
+		left: newScrollPosition,
+		behavior: 'smooth',
+	});
+};
 </script>
 
 <template>
@@ -56,20 +68,27 @@ const move = (e: MouseEvent) => {
 			</div>
 		</PopoverTrigger>
 		<PopoverContent
-			class="min-w-[33vw] max-w-[50vw] bg-primary-foreground"
+			class="min-w-[40vw] bg-primary-foreground"
 			:hide-when-detached="true"
 			side="bottom"
 		>
+			<!-- TODO download zip -->
+			<!-- TODO image controls -->
 			<ScrollArea
 				id="scrollArea"
 				@mousedown="mouseDown"
 				@mouseleave="leave"
 				@mouseup="up"
 				@mousemove="move"
+				@wheel="wheel"
 			>
 				<div class="flex flex-row">
 					<div v-for="image in props.images" :key="image.url" class="p-1">
-						<img :src="image.url" class="min-w-[150px] object-cover" />
+						<img
+							:src="image.url"
+							class="min-w-[200px] object-cover"
+							draggable="false"
+						/>
 					</div>
 				</div>
 				<ScrollBar orientation="horizontal" />

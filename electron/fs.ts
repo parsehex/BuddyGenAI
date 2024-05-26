@@ -142,7 +142,7 @@ export async function findBinaryPath<T extends ProjectName>(
 				continue;
 			}
 
-			// console.log('checking', binPath);
+			console.log('checking', binPath);
 			await fs.access(binPath);
 			// console.log('found', binPath);
 			await tryBinary(binPath);

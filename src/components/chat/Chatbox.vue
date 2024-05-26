@@ -180,10 +180,11 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						.slice(-6),
 				},
 			})) as string;
+
+			console.log('cmd', cmd.length, cmd);
 			cmd = attemptToFixJson(cmd);
 
 			let imgToSave = '';
-			console.log('cmd', cmd.length, cmd);
 			let isValidJSON = false;
 			try {
 				JSON.parse(cmd);

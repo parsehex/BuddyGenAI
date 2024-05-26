@@ -44,7 +44,7 @@ watch(
 
 <template>
 	<Avatar class="mr-1" :size="size">
-		<AvatarImage :src="profilePicValue" />
+		<AvatarImage :src="profilePicValue" draggable="false" />
 		<AvatarFallback>
 			<img
 				v-if="!profilePicValue && !noDefault"
