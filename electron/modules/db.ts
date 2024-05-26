@@ -6,7 +6,7 @@ import log from 'electron-log/main';
 import { findDirectoryInPath, getDirname } from '../fs';
 import { initAppSettings } from '../AppSettings';
 
-const VERBOSE = true;
+const VERBOSE = false;
 
 const isDev = process.env.NODE_ENV === 'development';
 
