@@ -91,7 +91,7 @@ const wheel = (e: WheelEvent) => {
 						/>
 					</div>
 				</div>
-				<ScrollBar orientation="horizontal" />
+				<!-- <ScrollBar orientation="horizontal" /> -->
 			</ScrollArea>
 		</PopoverContent>
 	</Popover>
