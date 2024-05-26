@@ -8,12 +8,8 @@ const route = useRoute();
 // const id = route.params.id as string;
 const id = computed(() => route.params.id as string);
 
-// const messages = await api.message.getAll(id.value);
-// console.log(id, 'got thread messages', messages);
-
 const getInitialMessages = async () => {
 	const messages = await api.message.getAll(id.value);
-	console.log(id.value, 'got thread messages', messages);
 	return messages;
 };
 </script>

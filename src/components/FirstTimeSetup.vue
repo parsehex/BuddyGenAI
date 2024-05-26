@@ -39,6 +39,8 @@ import {
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
+import DevOnly from './DevOnly.vue';
+import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -572,90 +574,20 @@ const acceptPicKeywords = () => {
 									:no-default="true"
 									size="lg"
 								/>
-								<Label for="profile-picture" class="flex flex-col items-center">
-									<span class="text-lg">Appearance</span>
-								</Label>
-								<p class="text-sm text-gray-500">
-									You can use keywords -- e.g.
-									<b><i>tan suit, sunglasses,</i></b>
-									etc.
-								</p>
-								<div class="flex w-full items-center gap-1.5">
-									<Input
-										id="profile-picture"
-										v-model="profilePicturePrompt"
-										@keyup.enter="refreshProfilePicture"
-										class="p-2 border border-gray-300 dark:border-gray-700 rounded"
-									/>
-
-									<Popover
-										:open="profilePicPopover"
-										@update:open="
-											($event) => {
-												if (!store.isExternalProvider && !store.chatServerRunning) return;
-												profilePicPopover = $event;
-											}
-										"
-									>
-										<PopoverTrigger as-child>
-											<Button
-												type="button"
-												class="magic"
-												title="Suggest keywords"
-												:disabled="!store.isExternalProvider && !store.chatServerRunning"
-											>
-												<Sparkles />
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent
-											side="top"
-											:avoid-collisions="true"
-											align="start"
-											class="flex flex-col px-2 py-4"
-										>
-											<Button
-												@click="suggestKeywords"
-												class="p-2 bg-blue-500 text-white rounded"
-											>
-												Suggest {{ profilePicturePrompt.length ? 'More' : '' }} Keywords
-											</Button>
-											<Spinner v-if="creatingSuggestKeywords" />
-
-											<p v-if="createdKeywords" class="my-4">
-												<span class="text-sm">AI Suggestion:</span>
-												<br />
-												<span class="font-bold">{{ createdKeywords }}</span>
-											</p>
-											<Button
-												v-if="createdKeywords"
-												class="p-2 success text-white rounded"
-												@click="acceptPicKeywords"
-											>
-												Accept & Make Picture
-											</Button>
-										</PopoverContent>
-									</Popover>
-								</div>
-
-								<!-- <div
-									class="flex flex-col items-center justify-center my-1"
-									v-if="!store.isExternalProvider"
+								<p
+									class="text-sm text-gray-500 select-none"
+									v-if="acceptedBuddy && newBuddy"
 								>
-									<Label class="text-lg">Picture Quality</Label>
-									<Select v-model:model-value="picQuality" class="my-2">
-										<SelectTrigger>
-											<SelectValue placeholder="Buddy" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectLabel>Quality</SelectLabel>
-											<SelectGroup>
-												<SelectItem value="1">Low</SelectItem>
-												<SelectItem value="2">Medium</SelectItem>
-												<SelectItem value="3">High</SelectItem>
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div> -->
+									Images are created using AI and may have unexpected results.
+								</p>
+								<BuddyAppearanceOptions
+									v-if="acceptedBuddy && newBuddy"
+									:persona="newBuddy"
+									:profile-pic-prompt="profilePicturePrompt"
+									@update-profile-pic-prompt="profilePicturePrompt = $event"
+									@refresh-profile-picture="refreshProfilePicture"
+								/>
+
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button
 									@click="refreshProfilePicture"
@@ -678,12 +610,6 @@ const acceptPicKeywords = () => {
 					>
 						Save
 					</Button>
-					<Alert v-if="store.newHere" class="mt-4 p-2" variant="info">
-						<AlertTitle>Tip</AlertTitle>
-						<AlertDescription>
-							You can make a Custom chat without a Buddy from the sidebar.
-						</AlertDescription>
-					</Alert>
 				</CardContent>
 			</Card>
 		</div>

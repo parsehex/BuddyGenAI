@@ -29,8 +29,6 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 	)) as ChatMessage[];
 	const hasSystemMessage = messages[0]?.role === 'system';
 
-	console.log(messages);
-
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
 		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;

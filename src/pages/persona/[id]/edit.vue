@@ -51,6 +51,7 @@ import {
 } from '@/src/lib/prompt/appearance';
 import DevOnly from '@/src/components/DevOnly.vue';
 import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
+import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -265,88 +266,6 @@ const acceptKeywords = () => {
 
 	refreshProfilePicture();
 };
-
-interface ExpectedAppearanceOptions {
-	[key: string]: string[];
-}
-interface SelectedAppearanceOptions {
-	[key: string]: string;
-}
-interface AppearanceOptionsLoading {
-	[key: string]: boolean;
-}
-
-const appearanceOptions = ref({} as ExpectedAppearanceOptions);
-const loadingAppearanceOptions = ref({} as AppearanceOptionsLoading);
-
-const newAppearanceOptions = async () => {
-	// set all appearance options to loading
-	// keys: hair color, hair style, eye color, body type, clothing
-	loadingAppearanceOptions.value = {
-		'hair color': true,
-		'hair style': true,
-		'eye color': true,
-		'body type': true,
-		clothing: true,
-	};
-
-	appearanceOptions.value = {
-		'hair color': [],
-		'hair style': [],
-		'eye color': [],
-		'body type': [],
-		clothing: [],
-	};
-
-	// for each one, get the prompt for that option
-	for (const key in loadingAppearanceOptions.value) {
-		const prompt = appearanceOptionsFromNameAndDescription(
-			persona.value?.name || '',
-			persona.value?.description || '',
-			key
-		);
-
-		// TODO improve prompt to just use llama 3's natural ability to respond with json instead of passing schema
-		const res = await complete(prompt, {
-			body: {
-				temperature: 0.25,
-				// json_schema: getPartialSchema(key),
-			},
-		});
-
-		if (res) {
-			console.log(res);
-			const options = JSON.parse(res);
-			appearanceOptions.value[key] = options;
-		}
-
-		loadingAppearanceOptions.value[key] = false;
-	}
-};
-
-const selectedAppearanceOptions = ref({} as SelectedAppearanceOptions);
-
-// (disjointed) TODO option(s) to change composition of profile pic (e.g. close up, full body, etc.)
-//   also want to specifically set a background color + have option to change it
-// (even more disjointed) TODO use function calling to write message but also:
-//   - function to get budyy's own appearance to include in context
-//	I think we would get a function call as the first thing when user submits a message, one of the function is "reply" which can be called to write a response with no function call
-// 		otherwise, we feed whatever other function call's result into the context when getting response
-
-// function to set appearance option
-const setAppearanceOption = (key: string, value: string) => {
-	selectedAppearanceOptions.value[key] = value;
-
-	console.log(JSON.stringify(selectedAppearanceOptions.value));
-	const newPrompt = appearanceToPrompt(selectedAppearanceOptions.value);
-	console.log(newPrompt);
-
-	if (!newPrompt) {
-		return;
-	}
-
-	profilePicturePrompt.value = newPrompt;
-};
 </script>
 
 <template>
@@ -385,67 +304,13 @@ const setAppearanceOption = (key: string, value: string) => {
 						@select-profile-pic="handleSelectProfilePic"
 					/>
 
-					<div class="flex flex-col items-center justify-center w-full">
-						<!-- appearance options -->
-						<div class="flex flex-col items-center justify-center w-full">
-							<Label class="text-lg">Appearance Options</Label>
-							<div class="flex items-center justify-center w-full">
-								<Button type="button" @click="newAppearanceOptions">
-									New Options
-								</Button>
-								<!-- <Spinner
-									class="ml-2"
-									:style="{
-										visibility: generatingAppearanceOptions ? 'visible' : 'hidden',
-									}"
-								/> -->
-							</div>
-							<div class="flex flex-row items-center justify-center w-full">
-								<!--
-									TODO improvements:
-									- Refresh button with each category (will use subset of schema, should be faster?)
-									- need parser to take selected options to add to prompt
-									-   e.g. "hair color: brown, hair style: long, eye color: blue, body type: slim, clothing: casual" -> "long brown hair, blue eye color, slim body, casual clothing"
-										- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
-									- checkbox options (e.g. glasses, hat, etc.)
-								-->
-								<div
-									v-for="(options, key) in appearanceOptions"
-									:key="key"
-									class="flex flex-wrap items-center justify-center w-full my-2"
-								>
-									<!-- <Label class="text-lg">{{ key }}</Label> -->
-									<Spinner v-if="loadingAppearanceOptions[key]" class="ml-2" />
-									<!-- @vue-ignore -->
-									<Select
-										class="my-2"
-										@update:model-value="setAppearanceOption(key, $event)"
-									>
-										<SelectTrigger>
-											<SelectValue :placeholder="key + ''" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectLabel>{{ key }}</SelectLabel>
-											<SelectGroup>
-												<SelectItem v-for="option in options" :key="option" :value="option">
-													{{ option }}
-												</SelectItem>
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div>
-							</div>
-						</div>
-
-						<DevOnly>
-							<Input
-								id="profile-picture"
-								v-model="profilePicturePrompt"
-								class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
-								@keydown.enter="refreshProfilePicture"
-							/>
-						</DevOnly>
-					</div>
+					<BuddyAppearanceOptions
+						v-if="persona"
+						:persona="persona"
+						:profile-pic-prompt="profilePicturePrompt"
+						@refresh-profile-pic="refreshProfilePicture"
+						@update-profile-pic-prompt="profilePicturePrompt = $event"
+					/>
 
 					<!-- <div
 						class="flex flex-col items-center justify-center my-1"

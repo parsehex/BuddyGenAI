@@ -41,9 +41,9 @@ import {
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
 import { attemptToFixJson, isDevMode, playAudio } from '@/src/lib/utils';
-import usePiper from '@/src/composables/usePiper';
 import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
 import useWhisper from '@/src/composables/useWhisper';
+import ThreadImages from './ThreadImages.vue';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -120,14 +120,12 @@ const msgsToSave = [] as Message[];
 
 const reloadingId = ref('');
 
-console.log('hey, we have a new id', threadId.value);
-
 // TODO if first time, generate first message to user
 // TODO figure out solution to stream completion response
 
 // await initialMessages.value;
 
-console.log('initial messages', await initialMessages.value);
+// console.log('initial messages', await initialMessages.value);
 
 const userName = AppSettings.get('user_name') as string;
 
@@ -140,13 +138,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		onFinish: async () => {
 			let ttsToSave = '';
 			const autoRead = store.settings.auto_read_chat;
-			console.log('autoRead', autoRead);
+			// console.log('autoRead', autoRead);
 			// @ts-ignore
 			if (autoRead === 1 || autoRead === '1.0') {
 				const lastMessage = messages.value[messages.value.length - 1];
 				const filename = `${Date.now()}.wav`;
 				const text = cleanTextForTTS(lastMessage.content);
-				console.log('tts text', text);
+				// console.log('tts text', text);
 				await makeTTS({
 					absModelPath: store.getTTSModelPath(),
 					outputFilename: filename,
@@ -172,11 +170,14 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			let cmd = (await complete(shouldSendImg(userName, assistant), {
 				body: {
 					max_tokens: 512,
-					temperature: 0.05,
-					messages: messages.value.slice().map((m) => ({
-						role: m.role === 'user' ? user : assistant,
-						content: m.content,
-					})),
+					temperature: 0.01,
+					messages: messages.value
+						.slice()
+						.map((m) => ({
+							role: m.role === 'user' ? user : assistant,
+							content: m.content,
+						}))
+						.slice(-6),
 				},
 			})) as string;
 			cmd = attemptToFixJson(cmd);
@@ -194,31 +195,32 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (isValidJSON) {
 				cmdObj = JSON.parse(cmd);
 			}
-			let explicit = cmd?.includes('explicit') || !isValidJSON;
-			if (cmdObj.send_image && !explicit) {
+			let explicit = !isValidJSON && cmd?.includes('explicit');
+			if (!explicit && cmdObj.do_send) {
 				let buddyAppearance = '';
 				if (currentBuddy.value?.profile_pic_prompt) {
 					buddyAppearance = currentBuddy.value.profile_pic_prompt;
 				}
-				const img = await complete(
-					imgDescriptionFromChat(
-						userName,
-						currentBuddy.value?.name || '',
-						buddyAppearance
-					),
-					{
-						body: { max_tokens: 100, temperature: 0.1, messages: messages.value },
-					}
+				const imgDescPrompt = imgDescriptionFromChat(
+					userName,
+					currentBuddy.value?.name || 'AI Assistant',
+					buddyAppearance
 				);
-				console.log('img', img);
+				console.log('imgDescPrompt', imgDescPrompt);
+				const img = await complete(imgDescPrompt, {
+					body: {
+						max_tokens: 100,
+						temperature: 0.1,
+						messages: messages.value.slice(-6),
+					},
+				});
+				console.log('img description', img);
 				if (img) {
 					explicit = img?.includes('explicit');
 					cmdObj.description = img;
 				}
 
-				if (cmdObj.description && !explicit) {
-					// update the message's image to be and empty string
-					// const lastMessage = messages.value[messages.value.length - 1];
+				if (cmdObj.description && cmdObj.do_send && !explicit) {
 					const lastMessage = JSON.parse(
 						JSON.stringify(messages.value[messages.value.length - 1])
 					);
@@ -227,13 +229,12 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						JSON.parse(JSON.stringify(m))
 					);
 					newMessages[messages.value.length - 1] = lastMessage;
-					console.log('newMessages', newMessages);
 					setMessages(newMessages);
 
 					let p = (await complete(imgPromptFromDescription(cmdObj.description), {
-						body: { max_tokens: 50, temperature: 0.1 },
+						body: { max_tokens: 125, temperature: 0.1 },
 					})) as string;
-					console.log('p', p);
+					console.log('img prompt', p);
 					if (p) {
 						p = attemptToFixJson(p);
 						p = JSON.parse(p);
@@ -297,8 +298,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				return;
 			}
 
-			console.log('onFinish', messages.value.length);
-
 			const lastMessage = messages.value[messages.value.length - 1];
 			if (lastMessage.role === 'assistant') {
 				const msg = {
@@ -314,7 +313,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			if (msgsToSave.length) {
 				for (const msg of msgsToSave) {
-					console.log('saving', msg);
+					// console.log('saving', msg);
 					// @ts-ignore
 					await api.message.createOne(threadId.value, msg, msg.image, msg.tts);
 				}
@@ -382,6 +381,11 @@ watch(
 	() => {
 		scrollToBottom();
 	}
+);
+
+const threadImages = computed(() =>
+	// @ts-ignore
+	messages.value.filter((m) => m.image && m.role === 'assistant')
 );
 
 const uiMessages = computed(() =>
@@ -467,22 +471,6 @@ const updateSysMessage = async () => {
 const refreshed = ref(false);
 const thread = ref({} as ChatThread);
 const threadMode = ref('custom' as 'custom' | 'persona');
-// const handleThreadModeChange = async (newMode: 'custom' | 'persona') => {
-// 	if (!threadId) return;
-// 	if (refreshed.value) {
-// 		setTimeout(() => {
-// 			refreshed.value = false;
-// 		}, 10);
-// 		return;
-// 	}
-// 	await api.message.removeAll(threadId.value);
-// 	await api.thread.updateOne(threadId.value, { mode: newMode });
-
-// 	await updateThread();
-// 	await refreshBuddies();
-// 	await refreshMessages();
-// };
-// watch(threadMode, handleThreadModeChange);
 
 const buddyModeUseCurrent = ref(false);
 
@@ -514,7 +502,7 @@ await refreshBuddies();
 let t: ChatThread | undefined;
 try {
 	t = await updateThread();
-	console.log('thread', t);
+	// console.log('thread', t);
 } catch (e) {
 	await router.push('/');
 }
@@ -533,13 +521,6 @@ onBeforeMount(async () => {
 		scrollToBottom();
 	}, 250);
 });
-
-const updateSysFromBuddy = async () => {
-	if (!threadId) return;
-	await api.thread.updateSystemMessage(threadId.value);
-
-	await refreshMessages();
-};
 
 const canSend = computed(() => {
 	if (!store.isExternalProvider) {
@@ -649,6 +630,8 @@ const startRecording = async () => {
 			<h2 class="text-2xl font-bold">
 				{{ threadTitle }}
 			</h2>
+			<!-- @vue-ignore -->
+			<ThreadImages :images="threadImages.map((m) => ({ url: m.image }))" />
 			<BuddyCard
 				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
 				:persona="currentBuddy"

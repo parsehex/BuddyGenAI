@@ -1,14 +1,13 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import App from './app.vue';
 import router from '@/lib/router';
+import App from './app.vue';
 
 const appDiv = document.getElementById('app');
 
 if (!appDiv) {
 	throw new Error('Could not find #app element');
 }
-console.log('appDiv', appDiv, App);
 
 const pinia = createPinia();
 

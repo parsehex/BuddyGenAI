@@ -217,7 +217,7 @@ const doTTS = async () => {
 						</Button>
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between">
-						<div class="">
+						<div class="grow">
 							{{ message.content }}
 						</div>
 						<MessageImage v-if="imgValue" :imgValue="imgValue" />

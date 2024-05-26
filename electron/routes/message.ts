@@ -14,7 +14,16 @@ const chatProviderUrls = {
 
 const router = Router();
 
-const stop = ['<|eot_id|>', 'USER:', 'user:', '</s>', '<|end|>'];
+const stop = [
+	'<|eot_id|>',
+	'USER:',
+	'user:',
+	'</s>',
+	'<|end|>',
+	'<|im_0|>',
+	'<|im_end|>',
+	'<|im_start|>',
+];
 let currentModel = '';
 
 export function updateModel(modelName: string) {
@@ -97,6 +106,7 @@ async function useAlternateCompletion(options: any, res: any) {
 		max_tokens,
 		temperature,
 		stream: true,
+		stop,
 	} as any;
 
 	if (jsonSchema) {

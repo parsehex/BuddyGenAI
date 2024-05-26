@@ -22,6 +22,7 @@ const imgLoading = computed(() => {
 		@contextmenu.prevent
 		:style="{
 			maxHeight: imgMaximized ? '512px' : '256px',
+			maxWidth: '256px',
 		}"
 	>
 		<Progress
@@ -47,6 +48,7 @@ const imgLoading = computed(() => {
 				imgMaximized ? 'hover:scale-95' : 'hover:scale-105',
 				imgMaximized ? 'min-w-64' : 'max-w-32',
 				'transition-transform',
+				'mx-auto',
 			]"
 		/>
 		<p v-if="!imgLoading" class="text-sm text-center text-gray-500 select-none">
