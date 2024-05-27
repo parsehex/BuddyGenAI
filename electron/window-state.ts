@@ -1,7 +1,7 @@
 import { app, type BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import { findResourcesPath, getDataPath } from './fs';
+import { getDataPath } from './fs';
 import { debounce } from './utils';
 
 interface WindowState {
@@ -34,12 +34,11 @@ export function loadWindowState(): WindowState {
 }
 
 const saveState = debounce(async function () {
-	const dataDir = await findResourcesPath();
+	const dataDir = await getDataPath();
 	fs.writeFileSync(
 		path.join(dataDir, 'window-state.json'),
 		JSON.stringify(state)
 	);
-	console.log('Saved window state');
 }, 1000);
 
 export default function rememberWindowState(mainWindow: BrowserWindow) {
