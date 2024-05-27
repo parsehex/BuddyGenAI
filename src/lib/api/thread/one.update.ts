@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AppSettings } from '@/lib/api/AppSettings';
 import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
-import * as prompt from '@/lib/prompt/persona';
+import * as prompt from '@/src/lib/prompt/buddy';
 import { del, insert, select, update } from '@/lib/sql';
 import useElectron from '@/composables/useElectron';
 

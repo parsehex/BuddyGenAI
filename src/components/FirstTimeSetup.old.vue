@@ -25,7 +25,7 @@ import { Sparkles } from 'lucide-vue-next';
 import BuddyAvatar from './BuddyAvatar.vue';
 import { Progress } from '@/components/ui/progress';
 import useElectron from '@/composables/useElectron';
-import { descriptionFromKeywords } from '@/lib/prompt/persona';
+import { descriptionFromKeywords } from '@/src/lib/prompt/buddy';
 import {
 	Popover,
 	PopoverContent,

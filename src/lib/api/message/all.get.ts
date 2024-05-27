@@ -6,7 +6,7 @@ import type {
 	BuddyVersion,
 } from '@/lib/api/types-db';
 import { AppSettings } from '@/lib/api/AppSettings';
-import * as prompt from '@/lib/prompt/persona';
+import * as prompt from '@/src/lib/prompt/buddy';
 import { select } from '@/lib/sql';
 
 const { dbGet, dbAll } = useElectron();

@@ -1,4 +1,4 @@
-import * as prompt from '@/lib/prompt/persona';
+import * as prompt from '@/src/lib/prompt/buddy';
 import { AppSettings } from '@/lib/api/AppSettings';
 import useElectron from '@/composables/useElectron';
 import type {

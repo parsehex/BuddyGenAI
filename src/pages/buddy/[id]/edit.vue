@@ -38,7 +38,7 @@ import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import type { ProfilePicQuality } from '@/lib/api/types-api';
-import { descriptionFromKeywords } from '@/lib/prompt/persona';
+import { descriptionFromKeywords } from '@/src/lib/prompt/buddy';
 import {
 	genderFromName,
 	keywordsFromNameAndDescription,
