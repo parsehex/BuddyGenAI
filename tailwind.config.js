@@ -2,43 +2,15 @@ const animate = require('tailwindcss-animate');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ['./**/*.html', './src/**/*.{vue,ts}', './app.vue'],
+	content: [
+		'./**/*.html',
+		'./src/**/*.{vue,ts}',
+		'./app.vue',
+		'./assets/css/*.css',
+	],
 
 	darkMode: ['class'],
 	prefix: '',
-
-	safelist: [
-		// {
-		// 	pattern: /./, // the "." means "everything"
-		// },
-		// {
-		// 	pattern: /rounded*/,
-		// },
-		// {
-		// 	pattern: /flex*/,
-		// },
-		// {
-		// 	pattern: /gap*/,
-		// },
-		// {
-		// 	pattern: /items-+/,
-		// },
-		// {
-		// 	pattern: /h-\d+/,
-		// },
-		// {
-		// 	pattern: /w-\d+/,
-		// },
-		// {
-		// 	pattern: /m.-\d+/,
-		// },
-		// {
-		// 	pattern: /p.-\d+/,
-		// },
-		// {
-		// 	pattern: /(text|font)-+/,
-		// },
-	],
 
 	theme: {
 		container: {
