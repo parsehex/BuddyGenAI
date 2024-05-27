@@ -11,12 +11,12 @@ import useElectron from '@/composables/useElectron';
 const { dbAll, dbGet } = useElectron();
 
 export default async function getAll(
-	persona_id?: string
+	buddy_id?: string
 ): Promise<MergedChatThread[]> {
 	if (!dbAll) throw new Error('dbAll is not defined');
 
-	if (persona_id) {
-		const sql = select('chat_thread', ['*'], { persona_id });
+	if (buddy_id) {
+		const sql = select('chat_thread', ['*'], { persona_id: buddy_id });
 		const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
 
 		const threadsMessages = await Promise.all(
@@ -26,15 +26,15 @@ export default async function getAll(
 			})
 		);
 
-		const sqlPersona = select('persona', ['*'], { id: persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
+		const sqlBuddy = select('persona', ['*'], { id: buddy_id });
+		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 
-		const sqlPersonaVersion = select('persona_version', ['*'], {
-			id: persona.current_version_id,
+		const sqlBuddyVersion = select('persona_version', ['*'], {
+			id: buddy.current_version_id,
 		});
-		const personaVersion = (await dbGet(
-			sqlPersonaVersion[0],
-			sqlPersonaVersion[1]
+		const buddyVersion = (await dbGet(
+			sqlBuddyVersion[0],
+			sqlBuddyVersion[1]
 		)) as BuddyVersion;
 
 		const mergedThreads = threads.map((thread, i) => {
@@ -43,11 +43,11 @@ export default async function getAll(
 				...thread,
 				latest_message: threadMessages[threadMessages.length - 1],
 				selected_buddy: {
-					...persona,
-					name: personaVersion.name,
-					description: personaVersion.description,
-					persona_id: persona.id,
-					version: personaVersion.version,
+					...buddy,
+					name: buddyVersion.name,
+					description: buddyVersion.description,
+					persona_id: buddy.id,
+					version: buddyVersion.version,
 				},
 			};
 		});
@@ -69,36 +69,34 @@ export default async function getAll(
 			})
 		);
 
-		const personas = await Promise.all(
+		const buddies = await Promise.all(
 			threads.map((thread) => {
-				const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
-				const persona = dbGet(sqlPersona[0], sqlPersona[1]);
-				const sqlPersonaVersion = select('persona_version', ['*'], {
+				const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
+				const buddy = dbGet(sqlBuddy[0], sqlBuddy[1]);
+				const sqlBuddyVersion = select('persona_version', ['*'], {
 					id: thread.current_persona_version_id,
 				});
-				const personaVersion = dbGet(sqlPersonaVersion[0], sqlPersonaVersion[1]);
-				return Promise.all([persona, personaVersion]) as Promise<
-					[Buddy, BuddyVersion]
-				>;
+				const buddyVersion = dbGet(sqlBuddyVersion[0], sqlBuddyVersion[1]);
+				return Promise.all([buddy, buddyVersion]) as Promise<[Buddy, BuddyVersion]>;
 			})
 		);
 
 		console.log(threadsMessages);
 
 		const mergedThreads = threads.map((thread, i) => {
-			const persona = personas[i][0];
-			const personaVersion = personas[i][1];
+			const buddy = buddies[i][0];
+			const buddyVersion = buddies[i][1];
 			const threadMessages = threadsMessages[i];
 			return {
 				...thread,
 				latest_message: threadMessages[threadMessages.length - 1],
-				selected_buddy: persona
+				selected_buddy: buddy
 					? {
-							...persona,
-							name: personaVersion.name,
-							description: personaVersion.description,
-							persona_id: persona.id,
-							version: personaVersion.version,
+							...buddy,
+							name: buddyVersion.name,
+							description: buddyVersion.description,
+							persona_id: buddy.id,
+							version: buddyVersion.version,
 					  }
 					: null,
 			};

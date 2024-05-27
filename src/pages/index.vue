@@ -183,7 +183,7 @@ const sortedThreads = computed(() => {
 										visibility:
 											thread.latest_message?.role !== 'user' ? 'visible' : 'hidden',
 									}"
-									:persona="thread.selected_buddy"
+									:buddy="thread.selected_buddy"
 									size="base"
 								/>
 								<Avatar v-else size="base">

@@ -12,10 +12,10 @@ import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '../lib/api/types-db';
 
 const props = defineProps<{
-	persona: BuddyVersionMerged;
+	buddy: BuddyVersionMerged;
 	allProfilePics: string[];
 }>();
-const { persona, allProfilePics } = toRefs(props);
+const { buddy, allProfilePics } = toRefs(props);
 
 const emit = defineEmits(['selectProfilePic']);
 
@@ -47,7 +47,7 @@ const allPicsOpen = ref(false);
 					<img
 						v-for="pic in allProfilePics"
 						:key="pic"
-						:src="urls.buddy.getProfilePic(`${persona?.id}/${pic}`)"
+						:src="urls.buddy.getProfilePic(`${buddy?.id}/${pic}`)"
 						@click="emit('selectProfilePic', pic)"
 						class="cursor-pointer w-[64px] h-[64px] m-1 rounded-full hover:shadow-lg hover:scale-105 hover:opacity-90"
 					/>

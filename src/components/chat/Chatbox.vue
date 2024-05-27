@@ -645,7 +645,7 @@ const startRecording = async () => {
 			<ThreadImages :images="threadImages.map((m) => ({ url: m.image }))" />
 			<BuddyCard
 				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
-				:persona="currentBuddy"
+				:buddy="currentBuddy"
 			/>
 		</div>
 		<Collapsible
@@ -677,7 +677,7 @@ const startRecording = async () => {
 					:key="m.id"
 					:thread-id="threadId"
 					:thread-mode="threadMode"
-					:current-persona="currentBuddy"
+					:current-buddy="currentBuddy"
 					:message="m"
 					@edit="refreshMessages"
 					@delete="refreshMessages"

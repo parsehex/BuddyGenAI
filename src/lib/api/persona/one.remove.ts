@@ -8,14 +8,14 @@ const { dbGet, dbRun } = useElectron();
 export default async function removeOne(id: string): Promise<DeleteResponse> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
-	const sqlPersona = select('persona', ['*'], { id });
-	const persona = await dbGet(sqlPersona[0], sqlPersona[1]);
-	if (!persona) {
-		throw new Error('Persona not found');
+	const sqlBuddy = select('persona', ['*'], { id });
+	const buddy = await dbGet(sqlBuddy[0], sqlBuddy[1]);
+	if (!buddy) {
+		throw new Error('Buddy not found');
 	}
 
-	await api.thread.removeAll(persona.id);
-	await api.buddy.version.removeAll(persona.id);
+	await api.thread.removeAll(buddy.id);
+	await api.buddy.version.removeAll(buddy.id);
 
 	const sql = del('persona', { id });
 	await dbRun(sql[0], sql[1]);

@@ -39,16 +39,16 @@ export default async function createOne({
 	let current_persona_version_id = null;
 	if (mode === 'persona') {
 		if (!persona_id) {
-			throw new Error('Persona ID is required');
+			throw new Error('Buddy ID is required');
 		}
-		const sqlPersona = select('persona', ['current_version_id'], {
+		const sqlBuddy = select('persona', ['current_version_id'], {
 			id: persona_id,
 		});
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-		if (!persona) {
-			throw new Error('Persona not found');
+		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		if (!buddy) {
+			throw new Error('Buddy not found');
 		}
-		current_persona_version_id = persona.current_version_id;
+		current_persona_version_id = buddy.current_version_id;
 	}
 
 	const id = uuidv4();
@@ -79,18 +79,18 @@ export default async function createOne({
 		});
 		await dbRun(sqlMessage[0], sqlMessage[1]);
 	} else if (mode === 'persona') {
-		const sqlPersona = select('persona', ['*'], { id: persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-		if (persona) {
-			const sqlPersonaVersion = select('persona_version', ['*'], {
-				id: persona.current_version_id,
+		const sqlBuddy = select('persona', ['*'], { id: persona_id });
+		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		if (buddy) {
+			const sqlBuddyVersion = select('persona_version', ['*'], {
+				id: buddy.current_version_id,
 			});
-			const personaVersion = (await dbGet(
-				sqlPersonaVersion[0],
-				sqlPersonaVersion[1]
+			const buddyVersion = (await dbGet(
+				sqlBuddyVersion[0],
+				sqlBuddyVersion[1]
 			)) as BuddyVersion;
-			if (!personaVersion) {
-				throw new Error('Current version of persona not found');
+			if (!buddyVersion) {
+				throw new Error('Current version of Buddy not found');
 			}
 			const sqlMessage = insert('chat_message', {
 				id: uuidv4(),
@@ -98,8 +98,8 @@ export default async function createOne({
 				role: 'system',
 				content: prompt.fromPersonaDescription(
 					userName,
-					personaVersion.name,
-					personaVersion.description || ''
+					buddyVersion.name,
+					buddyVersion.description || ''
 				),
 				image: '',
 				tts: '',

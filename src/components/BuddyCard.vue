@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, watch } from 'vue';
+import { ref, onBeforeMount, watch, toRefs } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,8 +12,9 @@ import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import BuddyAvatar from './BuddyAvatar.vue';
 
 const props = defineProps<{
-	persona: BuddyVersionMerged;
+	buddy: BuddyVersionMerged;
 }>();
+const { buddy } = toRefs(props);
 
 const id = ref('');
 const name = ref('');
@@ -27,10 +28,9 @@ const time_at = ref('');
 
 const descLimit = 250;
 
-const updatePersona = async () => {
-	if (!props.persona) return;
-	// const p = await api.persona.getOne(props.persona.id);
-	const p = props.persona;
+const updateBuddy = async () => {
+	if (!buddy.value) return;
+	const p = buddy.value;
 	id.value = p.id;
 	name.value = p.name;
 	if (p.description) {
@@ -59,13 +59,13 @@ const updatePersona = async () => {
 };
 
 onBeforeMount(async () => {
-	await updatePersona();
+	await updateBuddy();
 });
 
 watch(
-	() => props.persona,
+	() => buddy.value,
 	async () => {
-		await updatePersona();
+		await updateBuddy();
 	}
 );
 </script>
@@ -74,13 +74,13 @@ watch(
 	<HoverCard>
 		<HoverCardTrigger as-child>
 			<div class="flex items-center bg-primary-foreground rounded-lg">
-				<BuddyAvatar :persona="props.persona" size="sm" />
+				<BuddyAvatar :buddy="buddy" size="sm" />
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
 		<HoverCardContent class="w-96" :hide-when-detached="true">
 			<div class="flex items-center space-x-4">
-				<BuddyAvatar :persona="props.persona" size="base" />
+				<BuddyAvatar :buddy="buddy" size="base" />
 				<div class="space-y-1">
 					<div class="flex justify-around">
 						<RouterLink :to="`/buddy/${id}/edit`">Edit</RouterLink>

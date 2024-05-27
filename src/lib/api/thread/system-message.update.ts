@@ -22,35 +22,35 @@ export default async function updateSystemMessage(
 		throw new Error('Thread not found');
 	}
 	if (thread.mode !== 'persona') {
-		throw new Error('Thread is not a persona thread');
+		throw new Error('Thread is not a Buddy thread');
 	}
 	if (!thread.persona_id) {
-		throw new Error('Thread does not have a persona selected');
+		throw new Error('Thread does not have a Buddy selected');
 	}
 
-	const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
-	const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-	if (!persona) {
-		throw new Error('Persona not found');
+	const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
+	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+	if (!buddy) {
+		throw new Error('Buddy not found');
 	}
 
-	const sqlPersonaVersion = select('persona_version', ['*'], {
-		id: persona.current_version_id,
+	const sqlBuddyVersion = select('persona_version', ['*'], {
+		id: buddy.current_version_id,
 	});
-	const personaVersion = (await dbGet(
-		sqlPersonaVersion[0],
-		sqlPersonaVersion[1]
+	const buddyVersion = (await dbGet(
+		sqlBuddyVersion[0],
+		sqlBuddyVersion[1]
 	)) as BuddyVersion;
-	if (!personaVersion) {
-		throw new Error('Current version of persona not found');
+	if (!buddyVersion) {
+		throw new Error('Current version of Buddy not found');
 	}
 
 	const userName = AppSettings.get('user_name') as string;
 
 	const content = prompt.fromPersonaDescription(
 		userName,
-		personaVersion.name,
-		personaVersion.description || ''
+		buddyVersion.name,
+		buddyVersion.description || ''
 	);
 	const sqlFirstMessage = update(
 		'chat_message',

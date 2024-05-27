@@ -41,8 +41,9 @@ const props = defineProps<{
 	threadId: string;
 	message: Message | ChatMessage;
 	threadMode: 'persona' | 'custom';
-	currentPersona?: BuddyVersionMerged;
+	currentBuddy?: BuddyVersionMerged;
 }>();
+const { threadId, message, threadMode, currentBuddy } = toRefs(props);
 
 const emit = defineEmits<{
 	(e: 'edit', id: string): void;
@@ -50,7 +51,6 @@ const emit = defineEmits<{
 	(e: 'clearThread'): void;
 }>();
 
-const { threadId, message, threadMode, currentPersona } = toRefs(props);
 const isUser = computed(() => message.value.role === 'user');
 
 // @ts-ignore
@@ -110,9 +110,9 @@ const doClearThread = async () => {
 
 const msgInitials = computed(() => {
 	if (isUser.value) return userName.value[0];
-	if (!currentPersona.value) return '';
+	if (!currentBuddy.value) return '';
 
-	const firstName = currentPersona.value.name.split(' ')[0];
+	const firstName = currentBuddy.value.name.split(' ')[0];
 	return firstName[0];
 });
 
@@ -179,14 +179,11 @@ const doTTS = async () => {
 						</span>
 						<span v-else>
 							<RouterLink
-								:to="`/buddy/${currentPersona?.id}/view`"
+								:to="`/buddy/${currentBuddy?.id}/view`"
 								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
 							>
-								<BuddyAvatar
-									v-if="!isUser && currentPersona"
-									:persona="currentPersona"
-								/>
-								{{ currentPersona?.name }}
+								<BuddyAvatar v-if="!isUser && currentBuddy" :buddy="currentBuddy" />
+								{{ currentBuddy?.name }}
 							</RouterLink>
 						</span>
 

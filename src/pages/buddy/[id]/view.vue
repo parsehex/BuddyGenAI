@@ -113,7 +113,7 @@ const createThread = async () => {
 			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
 				<BuddyAvatar
 					v-if="buddy"
-					:persona="buddy"
+					:buddy="buddy"
 					size="lg"
 					class="hover:scale-150"
 				/>
@@ -149,7 +149,7 @@ const createThread = async () => {
 			v-if="threads.length === 0"
 			class="text-gray-400 italic text-center mt-1"
 		>
-			No threads using this persona.
+			No chats with {{ name ? name : 'this buddy' }} yet.
 			<br />
 			<Button type="button" class="mt-2" @click="createThread">
 				Create Thread

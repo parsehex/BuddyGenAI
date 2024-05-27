@@ -46,26 +46,26 @@ export default async function createProfilePic(
 		}
 	}
 
-	const sqlPersona = select('persona', ['*'], { id });
-	const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
+	const sqlBuddy = select('persona', ['*'], { id });
+	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 
-	if (!persona) {
-		throw new Error('Persona not found');
+	if (!buddy) {
+		throw new Error('Buddy not found');
 	}
 
 	const sqlCurrentVersion = select('persona_version', ['*'], {
-		id: persona.current_version_id,
+		id: buddy.current_version_id,
 	});
 	const currentVersion = (await dbGet(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
 	)) as BuddyVersion;
 
-	if (!currentVersion) throw new Error('Persona version not found');
+	if (!currentVersion) throw new Error('Buddy version not found');
 
 	let extraPrompt = '';
-	if (persona.profile_pic_prompt) {
-		extraPrompt = persona.profile_pic_prompt;
+	if (buddy.profile_pic_prompt) {
+		extraPrompt = buddy.profile_pic_prompt;
 	}
 
 	let animated = false;
@@ -86,7 +86,7 @@ export default async function createProfilePic(
 	const filename = `${Date.now()}.png`;
 	await makePicture({
 		absModelPath: modelPath,
-		outputSubDir: persona.id,
+		outputSubDir: buddy.id,
 		outputFilename: filename,
 		posPrompt,
 		negPrompt,

@@ -5,7 +5,7 @@ import useElectron from '@/composables/useElectron';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
-interface UpdatePersonaOptions {
+interface UpdateBuddyOptions {
 	id: string;
 	name?: string;
 	description?: string;
@@ -21,25 +21,22 @@ export default async function updateOne({
 	profile_pic,
 	profile_pic_prompt,
 	profile_pic_use_prompt = true,
-}: UpdatePersonaOptions): Promise<BuddyVersionMerged> {
+}: UpdateBuddyOptions): Promise<BuddyVersionMerged> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 	if (!id) {
-		throw new Error('Persona ID is required');
+		throw new Error('Buddy ID is required');
 	}
 
-	let returningPersona: BuddyVersionMerged = null as any;
+	let returningBuddy: BuddyVersionMerged = null as any;
 
-	const sqlPersona = select('persona', ['*'], { id });
-	let persona = (await dbGet(
-		sqlPersona[0],
-		sqlPersona[1]
-	)) as BuddyVersionMerged;
-	if (!persona) {
-		throw new Error('Persona not found');
+	const sqlBuddy = select('persona', ['*'], { id });
+	let buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as BuddyVersionMerged;
+	if (!buddy) {
+		throw new Error('Buddy not found');
 	}
 
 	const sqlCurrentVersion = select('persona_version', ['*'], {
-		id: persona.current_version_id,
+		id: buddy.current_version_id,
 	});
 	const currentVersion = (await dbGet(
 		sqlCurrentVersion[0],
@@ -52,7 +49,7 @@ export default async function updateOne({
 	const makeNewVersion = !!(name || description);
 
 	if (makeNewVersion) {
-		returningPersona = { ...persona };
+		returningBuddy = { ...buddy };
 
 		const newVersionId = uuidv4();
 		const newVersion = currentVersion.version + 1;
@@ -68,21 +65,18 @@ export default async function updateOne({
 			description: versionDescription,
 		});
 		await dbRun(sqlNewVersion[0], sqlNewVersion[1]);
-		returningPersona.version = newVersion;
-		returningPersona.name = versionName;
-		returningPersona.description = versionDescription;
+		returningBuddy.version = newVersion;
+		returningBuddy.name = versionName;
+		returningBuddy.description = versionDescription;
 
-		const sqlUpdatePersona = update(
+		const sqlUpdateBuddy = update(
 			'persona',
 			{ current_version_id: newVersionId, updated: new Date().getTime() },
 			{ id }
 		);
-		await dbRun(sqlUpdatePersona[0], sqlUpdatePersona[1]);
-		const sqlPersonaGet = select('persona', ['*'], { id });
-		persona = (await dbGet(
-			sqlPersonaGet[0],
-			sqlPersonaGet[1]
-		)) as BuddyVersionMerged;
+		await dbRun(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
+		const sqlBuddyGet = select('persona', ['*'], { id });
+		buddy = (await dbGet(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
 
 		const sqlThreads = select('chat_thread', ['*'], {
 			persona_id: id,
@@ -110,24 +104,21 @@ export default async function updateOne({
 		dataToUpdate.profile_pic_use_prompt = profile_pic_use_prompt;
 
 	if (Object.keys(dataToUpdate).length === 1) {
-		return returningPersona;
+		return returningBuddy;
 	}
-	const sqlUpdatePersona = update('persona', dataToUpdate, { id });
-	await dbRun(sqlUpdatePersona[0], sqlUpdatePersona[1]);
-	const sqlPersonaGet = select('persona', ['*'], { id });
-	persona = (await dbGet(
-		sqlPersonaGet[0],
-		sqlPersonaGet[1]
-	)) as BuddyVersionMerged;
-	if (!returningPersona) {
-		returningPersona = { ...persona };
-		returningPersona.version = currentVersion.version;
-		returningPersona.name = currentVersion.name;
-		returningPersona.description = currentVersion.description;
+	const sqlUpdateBuddy = update('persona', dataToUpdate, { id });
+	await dbRun(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
+	const sqlBuddyGet = select('persona', ['*'], { id });
+	buddy = (await dbGet(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
+	if (!returningBuddy) {
+		returningBuddy = { ...buddy };
+		returningBuddy.version = currentVersion.version;
+		returningBuddy.name = currentVersion.name;
+		returningBuddy.description = currentVersion.description;
 	}
-	returningPersona.profile_pic = persona.profile_pic;
-	returningPersona.profile_pic_prompt = persona.profile_pic_prompt;
-	returningPersona.profile_pic_use_prompt = persona.profile_pic_use_prompt;
+	returningBuddy.profile_pic = buddy.profile_pic;
+	returningBuddy.profile_pic_prompt = buddy.profile_pic_prompt;
+	returningBuddy.profile_pic_use_prompt = buddy.profile_pic_use_prompt;
 
-	return returningPersona;
+	return returningBuddy;
 }

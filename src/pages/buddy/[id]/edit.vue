@@ -63,7 +63,7 @@ const store = useAppStore();
 const route = useRoute();
 const id = route.params.id as string;
 
-const persona = ref(null as BuddyVersionMerged | null);
+const buddy = ref(null as BuddyVersionMerged | null);
 
 const nameValue = ref('');
 const descriptionValue = ref('');
@@ -94,9 +94,9 @@ const handleSelectProfilePic = async (pic: string) => {
 		id,
 		profile_pic: pic,
 	});
-	persona.value = await api.buddy.getOne(id);
+	buddy.value = await api.buddy.getOne(id);
 	profilePictureValue.value = urls.buddy.getProfilePic(
-		`${persona.value?.id}/${pic}`
+		`${buddy.value?.id}/${pic}`
 	);
 
 	updateBuddies();
@@ -111,18 +111,18 @@ const handleSelectProfilePic = async (pic: string) => {
 // we can clean up pics that werent used
 
 onBeforeMount(async () => {
-	persona.value = await api.buddy.getOne(id);
-	if (persona.value) {
-		nameValue.value = persona.value.name;
-		descriptionValue.value = persona.value.description || '';
+	buddy.value = await api.buddy.getOne(id);
+	if (buddy.value) {
+		nameValue.value = buddy.value.name;
+		descriptionValue.value = buddy.value.description || '';
 	}
-	if (persona.value?.profile_pic) {
+	if (buddy.value?.profile_pic) {
 		profilePictureValue.value = urls.buddy.getProfilePic(
-			`${persona.value.id}/${persona.value.profile_pic}`
+			`${buddy.value.id}/${buddy.value.profile_pic}`
 		);
 	}
-	if (persona.value?.profile_pic_prompt) {
-		profilePicturePrompt.value = persona.value.profile_pic_prompt;
+	if (buddy.value?.profile_pic_prompt) {
+		profilePicturePrompt.value = buddy.value.profile_pic_prompt;
 	}
 
 	allProfilePics.value = await api.buddy.profilePic.getAll(id);
@@ -148,7 +148,7 @@ const picQual = computed({
 });
 
 const refreshProfilePicture = async () => {
-	if (!persona.value) {
+	if (!buddy.value) {
 		return;
 	}
 	updatingProfilePicture.value = true;
@@ -157,7 +157,7 @@ const refreshProfilePicture = async () => {
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
 	const genderPrompt = genderFromName(
-		persona.value.name,
+		buddy.value.name,
 		profilePicturePrompt.value
 	);
 	let gender = '';
@@ -170,10 +170,10 @@ const refreshProfilePicture = async () => {
 	}
 	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
 
-	persona.value = await api.buddy.getOne(id);
+	buddy.value = await api.buddy.getOne(id);
 
 	profilePictureValue.value = urls.buddy.getProfilePic(
-		`${persona.value?.id}/${res.output}`
+		`${buddy.value?.id}/${res.output}`
 	);
 	updatingProfilePicture.value = false;
 
@@ -191,7 +191,7 @@ const remixDescription = async () => {
 		return;
 	}
 	const promptStr = descriptionFromKeywords(
-		persona.value?.name || '',
+		buddy.value?.name || '',
 		wizInput.value
 	);
 	generating.value = true;
@@ -220,9 +220,9 @@ const createdKeywords = ref('');
 const creatingKeywords = ref(false);
 const suggestKeywords = async (type: 'more' | 'new') => {
 	chosenType = type;
-	const descVal = persona.value?.description || '';
+	const descVal = buddy.value?.description || '';
 	const promptStr = keywordsFromNameAndDescription(
-		persona.value?.name || '',
+		buddy.value?.name || '',
 		descVal,
 		type === 'more' ? profilePicturePrompt.value : undefined
 	);
@@ -288,26 +288,26 @@ const acceptKeywords = () => {
 				<div class="flex flex-col items-center">
 					<Input
 						v-model="nameValue"
-						placeholder="Persona name"
+						placeholder="Buddy name"
 						size="lg"
 						class="my-2 w-2/5"
 					/>
-					<BuddyAvatar v-if="persona" :persona="persona" size="lg" />
+					<BuddyAvatar v-if="buddy" :buddy="buddy" size="lg" />
 
 					<p class="text-sm text-gray-500 select-none">
 						Images are created using AI and may have unexpected results.
 					</p>
 
 					<BuddyAvatarSelect
-						v-if="persona"
-						:persona="persona"
+						v-if="buddy"
+						:buddy="buddy"
 						:all-profile-pics="allProfilePics"
 						@select-profile-pic="handleSelectProfilePic"
 					/>
 
 					<BuddyAppearanceOptions
-						v-if="persona"
-						:persona="persona"
+						v-if="buddy"
+						:buddy="buddy"
 						:profile-pic-prompt="profilePicturePrompt"
 						@refresh-profile-pic="refreshProfilePicture"
 						@update-profile-pic-prompt="profilePicturePrompt = $event"
@@ -344,7 +344,7 @@ const acceptKeywords = () => {
 						Description
 						<Textarea
 							v-model="descriptionValue"
-							:placeholder="`${persona?.name} is...`"
+							:placeholder="`${buddy?.name} is...`"
 							class="w-full min-h-48"
 						/>
 					</label>
@@ -354,13 +354,13 @@ const acceptKeywords = () => {
 					<CardHeader>
 						<h2 class="font-bold">Description Wizard</h2>
 						<p class="text-sm text-gray-500">
-							Create a new description for {{ persona?.name }} using the AI Description
+							Create a new description for {{ buddy?.name }} using the AI Description
 							Wizard.
 						</p>
 					</CardHeader>
 					<CardContent>
 						<Label>
-							<span class="text-lg">Keywords that describe {{ persona?.name }}</span>
+							<span class="text-lg">Keywords that describe {{ buddy?.name }}</span>
 							<Input
 								v-model="wizInput"
 								placeholder="helpful, approachable, talkative..."

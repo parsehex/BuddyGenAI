@@ -55,22 +55,19 @@ const editBuddy = (id: string) => {
 			<ContextMenu>
 				<ContextMenuTrigger>
 					<li
-						v-for="persona in buddies"
-						:key="persona.id"
+						v-for="buddy in buddies"
+						:key="buddy.id"
 						:class="[
 							'cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors rounded border-b-2',
-							isBuddySelected(persona.id)
+							isBuddySelected(buddy.id)
 								? 'font-bold bg-gray-200 dark:bg-gray-800'
 								: '',
 						]"
-						@contextmenu="rightClickedId = persona.id"
+						@contextmenu="rightClickedId = buddy.id"
 					>
-						<RouterLink
-							class="p-2 flex items-center"
-							:to="`/buddy/${persona.id}/view`"
-						>
-							<BuddyAvatar :persona="persona" />
-							<span class="ml-1">{{ persona.name }}</span>
+						<RouterLink class="p-2 flex items-center" :to="`/buddy/${buddy.id}/view`">
+							<BuddyAvatar :buddy="buddy" />
+							<span class="ml-1">{{ buddy.name }}</span>
 						</RouterLink>
 					</li>
 				</ContextMenuTrigger>

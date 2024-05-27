@@ -12,11 +12,11 @@ import useElectron from '@/composables/useElectron';
 const { dbAll, dbGet } = useElectron();
 
 export default async function removeAllThreads(
-	persona_id: string
+	buddy_id: string
 ): Promise<DeleteResponse> {
 	if (!dbAll) throw new Error('dbAll is not defined');
 
-	const sql = select('chat_thread', ['*'], { persona_id });
+	const sql = select('chat_thread', ['*'], { persona_id: buddy_id });
 	const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
 
 	for (const thread of threads) {

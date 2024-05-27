@@ -30,26 +30,21 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 	const hasSystemMessage = messages[0]?.role === 'system';
 
 	if (shouldReplaceSystem && thread.persona_id) {
-		const sqlPersona = select('persona', ['*'], { id: thread.persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-		if (!persona) {
-			// throw createError({ statusCode: 404, statusMessage: 'Persona not found' });
-			throw new Error('Persona not found');
+		const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
+		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		if (!buddy) {
+			throw new Error('Buddy not found');
 		}
 
-		const sqlPersonaVersion = select('persona_version', ['*'], {
-			id: persona.current_version_id,
+		const sqlBuddyVersion = select('persona_version', ['*'], {
+			id: buddy.current_version_id,
 		});
-		const personaVersion = (await dbGet(
-			sqlPersonaVersion[0],
-			sqlPersonaVersion[1]
+		const buddyVersion = (await dbGet(
+			sqlBuddyVersion[0],
+			sqlBuddyVersion[1]
 		)) as BuddyVersion;
-		if (!personaVersion) {
-			// throw createError({
-			// 	statusCode: 404,
-			// 	statusMessage: 'Persona version not found',
-			// });
-			throw new Error('Persona version not found');
+		if (!buddyVersion) {
+			throw new Error('Buddy version not found');
 		}
 
 		if (!hasSystemMessage) {
@@ -61,8 +56,8 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 				role: 'system',
 				content: prompt.fromPersonaDescription(
 					userName,
-					personaVersion.name,
-					personaVersion.description
+					buddyVersion.name,
+					buddyVersion.description
 				),
 				image: null,
 				tts: null,
@@ -73,8 +68,8 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 			const userName = AppSettings.get('user_name') as string;
 			messages[0].content = prompt.fromPersonaDescription(
 				userName,
-				personaVersion.name,
-				personaVersion.description
+				buddyVersion.name,
+				buddyVersion.description
 			);
 		}
 	}

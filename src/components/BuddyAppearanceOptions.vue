@@ -21,12 +21,12 @@ import type { BuddyVersionMerged } from '../lib/api/types-db';
 import { appearanceToPrompt } from '../lib/prompt/appearance';
 
 const props = defineProps<{
-	persona: BuddyVersionMerged;
+	buddy: BuddyVersionMerged;
 	profilePicPrompt: string;
 }>();
 const emit = defineEmits(['updateProfilePicPrompt', 'refreshProfilePic']);
 
-const { persona, profilePicPrompt } = toRefs(props);
+const { buddy, profilePicPrompt } = toRefs(props);
 
 const { complete } = useCompletion({ api: urls.message.completion() });
 
@@ -65,8 +65,8 @@ const newAppearanceOptions = async () => {
 	// for each one, get the prompt for that option
 	for (const key in loadingAppearanceOptions.value) {
 		const prompt = appearanceOptionsFromNameAndDescription(
-			persona.value?.name || '',
-			persona.value?.description || '',
+			buddy.value?.name || '',
+			buddy.value?.description || '',
 			key
 		);
 

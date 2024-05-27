@@ -512,10 +512,7 @@ const acceptPicKeywords = () => {
 							/>
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
 								<!-- add tooltip with tips on good values -->
-								<Label
-									class="block text-lg text-center font-bold"
-									for="persona-keywords"
-								>
+								<Label class="block text-lg text-center font-bold" for="buddy-keywords">
 									Use a few words to describe your Buddy
 								</Label>
 								<p class="text-sm text-gray-500 text-center mb-1">
@@ -527,7 +524,7 @@ const acceptPicKeywords = () => {
 								</p>
 								<div class="flex w-full items-center gap-1.5">
 									<Input
-										id="persona-keywords"
+										id="buddy-keywords"
 										v-model="buddyKeywords"
 										@keyup.enter="acceptBuddy('keywords')"
 										class="p-2 border border-gray-300 dark:border-gray-700 rounded"
@@ -651,7 +648,7 @@ const acceptPicKeywords = () => {
 							</div>
 						</CardContent>
 					</Card>
-					<Card v-else class="mt-4 p-2 w-full" id="buddyCard">
+					<Card v-else class="mt-4 p-2 w-full">
 						<CardContent>
 							<h2 v-if="store.newHere" class="text-lg mt-4 text-center underline">
 								Your first Buddy
@@ -662,7 +659,7 @@ const acceptPicKeywords = () => {
 							<div class="flex flex-col items-center">
 								<BuddyAvatar
 									v-if="acceptedBuddy && newBuddy"
-									:persona="newBuddy"
+									:buddy="newBuddy"
 									:no-default="true"
 									size="lg"
 								/>

@@ -3,14 +3,14 @@ import useElectron from '@/composables/useElectron';
 const { listDirectory, getDataPath } = useElectron();
 
 export default async function getAllProfilePics(
-	personaId: string,
+	buddyId: string,
 	thread?: string
 ) {
 	if (!listDirectory) {
 		throw new Error('listDirectory is not defined');
 	}
 
-	let p = 'images/' + personaId;
+	let p = 'images/' + buddyId;
 	if (thread) {
 		p += '/' + thread;
 	}

@@ -30,12 +30,12 @@ export default async function updateOne(
 
 	const changedName = name && name !== currentThread.name;
 	const changedMode = mode && mode !== currentThread.mode;
-	const changedPersona = persona_id && persona_id !== currentThread.persona_id;
+	const changedBuddy = persona_id && persona_id !== currentThread.persona_id;
 
 	const dataToUpdate: Record<string, any> = {};
 	if (changedName) dataToUpdate.name = name;
 	if (changedMode) dataToUpdate.mode = mode;
-	if (changedPersona) dataToUpdate.persona_id = persona_id;
+	if (changedBuddy) dataToUpdate.persona_id = persona_id;
 	if (persona_mode_use_current) dataToUpdate.persona_id = null;
 
 	const sqlUpdateThread = update('chat_thread', dataToUpdate, { id });
@@ -58,19 +58,19 @@ export default async function updateOne(
 			});
 			await dbRun(sqlMessage[0], sqlMessage[1]);
 		} else if (mode === 'persona') {
-			const personaId = (persona_id || currentThread.persona_id) as string;
-			const sqlPersona = select('persona', ['*'], { id: personaId });
-			const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-			if (persona) {
-				const sqlPersonaVersion = select('persona_version', ['*'], {
-					id: persona.current_version_id,
+			const buddyId = (persona_id || currentThread.persona_id) as string;
+			const sqlBuddy = select('persona', ['*'], { id: buddyId });
+			const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+			if (buddy) {
+				const sqlBuddyVersion = select('persona_version', ['*'], {
+					id: buddy.current_version_id,
 				});
-				const personaVersion = (await dbGet(
-					sqlPersonaVersion[0],
-					sqlPersonaVersion[1]
+				const buddyVersion = (await dbGet(
+					sqlBuddyVersion[0],
+					sqlBuddyVersion[1]
 				)) as BuddyVersion;
-				if (!personaVersion) {
-					throw new Error('Current version of persona not found');
+				if (!buddyVersion) {
+					throw new Error('Current version of Buddy not found');
 				}
 				const sqlMessage = insert('chat_message', {
 					id: uuidv4(),
@@ -78,35 +78,35 @@ export default async function updateOne(
 					role: 'system',
 					content: prompt.fromPersonaDescription(
 						userName,
-						personaVersion.name,
-						personaVersion.description || ''
+						buddyVersion.name,
+						buddyVersion.description || ''
 					),
 					thread_id: id,
 					thread_index: 0,
 				});
 				await dbRun(sqlMessage[0], sqlMessage[1]);
 			} else {
-				console.error(`Persona ID-${personaId} not found (was it deleted?)`);
+				console.error(`Buddy ID-${buddyId} not found (was it deleted?)`);
 			}
 		}
 	}
 
-	if (changedPersona) {
+	if (changedBuddy) {
 		const sqlMessages = del('chat_message', { thread_id: id });
 		await dbRun(sqlMessages[0], sqlMessages[1]);
 
-		const sqlPersona = select('persona', ['*'], { id: persona_id });
-		const persona = (await dbGet(sqlPersona[0], sqlPersona[1])) as Buddy;
-		if (persona) {
-			const sqlPersonaVersion = select('persona_version', ['*'], {
-				id: persona.current_version_id,
+		const sqlBuddy = select('persona', ['*'], { id: persona_id });
+		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		if (buddy) {
+			const sqlBuddyVersion = select('persona_version', ['*'], {
+				id: buddy.current_version_id,
 			});
-			const personaVersion = (await dbGet(
-				sqlPersonaVersion[0],
-				sqlPersonaVersion[1]
+			const buddyVersion = (await dbGet(
+				sqlBuddyVersion[0],
+				sqlBuddyVersion[1]
 			)) as BuddyVersion;
-			if (!personaVersion) {
-				throw new Error('Current version of persona not found');
+			if (!buddyVersion) {
+				throw new Error('Current version of Buddy not found');
 			}
 			const sqlMessage = insert('chat_message', {
 				id: uuidv4(),
@@ -114,15 +114,15 @@ export default async function updateOne(
 				role: 'system',
 				content: prompt.fromPersonaDescription(
 					userName,
-					personaVersion.name,
-					personaVersion.description || ''
+					buddyVersion.name,
+					buddyVersion.description || ''
 				),
 				thread_id: id,
 				thread_index: 0,
 			});
 			await dbRun(sqlMessage[0], sqlMessage[1]);
 		} else {
-			console.error(`Persona ID-${persona_id} not found (was it deleted?)`);
+			console.error(`Buddy ID-${persona_id} not found (was it deleted?)`);
 		}
 	}
 
