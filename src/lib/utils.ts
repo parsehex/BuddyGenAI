@@ -76,6 +76,21 @@ export function attemptToFixJson(json: string): string {
 	const firstIsOpeningBracket = json[0] === '{';
 	const lastIsClosingBracket = json[json.length - 1] === '}';
 
+	if (!hasBothBrackets) {
+		// hail mary
+		try {
+			let tmp = '{' + json + '}';
+			if (tmp.includes('True')) {
+				tmp = tmp.replace(/True/g, 'true');
+			}
+			if (tmp.includes('False')) {
+				tmp = tmp.replace(/False/g, 'false');
+			}
+			const parsed = JSON.parse(tmp);
+			return JSON.stringify(parsed, null, 2);
+		} catch (e) {}
+	}
+
 	if (firstIsOpeningBracket && !hasClosingBracket) {
 		json += '}';
 	}
