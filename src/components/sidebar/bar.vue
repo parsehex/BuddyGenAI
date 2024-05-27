@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/stores/main';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
-import SettingsPanel from './SettingsPanel.vue';
+import SettingsPanel from './settings/SettingsPanel.vue';
 import ColorMode from './ColorMode.vue';
 import { useToast } from '../ui/toast';
 import Button from '../ui/button/Button.vue';

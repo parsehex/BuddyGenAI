@@ -21,7 +21,7 @@ import {
 import ImportModel from '@/components/ImportModel.vue';
 import OpenAIAPIKeyHelpButton from '@/components/OpenAIAPIKeyHelpButton.vue';
 import DevOnly from '@/components/DevOnly.vue';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '../../ui/scroll-area';
 import { storeToRefs } from 'pinia';
 
 const { toast } = useToast();
