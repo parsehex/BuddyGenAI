@@ -141,6 +141,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (!pathJoin) {
 				throw new Error('pathJoin not available');
 			}
+			// TODO keep isloading on until we finish everything here
 
 			let ttsToSave = '';
 			const autoRead = store.settings.auto_read_chat;
@@ -256,6 +257,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						}
 						const filename = `${Date.now()}.png`;
 
+						const quality = store.settings.chat_image_quality;
+
 						await makePicture({
 							absModelPath: store.getImageModelPath(),
 							outputSubDir,
@@ -263,6 +266,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							posPrompt: p,
 							negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
 							size: 768,
+							quality,
 						});
 
 						const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);

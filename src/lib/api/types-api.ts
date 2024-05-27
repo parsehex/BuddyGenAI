@@ -14,6 +14,7 @@ export interface SDOptions {
 	output: string;
 	neg?: string;
 	size?: number;
+	steps?: number;
 }
 
 export interface PiperOptions {

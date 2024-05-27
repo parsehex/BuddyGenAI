@@ -10,7 +10,14 @@ interface MakePictureOptions {
 	posPrompt: string;
 	negPrompt: string;
 	size?: 512 | 768;
+	quality?: 'low' | 'medium' | 'high';
 }
+
+const Steps = {
+	low: 16,
+	medium: 24,
+	high: 32,
+};
 
 export async function makePicture(options: MakePictureOptions) {
 	const electron = useElectron();
@@ -27,6 +34,7 @@ export async function makePicture(options: MakePictureOptions) {
 		posPrompt,
 		negPrompt,
 		size = 512,
+		quality = 'medium',
 	} = options;
 
 	const modelExists = await verifyFilePath(absModelPath);
@@ -47,5 +55,6 @@ export async function makePicture(options: MakePictureOptions) {
 		output: outputPath,
 		neg: negPrompt,
 		size,
+		steps: Steps[quality],
 	});
 }

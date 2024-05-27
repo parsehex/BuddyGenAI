@@ -11,6 +11,7 @@ type AppSettingsKeys =
 	| 'selected_model_image'
 	| 'selected_model_tts'
 	| 'selected_model_whisper'
+	| 'chat_image_quality'
 	| 'external_api_key'
 	| 'fresh_db'
 	| 'n_gpu_layers'
@@ -27,6 +28,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_model_image: '',
 	selected_model_tts: 'en_GB-jenny_dioco-medium.onnx',
 	selected_model_whisper: 'ggml-distil-large-v3.bin',
+	chat_image_quality: 'medium',
 	external_api_key: '',
 	fresh_db: 0,
 	n_gpu_layers: 99,

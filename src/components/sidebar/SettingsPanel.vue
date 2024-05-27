@@ -115,6 +115,13 @@ const updateImageModel = async (model: string) => {
 
 	settings.value.selected_model_image = model;
 };
+const updateChatImageQuality = async (quality: string) => {
+	console.log('Update chat image quality:', quality);
+
+	if (settings.value.chat_image_quality === quality) return;
+
+	settings.value.chat_image_quality = quality;
+};
 const updateTTSModel = async (model: string) => {
 	console.log('Update TTS model:', model);
 
@@ -353,6 +360,31 @@ const autoSendSTT = computed({
 							<SelectLabel>Image Models</SelectLabel>
 							<SelectItem v-for="model in imageModels" :key="model" :value="model">
 								{{ model }}
+							</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+
+				<Label for="chat-image-quality" class="block mt-2">
+					Chat Image Quality
+				</Label>
+				<Select
+					:default-value="settings.chat_image_quality"
+					@update:model-value="updateChatImageQuality"
+					id="chat-image-quality"
+				>
+					<SelectTrigger :title="settings.chat_image_quality">
+						<SelectValue placeholder="Select an image quality" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Image Quality</SelectLabel>
+							<SelectItem
+								v-for="quality in ['low', 'medium', 'high']"
+								:key="quality"
+								:value="quality"
+							>
+								{{ quality }}
 							</SelectItem>
 						</SelectGroup>
 					</SelectContent>

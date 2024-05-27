@@ -7,13 +7,14 @@ import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
 
-// @/lib/api/types-api
+// also in @/lib/api/types-api
 interface SDOptions {
 	model: string;
 	pos: string;
 	output: string;
 	neg?: string;
 	size?: number;
+	steps?: number;
 }
 
 // TODO catch diff errors && bubble them up to the UI
@@ -77,7 +78,8 @@ async function runSD(
 	pos: string,
 	output: string,
 	neg?: string,
-	size = 256
+	size = 256,
+	steps = 16
 ) {
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
 	return new Promise((resolve, reject) => {
@@ -96,6 +98,8 @@ async function runSD(
 			output,
 			'--seed',
 			'-1',
+			'--steps',
+			`${steps}`,
 			// '--cfg-scale',
 			// '2.5',
 			// '--clip-skip',
@@ -176,7 +180,8 @@ export default function sdModule(mainWindow: BrowserWindow) {
 			options.pos,
 			options.output,
 			options.neg,
-			options.size
+			options.size,
+			options.steps
 		);
 	});
 }

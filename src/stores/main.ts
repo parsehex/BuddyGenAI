@@ -36,6 +36,7 @@ interface Settings {
 	selected_model_image: string;
 	selected_model_tts: string;
 	selected_model_whisper: string;
+	chat_image_quality: string;
 	external_api_key: string;
 	fresh_db: number;
 	n_gpu_layers: number;
