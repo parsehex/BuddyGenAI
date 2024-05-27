@@ -7,6 +7,7 @@ const { dbGet, dbRun } = useElectron();
 
 interface CreateBuddyOptions {
 	name: string;
+	tts_voice?: string;
 	description?: string;
 	profile_pic?: string;
 	profile_pic_prompt?: string;
@@ -15,6 +16,7 @@ interface CreateBuddyOptions {
 
 export default async function createOne({
 	name,
+	tts_voice = '',
 	description,
 	profile_pic,
 	profile_pic_prompt,
@@ -32,6 +34,7 @@ export default async function createOne({
 	const sqlBuddy = insert('persona', {
 		id: buddyId,
 		created: new Date().getTime(),
+		tts_voice,
 		profile_pic,
 		profile_pic_prompt,
 		profile_pic_use_prompt,

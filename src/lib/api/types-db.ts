@@ -4,6 +4,7 @@ export interface Buddy {
 	id: string;
 	created: number;
 	updated: number | null;
+	tts_voice: string | null;
 	profile_pic: string | null;
 	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
@@ -21,6 +22,7 @@ export interface BuddyVersionMerged {
 	id: string;
 	created: number;
 	updated: number | null;
+	tts_voice: string | null;
 	persona_id: string;
 	version: number;
 	name: string;

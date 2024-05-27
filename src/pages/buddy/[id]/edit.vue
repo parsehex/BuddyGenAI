@@ -44,12 +44,6 @@ import {
 	keywordsFromNameAndDescription,
 	appearanceOptionsFromNameAndDescription,
 } from '@/lib/prompt/sd';
-import {
-	appearanceToPrompt,
-	getPartialSchema,
-	jsonSchema,
-} from '@/src/lib/prompt/appearance';
-import DevOnly from '@/src/components/DevOnly.vue';
 import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
 import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue';
 
@@ -57,7 +51,7 @@ import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue'
 
 const { toast } = useToast();
 const { complete } = useCompletion({ api: urls.message.completion() });
-const { updateBuddies } = useAppStore();
+const { updateBuddies, updateModels, ttsModels } = useAppStore();
 const store = useAppStore();
 
 const route = useRoute();
@@ -66,6 +60,7 @@ const id = route.params.id as string;
 const buddy = ref(null as BuddyVersionMerged | null);
 
 const nameValue = ref('');
+const selectedTTSVoice = ref('');
 const descriptionValue = ref('');
 const profilePictureValue = ref('');
 const profilePicturePrompt = ref('');
@@ -116,6 +111,9 @@ onBeforeMount(async () => {
 		nameValue.value = buddy.value.name;
 		descriptionValue.value = buddy.value.description || '';
 	}
+	if (buddy.value?.tts_voice) {
+		selectedTTSVoice.value = buddy.value.tts_voice;
+	}
 	if (buddy.value?.profile_pic) {
 		profilePictureValue.value = urls.buddy.getProfilePic(
 			`${buddy.value.id}/${buddy.value.profile_pic}`
@@ -126,6 +124,8 @@ onBeforeMount(async () => {
 	}
 
 	allProfilePics.value = await api.buddy.profilePic.getAll(id);
+
+	updateModels('tts');
 });
 
 const handleSave = async () => {
@@ -135,8 +135,9 @@ const handleSave = async () => {
 		id,
 		name: nameValue.value,
 		description: descriptionValue.value,
+		tts_voice: selectedTTSVoice.value,
 	});
-	await router.push(`./view`);
+	await router.push(`/buddy/${id}/view`);
 };
 
 const picQuality = ref(3 as ProfilePicQuality);
@@ -313,31 +314,33 @@ const acceptKeywords = () => {
 						@update-profile-pic-prompt="profilePicturePrompt = $event"
 					/>
 
-					<!-- <div
-						class="flex flex-col items-center justify-center my-1"
-						v-if="!store.isExternalProvider"
-					>
-						<Label class="text-lg">Picture Quality</Label>
-						<Select v-model:model-value="picQual" class="my-2">
-							<SelectTrigger>
-								<SelectValue placeholder="Buddy" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectLabel>Quality</SelectLabel>
-								<SelectGroup>
-									<SelectItem value="1">Low</SelectItem>
-									<SelectItem value="2">Medium</SelectItem>
-									<SelectItem value="3">High</SelectItem>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-					</div> -->
 					<div class="flex flex-col items-center justify-center w-full">
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
 					</div>
+
+					<Label class="mt-4 flex flex-col items-center">
+						<span class="text-lg">{{ buddy?.name }}'s Voice</span>
+						<Select
+							:default-value="buddy?.tts_voice || ''"
+							v-model="selectedTTSVoice"
+							class="w-full"
+						>
+							<SelectTrigger :title="selectedTTSVoice">
+								<SelectValue placeholder="Select a TTS voice" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel>TTS Voices</SelectLabel>
+									<SelectItem v-for="model in ttsModels" :key="model" :value="model">
+										{{ model }}
+									</SelectItem>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Label>
 				</div>
 				<div class="flex flex-col items-center space-y-4">
 					<label class="text-lg w-full text-center">

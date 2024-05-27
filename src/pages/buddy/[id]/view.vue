@@ -163,7 +163,10 @@ const createThread = async () => {
 			</div>
 		</div>
 
-		<AllThreadsImages :threads="threadsNameImages" />
+		<AllThreadsImages
+			v-if="threadsNameImages.length"
+			:threads="threadsNameImages"
+		/>
 	</ScrollArea>
 </template>
 

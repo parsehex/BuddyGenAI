@@ -3,7 +3,7 @@ import usePiper from '@/composables/usePiper';
 import { verifyFilePath } from './utils';
 
 interface MakeTTSOptions {
-	absModelPath: string;
+	absModelPath: string; // should be called voice path
 	outputFilename?: string;
 	text: string;
 }

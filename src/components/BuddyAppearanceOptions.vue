@@ -24,9 +24,9 @@ const props = defineProps<{
 	buddy: BuddyVersionMerged;
 	profilePicPrompt: string;
 }>();
-const emit = defineEmits(['updateProfilePicPrompt', 'refreshProfilePic']);
-
 const { buddy, profilePicPrompt } = toRefs(props);
+
+const emit = defineEmits(['updateProfilePicPrompt', 'refreshProfilePic']);
 
 const { complete } = useCompletion({ api: urls.message.completion() });
 
@@ -112,6 +112,10 @@ const setAppearanceOption = (key: string, value: string) => {
 	// profilePicturePrompt.value = newPrompt;
 	emit('updateProfilePicPrompt', newPrompt);
 };
+
+onMounted(() => {
+	newAppearanceOptions();
+});
 </script>
 
 <template>
@@ -125,9 +129,13 @@ const setAppearanceOption = (key: string, value: string) => {
 			<div class="flex flex-row items-center justify-center w-full">
 				<!--
 					TODO improvements:
-					- need parser to take selected options to add to prompt
-					-   e.g. "hair color: brown, hair style: long, eye color: blue, body type: slim, clothing: casual" -> "long brown hair, blue eye color, slim body, casual clothing"
-						- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
+					- when an option is selected, we should save that set of options to the buddy for reuse later
+						- use saved value as initial value for selects
+						- easy way: save whole appearance options json
+					- maybe keep New Options btn but add buttons to each category:
+						- Refresh: generate new set of options for category
+						- More: generate more options for category + save to buddy
+					- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
 					- checkbox options (e.g. glasses, hat, etc.)
 				-->
 				<div
@@ -161,6 +169,7 @@ const setAppearanceOption = (key: string, value: string) => {
 		<DevOnly class="w-full">
 			<Input
 				id="profile-picture"
+				v-model="profilePicPrompt"
 				@blur="emit('updateProfilePicPrompt', $event.target.value)"
 				class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
 				@keydown.enter="emit('refreshProfilePic')"

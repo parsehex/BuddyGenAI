@@ -153,7 +153,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				const text = cleanTextForTTS(lastMessage.content);
 				// console.log('tts text', text);
 				await makeTTS({
-					absModelPath: store.getTTSModelPath(),
+					absModelPath: store.getTTSModelPath(currentBuddy.value?.id || ''),
 					outputFilename: filename,
 					text,
 				});

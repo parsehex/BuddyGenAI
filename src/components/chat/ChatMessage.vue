@@ -135,7 +135,7 @@ const doTTS = async () => {
 		const text = cleanTextForTTS(message.value.content);
 
 		await makeTTS({
-			absModelPath: store.getTTSModelPath(),
+			absModelPath: store.getTTSModelPath(currentBuddy.value?.id || ''),
 			outputFilename: filename,
 			text,
 		});

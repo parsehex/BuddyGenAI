@@ -8,6 +8,7 @@ const { dbGet, dbAll, dbRun } = useElectron();
 interface UpdateBuddyOptions {
 	id: string;
 	name?: string;
+	tts_voice?: string;
 	description?: string;
 	profile_pic?: string;
 	profile_pic_prompt?: string;
@@ -17,6 +18,7 @@ interface UpdateBuddyOptions {
 export default async function updateOne({
 	id,
 	name,
+	tts_voice,
 	description,
 	profile_pic,
 	profile_pic_prompt,
@@ -98,6 +100,7 @@ export default async function updateOne({
 	const dataToUpdate: Record<string, any> = {
 		updated: new Date().getTime(),
 	};
+	if (tts_voice) dataToUpdate.tts_voice = tts_voice;
 	if (profile_pic) dataToUpdate.profile_pic = profile_pic;
 	if (profile_pic_prompt) dataToUpdate.profile_pic_prompt = profile_pic_prompt;
 	if (profile_pic_use_prompt)

@@ -136,7 +136,22 @@ export const useAppStore = defineStore('app', () => {
 		whisperModels.value.push(...res);
 		return res;
 	};
-	const updateModels = async () => {
+	const updateModels = async (
+		certain?: 'chat' | 'image' | 'tts' | 'whisper'
+	) => {
+		if (certain === 'chat') {
+			const res = await updateChatModels();
+			return { chatModels: res };
+		} else if (certain === 'image') {
+			const res = await updateImageModels();
+			return { imageModels: res };
+		} else if (certain === 'tts') {
+			const res = await updateTTSModels();
+			return { ttsModels: res };
+		} else if (certain === 'whisper') {
+			const res = await updateWhisperModels();
+			return { whisperModels: res };
+		}
 		const [chat, image, tts, whisper] = await Promise.all([
 			updateChatModels(),
 			updateImageModels(),
@@ -195,13 +210,20 @@ export const useAppStore = defineStore('app', () => {
 			: '/';
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
 	};
-	const getTTSModelPath = () => {
+	const getTTSModelPath = (buddyId?: string) => {
 		if (!settings.value.local_model_directory) return '';
 		if (!settings.value.selected_model_tts) return '';
+		let modelToUse = settings.value.selected_model_tts;
+		if (buddyId) {
+			const buddy = buddies.value.find((b) => b.id === buddyId);
+			if (buddy && buddy.tts_voice) {
+				modelToUse = buddy.tts_voice;
+			}
+		}
 		const slash = settings.value.local_model_directory.includes('\\')
 			? '\\'
 			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_tts}`;
+		return `${settings.value.local_model_directory}${slash}${modelToUse}`;
 	};
 	const getWhisperModelPath = () => {
 		if (!settings.value.local_model_directory) return '';

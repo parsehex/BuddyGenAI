@@ -26,7 +26,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_provider_image: 'local',
 	selected_model_chat: '',
 	selected_model_image: '',
-	selected_model_tts: 'en_GB-jenny_dioco-medium.onnx',
+	selected_model_tts: 'en_US-lessac-medium.onnx',
 	selected_model_whisper: 'ggml-distil-large-v3.bin',
 	chat_image_quality: 'medium',
 	external_api_key: '',
