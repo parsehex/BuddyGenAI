@@ -13,6 +13,7 @@ import GeneralOptions from './GeneralOptions.vue';
 import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
+import STTOptions from './STTOptions.vue';
 
 const { pickDirectory, verifyModelDirectory } = useElectron();
 
@@ -76,11 +77,12 @@ onMounted(() => {
 			<AlertTitle>Error</AlertTitle>
 			<AlertDescription>{{ error }}</AlertDescription>
 		</Alert>
-		<Accordion class="px-2" type="single" collapsible default-value="">
+		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
 			<ChatAIOptions />
 			<ImageAIOptions />
 			<TTSOptions />
+			<STTOptions />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
 			<Button

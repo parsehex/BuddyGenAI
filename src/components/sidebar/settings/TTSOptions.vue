@@ -48,7 +48,7 @@ const autoReadChat = computed({
 		<AccordionTrigger>Text-to-Speech Options</AccordionTrigger>
 		<AccordionContent>
 			<OptionSection
-				label="Default TTS Voice"
+				label="Default Voice"
 				labelName="tts-model"
 				orientation="vertical"
 			>
@@ -80,7 +80,7 @@ const autoReadChat = computed({
 					:default-value="autoReadChat"
 					v-model="autoReadChat"
 					id="auto_read_chat"
-					class="flex flex-row mb-3"
+					class="flex flex-row"
 				>
 					<div class="flex items-center space-x-2">
 						<RadioGroupItem id="auto-tts-yes" value="true">Yes</RadioGroupItem>

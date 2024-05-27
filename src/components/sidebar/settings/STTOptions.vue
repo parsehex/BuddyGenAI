@@ -6,6 +6,7 @@ import {
 	AccordionItem,
 	AccordionContent,
 } from '@/components/ui/accordion';
+import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
 	Select,
@@ -43,11 +44,11 @@ const autoSendSTT = computed({
 </script>
 
 <template>
-	<AccordionItem value="tts-options">
+	<AccordionItem value="stt-options">
 		<AccordionTrigger>Speech-to-Text Options</AccordionTrigger>
 		<AccordionContent>
 			<OptionSection
-				label="STT/Whisper Voice"
+				label="STT / Whisper Model"
 				labelName="stt-model"
 				orientation="vertical"
 			>
@@ -83,7 +84,7 @@ const autoSendSTT = computed({
 					:default-value="autoSendSTT"
 					v-model="autoSendSTT"
 					id="auto_send_stt"
-					class="flex flex-row mt-2"
+					class="flex flex-row"
 				>
 					<div class="flex items-center space-x-2">
 						<RadioGroupItem id="auto-stt-yes" value="true">Yes</RadioGroupItem>
