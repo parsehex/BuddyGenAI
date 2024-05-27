@@ -9,7 +9,6 @@ import titleBarActionsModule from './modules/titleBarActions';
 import macMenuModule from './modules/macMenu';
 import { ipcMain } from 'electron/main';
 import macMenu from './modules/macMenu';
-import { title } from 'process';
 import db from './modules/db';
 import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
@@ -22,6 +21,7 @@ import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
 
 import dotenv from 'dotenv';
+import rememberWindowState, { loadWindowState } from './window-state';
 dotenv.config({
 	path: path.join(__dirname, '..', '.env'),
 });
@@ -42,13 +42,16 @@ const modules = [titleBarActionsModule, macMenuModule];
 // =====================
 async function createWindow() {
 	console.log('System info', { isProduction, platform, architucture });
-	// TODO better sizing, remember window size/shape/position
+
+	const initialWindowState = loadWindowState();
+
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		width: 1024,
-		height: 710,
+		width: initialWindowState.width,
+		height: initialWindowState.height,
+		x: initialWindowState.x,
+		y: initialWindowState.y,
 		minWidth: 950,
-		// minHeight: 676,
 		maximizable: true,
 		webPreferences: {
 			// devTools: !isProduction,
@@ -63,6 +66,12 @@ async function createWindow() {
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
 		title: 'BuddyGenAI',
 	});
+
+	if (initialWindowState.maximized) {
+		mainWindow.maximize();
+	}
+
+	rememberWindowState(mainWindow);
 
 	await db(mainWindow);
 	await llamaCppModule(mainWindow);
