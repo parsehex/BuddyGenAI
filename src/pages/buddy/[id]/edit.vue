@@ -274,12 +274,12 @@ const acceptKeywords = () => {
 		<div class="flex items-center justify-center mb-2">
 			<Button
 				type="button"
-				@click="router.push(`/persona/${id}/view`)"
+				@click="router.push(`/buddy/${id}/view`)"
 				variant="outline"
 			>
 				View
 			</Button>
-			<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
+			<!-- <RouterLink class="ml-4" :to="`/buddy/${id}/history`">
 				Version History
 			</RouterLink> -->
 		</div>

@@ -34,8 +34,8 @@ onBeforeMount(async () => {
 	<div class="container flex flex-col items-center">
 		<h1 class="text-2xl font-bold">Persona Version History</h1>
 		<div>
-			<RouterLink class="ml-4" :to="`/persona/${id}/view`">View</RouterLink>
-			<RouterLink class="ml-4" :to="`/persona/${id}/edit`">Edit</RouterLink>
+			<RouterLink class="ml-4" :to="`/buddy/${id}/view`">View</RouterLink>
+			<RouterLink class="ml-4" :to="`/buddy/${id}/edit`">Edit</RouterLink>
 		</div>
 	</div>
 </template>

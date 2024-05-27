@@ -22,7 +22,7 @@ const route = useRoute();
 const rightClickedId = ref('');
 
 const isBuddySelected = (id: string | number) =>
-	route.path.includes(`/persona`) && route.params.id == id;
+	route.path.includes(`/buddy`) && route.params.id == id;
 
 // TODO italicize if buddy is selected in chat (still bolded if viewing/editing)
 
@@ -40,7 +40,7 @@ const removeBuddy = async (id: string) => {
 };
 
 const editBuddy = (id: string) => {
-	router.push(`/persona/${id}/edit`);
+	router.push(`/buddy/${id}/edit`);
 };
 </script>
 
@@ -67,7 +67,7 @@ const editBuddy = (id: string) => {
 					>
 						<RouterLink
 							class="p-2 flex items-center"
-							:to="`/persona/${persona.id}/view`"
+							:to="`/buddy/${persona.id}/view`"
 						>
 							<BuddyAvatar :persona="persona" />
 							<span class="ml-1">{{ persona.name }}</span>

@@ -19,11 +19,11 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/buddy/[id]/edit': RouteRecordInfo<'/buddy/[id]/edit', '/buddy/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/buddy/[id]/history': RouteRecordInfo<'/buddy/[id]/history', '/buddy/:id/history', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/buddy/[id]/view': RouteRecordInfo<'/buddy/[id]/view', '/buddy/:id/view', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/chat/[id]': RouteRecordInfo<'/chat/[id]', '/chat/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/create-buddy': RouteRecordInfo<'/create-buddy', '/create-buddy', Record<never, never>, Record<never, never>>,
     '/credits': RouteRecordInfo<'/credits', '/credits', Record<never, never>, Record<never, never>>,
-    '/persona/[id]/edit': RouteRecordInfo<'/persona/[id]/edit', '/persona/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    '/persona/[id]/history': RouteRecordInfo<'/persona/[id]/history', '/persona/:id/history', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    '/persona/[id]/view': RouteRecordInfo<'/persona/[id]/view', '/persona/:id/view', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 }

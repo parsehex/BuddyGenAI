@@ -179,7 +179,7 @@ const doTTS = async () => {
 						</span>
 						<span v-else>
 							<RouterLink
-								:to="`/persona/${currentPersona?.id}/view`"
+								:to="`/buddy/${currentPersona?.id}/view`"
 								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
 							>
 								<BuddyAvatar

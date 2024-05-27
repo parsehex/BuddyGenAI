@@ -83,8 +83,8 @@ watch(
 				<BuddyAvatar :persona="props.persona" size="base" />
 				<div class="space-y-1">
 					<div class="flex justify-around">
-						<RouterLink :to="`/persona/${id}/edit`">Edit</RouterLink>
-						<RouterLink :to="`/persona/${id}/view`">View</RouterLink>
+						<RouterLink :to="`/buddy/${id}/edit`">Edit</RouterLink>
+						<RouterLink :to="`/buddy/${id}/view`">View</RouterLink>
 					</div>
 					<p class="text-sm">{{ description }}</p>
 					<div class="flex items-center pt-2">

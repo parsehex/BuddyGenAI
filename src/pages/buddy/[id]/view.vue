@@ -101,12 +101,12 @@ const createThread = async () => {
 		</h1>
 		<Button
 			type="button"
-			@click="router.push(`/persona/${id}/edit`)"
+			@click="router.push(`/buddy/${id}/edit`)"
 			variant="outline"
 		>
 			Edit
 		</Button>
-		<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
+		<!-- <RouterLink class="ml-4" :to="`/buddy/${id}/history`">
 			Version History
 		</RouterLink> -->
 		<Card class="w-full md:w-2/3 mx-auto text-left">
@@ -122,7 +122,7 @@ const createThread = async () => {
 				{{ description }}
 				<span v-if="description.length === 0" class="text-gray-400 italic">
 					No description &nbsp;&mdash;&nbsp;
-					<RouterLink class="text-blue-500 underline" :to="`/persona/${id}/edit`">
+					<RouterLink class="text-blue-500 underline" :to="`/buddy/${id}/edit`">
 						Add description
 					</RouterLink>
 				</span>

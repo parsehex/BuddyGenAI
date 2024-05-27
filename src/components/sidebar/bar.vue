@@ -21,12 +21,12 @@ const { toast } = useToast();
 const store = useAppStore();
 const route = useRoute();
 
-const modelValue = ref(route.path.includes('/persona') ? 'buddy' : 'chat');
+const modelValue = ref(route.path.includes('/buddy') ? 'buddy' : 'chat');
 
 watch(
 	() => route.path,
 	(path) => {
-		if (path.includes('/persona')) {
+		if (path.includes('/buddy')) {
 			modelValue.value = 'buddy';
 		} else {
 			modelValue.value = 'chat';
