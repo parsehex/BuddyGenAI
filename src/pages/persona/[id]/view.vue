@@ -10,10 +10,13 @@ import type {
 	ChatThread,
 	MergedChatThread,
 	BuddyVersionMerged,
+	ChatMessage,
 } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
+import AllThreadsImages from '@/src/components/AllThreadsImages.vue';
+import { ScrollArea } from '@/src/components/ui/scroll-area';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -26,6 +29,10 @@ const updated = ref(null as number | null);
 const profilePic = ref('');
 
 const threads = ref([] as MergedChatThread[]);
+const threadsMessages = ref([] as ChatMessage[][]);
+const threadsNameImages = ref(
+	[] as { name: string; images: { url: string }[] }[]
+);
 
 const time_label = ref('Created' as 'Created' | 'Updated');
 const time_at = ref('');
@@ -54,6 +61,25 @@ onBeforeMount(async () => {
 	}
 
 	threads.value = await api.thread.getAll(id);
+	const msgs = await Promise.all(
+		threads.value.map((t) => api.message.getAll(t.id))
+	);
+	threadsMessages.value = msgs;
+
+	threadsNameImages.value = threads.value.map((t, i) => {
+		const msgsWithImages = threadsMessages.value[i].filter((m) => m.image);
+		return {
+			name: t.name,
+			images: msgsWithImages.map((m) => ({ url: m.image || '' })),
+		};
+	});
+
+	// remove threads with no images
+	threadsNameImages.value = threadsNameImages.value.filter(
+		(t) => t.images.length > 0
+	);
+
+	console.log(threadsNameImages.value);
 });
 
 const createThread = async () => {
@@ -67,25 +93,30 @@ const createThread = async () => {
 </script>
 
 <template>
-	<div class="flex flex-col items-center">
+	<ScrollArea
+		class="flex flex-col items-center text-center justify-center h-screen mb-12"
+	>
 		<h1 class="text-2xl font-bold">
 			<span class="text-blue-500">{{ name }}</span>
 		</h1>
-		<div class="flex items-center my-2">
-			<Button
-				type="button"
-				@click="router.push(`/persona/${id}/edit`)"
-				variant="outline"
-			>
-				Edit
-			</Button>
-			<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
-				Version History
-			</RouterLink> -->
-		</div>
-		<Card class="w-full md:w-2/3">
+		<Button
+			type="button"
+			@click="router.push(`/persona/${id}/edit`)"
+			variant="outline"
+		>
+			Edit
+		</Button>
+		<!-- <RouterLink class="ml-4" :to="`/persona/${id}/history`">
+			Version History
+		</RouterLink> -->
+		<Card class="w-full md:w-2/3 mx-auto text-left">
 			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
-				<BuddyAvatar v-if="buddy" :persona="buddy" size="lg" />
+				<BuddyAvatar
+					v-if="buddy"
+					:persona="buddy"
+					size="lg"
+					class="hover:scale-150"
+				/>
 			</CardHeader>
 			<CardContent class="whitespace-pre-wrap">
 				{{ description }}
@@ -102,7 +133,7 @@ const createThread = async () => {
 				</span>
 			</CardContent>
 		</Card>
-		<h2 class="text-xl font-bold mt-4 flex items-center">
+		<h2 class="text-xl font-bold mt-4 flex items-center justify-center">
 			Chats with {{ name }}
 			<Button
 				v-if="threads.length > 0"
@@ -131,7 +162,9 @@ const createThread = async () => {
 				</RouterLink>
 			</div>
 		</div>
-	</div>
+
+		<AllThreadsImages :threads="threadsNameImages" />
+	</ScrollArea>
 </template>
 
 <style>

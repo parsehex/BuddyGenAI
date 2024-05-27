@@ -2,12 +2,20 @@ import useElectron from '@/composables/useElectron';
 
 const { listDirectory, getDataPath } = useElectron();
 
-export default async function getAllProfilePics(personaId: string) {
+export default async function getAllProfilePics(
+	personaId: string,
+	thread?: string
+) {
 	if (!listDirectory) {
 		throw new Error('listDirectory is not defined');
 	}
 
-	const dataPath = await getDataPath('images/' + personaId);
+	let p = 'images/' + personaId;
+	if (thread) {
+		p += '/' + thread;
+	}
+
+	const dataPath = await getDataPath(p);
 	const files = await listDirectory(dataPath);
 	const images = files.filter((f) => f.endsWith('.png'));
 

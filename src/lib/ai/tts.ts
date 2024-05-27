@@ -2,13 +2,13 @@ import useElectron from '@/composables/useElectron';
 import usePiper from '@/composables/usePiper';
 import { verifyFilePath } from './utils';
 
-interface MakePictureOptions {
+interface MakeTTSOptions {
 	absModelPath: string;
 	outputFilename?: string;
 	text: string;
 }
 
-export async function makeTTS(options: MakePictureOptions) {
+export async function makeTTS(options: MakeTTSOptions) {
 	const electron = useElectron();
 	if (!electron.getDataPath) throw new Error('Electron not found');
 

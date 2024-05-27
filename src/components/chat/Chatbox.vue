@@ -44,12 +44,14 @@ import { attemptToFixJson, isDevMode, playAudio } from '@/src/lib/utils';
 import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
 import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
+import useElectron from '@/src/composables/useElectron';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
 const { complete } = useCompletion({ api: urls.message.completion() });
+const { pathJoin } = useElectron();
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -136,6 +138,10 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
+			if (!pathJoin) {
+				throw new Error('pathJoin not available');
+			}
+
 			let ttsToSave = '';
 			const autoRead = store.settings.auto_read_chat;
 			// console.log('autoRead', autoRead);
@@ -240,10 +246,14 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						p = attemptToFixJson(p);
 						p = JSON.parse(p);
 
-						const outputSubDir =
+						let outputSubDir =
 							threadMode.value === 'persona'
 								? currentBuddy.value?.id || ''
 								: 'AI-Assistant';
+						// save to thread subdirectory
+						if (threadId.value) {
+							outputSubDir = await pathJoin(outputSubDir, threadId.value);
+						}
 						const filename = `${Date.now()}.png`;
 
 						await makePicture({
@@ -698,13 +708,7 @@ const startRecording = async () => {
 				autofocus
 			/>
 			<div class="flex flex-col items-center gap-1">
-				<Button
-					type="button"
-					size="sm"
-					@click="doSubmit"
-					class="info"
-					:disabled="!canSend"
-				>
+				<Button type="button" size="sm" @click="doSubmit" :disabled="!canSend">
 					<!-- TODO implement stop -->
 					<!-- TODO switch to send icon and stop icon -->
 					Send

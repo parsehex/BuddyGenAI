@@ -4,6 +4,23 @@ const Platform = builder.Platform;
 const fs = require('fs-extra');
 const path = require('path');
 
+const sourceEnv = path.join(__dirname, '.env');
+const destEnv = path.join(__dirname, '.output', '.env');
+fs.copyFileSync(sourceEnv, destEnv);
+
+const env = fs.readFileSync(destEnv, 'utf8');
+const envObj = env.split('\n').reduce((acc, line) => {
+	const [key, value] = line.split('=');
+	acc[key] = value;
+	return acc;
+}, {});
+const AppEdition = envObj.APP_EDITION;
+
+if (!AppEdition) {
+	console.error('Could not find APP_EDITION in the .env file.');
+	process.exit(1);
+}
+
 const platform = 'WINDOWS';
 // const platform = 'LINUX'
 // const platform = 'MAC'
@@ -24,7 +41,7 @@ if (!isVersionsSet) {
 /**
  * @type {import('electron-builder').CompressionLevel}
  */
-const compression = 'maximum';
+const compression = 'store';
 // set to 'maximum' for production builds
 
 console.time(`build (${compression} compression-level)`);
@@ -97,7 +114,7 @@ const options = {
 		icon: './build/icon.ico',
 		target: [
 			{
-				target: 'nsis',
+				target: 'dir',
 				arch: ['x64'],
 				// arch: ['x64', 'ia32']
 			},

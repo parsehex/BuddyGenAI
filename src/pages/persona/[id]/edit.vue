@@ -301,6 +301,7 @@ const acceptKeywords = () => {
 					<BuddyAvatarSelect
 						v-if="persona"
 						:persona="persona"
+						:all-profile-pics="allProfilePics"
 						@select-profile-pic="handleSelectProfilePic"
 					/>
 

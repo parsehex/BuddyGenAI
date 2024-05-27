@@ -121,22 +121,15 @@ const setAppearanceOption = (key: string, value: string) => {
 			<Label class="text-lg">Appearance Options</Label>
 			<div class="flex items-center justify-center w-full">
 				<Button type="button" @click="newAppearanceOptions"> New Options </Button>
-				<!-- <Spinner
-									class="ml-2"
-									:style="{
-										visibility: generatingAppearanceOptions ? 'visible' : 'hidden',
-									}"
-								/> -->
 			</div>
 			<div class="flex flex-row items-center justify-center w-full">
 				<!--
-									TODO improvements:
-									- Refresh button with each category (will use subset of schema, should be faster?)
-									- need parser to take selected options to add to prompt
-									-   e.g. "hair color: brown, hair style: long, eye color: blue, body type: slim, clothing: casual" -> "long brown hair, blue eye color, slim body, casual clothing"
-										- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
-									- checkbox options (e.g. glasses, hat, etc.)
-								-->
+					TODO improvements:
+					- need parser to take selected options to add to prompt
+					-   e.g. "hair color: brown, hair style: long, eye color: blue, body type: slim, clothing: casual" -> "long brown hair, blue eye color, slim body, casual clothing"
+						- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
+					- checkbox options (e.g. glasses, hat, etc.)
+				-->
 				<div
 					v-for="(options, key) in appearanceOptions"
 					:key="key"
@@ -165,10 +158,10 @@ const setAppearanceOption = (key: string, value: string) => {
 			</div>
 		</div>
 
-		<DevOnly>
+		<DevOnly class="w-full">
 			<Input
 				id="profile-picture"
-				v-model="profilePicPrompt"
+				@blur="emit('updateProfilePicPrompt', $event.target.value)"
 				class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
 				@keydown.enter="emit('refreshProfilePic')"
 			/>

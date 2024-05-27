@@ -21,6 +21,11 @@ import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
 
+import dotenv from 'dotenv';
+dotenv.config({
+	path: path.join(__dirname, '..', '.env'),
+});
+
 log.initialize();
 log.errorHandler.startCatching();
 
@@ -66,6 +71,10 @@ async function createWindow() {
 	await whisperModule(mainWindow);
 
 	mainWindow.removeMenu();
+
+	ipcMain.handle('getAppEdition', async () => {
+		return process.env.APP_EDITION;
+	});
 
 	ipcMain.handle('pathJoin', async (_, path: string, ...paths: string[]) => {
 		return join(path, ...paths);

@@ -37,6 +37,11 @@ export default function useElectron() {
 		windowStats.value.isFullscreen = value;
 	});
 
+	const getAppEdition = async () => {
+		const result = await electron.ipcRenderer.invoke('getAppEdition:app');
+		return result;
+	};
+
 	const copyToClipboard = (text: string) => {
 		electron.clipboard.writeText(text);
 	};
@@ -157,6 +162,7 @@ export default function useElectron() {
 	};
 
 	return {
+		getAppEdition,
 		copyToClipboard,
 		isElectron,
 		titleBarActions,

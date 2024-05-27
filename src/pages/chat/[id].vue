@@ -15,9 +15,7 @@ const getInitialMessages = async () => {
 </script>
 
 <template>
-	<div>
-		<Chatbox v-if="id" :threadId="id" :initialMessages="getInitialMessages()" />
-	</div>
+	<Chatbox v-if="id" :threadId="id" :initialMessages="getInitialMessages()" />
 </template>
 
 <style lang="scss"></style>

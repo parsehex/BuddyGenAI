@@ -5,6 +5,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import ImageWithPreview from '../ImageWithPreview.vue';
 
 const props = defineProps<{
 	images: { url: string }[];
@@ -62,9 +63,9 @@ const wheel = (e: WheelEvent) => {
 	<Popover>
 		<PopoverTrigger as-child>
 			<div
-				class="flex items-center bg-primary-foreground rounded-b-lg w-full justify-center cursor-pointer"
+				class="flex items-center bg-primary-foreground rounded-lg justify-center cursor-pointer"
 			>
-				<span class="p-2"> Images </span>
+				<span class="p-2"> Images in this Chat </span>
 			</div>
 		</PopoverTrigger>
 		<PopoverContent
@@ -84,11 +85,7 @@ const wheel = (e: WheelEvent) => {
 			>
 				<div class="flex flex-row">
 					<div v-for="image in props.images" :key="image.url" class="p-1">
-						<img
-							:src="image.url"
-							class="min-w-[200px] object-cover"
-							draggable="false"
-						/>
+						<ImageWithPreview :img-url="image.url" class="min-w-[200px]" />
 					</div>
 				</div>
 				<!-- <ScrollBar orientation="horizontal" /> -->
