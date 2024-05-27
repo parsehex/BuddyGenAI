@@ -165,6 +165,7 @@ const doTTS = async () => {
 						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
 					>
 						<!-- would be good ux to have an option or a link to option to update user name -->
+						<!-- TODO button to Request Pic -->
 						<Avatar
 							v-if="isUser"
 							class="text-md mt-2 font-bold"
@@ -213,7 +214,7 @@ const doTTS = async () => {
 							<Volume2 />
 						</Button>
 					</CardHeader>
-					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between">
+					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between gap-2">
 						<div class="grow">
 							{{ message.content }}
 						</div>
