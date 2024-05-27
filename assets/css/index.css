@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* theme for PG Edition */
 @layer base {
 	:root {
 		--background: 0 0% 100%;
