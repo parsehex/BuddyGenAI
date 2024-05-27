@@ -7,29 +7,10 @@ import { updateModel } from '../routes/message';
 import log from 'electron-log/main';
 import { AppSettings } from '../AppSettings';
 import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
-};
-
-// by default, llamacpp uses template embedded in gguf if available
-// TODO any way to get this from the model?
-// https://github.com/ahoylabs/gguf.js
-const chatTemplateMap: { [key: string]: string } = {
-	Moistral: 'vicuna',
-	'WizardLM-2': 'vicuna',
-	'Lexi-': 'llama3',
-	'Hermes-2': 'chatml',
-	'Llama-3': 'llama3',
-	'llama-3': 'llama3',
-};
-
-const contextLengthMap: { [key: string]: number } = {
-	'WizardLM-2': 4096,
-	Moistral: 8192,
-	'Lexi-': 8192,
-	'Llama-3': 8192,
-	'llama-3': 8192,
 };
 
 let lastModel = '';
