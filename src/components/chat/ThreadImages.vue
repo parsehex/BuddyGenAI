@@ -6,6 +6,8 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ImageWithPreview from '../ImageWithPreview.vue';
+import { onMounted } from 'vue';
+import { delay } from '@/src/lib/utils';
 
 const props = defineProps<{
 	images: { url: string }[];
@@ -57,10 +59,21 @@ const wheel = (e: WheelEvent) => {
 		behavior: 'smooth',
 	});
 };
+
+const scrollRight = async () => {
+	await delay(5);
+	const scrollArea = getScrollArea();
+	console.log('scrollArea', scrollArea);
+	if (!scrollArea) return;
+	scrollArea.scrollTo({
+		left: scrollArea.scrollWidth,
+		behavior: 'smooth',
+	});
+};
 </script>
 
 <template>
-	<Popover>
+	<Popover @update:open="scrollRight">
 		<PopoverTrigger as-child>
 			<div
 				class="flex items-center bg-primary-foreground rounded-lg justify-center cursor-pointer"
