@@ -41,6 +41,13 @@ import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 import DevOnly from './DevOnly.vue';
 import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
+import {
+	TagsInput,
+	TagsInputInput,
+	TagsInputItem,
+	TagsInputItemDelete,
+	TagsInputItemText,
+} from '@/components/ui/tags-input';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -68,6 +75,16 @@ const buddyName = ref('');
 const buddyKeywords = ref('');
 const createdDescription = ref('');
 const profilePicturePrompt = ref('');
+
+const buddyKeywordsArr = computed({
+	get: () => {
+		if (!buddyKeywords.value) return [];
+		return buddyKeywords.value.split(',').map((s) => s.trim());
+	},
+	set: (value: string[]) => {
+		buddyKeywords.value = value.join(', ');
+	},
+});
 
 const acceptedBuddy = ref('' as '' | 'description' | 'keywords');
 const newBuddy = ref(null as BuddyVersionMerged | null);
@@ -417,6 +434,7 @@ const acceptPicKeywords = () => {
 								Choose a name that feels friendly and relatable, like "Alex" or "Sam."
 								Your buddy's name helps shape their personality!
 							</p>
+							<!-- TODO button to randomize -->
 							<Input
 								v-model="buddyName"
 								class="my-2 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
@@ -425,129 +443,29 @@ const acceptPicKeywords = () => {
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
 								<!-- add tooltip with tips on good values -->
 								<Label class="block text-lg text-center font-bold" for="buddy-keywords">
-									Use a few words to describe your Buddy
+									Characteristics
 								</Label>
 								<p class="text-sm text-gray-500 text-center mb-1">
-									This affects how {{ buddyName || 'your Buddy' }} talks with you.
+									These affect how {{ buddyName || 'your Buddy' }} talks with you.
 									<br />
 									You can use keywords like
 									<b><i>friendly, helpful, funny,</i></b>
 									etc.
 								</p>
-								<div class="flex w-full items-center gap-1.5">
-									<Input
-										id="buddy-keywords"
-										v-model="buddyKeywords"
-										@keyup.enter="acceptBuddy('keywords')"
-										class="p-2 border border-gray-300 dark:border-gray-700 rounded"
-									/>
-
-									<Popover
-										:open="keywordsPopover"
-										@update:open="
-											($event) => {
-												if (!store.isExternalProvider && !store.chatServerRunning) return;
-												keywordsPopover = $event;
-											}
-										"
+								<TagsInput v-model="buddyKeywordsArr" class="w-full">
+									<TagsInputItem
+										v-for="item in buddyKeywordsArr"
+										:key="item"
+										:value="item"
 									>
-										<PopoverTrigger as-child>
-											<!-- TODO make component -->
-											<Button
-												type="button"
-												class="magic"
-												title="Create a description"
-												:disabled="!store.isExternalProvider && !store.chatServerRunning"
-											>
-												<Sparkles />
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent
-											:prioritize-position="true"
-											side="left"
-											:avoid-collisions="true"
-											align="start"
-											class="w-96"
-										>
-											<div class="flex items-center">
-												<Button
-													@click="createDescription"
-													class="p-2 bg-blue-500 text-white rounded"
-													v-if="buddyKeywords"
-												>
-													Create Description
-												</Button>
-												<Button
-													@click="randomizeKeywords"
-													class="p-2 bg-blue-500 text-white rounded"
-													v-else
-												>
-													Randomize
-												</Button>
-												<Spinner v-if="creatingKeywords || creatingDescription" />
-											</div>
-											<p class="mt-4" v-if="createdDescription">
-												Created Description:
-												<br />
-												<span class="text-lg ml-3">{{ createdDescription }}</span>
-											</p>
-											<p class="mt-4" v-else-if="randomizedBuddy">
-												Randomized Buddy:
-												<br />
-												<span class="text-lg ml-3">
-													{{ randomizedBuddy.name }}
-												</span>
-												<br />
-												<span class="text-lg ml-3">
-													{{ randomizedBuddy.description }}
-												</span>
-											</p>
+										<TagsInputItemText />
+										<TagsInputItemDelete />
+									</TagsInputItem>
 
-											<!-- accept/cancel buttons -->
-											<div class="flex justify-center mt-4" v-if="createdDescription">
-												<Button
-													@click="acceptBuddy('description')"
-													class="p-2 success text-white rounded"
-												>
-													Accept
-												</Button>
-												<Button
-													@click="createdDescription = ''"
-													class="p-2 bg-blue-500 text-white rounded"
-												>
-													Cancel
-												</Button>
-											</div>
-											<div class="flex justify-center mt-4" v-else-if="randomizedBuddy">
-												<Button
-													@click="
-														() => {
-															if (!randomizedBuddy) return;
-															buddyName = randomizedBuddy.name;
-															buddyKeywords = randomizedBuddy.description;
-															randomizedBuddy = null;
-															keywordsPopover = false;
-														}
-													"
-													class="p-2 success text-white rounded"
-												>
-													Accept
-												</Button>
-												<Button
-													@click="
-														() => {
-															randomizedBuddy = null;
-															keywordsPopover = false;
-														}
-													"
-													class="p-2 bg-blue-500 text-white rounded"
-												>
-													Cancel
-												</Button>
-											</div>
-										</PopoverContent>
-									</Popover>
-								</div>
+									<TagsInputInput
+										:placeholder="buddyName ? buddyName + ' is...' : 'Keywords'"
+									/>
+								</TagsInput>
 
 								<div>
 									<Button
