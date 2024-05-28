@@ -33,6 +33,9 @@ import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
 import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
 import urls from '@/src/lib/api/urls';
+import { useToast } from '../ui/toast';
+
+const { toast } = useToast();
 
 const { copyToClipboard } = useElectron();
 const store = useAppStore();
@@ -131,11 +134,21 @@ const doTTS = async () => {
 	if (isUser.value) return;
 
 	if (!hasTTS.value) {
+		const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
+		const ttsEnabled = ttsModel && ttsModel !== '0';
+
+		if (!ttsEnabled) {
+			toast({
+				title: 'TTS is disabled',
+				description: 'Please set a Text-to-Speech voice in the settings',
+			});
+			return;
+		}
 		const filename = `${Date.now()}.wav`;
 		const text = cleanTextForTTS(message.value.content);
 
 		await makeTTS({
-			absModelPath: store.getTTSModelPath(currentBuddy.value?.id || ''),
+			absModelPath: ttsModel,
 			outputFilename: filename,
 			text,
 		});

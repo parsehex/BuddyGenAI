@@ -11,7 +11,7 @@ import {
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 
-const buddies = useAppStore().buddies as BuddyVersionMerged[];
+const store = useAppStore();
 
 const model = defineModel<string>({ required: false });
 
@@ -36,7 +36,11 @@ defineProps({
 			<SelectLabel>Buddies</SelectLabel>
 			<SelectGroup>
 				<SelectItem v-if="includeAi" value="ai"> AI Assistant </SelectItem>
-				<SelectItem v-for="buddy in buddies" :key="buddy.id" :value="buddy.id">
+				<SelectItem
+					v-for="buddy in store.buddies"
+					:key="buddy.id"
+					:value="buddy.id"
+				>
 					{{ buddy.name }}
 				</SelectItem>
 			</SelectGroup>

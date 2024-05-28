@@ -78,7 +78,7 @@ const scrollRight = async () => {
 			<div
 				class="flex items-center bg-primary-foreground rounded-lg justify-center cursor-pointer"
 			>
-				<span class="p-2"> Images in this Chat </span>
+				<span class="p-2 select-none"> Images in this Chat </span>
 			</div>
 		</PopoverTrigger>
 		<PopoverContent
@@ -101,7 +101,9 @@ const scrollRight = async () => {
 						<ImageWithPreview :img-url="image.url" class="min-w-[200px]" />
 					</div>
 				</div>
-				<!-- <ScrollBar orientation="horizontal" /> -->
+				<p v-if="!props.images.length" class="p-2 select-none">
+					No images in this chat.
+				</p>
 			</ScrollArea>
 		</PopoverContent>
 	</Popover>

@@ -128,6 +128,19 @@ export async function findBinaryPath<T extends ProjectName>(
 		'.',
 	];
 
+	if (!gpu) {
+		let index = directories.indexOf('cuda12');
+		if (index > -1) directories.splice(index, 1);
+		index = directories.indexOf('cuda11');
+		if (index > -1) directories.splice(index, 1);
+		index = directories.indexOf('rocm5.5');
+		if (index > -1) directories.splice(index, 1);
+		index = directories.indexOf('clblast');
+		if (index > -1) directories.splice(index, 1);
+		index = directories.indexOf('vulkan');
+		if (index > -1) directories.splice(index, 1);
+	}
+
 	for (let i = 0; i < directories.length; i++) {
 		try {
 			const dir = directories[i];

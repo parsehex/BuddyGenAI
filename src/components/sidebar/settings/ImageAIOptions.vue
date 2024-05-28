@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { useAppStore } from '@/src/stores/main';
 import {
 	AccordionTrigger,
 	AccordionItem,
 	AccordionContent,
 } from '@/components/ui/accordion';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectTrigger,
@@ -15,6 +16,7 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import OptionSection from './OptionSection.vue';
 import ImportModel from '../../ImportModel.vue';
 
@@ -30,12 +32,33 @@ const updateChatImageQuality = async (quality: string) => {
 
 	store.settings.chat_image_quality = quality;
 };
+
+const useGpu = computed(
+	() =>
+		// @ts-ignore
+		store.settings.gpu_enabled_image === '1.0' ||
+		store.settings.gpu_enabled_image === 1
+);
+const updateUseGPU = async (boolVal: boolean) => {
+	const numVal = boolVal ? 1 : 0;
+	if (store.settings.gpu_enabled_image === numVal) return;
+
+	// @ts-ignore
+	store.settings.gpu_enabled_image = numVal + '.0';
+};
 </script>
 
 <template>
 	<AccordionItem value="image-ai-options">
 		<AccordionTrigger>Image AI Options</AccordionTrigger>
 		<AccordionContent>
+			<OptionSection>
+				<Label class="flex items-center gap-2">
+					<Switch :checked="useGpu" @update:checked="updateUseGPU" />
+					Use GPU if available
+				</Label>
+			</OptionSection>
+
 			<OptionSection
 				label="Image Model"
 				labelName="image-model"

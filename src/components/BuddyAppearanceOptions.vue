@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
 import { ref, onMounted, toRefs } from 'vue';
+
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -19,6 +20,8 @@ import { appearanceOptionsFromNameAndDescription } from '../lib/prompt/sd';
 import urls from '../lib/api/urls';
 import type { BuddyVersionMerged } from '../lib/api/types-db';
 import { appearanceToPrompt } from '../lib/prompt/appearance';
+import { attemptToFixJson } from '../lib/utils';
+import { RefreshCw, Plus } from 'lucide-vue-next';
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;
@@ -40,45 +43,80 @@ interface AppearanceOptionsLoading {
 	[key: string]: boolean;
 }
 
-const appearanceOptions = ref({} as ExpectedAppearanceOptions);
-const loadingAppearanceOptions = ref({} as AppearanceOptionsLoading);
+const appearanceOptions = ref({
+	'hair color': [],
+	'hair style': [],
+	'eye color': [],
+	'body type': [],
+	clothing: [],
+} as ExpectedAppearanceOptions);
+const loadingAppearanceOptions = ref({
+	'hair color': false,
+	'hair style': false,
+	'eye color': false,
+	'body type': false,
+	clothing: false,
+} as AppearanceOptionsLoading);
 
-const newAppearanceOptions = async () => {
-	// set all appearance options to loading
-	// keys: hair color, hair style, eye color, body type, clothing
-	loadingAppearanceOptions.value = {
-		'hair color': true,
-		'hair style': true,
-		'eye color': true,
-		'body type': true,
-		clothing: true,
+type AppearanceCategory =
+	| 'hair color'
+	| 'hair style'
+	| 'eye color'
+	| 'body type'
+	| 'clothing';
+
+const newAppearanceOptions = async (category?: AppearanceCategory) => {
+	const toLoad: AppearanceCategory[] = category
+		? [category]
+		: ['hair color', 'hair style', 'eye color', 'body type', 'clothing'];
+
+	console.log(appearanceOptions.value['body type']);
+
+	const existingOptionValues = {
+		'hair color': JSON.parse(
+			JSON.stringify(appearanceOptions.value['hair color'] || '[]')
+		),
+		'hair style': JSON.parse(
+			JSON.stringify(appearanceOptions.value['hair style'] || '[]')
+		),
+		'eye color': JSON.parse(
+			JSON.stringify(appearanceOptions.value['eye color'] || '[]')
+		),
+		'body type': JSON.parse(
+			JSON.stringify(appearanceOptions.value['body type'] || '[]')
+		),
+		clothing: JSON.parse(
+			JSON.stringify(appearanceOptions.value.clothing || '[]')
+		),
 	};
 
-	appearanceOptions.value = {
-		'hair color': [],
-		'hair style': [],
-		'eye color': [],
-		'body type': [],
-		clothing: [],
-	};
+	for (const key of toLoad) {
+		loadingAppearanceOptions.value[key] = true;
+		appearanceOptions.value[key] = [];
+	}
 
 	// for each one, get the prompt for that option
-	for (const key in loadingAppearanceOptions.value) {
+	for (const key of toLoad) {
+		// TODO update to take existing options into account
+		const existing = existingOptionValues[key];
+		console.log(existing);
 		const prompt = appearanceOptionsFromNameAndDescription(
 			buddy.value?.name || '',
 			buddy.value?.description || '',
-			key
+			key,
+			existing
 		);
 
-		// TODO improve prompt to just use llama 3's natural ability to respond with json instead of passing schema
-		const res = await complete(prompt, {
+		let res = await complete(prompt, {
 			body: {
+				max_tokens: 75,
 				temperature: 0.25,
-				// json_schema: getPartialSchema(key),
 			},
 		});
 
 		if (res) {
+			res = attemptToFixJson(res, 'array');
+			console.log(prompt);
 			console.log(res);
 			const options = JSON.parse(res);
 			appearanceOptions.value[key] = options;
@@ -113,9 +151,9 @@ const setAppearanceOption = (key: string, value: string) => {
 	emit('updateProfilePicPrompt', newPrompt);
 };
 
-onMounted(() => {
-	newAppearanceOptions();
-});
+// onMounted(() => {
+// 	newAppearanceOptions();
+// });
 </script>
 
 <template>
@@ -124,7 +162,9 @@ onMounted(() => {
 		<div class="flex flex-col items-center justify-center w-full">
 			<Label class="text-lg">Appearance Options</Label>
 			<div class="flex items-center justify-center w-full">
-				<Button type="button" @click="newAppearanceOptions"> New Options </Button>
+				<Button type="button" @click="newAppearanceOptions()" variant="secondary">
+					Refresh All Options
+				</Button>
 			</div>
 			<div class="flex flex-row items-center justify-center w-full">
 				<!--
@@ -143,7 +183,23 @@ onMounted(() => {
 					:key="key"
 					class="flex flex-wrap items-center justify-center w-full my-2"
 				>
-					<Label class="text-lg">{{ key }}</Label>
+					<div>
+						<Button type="button" size="xs" variant="secondary" title="More options">
+							<Plus />
+						</Button>
+						<Button
+							type="button"
+							size="xs"
+							variant="secondary"
+							@click="newAppearanceOptions(key as AppearanceCategory)"
+							title="Refresh options"
+						>
+							<RefreshCw />
+						</Button>
+					</div>
+					<Label class="text-lg mr-1">
+						{{ key }}
+					</Label>
 					<Spinner v-if="loadingAppearanceOptions[key]" class="ml-2" />
 					<!-- @vue-ignore -->
 					<Select

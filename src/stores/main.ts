@@ -36,6 +36,9 @@ interface Settings {
 	selected_model_image: string;
 	selected_model_tts: string;
 	selected_model_whisper: string;
+	gpu_enabled_chat: number;
+	gpu_enabled_image: number;
+	gpu_enabled_whisper: number;
 	chat_image_quality: string;
 	external_api_key: string;
 	fresh_db: number;
@@ -213,6 +216,7 @@ export const useAppStore = defineStore('app', () => {
 	const getTTSModelPath = (buddyId?: string) => {
 		if (!settings.value.local_model_directory) return '';
 		if (!settings.value.selected_model_tts) return '';
+		if (!buddyId && settings.value.selected_model_tts === '0') return '';
 		let modelToUse = settings.value.selected_model_tts;
 		if (buddyId) {
 			const buddy = buddies.value.find((b) => b.id === buddyId);
@@ -228,6 +232,7 @@ export const useAppStore = defineStore('app', () => {
 	const getWhisperModelPath = () => {
 		if (!settings.value.local_model_directory) return '';
 		if (!settings.value.selected_model_whisper) return '';
+		if (settings.value.selected_model_whisper === '0') return '';
 		const slash = settings.value.local_model_directory.includes('\\')
 			? '\\'
 			: '/';
@@ -323,7 +328,15 @@ export const useAppStore = defineStore('app', () => {
 		const hasModelDir = !!settings.value.local_model_directory;
 		const hasChatModel = !!settings.value.selected_model_chat;
 		const hasImageModel = !!settings.value.selected_model_image;
-		return hasModelDir && hasChatModel && hasImageModel;
+		const hasTTSModel = !!settings.value.selected_model_tts;
+		const hasWhisperModel = !!settings.value.selected_model_whisper;
+		return (
+			hasModelDir &&
+			hasChatModel &&
+			hasImageModel &&
+			hasTTSModel &&
+			hasWhisperModel
+		);
 	});
 
 	const modelProvider = computed({

@@ -11,6 +11,9 @@ type AppSettingsKeys =
 	| 'selected_model_image'
 	| 'selected_model_tts'
 	| 'selected_model_whisper'
+	| 'gpu_enabled_chat'
+	| 'gpu_enabled_image'
+	| 'gpu_enabled_whisper'
 	| 'chat_image_quality'
 	| 'external_api_key'
 	| 'fresh_db'
@@ -26,8 +29,11 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_provider_image: 'local',
 	selected_model_chat: '',
 	selected_model_image: '',
-	selected_model_tts: 'en_US-lessac-medium.onnx',
-	selected_model_whisper: 'ggml-distil-large-v3.bin',
+	selected_model_tts: '0',
+	selected_model_whisper: '0',
+	gpu_enabled_chat: 1,
+	gpu_enabled_image: 1,
+	gpu_enabled_whisper: 1,
 	chat_image_quality: 'medium',
 	external_api_key: '',
 	fresh_db: 0,

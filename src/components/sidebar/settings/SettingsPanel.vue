@@ -69,7 +69,12 @@ onMounted(() => {
 <template>
 	<!--
 		TODO
-		- (unrelated) add option to Buddies to specify a certain model
+		- add option: Advanced -- show advanced options
+			- Just have a map of which settings are advanced, conditionally hide (do it in optionselect?)
+			- if enabled, hide:
+				- global model import
+				- models if # of all models === 1 (not default voice / selected_model_tts)
+		- (unrelated) add option to Buddies to specify a certain chat model
 		-   if the currently active model is not the one specified, switch to it and restart server
 	 -->
 	<ScrollArea class="h-screen pb-12">

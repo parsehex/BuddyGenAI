@@ -37,17 +37,17 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 			return;
 		}
 
-		nGpuLayers = Math.floor(+nGpuLayers);
-		const llamaCppPath = await findBinaryPath('llama.cpp', 'server');
-		const args = [
-			// '--nobrowser', // llamafile arg
-			'--port',
-			port + '',
-			'--model',
-			modelPath,
-			'--n-gpu-layers',
-			nGpuLayers + '',
-		];
+		const useGpu = (await AppSettings.get('gpu_enabled_chat')) as 0 | 1;
+		// @ts-ignore
+		const useGpuBool = useGpu === 1 || useGpu === '1.0';
+
+		const llamaCppPath = await findBinaryPath('llama.cpp', 'server', useGpuBool);
+		const args = ['--port', port + '', '--model', modelPath];
+
+		if (useGpuBool) {
+			nGpuLayers = Math.floor(+nGpuLayers);
+			args.push('--n-gpu-layers', nGpuLayers + '');
+		}
 
 		if (apiKey) {
 			args.push('--api-key', apiKey);
@@ -72,7 +72,7 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 			log.info('Using default context length:', 4096);
 		}
 
-		log.info('Llama.cpp Server Path:', llamaCppPath);
+		log.info('Llama.cpp Server Path:', llamaCppPath, `(GPU: ${useGpuBool})`);
 		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(

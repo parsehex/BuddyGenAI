@@ -66,6 +66,8 @@ const autoReadChat = computed({
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>TTS Models</SelectLabel>
+								<SelectItem value="0">Disabled</SelectItem>
+
 								<SelectItem
 									v-for="model in store.ttsModels"
 									:key="model"

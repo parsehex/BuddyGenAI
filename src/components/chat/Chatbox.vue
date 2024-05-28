@@ -145,15 +145,16 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			let ttsToSave = '';
 			const autoRead = store.settings.auto_read_chat;
-			// console.log('autoRead', autoRead);
+			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
+			const ttsEnabled = ttsModel && ttsModel !== '0';
 			// @ts-ignore
-			if (autoRead === 1 || autoRead === '1.0') {
+			if (ttsEnabled && (autoRead === 1 || autoRead === '1.0')) {
 				const lastMessage = messages.value[messages.value.length - 1];
 				const filename = `${Date.now()}.wav`;
 				const text = cleanTextForTTS(lastMessage.content);
 				// console.log('tts text', text);
 				await makeTTS({
-					absModelPath: store.getTTSModelPath(currentBuddy.value?.id || ''),
+					absModelPath: ttsModel,
 					outputFilename: filename,
 					text,
 				});
@@ -266,7 +267,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							posPrompt: p,
 							negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
 							size: 768,
-							quality,
+							quality: quality as any,
 						});
 
 						const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);
@@ -571,6 +572,17 @@ const startRecording = async () => {
 		return;
 	}
 
+	const whisperModelPath = store.getWhisperModelPath();
+	const whisperEnabled = whisperModelPath && whisperModelPath !== '0';
+	if (!whisperEnabled) {
+		toast({
+			variant: 'destructive',
+			title: 'Speech-to-Text is disabled',
+			description: 'Please set a Speech-to-Text model in the settings',
+		});
+		return;
+	}
+
 	if (recording.value) {
 		console.log('already recording');
 		recording.value = false;
@@ -603,7 +615,7 @@ const startRecording = async () => {
 					}
 					loadingTranscript.value = true;
 					const result = await whisper.runWhisper({
-						model: store.getWhisperModelPath(),
+						model: whisperModelPath,
 						input: buf,
 					});
 					console.log('whisper result', result);

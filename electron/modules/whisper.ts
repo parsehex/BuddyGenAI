@@ -79,7 +79,11 @@ function combineTranscriptChunks(chunks: TranscriptChunk[]) {
 }
 
 async function runWhisper(model: string, input: ArrayBuffer) {
-	const whisperPath = await findBinaryPath('whisper.cpp', 'main');
+	const useGpu = (await AppSettings.get('gpu_enabled_whisper')) as 0 | 1;
+	// @ts-ignore
+	const useGpuBool = useGpu === 1 || useGpu === '1.0';
+	const whisperPath = await findBinaryPath('whisper.cpp', 'main', useGpuBool);
+
 	return new Promise(async (resolve, reject) => {
 		// save input to a file
 		const inputName = 'C:/Users/User/Code/GitHub/BuddyGenAI/input.webm';

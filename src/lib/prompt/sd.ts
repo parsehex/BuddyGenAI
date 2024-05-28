@@ -30,7 +30,6 @@ Keywords should be visually descriptive of an individual and be comma-separated.
 	if (existingKeywords)
 		prompt += `\nExisting keywords (do not include):\n${existingKeywords}`;
 	prompt += `\n\nInput:\n${description}`;
-	console.log(prompt);
 	return prompt;
 }
 
@@ -40,20 +39,21 @@ const examples = {
 	'hair style': ['short', 'long', 'curly'],
 	'eye color': ['brown', 'green', 'blue'],
 	'body type': ['thin', 'muscular', 'overweight', 'curvy'],
-	clothing: ['casual t-shirt', 'tan suit', 'sundress', 'sweater'],
+	clothing: ['casual t-shirt', 'sundress', 'sweater', 'gray suit'],
 } as Record<string, string[]>;
 
 const notesMap = {
 	'hair color': 'Use typical colors',
 	'hair style': 'Use typical hair styles',
-	'eye color': 'Use typical eye colors',
+	'eye color': 'Use typical eye colors for people',
 	'body type': '',
 	clothing: '',
 } as Record<string, string>;
 export function appearanceOptionsFromNameAndDescription(
 	name: string,
 	description: string,
-	category: string
+	category: string,
+	existingOptions?: string[]
 ) {
 	// TODO have preset categories for ai to choose from
 	// hair color, hair style, eyes color, skin color, body type, clothing
@@ -61,12 +61,24 @@ export function appearanceOptionsFromNameAndDescription(
 	// ideas:
 	// category: face shape, facial hair, glasses, hat, skin color
 
+	console.log('category', category);
+
 	const example = examples[category];
 	example.sort(() => Math.random() - 0.5);
-	const exampleStr = JSON.stringify(example, null, ' ');
-	let prompt = `The following is a name and description of a character. Assistant's task is to generate options for the character's appearance based on the description. Respond with a valid JSON array containing between 5 and 10 strings to represent options that are typical for the specified category. Each option should be simple and visual-based.
+	const exampleStr = JSON.stringify(example, null, ' ')
+		.replace(/[\n\t]/g, '')
+		.replace('[ ', '[');
+	const existingOptionsStr = JSON.stringify(existingOptions, null, ' ')
+		.replace(/[\n\t]/g, '')
+		.replace('[ ', '[');
 
-Category: ${category}
+	let prompt = `The following is a name and description of a character. Assistant's task is to generate options for the character's appearance based on the description. Respond with a valid JSON array containing between 5 and 10 strings to represent options that are typical for the specified category. Each option should be simple and visual-based.${
+		existingOptions?.length ? ' Respond with new options only.' : ''
+	}
+
+Category: ${category}${
+		existingOptions?.length ? '\nExisting options: ' + existingOptionsStr : ''
+	}
 Short example response: ${exampleStr}
 
 Notes:${notesMap[category] ? '\n- ' + notesMap[category] : ''}
@@ -75,7 +87,7 @@ Notes:${notesMap[category] ? '\n- ' + notesMap[category] : ''}
 		.slice(2, 8)}`;
 	prompt += `\n\nName: ${name}`;
 	prompt += `\nDescription: ${description}`;
-	console.log(prompt);
+	// console.log(prompt);
 	return prompt;
 }
 

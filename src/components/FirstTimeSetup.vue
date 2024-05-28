@@ -132,7 +132,11 @@ onMounted(() => {
 });
 
 const handleSave = async () => {
-	if (store.newHere && !userNameValue.value) {
+	if (
+		store.newHere &&
+		store.settings.user_name.toLowerCase() === 'user' &&
+		!userNameValue.value
+	) {
 		toast({ variant: 'destructive', description: 'Please fill out your name.' });
 		return;
 	}

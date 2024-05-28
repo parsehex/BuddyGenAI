@@ -81,7 +81,11 @@ async function runSD(
 	size = 256,
 	steps = 16
 ) {
-	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
+	const useGpu = (await AppSettings.get('gpu_enabled_image')) as 0 | 1;
+	// @ts-ignore
+	const useGpuBool = useGpu === 1 || useGpu === '1.0';
+	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd', useGpuBool);
+
 	return new Promise((resolve, reject) => {
 		let W = size;
 		let H = size;
@@ -89,6 +93,7 @@ async function runSD(
 			W = 512;
 			H = 768;
 		}
+
 		const args = [
 			'-m',
 			model,
@@ -113,7 +118,7 @@ async function runSD(
 			args.splice(4, 0, '-n', removeAccents(neg));
 		}
 
-		log.info('SD Path:', sdPath);
+		log.info('SD Path:', sdPath, `(GPU: ${useGpuBool})`);
 		// log.info('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });

@@ -80,6 +80,20 @@ const doCreateThread = async () => {
 	await store.updateThreads();
 	router.push(`/chat/${newThread.id}`);
 };
+
+watch(
+	() => store.buddies,
+	(newVal) => {
+		if (selectedBuddy.value) {
+			const buddy = newVal.find(
+				(buddy: BuddyVersionMerged) => buddy.id === selectedBuddy.value
+			);
+			if (!buddy) {
+				selectedBuddy.value = '';
+			}
+		}
+	}
+);
 </script>
 
 <template>
@@ -95,7 +109,6 @@ const doCreateThread = async () => {
 				<div class="bg-background mb-1">
 					<ChatServerStatus v-if="!store.isExternalProvider" />
 					<div class="flex w-full px-2 my-1 items-end">
-						<!-- <BuddySelect v-model="selectedBuddy" /> -->
 						<BuddySelect v-model="selectedBuddy" include-ai />
 						<Button class="ml-1" @click="doCreateThread">+</Button>
 					</div>
@@ -107,7 +120,7 @@ const doCreateThread = async () => {
 			<TabsContent value="buddy">
 				<BuddyList />
 			</TabsContent>
-			<TabsContent v-if="!store.newHere" value="settings">
+			<TabsContent value="settings">
 				<SettingsPanel />
 			</TabsContent>
 		</div>

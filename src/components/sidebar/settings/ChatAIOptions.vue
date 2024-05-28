@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useAppStore } from '@/src/stores/main';
 import {
 	AccordionTrigger,
@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/accordion';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectTrigger,
@@ -17,6 +18,7 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import OptionSection from './OptionSection.vue';
 import ImportModel from '../../ImportModel.vue';
 
@@ -45,6 +47,21 @@ const nglBlur = async () => {
 
 	needsRestart.value = true;
 };
+
+const useGpu = computed(
+	() =>
+		// @ts-ignore
+		store.settings.gpu_enabled_chat === '1.0' ||
+		store.settings.gpu_enabled_chat === 1
+);
+const updateUseGPU = async (boolVal: boolean) => {
+	const numVal = boolVal ? 1 : 0;
+	if (store.settings.gpu_enabled_chat === numVal) return;
+
+	// @ts-ignore
+	store.settings.gpu_enabled_chat = numVal + '.0';
+	needsRestart.value = true;
+};
 </script>
 
 <template>
@@ -57,6 +74,13 @@ const nglBlur = async () => {
 					You'll need to restart the app for changes to take effect.
 				</AlertDescription>
 			</Alert>
+
+			<OptionSection>
+				<Label class="flex items-center gap-2">
+					<Switch :checked="useGpu" @update:checked="updateUseGPU" />
+					Use GPU if available
+				</Label>
+			</OptionSection>
 
 			<OptionSection
 				label="Chat Model"

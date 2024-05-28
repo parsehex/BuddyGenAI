@@ -18,15 +18,11 @@ import { Button } from '@/components/ui/button';
 
 const props = defineProps<{
 	type?: 'chat' | 'image' | 'tts' | 'stt';
+	label?: string;
 }>();
-const { type } = toRefs(props);
+const { type, label } = toRefs(props);
 
-const filePath = ref<string>('');
 const filePaths = ref<string[]>([]);
-
-const detectedModelType = ref<string>(''); // chat or image
-
-// TODO may want to refactor so that the user chooses to import a chat or image model specifically
 
 const { pathJoin, pickFile, moveFile, linkFile, basename } = useElectron();
 const store = useAppStore();
@@ -49,10 +45,10 @@ const tryToAutoSelectModels = () => {
 	if (!selectedImageModel && imageModels.length === 1) {
 		store.settings.selected_model_image = imageModels[0];
 	}
-	if (!selectedTTSModel && ttsModels.length === 1) {
+	if (!selectedTTSModel && selectedTTSModel !== '0' && ttsModels.length === 1) {
 		store.settings.selected_model_tts = ttsModels[0];
 	}
-	if (!selectedSTTModel && sttModels.length === 1) {
+	if (!selectedSTTModel && selectedSTTModel !== '0' && sttModels.length === 1) {
 		store.settings.selected_model_whisper = sttModels[0];
 	}
 };
@@ -70,7 +66,7 @@ const doMoveFile = async () => {
 
 	if (filePaths.value.length === 0) return;
 
-	console.log('Moving file:', filePath);
+	// console.log('Moving file:', filePath);
 	const modelsPath = store.settings.local_model_directory;
 
 	if (!modelsPath) {
@@ -81,7 +77,7 @@ const doMoveFile = async () => {
 	for (const filePath of filePaths.value) {
 		const fileName = await basename(filePath);
 		const newPath = await pathJoin(modelsPath, fileName);
-		console.log('New Model Path:', newPath);
+		// console.log('New Model Path:', newPath);
 
 		await moveFile(filePath, newPath);
 	}
@@ -100,7 +96,7 @@ const doLinkFile = async () => {
 
 	if (filePaths.value.length === 0) return;
 
-	console.log('Linking file:', filePath);
+	// console.log('Linking file:', filePath);
 	const modelsPath = store.settings.local_model_directory;
 
 	if (!modelsPath) {
@@ -111,7 +107,7 @@ const doLinkFile = async () => {
 	for (const filePath of filePaths.value) {
 		const fileName = await basename(filePath);
 		const newPath = await pathJoin(modelsPath, fileName);
-		console.log('New Model Path:', newPath);
+		// console.log('New Model Path:', newPath);
 
 		await linkFile(filePath, newPath);
 	}
@@ -144,7 +140,14 @@ const fileNames = computed(() => {
 	<Dialog :modal="true">
 		<DialogTrigger as-child>
 			<Button variant="default" class="self-center px-2">
-				<span v-if="!type">Import Any Models</span>
+				<span v-if="!type && !label" class="flex items-center gap-1">
+					<Import />
+					Import Models
+				</span>
+				<span v-else-if="label" class="flex items-center gap-1">
+					<Import />
+					{{ label }}
+				</span>
 				<Import v-else />
 			</Button>
 		</DialogTrigger>
@@ -165,7 +168,7 @@ const fileNames = computed(() => {
 						Image models: <code>.safetensors</code>
 					</div>
 					<div v-if="!type || type === 'tts'">
-						TTS models: <code>.onnx</code> + adjacent <code>.json</code>
+						TTS models: <code>.onnx</code> + Adjacent <code>.json</code> file
 					</div>
 					<div v-if="!type || type === 'stt'">STT models: <code>.bin</code></div>
 				</div>

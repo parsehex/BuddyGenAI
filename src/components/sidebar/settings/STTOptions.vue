@@ -17,6 +17,7 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import OptionSection from './OptionSection.vue';
 import ImportModel from '../../ImportModel.vue';
 
@@ -39,15 +40,38 @@ const autoSendSTT = computed({
 		const b = val === 'true';
 		const num = b ? 1 : 0;
 		if (num === store.settings.auto_send_stt) return;
-		store.settings.auto_send_stt = num;
+		// @ts-ignore
+		store.settings.auto_send_stt = num + '.0';
 	},
 });
+
+console.log(store.settings.gpu_enabled_whisper);
+const useGpu = computed(
+	() =>
+		// @ts-ignore
+		store.settings.gpu_enabled_whisper === '1.0' ||
+		store.settings.gpu_enabled_whisper === 1
+);
+const updateUseGPU = async (boolVal: boolean) => {
+	const numVal = boolVal ? 1 : 0;
+	if (store.settings.gpu_enabled_whisper === numVal) return;
+
+	// @ts-ignore
+	store.settings.gpu_enabled_whisper = numVal + '.0';
+};
 </script>
 
 <template>
 	<AccordionItem value="stt-options">
 		<AccordionTrigger>Speech-to-Text Options</AccordionTrigger>
 		<AccordionContent>
+			<OptionSection>
+				<Label class="flex items-center gap-2">
+					<Switch :checked="useGpu" @update:checked="updateUseGPU" />
+					Use GPU if available
+				</Label>
+			</OptionSection>
+
 			<OptionSection
 				label="STT / Whisper Model"
 				labelName="stt-model"
@@ -66,6 +90,8 @@ const autoSendSTT = computed({
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>STT Models</SelectLabel>
+								<SelectItem value="0">Disabled</SelectItem>
+
 								<SelectItem
 									v-for="model in store.whisperModels"
 									:key="model"
