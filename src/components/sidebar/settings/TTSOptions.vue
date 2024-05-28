@@ -18,6 +18,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
+import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 
@@ -52,23 +53,30 @@ const autoReadChat = computed({
 				labelName="tts-model"
 				orientation="vertical"
 			>
-				<Select
-					:default-value="store.settings.selected_model_tts"
-					@update:model-value="updateTTSModel"
-					id="tts-model"
-				>
-					<SelectTrigger :title="store.settings.selected_model_tts">
-						<SelectValue placeholder="Select a TTS model" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>TTS Models</SelectLabel>
-							<SelectItem v-for="model in store.ttsModels" :key="model" :value="model">
-								{{ model }}
-							</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<div class="flex">
+					<ImportModel type="tts" />
+					<Select
+						:default-value="store.settings.selected_model_tts"
+						@update:model-value="updateTTSModel"
+						id="tts-model"
+					>
+						<SelectTrigger :title="store.settings.selected_model_tts">
+							<SelectValue placeholder="Select a TTS model" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>TTS Models</SelectLabel>
+								<SelectItem
+									v-for="model in store.ttsModels"
+									:key="model"
+									:value="model"
+								>
+									{{ model }}
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
 			</OptionSection>
 
 			<OptionSection

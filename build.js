@@ -9,11 +9,15 @@ const destEnv = path.join(__dirname, '.output', '.env');
 fs.copyFileSync(sourceEnv, destEnv);
 
 const env = fs.readFileSync(destEnv, 'utf8');
-const envObj = env.split('\n').reduce((acc, line) => {
-	const [key, value] = line.split('=');
-	acc[key] = value;
-	return acc;
-}, {});
+const envObj = env
+	.split('\n')
+	.filter((line) => line.trim() !== '')
+	.reduce((acc, line) => {
+		const [key, value] = line.split('=');
+		acc[key.trim()] = JSON.parse((value || '').trim());
+		return acc;
+	}, {});
+console.log(envObj);
 const AppEdition = envObj.APP_EDITION;
 
 if (!AppEdition) {

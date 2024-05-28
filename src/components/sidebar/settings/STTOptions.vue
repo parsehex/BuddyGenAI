@@ -18,6 +18,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
+import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 
@@ -52,27 +53,30 @@ const autoSendSTT = computed({
 				labelName="stt-model"
 				orientation="vertical"
 			>
-				<Select
-					:default-value="store.settings.selected_model_whisper"
-					@update:model-value="updateWhisperModel"
-					id="stt-model"
-				>
-					<SelectTrigger :title="store.settings.selected_model_whisper">
-						<SelectValue placeholder="Select a model for STT" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>STT Models</SelectLabel>
-							<SelectItem
-								v-for="model in store.whisperModels"
-								:key="model"
-								:value="model"
-							>
-								{{ model }}
-							</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<div class="flex">
+					<ImportModel type="stt" />
+					<Select
+						:default-value="store.settings.selected_model_whisper"
+						@update:model-value="updateWhisperModel"
+						id="stt-model"
+					>
+						<SelectTrigger :title="store.settings.selected_model_whisper">
+							<SelectValue placeholder="Select a model for STT" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>STT Models</SelectLabel>
+								<SelectItem
+									v-for="model in store.whisperModels"
+									:key="model"
+									:value="model"
+								>
+									{{ model }}
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
 			</OptionSection>
 
 			<OptionSection

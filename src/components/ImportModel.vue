@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, toRefs } from 'vue';
+import { Import } from 'lucide-vue-next';
 import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
 import { delay } from '@/lib/utils';
@@ -14,6 +15,11 @@ import {
 	DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+
+const props = defineProps<{
+	type?: 'chat' | 'image' | 'tts' | 'stt';
+}>();
+const { type } = toRefs(props);
 
 const filePath = ref<string>('');
 const filePaths = ref<string[]>([]);
@@ -30,8 +36,12 @@ const emit = defineEmits(['modelImport']);
 const tryToAutoSelectModels = () => {
 	const selectedChatModel = store.settings.selected_model_chat;
 	const selectedImageModel = store.settings.selected_model_image;
+	const selectedTTSModel = store.settings.selected_model_tts;
+	const selectedSTTModel = store.settings.selected_model_whisper;
 	const chatModels = store.chatModels;
 	const imageModels = store.imageModels;
+	const ttsModels = store.ttsModels;
+	const sttModels = store.whisperModels;
 
 	if (!selectedChatModel && chatModels.length === 1) {
 		store.settings.selected_model_chat = chatModels[0];
@@ -39,18 +49,26 @@ const tryToAutoSelectModels = () => {
 	if (!selectedImageModel && imageModels.length === 1) {
 		store.settings.selected_model_image = imageModels[0];
 	}
+	if (!selectedTTSModel && ttsModels.length === 1) {
+		store.settings.selected_model_tts = ttsModels[0];
+	}
+	if (!selectedSTTModel && sttModels.length === 1) {
+		store.settings.selected_model_whisper = sttModels[0];
+	}
 };
 
 const doPickFile = async () => {
 	if (!pickFile) return console.error('Electron not available');
 
-	const files = await pickFile();
+	const files = await pickFile(type.value);
 	if (!files) return;
 
 	filePaths.value = files;
 };
 const doMoveFile = async () => {
 	if (!moveFile) return console.error('Electron not available');
+
+	if (filePaths.value.length === 0) return;
 
 	console.log('Moving file:', filePath);
 	const modelsPath = store.settings.local_model_directory;
@@ -79,6 +97,8 @@ const doMoveFile = async () => {
 };
 const doLinkFile = async () => {
 	if (!moveFile) return console.error('Electron not available');
+
+	if (filePaths.value.length === 0) return;
 
 	console.log('Linking file:', filePath);
 	const modelsPath = store.settings.local_model_directory;
@@ -123,17 +143,32 @@ const fileNames = computed(() => {
 <template>
 	<Dialog :modal="true">
 		<DialogTrigger as-child>
-			<Button variant="default" class="self-center"> Import Models </Button>
+			<Button variant="default" class="self-center px-2">
+				<span v-if="!type">Import Any Models</span>
+				<Import v-else />
+			</Button>
 		</DialogTrigger>
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle>Import Chat or Image Model(s)</DialogTitle>
+				<DialogTitle>
+					<span v-if="!type">Import Any Model(s)</span>
+					<span v-else-if="type === 'chat'">Import Chat Model(s)</span>
+					<span v-else-if="type === 'image'">Import Image Model(s)</span>
+					<span v-else-if="type === 'tts'">Import TTS Model(s)</span>
+					<span v-else-if="type === 'stt'">Import STT Model(s)</span>
+				</DialogTitle>
 			</DialogHeader>
 			<DialogDescription>
-				<p class="my-1 italic">
-					Chat models should be <code>.gguf</code> and Image models should be
-					<code>.safetensors</code>.
-				</p>
+				<div class="my-1 text-center">
+					<div v-if="!type || type === 'chat'">Chat models: <code>.gguf</code></div>
+					<div v-if="!type || type === 'image'">
+						Image models: <code>.safetensors</code>
+					</div>
+					<div v-if="!type || type === 'tts'">
+						TTS models: <code>.onnx</code> + adjacent <code>.json</code>
+					</div>
+					<div v-if="!type || type === 'stt'">STT models: <code>.bin</code></div>
+				</div>
 				<div class="flex items-end">
 					<Button
 						type="button"

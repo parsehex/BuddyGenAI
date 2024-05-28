@@ -16,6 +16,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
+import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 
@@ -40,27 +41,31 @@ const updateChatImageQuality = async (quality: string) => {
 				labelName="image-model"
 				orientation="vertical"
 			>
-				<Select
-					:default-value="store.settings.selected_model_image"
-					@update:model-value="updateImageModel"
-					id="image-model"
-				>
-					<SelectTrigger :title="store.settings.selected_model_image">
-						<SelectValue placeholder="Select an image model" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Image Models</SelectLabel>
-							<SelectItem
-								v-for="model in store.imageModels"
-								:key="model"
-								:value="model"
-							>
-								{{ model }}
-							</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<div class="flex">
+					<ImportModel type="image" />
+
+					<Select
+						:default-value="store.settings.selected_model_image"
+						@update:model-value="updateImageModel"
+						id="image-model"
+					>
+						<SelectTrigger :title="store.settings.selected_model_image">
+							<SelectValue placeholder="Select an image model" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Image Models</SelectLabel>
+								<SelectItem
+									v-for="model in store.imageModels"
+									:key="model"
+									:value="model"
+								>
+									{{ model }}
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
 			</OptionSection>
 
 			<OptionSection

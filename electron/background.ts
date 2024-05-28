@@ -148,11 +148,41 @@ async function createWindow() {
 		return result.filePaths[0];
 	});
 
-	ipcMain.handle('pickFile:app', async () => {
+	ipcMain.handle('pickFile:app', async (_, fileType: string) => {
+		let extensions = ['safetensors', 'gguf', 'onnx', 'bin'];
+		let name = 'Model files';
+		if (fileType === 'chat') {
+			extensions = ['gguf'];
+			name = 'Chat model files';
+		} else if (fileType === 'image') {
+			extensions = ['safetensors'];
+			name = 'Image model files';
+		} else if (fileType === 'tts') {
+			extensions = ['onnx'];
+			name = 'TTS voice files';
+		} else if (fileType === 'stt') {
+			extensions = ['bin'];
+			name = 'STT model files';
+		}
 		const result = await dialog.showOpenDialog({
 			properties: ['openFile', 'multiSelections'],
-			filters: [{ name: 'Model files', extensions: ['safetensors', 'gguf'] }],
+			filters: [{ name, extensions }],
 		});
+
+		if (fileType === 'tts') {
+			const onnxFiles = result.filePaths;
+			const configFiles = [];
+			for (const onnxFile of onnxFiles) {
+				const jsonFile = onnxFile + '.json';
+				try {
+					await fs.access(jsonFile);
+					configFiles.push(jsonFile);
+				} catch (err) {
+					console.log('json file not found for onnx file', onnxFile);
+				}
+			}
+			return [...onnxFiles, ...configFiles];
+		}
 
 		return result.filePaths;
 	});

@@ -18,6 +18,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
+import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 const needsRestart = ref(false);
@@ -62,27 +63,31 @@ const nglBlur = async () => {
 				labelName="chat-model"
 				orientation="vertical"
 			>
-				<Select
-					:default-value="store.settings.selected_model_chat"
-					@update:model-value="updateChatModel"
-					id="chat-model"
-				>
-					<SelectTrigger :title="store.settings.selected_model_chat">
-						<SelectValue placeholder="Select a chat model" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Chat Models</SelectLabel>
-							<SelectItem
-								v-for="model in store.chatModels"
-								:key="model"
-								:value="model"
-							>
-								{{ model }}
-							</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<div class="flex">
+					<ImportModel type="chat" />
+
+					<Select
+						:default-value="store.settings.selected_model_chat"
+						@update:model-value="updateChatModel"
+						id="chat-model"
+					>
+						<SelectTrigger :title="store.settings.selected_model_chat">
+							<SelectValue placeholder="Select a chat model" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Chat Models</SelectLabel>
+								<SelectItem
+									v-for="model in store.chatModels"
+									:key="model"
+									:value="model"
+								>
+									{{ model }}
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
 			</OptionSection>
 
 			<OptionSection

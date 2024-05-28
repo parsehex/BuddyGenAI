@@ -140,8 +140,8 @@ export default function useElectron() {
 		return result;
 	};
 
-	const pickFile = async () => {
-		const result = await electron.ipcRenderer.invoke('pickFile:app', null);
+	const pickFile = async (fileType?: 'chat' | 'image' | 'tts' | 'stt') => {
+		const result = await electron.ipcRenderer.invoke('pickFile:app', fileType);
 		return result;
 	};
 	const moveFile = async (source: string, destination: string) => {
