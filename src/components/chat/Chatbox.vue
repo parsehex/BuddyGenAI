@@ -205,7 +205,12 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				cmdObj = JSON.parse(cmd);
 			}
 			let explicit = !isValidJSON && cmd?.includes('explicit');
-			if (!explicit && cmdObj.do_send) {
+			const chatImageEnabled = store.settings.chat_image_enabled;
+			const isChatImageEnabled =
+				// @ts-ignore
+				chatImageEnabled === '1.0' || chatImageEnabled === 1;
+			console.log(chatImageEnabled, isChatImageEnabled, explicit, cmdObj.do_send);
+			if (isChatImageEnabled && !explicit && cmdObj.do_send) {
 				let buddyAppearance = '';
 				if (currentBuddy.value?.profile_pic_prompt) {
 					buddyAppearance = currentBuddy.value.profile_pic_prompt;

@@ -46,6 +46,20 @@ const updateUseGPU = async (boolVal: boolean) => {
 	// @ts-ignore
 	store.settings.gpu_enabled_image = numVal + '.0';
 };
+
+const chatImageEnabled = computed(
+	() =>
+		// @ts-ignore
+		store.settings.chat_image_enabled === '1.0' ||
+		store.settings.chat_image_enabled === 1
+);
+const updateChatImageEnabled = async (boolVal: boolean) => {
+	const numVal = boolVal ? 1 : 0;
+	if (store.settings.chat_image_enabled === numVal) return;
+
+	// @ts-ignore
+	store.settings.chat_image_enabled = numVal + '.0';
+};
 </script>
 
 <template>
@@ -96,6 +110,13 @@ const updateUseGPU = async (boolVal: boolean) => {
 				labelName="chat-image-quality"
 				orientation="vertical"
 			>
+				<Label class="flex items-center gap-2">
+					<Switch
+						:checked="chatImageEnabled"
+						@update:checked="updateChatImageEnabled"
+					/>
+					Enable chat images
+				</Label>
 				<Select
 					:default-value="store.settings.chat_image_quality"
 					@update:model-value="updateChatImageQuality"

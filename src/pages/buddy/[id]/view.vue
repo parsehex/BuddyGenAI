@@ -115,7 +115,7 @@ const createThread = async () => {
 					v-if="buddy"
 					:buddy="buddy"
 					size="lg"
-					class="hover:scale-150"
+					class="hover:scale-150 text-3xl"
 				/>
 			</CardHeader>
 			<CardContent class="whitespace-pre-wrap">

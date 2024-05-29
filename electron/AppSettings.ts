@@ -14,6 +14,7 @@ type AppSettingsKeys =
 	| 'gpu_enabled_chat'
 	| 'gpu_enabled_image'
 	| 'gpu_enabled_whisper'
+	| 'chat_image_enabled'
 	| 'chat_image_quality'
 	| 'external_api_key'
 	| 'fresh_db'
@@ -34,6 +35,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	gpu_enabled_chat: 1,
 	gpu_enabled_image: 1,
 	gpu_enabled_whisper: 1,
+	chat_image_enabled: 0,
 	chat_image_quality: 'medium',
 	external_api_key: '',
 	fresh_db: 0,

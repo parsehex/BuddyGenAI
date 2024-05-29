@@ -135,10 +135,11 @@ const doTTS = async () => {
 
 	if (!hasTTS.value) {
 		const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-		const ttsEnabled = ttsModel && ttsModel !== '0';
+		const ttsEnabled = !!ttsModel;
 
 		if (!ttsEnabled) {
 			toast({
+				variant: 'destructive',
 				title: 'TTS is disabled',
 				description: 'Please set a Text-to-Speech voice in the settings',
 			});

@@ -45,7 +45,7 @@ if (!isVersionsSet) {
 /**
  * @type {import('electron-builder').CompressionLevel}
  */
-const compression = 'store';
+const compression = 'maximum';
 // set to 'maximum' for production builds
 
 console.time(`build (${compression} compression-level)`);
@@ -118,7 +118,7 @@ const options = {
 		icon: './build/icon.ico',
 		target: [
 			{
-				target: 'dir',
+				target: 'nsis',
 				arch: ['x64'],
 				// arch: ['x64', 'ia32']
 			},

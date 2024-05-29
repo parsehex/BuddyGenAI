@@ -44,15 +44,10 @@ watch(
 </script>
 
 <template>
-	<Avatar class="mr-1" :size="size">
+	<Avatar class="mr-1 text-md font-bold" :size="size">
 		<AvatarImage :src="profilePicValue" draggable="false" />
 		<AvatarFallback>
-			<img
-				v-if="!profilePicValue && !noDefault"
-				src="/assets/logo.png"
-				alt="Default Buddy icon"
-			/>
-			<span v-else>{{ initials }}</span>
+			<span>{{ initials }}</span>
 		</AvatarFallback>
 	</Avatar>
 </template>

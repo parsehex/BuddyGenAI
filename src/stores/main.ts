@@ -39,6 +39,7 @@ interface Settings {
 	gpu_enabled_chat: number;
 	gpu_enabled_image: number;
 	gpu_enabled_whisper: number;
+	chat_image_enabled: number;
 	chat_image_quality: string;
 	external_api_key: string;
 	fresh_db: number;
@@ -214,9 +215,11 @@ export const useAppStore = defineStore('app', () => {
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
 	};
 	const getTTSModelPath = (buddyId?: string) => {
+		console.log('TEST', settings.value.selected_model_tts);
 		if (!settings.value.local_model_directory) return '';
 		if (!settings.value.selected_model_tts) return '';
-		if (!buddyId && settings.value.selected_model_tts === '0') return '';
+		if (settings.value.selected_model_tts === '0') return '';
+
 		let modelToUse = settings.value.selected_model_tts;
 		if (buddyId) {
 			const buddy = buddies.value.find((b) => b.id === buddyId);

@@ -72,7 +72,7 @@ const userNameValue = ref('');
 
 // TODO check if buddy name already exists, add text alerting user
 const buddyName = ref('');
-const buddyKeywords = ref('');
+const buddyKeywords = ref('friendly, talkative');
 const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
@@ -98,6 +98,15 @@ const acceptedBuddyDesc = ref('');
 const acceptBuddy = async (
 	descriptionOrKeywords: 'description' | 'keywords'
 ) => {
+	const existingBuddy = store.buddies.find((b) => b.name === buddyName.value);
+	if (existingBuddy) {
+		toast({
+			variant: 'destructive',
+			description: 'A Buddy with that name already exists.',
+		});
+		return;
+	}
+
 	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
 			variant: 'destructive',
@@ -402,12 +411,9 @@ const acceptPicKeywords = () => {
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">
-					<h2 v-if="store.newHere" class="text-lg text-center underline mb-0 pb-3">
-						{{ 'What do we call you?' }}
-					</h2>
 					<Label
 						v-if="store.newHere"
-						class="mb-0 pb-3 text-center flex items-center justify-center"
+						class="mb-0 pb-3 text-center flex items-center justify-center text-lg"
 					>
 						Your Name
 						<Input
@@ -426,18 +432,17 @@ const acceptPicKeywords = () => {
 						<!-- require name first? -->
 						<!-- ${userName} would like to talk to a buddy.\n\nYour task is to list names of buddies which the user might want to talk to.\nRespond with a valid JSON array of strings. -->
 						<CardContent class="flex flex-col items-center">
-							<h2 class="text-lg mb-4 text-center underline">
+							<h2 class="text-2xl text-center font-bold">
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
 							<!-- TODO untangle this rats nest of a file -->
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-gray-300">
 								Choose a name that feels friendly and relatable, like "Alex" or "Sam."
-								Your buddy's name helps shape their personality!
 							</p>
 							<!-- TODO button to randomize -->
 							<Input
 								v-model="buddyName"
-								class="my-2 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
+								class="my-4 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
 								placeholder="Name"
 							/>
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
@@ -445,14 +450,10 @@ const acceptPicKeywords = () => {
 								<Label class="block text-lg text-center font-bold" for="buddy-keywords">
 									Characteristics
 								</Label>
-								<p class="text-sm text-gray-500 text-center mb-1">
+								<p class="text-sm text-gray-300 text-center mb-1">
 									These affect how {{ buddyName || 'your Buddy' }} talks with you.
-									<br />
-									You can use keywords like
-									<b><i>friendly, helpful, funny,</i></b>
-									etc.
 								</p>
-								<TagsInput v-model="buddyKeywordsArr" class="w-full">
+								<TagsInput v-model="buddyKeywordsArr" class="w-full mt-2">
 									<TagsInputItem
 										v-for="item in buddyKeywordsArr"
 										:key="item"
@@ -462,15 +463,21 @@ const acceptPicKeywords = () => {
 										<TagsInputItemDelete />
 									</TagsInputItem>
 
-									<TagsInputInput
-										:placeholder="buddyName ? buddyName + ' is...' : 'Keywords'"
-									/>
+									<TagsInputInput :placeholder="'Keywords'" />
 								</TagsInput>
+
+								<blockquote
+									class="text-sm text-gray-400 text-center mt-2 select-none border-l border-gray-300 p-2"
+								>
+									<i>{{ buddyName || 'Your Buddy' }} is...</i>
+									<br />
+									{{ buddyKeywords }}
+								</blockquote>
 
 								<div>
 									<Button
 										@click="acceptBuddy(createdDescription ? 'description' : 'keywords')"
-										class="mt-4 p-2 bg-blue-500 text-white rounded"
+										class="mt-4 p-2 rounded"
 									>
 										Create Buddy
 									</Button>
@@ -492,6 +499,7 @@ const acceptPicKeywords = () => {
 									:buddy="newBuddy"
 									:no-default="true"
 									size="lg"
+									class="text-3xl"
 								/>
 								<p
 									class="text-sm text-gray-500 select-none"
