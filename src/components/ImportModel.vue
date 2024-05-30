@@ -45,10 +45,10 @@ const tryToAutoSelectModels = () => {
 	if (!selectedImageModel && imageModels.length === 1) {
 		store.settings.selected_model_image = imageModels[0];
 	}
-	if (!selectedTTSModel && selectedTTSModel !== '0' && ttsModels.length === 1) {
+	if (!selectedTTSModel && ttsModels.length) {
 		store.settings.selected_model_tts = ttsModels[0];
 	}
-	if (!selectedSTTModel && selectedSTTModel !== '0' && sttModels.length === 1) {
+	if (!selectedSTTModel && sttModels.length === 1) {
 		store.settings.selected_model_whisper = sttModels[0];
 	}
 };
