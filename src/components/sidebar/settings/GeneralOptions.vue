@@ -44,29 +44,25 @@ const openModels = async () => {
 				/>
 			</OptionSection>
 
-			<OptionSection
-				label="Model Folder"
-				labelName="local_model_directory"
-				orientation="vertical"
-			>
+			<OptionSection label="General Model Options" orientation="vertical">
 				<div class="flex justify-center">
 					<Button
 						@click="openModels"
 						class="px-4 py-2 ml-1 rounded-md"
 						variant="outline"
 					>
-						Browse
+						Open Model Folder
 					</Button>
-					<ImportModel />
+					<Button
+						@click="store.updateModels"
+						class="px-4 py-2 rounded-md"
+						title="Refresh Model Lists"
+						variant="secondary"
+					>
+						<RefreshCw class="w-4 h-4" />
+					</Button>
 				</div>
-				<Button
-					@click="store.updateModels"
-					class="px-4 py-2 rounded-md"
-					title="Refresh Model Lists"
-					variant="secondary"
-				>
-					<RefreshCw class="w-4 h-4" />
-				</Button>
+				<ImportModel />
 			</OptionSection>
 		</AccordionContent>
 	</AccordionItem>

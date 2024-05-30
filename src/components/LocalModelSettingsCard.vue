@@ -22,7 +22,7 @@ const props = defineProps<{
 	firstTime: boolean;
 }>();
 
-const emits = defineEmits(['openModelDirectory', 'modelChange']);
+const emits = defineEmits(['openModelDirectory']);
 
 const { updateModels } = useAppStore();
 const store = useAppStore();
@@ -84,7 +84,7 @@ const onChatModelChange = () => {
 				</span> -->
 			</p>
 			<div class="mt-4 flex items-center gap-2">
-				<ImportModel @model-import="emits('modelChange', 'chat')" />
+				<ImportModel @model-import="onChatModelChange" />
 			</div>
 			<div
 				class="mt-4"
@@ -116,11 +116,7 @@ const onChatModelChange = () => {
 				</Select>
 				<br />
 				<Label for="image-model" class="mb-1">Image Model</Label>
-				<Select
-					v-model="store.settings.selected_model_image"
-					@update:model-value="emits('modelChange', 'image')"
-					id="image-model"
-				>
+				<Select v-model="store.settings.selected_model_image" id="image-model">
 					<SelectTrigger>
 						<SelectValue placeholder="Select an image model" />
 					</SelectTrigger>
@@ -139,11 +135,7 @@ const onChatModelChange = () => {
 				</Select>
 				<br />
 				<Label for="tts-model" class="mb-1">Default TTS Voice</Label>
-				<Select
-					v-model="store.settings.selected_model_tts"
-					@update:model-value="emits('modelChange', 'tts')"
-					id="tts-model"
-				>
+				<Select v-model="store.settings.selected_model_tts" id="tts-model">
 					<SelectTrigger>
 						<SelectValue placeholder="Select a TTS voice" />
 					</SelectTrigger>
@@ -160,11 +152,7 @@ const onChatModelChange = () => {
 				</Select>
 				<br />
 				<Label for="stt-model" class="mb-1">STT Model</Label>
-				<Select
-					v-model="store.settings.selected_model_whisper"
-					@update:model-value="emits('modelChange', 'stt')"
-					id="stt-model"
-				>
+				<Select v-model="store.settings.selected_model_whisper" id="stt-model">
 					<SelectTrigger>
 						<SelectValue placeholder="Select an STT model" />
 					</SelectTrigger>

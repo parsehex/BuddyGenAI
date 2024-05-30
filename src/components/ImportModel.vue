@@ -139,7 +139,7 @@ const fileNames = computed(() => {
 <template>
 	<Dialog :modal="true">
 		<DialogTrigger as-child>
-			<Button variant="default" class="self-center px-2">
+			<Button variant="secondary" class="self-center px-2">
 				<span v-if="!type && !label" class="flex items-center gap-1">
 					<Import />
 					Import Models
@@ -177,7 +177,7 @@ const fileNames = computed(() => {
 						type="button"
 						@click="doPickFile"
 						variant="link"
-						class="custom-file-upload hover:bg-gray-100"
+						class="custom-file-upload hover:bg-gray-100 underline"
 					>
 						Choose file...
 					</Button>

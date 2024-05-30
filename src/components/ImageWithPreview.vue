@@ -29,9 +29,7 @@ const classStr = computed(() => {
 			<div class="flex flex-col items-center">
 				<!-- TODO title & desc? -->
 				<DialogTitle>Image Preview</DialogTitle>
-				<DialogDescription class="mb-2">
-					Click the image to close the preview
-				</DialogDescription>
+				<DialogDescription class="mb-2"> </DialogDescription>
 
 				<img :src="imgUrl" class="max-h-[75vh]" />
 				<p
