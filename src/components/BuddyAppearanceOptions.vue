@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
 import { ref, onMounted, toRefs } from 'vue';
+import { RefreshCw, Plus } from 'lucide-vue-next';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -21,7 +22,11 @@ import urls from '../lib/api/urls';
 import type { BuddyVersionMerged } from '../lib/api/types-db';
 import { appearanceToPrompt } from '../lib/prompt/appearance';
 import { attemptToFixJson } from '../lib/utils';
-import { RefreshCw, Plus } from 'lucide-vue-next';
+import { useAppStore } from '../stores/main';
+import { useToast } from './ui/toast';
+
+const store = useAppStore();
+const { toast } = useToast();
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;
@@ -66,6 +71,14 @@ type AppearanceCategory =
 	| 'clothing';
 
 const newAppearanceOptions = async (category?: AppearanceCategory) => {
+	if (!store.chatServerRunning) {
+		toast({
+			variant: 'destructive',
+			title: 'Chat is offline',
+			description: 'Please start the chat server in the sidebar',
+		});
+		return;
+	}
 	const toLoad: AppearanceCategory[] = category
 		? [category]
 		: ['hair color', 'hair style', 'eye color', 'body type', 'clothing'];
