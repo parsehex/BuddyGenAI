@@ -13,10 +13,13 @@ export function posPromptFromName(
 	console.log(prompt);
 	return prompt;
 }
+// TODO generate more keywords from set appearance
+// 	"Using the existing keywords, write more visual keywords to describe ${name}"
+
 export function negPromptFromName(name: string) {
 	// TODO take extra
 	// TODO idea: use more aggressive negative when quality set to low
-	return `disfigured, distorted, evil, floating debris, child, kid, children, low quality, square, side-by-side, 2girl`;
+	return `disfigured, distorted, evil, floating debris, child, kid, children, low quality, square, painting, side-by-side`;
 }
 
 /** Returns prompt for LLM to generate keyword suggestions. */
