@@ -16,10 +16,24 @@ export function posPromptFromName(
 // TODO generate more keywords from set appearance
 // 	"Using the existing keywords, write more visual keywords to describe ${name}"
 
-export function negPromptFromName(name: string) {
+export function negPromptFromName(name: string, gender = '') {
 	// TODO take extra
 	// TODO idea: use more aggressive negative when quality set to low
-	return `disfigured, distorted, evil, floating debris, child, kid, children, low quality, square, painting, side-by-side`;
+
+	let extra = '';
+	gender = gender.toLowerCase();
+
+	if (gender === 'female') {
+		extra = 'male, boy, man';
+	} else if (gender === 'male') {
+		extra = 'female, girl, woman';
+	}
+
+	const prompt = `${
+		extra ? extra + ', ' : ''
+	}disfigured, distorted, evil, floating debris, child, kid, children, low quality, square, painting, side-by-side`;
+	console.log(prompt);
+	return prompt;
 }
 
 /** Returns prompt for LLM to generate keyword suggestions. */

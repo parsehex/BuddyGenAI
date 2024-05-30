@@ -81,7 +81,7 @@ export default async function createProfilePic(
 		gender,
 		animated
 	);
-	const negPrompt = negPromptFromName(currentVersion.name);
+	const negPrompt = negPromptFromName(currentVersion.name, gender);
 
 	const filename = `${Date.now()}.png`;
 	await makePicture({
