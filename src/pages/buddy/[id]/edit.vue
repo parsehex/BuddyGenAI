@@ -46,6 +46,7 @@ import {
 } from '@/lib/prompt/sd';
 import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
 import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue';
+import { isNameValid } from '@/src/lib/ai/general';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -128,8 +129,30 @@ onBeforeMount(async () => {
 	updateModels('tts');
 });
 
+const validateName = async () => {
+	const existingName = store.buddies.find((b) => b.name === nameValue.value);
+	if (existingName) {
+		toast({
+			variant: 'destructive',
+			description:
+				'You have a buddy with that name already, pleaser choose another name.',
+		});
+		return;
+	}
+
+	const nameIsValid = await isNameValid(nameValue.value, complete);
+	if (!nameIsValid) {
+		toast({
+			variant: 'destructive',
+			title: 'Invalid Name',
+			description: 'Please enter a valid name for your buddy.',
+		});
+	}
+	return nameIsValid;
+};
+
 const handleSave = async () => {
-	// TODO validate name
+	if (!(await validateName())) return;
 
 	await api.buddy.updateOne({
 		id,

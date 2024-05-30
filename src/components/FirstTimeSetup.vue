@@ -48,6 +48,7 @@ import {
 	TagsInputItemDelete,
 	TagsInputItemText,
 } from '@/components/ui/tags-input';
+import { isNameValid } from '../lib/ai/general';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -86,7 +87,7 @@ const buddyKeywordsArr = computed({
 	},
 });
 
-const acceptedBuddy = ref('' as '' | 'description' | 'keywords');
+const acceptedBuddy = ref(false);
 const newBuddy = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
@@ -94,18 +95,31 @@ const keywordsPopover = ref(false);
 const profilePicPopover = ref(false);
 const createdKeywords = ref('');
 
-const acceptedBuddyDesc = ref('');
-const acceptBuddy = async (
-	descriptionOrKeywords: 'description' | 'keywords'
-) => {
-	const existingBuddy = store.buddies.find((b) => b.name === buddyName.value);
-	if (existingBuddy) {
+const validateName = async () => {
+	const existingName = store.buddies.find((b) => b.name === buddyName.value);
+	if (existingName) {
 		toast({
 			variant: 'destructive',
-			description: 'A Buddy with that name already exists.',
+			description:
+				'You have a buddy with that name already, pleaser choose another name.',
 		});
 		return;
 	}
+
+	const nameIsValid = await isNameValid(buddyName.value, complete);
+	if (!nameIsValid) {
+		toast({
+			variant: 'destructive',
+			title: 'Invalid Name',
+			description: 'Please enter a valid name for your buddy.',
+		});
+	}
+	return nameIsValid;
+};
+
+const acceptedBuddyDesc = ref('');
+const acceptBuddy = async () => {
+	if (!(await validateName())) return;
 
 	if (!buddyName.value || !buddyKeywords.value) {
 		toast({
@@ -115,15 +129,12 @@ const acceptBuddy = async (
 		return;
 	}
 	let buddyDescription = createdDescription.value;
-	if (descriptionOrKeywords === 'keywords') {
-		buddyDescription = buddyKeywords.value;
-	}
 	newBuddy.value = await api.buddy.createOne({
 		name: buddyName.value,
 		description: buddyDescription,
 	});
 
-	acceptedBuddy.value = descriptionOrKeywords;
+	acceptedBuddy.value = true;
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
 };
