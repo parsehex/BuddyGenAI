@@ -218,7 +218,7 @@ router.post('/api/completion', async (req, res) => {
 		},
 		{
 			role: 'assistant',
-			content: 'Output:',
+			content: 'Response: ',
 		},
 	];
 
