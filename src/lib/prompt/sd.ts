@@ -31,7 +31,7 @@ export function negPromptFromName(name: string, gender = '') {
 
 	const prompt = `${
 		extra ? extra + ', ' : ''
-	}disfigured, distorted, evil, floating debris, child, kid, children, low quality, square, painting, side-by-side`;
+	}disfigured, distorted, child, kid, children, young, low quality, evil, square, painting, side-by-side, text floating debris, logo icon`;
 	console.log(prompt);
 	return prompt;
 }
