@@ -31,9 +31,11 @@ import { textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
 import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
-import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
+import { makeTTS } from '@/src/lib/ai/tts';
+
 import urls from '@/src/lib/api/urls';
 import { useToast } from '../ui/toast';
+import { cleanTextForTTS } from '@/src/lib/ai/utils';
 
 const { toast } = useToast();
 

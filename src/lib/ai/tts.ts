@@ -1,6 +1,11 @@
 import useElectron from '@/composables/useElectron';
 import usePiper from '@/composables/usePiper';
-import { verifyFilePath } from './utils';
+import { cleanTextForTTS, verifyFilePath } from './utils';
+import { useAppStore } from '@/src/stores/main';
+import { playAudio } from '../utils';
+import urls from '../api/urls';
+
+const store = useAppStore();
 
 interface MakeTTSOptions {
 	absModelPath: string; // should be called voice path
@@ -25,7 +30,6 @@ export async function makeTTS(options: MakeTTSOptions) {
 	const dataPath = await getDataPath('tts/');
 	await mkdir(dataPath);
 
-	// overwrite existing file
 	const filename = options.outputFilename || `${Date.now()}.wav`;
 	const outputPath = await pathJoin(dataPath, filename);
 	const outputExists = await verifyFilePath(outputPath);
@@ -38,15 +42,30 @@ export async function makeTTS(options: MakeTTSOptions) {
 	});
 }
 
-export function cleanTextForTTS(text: string) {
-	// Remove phrases enclosed in asterisks
-	let cleanedText = text.replace(/\*[^*]*\*/g, '');
+/**
+ * Higher-level function that uses makeTTS and plays the audio, returning the URL of the audio
+ */
+export async function makeAndReadTTS(text: string, ttsModel: string) {
+	const autoRead = store.settings.auto_read_chat;
 
-	// replace ... with . . .
-	cleanedText = cleanedText.replace(/\.{3}/g, '. . .');
+	// 0 is the value i that chose to signify disabling tts or stt
+	// values from the db are getting cast to strings + sqlite uses 0 or 1 for booleans
+	// @ts-ignore
+	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== 1;
+	const ttsEnabled = ttsModel && ttsModel !== '0';
 
-	// remove urls
-	cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/g, '');
+	if (!autoReadEnabled || !ttsEnabled) return;
 
-	return cleanedText;
+	const filename = `${Date.now()}.wav`;
+	text = cleanTextForTTS(text);
+	await makeTTS({
+		absModelPath: ttsModel,
+		outputFilename: filename,
+		text,
+	});
+
+	const url = urls.tts.get(filename);
+	playAudio(url);
+
+	return url;
 }

@@ -13,3 +13,16 @@ export async function verifyFilePath(p: string) {
 		return false;
 	}
 }
+
+export function cleanTextForTTS(text: string) {
+	// Remove phrases enclosed in asterisks
+	let cleanedText = text.replace(/\*[^*]*\*/g, '');
+
+	// replace ... with . . .
+	cleanedText = cleanedText.replace(/\.{3}/g, '. . .');
+
+	// remove urls
+	cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/g, '');
+
+	return cleanedText;
+}

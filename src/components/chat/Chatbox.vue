@@ -40,8 +40,9 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { attemptToFixJson, isDevMode, playAudio } from '@/src/lib/utils';
-import { cleanTextForTTS, makeTTS } from '@/src/lib/ai/tts';
+import { attemptToFixJson, delay, isDevMode, playAudio } from '@/src/lib/utils';
+import { makeAndReadTTS, makeTTS } from '@/src/lib/ai/tts';
+import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
@@ -52,8 +53,6 @@ const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
 const { complete } = useCompletion({ api: urls.message.completion() });
 const { pathJoin } = useElectron();
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // https://github.com/parsehex/BuddyGenAI/issues/2
 // there is a bug where if you unfocus the window while buddy is responding,
@@ -138,51 +137,43 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
-			if (!pathJoin) {
-				throw new Error('pathJoin not available');
-			}
+			// so what all happens here?
+			// - do auto read if enabled
+			// - conditionally send an image (if enabled and not deemed explicit)
+			// - reload if we're reloading
+			// - save the messages
+			// - generate a title if we're at 3 messages (first message pair)
+
+			if (!pathJoin) throw new Error('pathJoin not available');
+
 			// TODO keep isloading on until we finish everything here
 
-			let ttsToSave = '';
-			const autoRead = store.settings.auto_read_chat;
-			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-			const ttsEnabled = ttsModel && ttsModel !== '0';
-			// @ts-ignore
-			if (ttsEnabled && (autoRead === 1 || autoRead === '1.0')) {
-				const lastMessage = messages.value[messages.value.length - 1];
-				const filename = `${Date.now()}.wav`;
-				const text = cleanTextForTTS(lastMessage.content);
-				// console.log('tts text', text);
-				await makeTTS({
-					absModelPath: ttsModel,
-					outputFilename: filename,
-					text,
-				});
+			const lastMessage = messages.value[messages.value.length - 1];
 
+			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
+			let ttsToSave = await makeAndReadTTS(lastMessage.content, ttsModel);
+			if (ttsToSave) {
 				// @ts-ignore
 				lastMessage.tts = urls.tts.get(filename);
-				ttsToSave = urls.tts.get(filename);
 				const newMessages = [...messages.value].map((m) => m);
 				newMessages[messages.value.length - 1] = lastMessage;
 				setMessages(newMessages);
-
-				playAudio(urls.tts.get(filename));
 			}
 
-			const assistant =
+			const assistantName =
 				threadMode.value === 'persona'
 					? currentBuddy.value?.name || ''
 					: 'Assistant';
 			const user = userName;
 
-			let cmd = (await complete(shouldSendImg(userName, assistant), {
+			let cmd = (await complete(shouldSendImg(userName, assistantName), {
 				body: {
 					max_tokens: 512,
 					temperature: 0.01,
 					messages: messages.value
 						.slice()
 						.map((m) => ({
-							role: m.role === 'user' ? user : assistant,
+							role: m.role === 'user' ? user : assistantName,
 							content: m.content,
 						}))
 						.slice(-6),
@@ -293,7 +284,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				// TODO NOTE below is part of workaround https://github.com/parsehex/BuddyGenAI/issues/2
 				const reloadingMsg = messages.value.find((m) => m.id === reloadingId.value);
 				if (reloadingMsg?.role === 'user') {
-					// add the assistant's response to the last user message
+					// shouldn't normally happen but add the assistant's response to the thread
 					const lastMessage = messages.value[messages.value.length - 1];
 					await api.message.createOne(threadId.value, {
 						role: 'assistant',
@@ -319,7 +310,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				return;
 			}
 
-			const lastMessage = messages.value[messages.value.length - 1];
 			if (lastMessage.role === 'assistant') {
 				const msg = {
 					role: 'assistant',
