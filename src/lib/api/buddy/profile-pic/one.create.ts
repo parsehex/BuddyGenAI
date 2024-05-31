@@ -20,6 +20,14 @@ TODO notes about profile pic versioning:
 - need to update naming to include the version id
 */
 
+const colors = [
+	'light blue',
+	'light red',
+	'violet',
+	'light green',
+	'light yellow',
+];
+
 export default async function createProfilePic(
 	id: string,
 	quality?: ProfilePicQuality,
@@ -75,9 +83,11 @@ export default async function createProfilePic(
 		animated = true;
 	}
 
+	const ranColor = colors[Math.floor(Math.random() * colors.length)];
+
 	const posPrompt = posPromptFromName(
 		currentVersion.name,
-		extraPrompt,
+		extraPrompt + `, (${ranColor} background)`,
 		gender,
 		animated
 	);

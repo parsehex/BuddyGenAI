@@ -51,10 +51,13 @@ export async function makeAndReadTTS(text: string, ttsModel: string) {
 	// 0 is the value i that chose to signify disabling tts or stt
 	// values from the db are getting cast to strings + sqlite uses 0 or 1 for booleans
 	// @ts-ignore
-	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== 1;
+	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== 0;
 	const ttsEnabled = ttsModel && ttsModel !== '0';
 
-	if (!autoReadEnabled || !ttsEnabled) return;
+	if (!autoReadEnabled || !ttsEnabled) {
+		console.log('TTS not enabled');
+		return;
+	}
 
 	const filename = `${Date.now()}.wav`;
 	text = cleanTextForTTS(text);

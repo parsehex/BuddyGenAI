@@ -62,7 +62,6 @@ const doCreateThread = async () => {
 	if (errorMsg) {
 		toast({
 			variant: 'destructive',
-			title: 'Error creating thread',
 			description: errorMsg,
 		});
 		return;

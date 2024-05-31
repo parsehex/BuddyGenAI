@@ -5,6 +5,8 @@ CREATE TABLE persona (
 	profile_pic TEXT,
 	profile_pic_prompt TEXT,
 	profile_pic_use_prompt INTEGER NOT NULL CHECK(profile_pic_use_prompt IN (0, 1)),
+	appearance_options TEXT,
+	selected_appearance_options TEXT,
 	tts_voice TEXT,
 	current_version_id TEXT,
 	FOREIGN KEY(current_version_id) REFERENCES persona_version(id) ON DELETE CASCADE

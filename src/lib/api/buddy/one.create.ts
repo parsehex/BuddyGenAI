@@ -12,6 +12,8 @@ interface CreateBuddyOptions {
 	profile_pic?: string;
 	profile_pic_prompt?: string;
 	profile_pic_use_prompt?: boolean;
+	appearance_options?: string;
+	selected_appearance_options?: string;
 }
 
 export default async function createOne({
@@ -21,6 +23,8 @@ export default async function createOne({
 	profile_pic,
 	profile_pic_prompt,
 	profile_pic_use_prompt = true,
+	appearance_options,
+	selected_appearance_options,
 }: CreateBuddyOptions): Promise<BuddyVersionMerged> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
@@ -38,6 +42,8 @@ export default async function createOne({
 		profile_pic,
 		profile_pic_prompt,
 		profile_pic_use_prompt,
+		appearance_options,
+		selected_appearance_options,
 	});
 	await dbRun(sqlBuddy[0], sqlBuddy[1]);
 	const sqlBuddyGet = select('persona', ['*'], { id: buddyId });

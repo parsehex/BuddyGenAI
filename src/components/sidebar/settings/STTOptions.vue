@@ -45,7 +45,6 @@ const autoSendSTT = computed({
 	},
 });
 
-console.log(store.settings.gpu_enabled_whisper);
 const useGpu = computed(
 	() =>
 		// @ts-ignore

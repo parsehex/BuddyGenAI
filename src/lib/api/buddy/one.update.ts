@@ -13,6 +13,8 @@ interface UpdateBuddyOptions {
 	profile_pic?: string;
 	profile_pic_prompt?: string;
 	profile_pic_use_prompt?: boolean;
+	appearance_options?: string;
+	selected_appearance_options?: string;
 }
 
 export default async function updateOne({
@@ -23,6 +25,8 @@ export default async function updateOne({
 	profile_pic,
 	profile_pic_prompt,
 	profile_pic_use_prompt = true,
+	appearance_options,
+	selected_appearance_options,
 }: UpdateBuddyOptions): Promise<BuddyVersionMerged> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 	if (!id) {
@@ -105,6 +109,9 @@ export default async function updateOne({
 	if (profile_pic_prompt) dataToUpdate.profile_pic_prompt = profile_pic_prompt;
 	if (profile_pic_use_prompt)
 		dataToUpdate.profile_pic_use_prompt = profile_pic_use_prompt;
+	if (appearance_options) dataToUpdate.appearance_options = appearance_options;
+	if (selected_appearance_options)
+		dataToUpdate.selected_appearance_options = selected_appearance_options;
 
 	if (Object.keys(dataToUpdate).length === 1) {
 		return returningBuddy;

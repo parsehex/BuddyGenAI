@@ -10,45 +10,18 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectLabel,
-	SelectGroup,
-	SelectItem,
-} from '@/components/ui/select';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { api } from '@/lib/api';
-import { Sparkles } from 'lucide-vue-next';
 import BuddyAvatar from './BuddyAvatar.vue';
 import { Progress } from '@/components/ui/progress';
 import useElectron from '@/composables/useElectron';
-import { descriptionFromKeywords } from '@/src/lib/prompt/buddy';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
 import Spinner from './Spinner.vue';
-import {
-	genderFromName,
-	keywordsFromNameAndDescription,
-} from '@/lib/prompt/sd';
+import { genderFromName } from '@/lib/prompt/sd';
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
-import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
-import DevOnly from './DevOnly.vue';
 import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
-import {
-	TagsInput,
-	TagsInputInput,
-	TagsInputItem,
-	TagsInputItemDelete,
-	TagsInputItemText,
-} from '@/components/ui/tags-input';
-import { isNameValid } from '../lib/ai/general';
+import { isDescriptionValid, isNameValid } from '../lib/ai/general';
+import BuddyTagsInput from './BuddyTagsInput.vue';
+import type { AppearanceCategory } from '../lib/ai/appearance-options';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -71,10 +44,8 @@ watch(
 
 const userNameValue = ref('');
 
-// TODO check if buddy name already exists, add text alerting user
 const buddyName = ref('');
 const buddyKeywords = ref('friendly, talkative');
-const createdDescription = ref('');
 const profilePicturePrompt = ref('');
 
 const buddyKeywordsArr = computed({
@@ -87,23 +58,38 @@ const buddyKeywordsArr = computed({
 	},
 });
 
+const generatedAppearanceOptions = ref({
+	'hair color': [],
+	'hair style': [],
+	'eye color': [],
+	'body type': [],
+	'clothing style': [],
+} as Record<AppearanceCategory, string[]>);
+const selectedAppearanceOptions = ref({
+	'hair color': '',
+	'hair style': '',
+	'eye color': '',
+	'body type': '',
+	'clothing style': '',
+} as Record<AppearanceCategory, string>);
+
 const acceptedBuddy = ref(false);
 const newBuddy = ref(null as BuddyVersionMerged | null);
 const updatingProfilePicture = ref(false);
 
 const keywordsPopover = ref(false);
-const profilePicPopover = ref(false);
-const createdKeywords = ref('');
 
+const isSaving = ref(false);
 const validateName = async () => {
-	const existingName = store.buddies.find((b) => b.name === buddyName.value);
-	if (existingName) {
+	const existing = store.buddies.find((b) => b.name === buddyName.value);
+	if (existing && existing.id !== newBuddy.value?.id) {
 		toast({
 			variant: 'destructive',
 			description:
 				'You have a buddy with that name already, pleaser choose another name.',
 		});
-		return;
+		isSaving.value = false;
+		return false;
 	}
 
 	const nameIsValid = await isNameValid(buddyName.value, complete);
@@ -113,30 +99,55 @@ const validateName = async () => {
 			title: 'Invalid Name',
 			description: 'Please enter a valid name for your buddy.',
 		});
+		isSaving.value = false;
+		return false;
 	}
 	return nameIsValid;
+};
+const validateKeywords = async () => {
+	if (!buddyKeywordsArr.value.length) {
+		toast({
+			variant: 'destructive',
+			description: 'Please enter some keywords for your buddy.',
+		});
+		return false;
+	}
+
+	const descIsValid = await isDescriptionValid(
+		buddyKeywordsArr.value.join(', '),
+		buddyName.value,
+		complete
+	);
+	if (!descIsValid) {
+		toast({
+			variant: 'destructive',
+			title: 'Invalid Description',
+			description: 'Please enter a valid description for your buddy.',
+		});
+	}
+	return descIsValid;
 };
 
 const acceptedBuddyDesc = ref('');
 const acceptBuddy = async () => {
+	isSaving.value = true;
 	if (!(await validateName())) return;
+	if (!(await validateKeywords())) return;
 
-	if (!buddyName.value || !buddyKeywords.value) {
-		toast({
-			variant: 'destructive',
-			description: 'Please fill out a Name and Keywords for your Buddy.',
-		});
-		return;
-	}
-	let buddyDescription = createdDescription.value;
+	const appOptStr = JSON.stringify(generatedAppearanceOptions.value);
+	const selectedAppOptStr = JSON.stringify(selectedAppearanceOptions.value);
+	const buddyDescription = buddyKeywords.value;
 	newBuddy.value = await api.buddy.createOne({
 		name: buddyName.value,
 		description: buddyDescription,
+		appearance_options: appOptStr,
+		selected_appearance_options: selectedAppOptStr,
 	});
 
 	acceptedBuddy.value = true;
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
+	isSaving.value = false;
 };
 
 const updateName = async () => {
@@ -222,9 +233,21 @@ const refreshProfilePicture = async () => {
 	if (updatingProfilePicture.value) {
 		return;
 	}
+	if (profilePicturePrompt.value.split(',').length < 4) {
+		toast({
+			variant: 'destructive',
+			description: 'Please select all appearance options first.',
+		});
+		return;
+	}
+	console.log(generatedAppearanceOptions.value);
+	const appOptStr = JSON.stringify(generatedAppearanceOptions.value);
+	const selectedAppOptStr = JSON.stringify(selectedAppearanceOptions.value);
 	await api.buddy.updateOne({
 		id: newBuddy.value.id,
 		profile_pic_prompt: profilePicturePrompt.value,
+		appearance_options: appOptStr,
+		selected_appearance_options: selectedAppOptStr,
 	});
 	const genderPrompt = genderFromName(
 		buddyName.value,
@@ -246,139 +269,6 @@ const refreshProfilePicture = async () => {
 
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
-};
-
-const creatingDescription = ref(false);
-const createDescription = async () => {
-	if (!buddyName.value || !buddyKeywords.value) {
-		toast({
-			variant: 'destructive',
-			description: 'Please enter a name and some info for your Buddy.',
-		});
-		return;
-	}
-	if (!store.chatServerRunning) {
-		toast({
-			variant: 'destructive',
-			description: 'Please start the chat server first.',
-		});
-		return;
-	}
-	const promptStr = descriptionFromKeywords(
-		buddyName.value,
-		buddyKeywords.value
-	);
-	let value = '';
-	try {
-		creatingDescription.value = true;
-		value = (await complete(promptStr, {
-			body: { max_tokens: 175, temperature: 0.25 },
-		})) as string;
-		creatingDescription.value = false;
-	} catch (e) {
-		console.error(e);
-		value = '';
-	}
-	value = value || '';
-	value = value.trim();
-	if (!value) {
-		toast({
-			variant: 'destructive',
-			description: 'Error remixing description. Please try again.',
-		});
-		return;
-	}
-
-	// TODO do better
-	// does value end with a period? if not, truncate to last period
-	const l = value.length;
-	if (value[l - 1] !== '.') {
-		const lastPeriod = value.lastIndexOf('.');
-		if (lastPeriod !== -1) {
-			value = value.slice(0, lastPeriod + 1);
-		}
-	}
-	createdDescription.value = value;
-};
-
-const randomizedBuddy = ref(
-	null as { name: string; description: string } | null
-);
-const creatingKeywords = ref(false);
-const randomizeKeywords = async () => {
-	let promptStr = `Your task is to generate a name and a description for someone${
-		buddyName.value ? ' named ' + buddyName.value : ''
-	}.\n\nReturn a JSON object with the keys "name" and "description".\n\nRandom seed: ${Math.random()}`;
-	let value = '';
-	try {
-		creatingKeywords.value = true;
-		value = (await complete(promptStr, {
-			body: { max_tokens: 150, temperature: 0.15 },
-		})) as string;
-		creatingKeywords.value = false;
-	} catch (e) {
-		console.error(e);
-		value = '';
-	}
-	console.log(value);
-	value = value || '';
-	value = value.trim();
-	if (!value) {
-		toast({
-			variant: 'destructive',
-			description: 'Error generating keywords. Please try again.',
-		});
-		return;
-	}
-	try {
-		randomizedBuddy.value = JSON.parse(value);
-	} catch (e) {
-		console.error(value, e);
-		toast({
-			variant: 'destructive',
-			description: 'Error parsing response. Please try again.',
-		});
-	}
-};
-
-const creatingSuggestKeywords = ref(false);
-const suggestKeywords = async () => {
-	const descVal = newBuddy.value?.description || acceptedBuddyDesc.value || '';
-	const promptStr = keywordsFromNameAndDescription(buddyName.value, descVal);
-	let value = '';
-	try {
-		creatingSuggestKeywords.value = true;
-		value = (await complete(promptStr, {
-			body: { max_tokens: 75, temperature: 0.75 },
-		})) as string;
-		creatingSuggestKeywords.value = false;
-	} catch (e) {
-		console.error(e);
-		value = '';
-	}
-	value = value || '';
-	value = value.trim();
-	if (!value) {
-		toast({
-			variant: 'destructive',
-			description: 'Error generating keywords. Please try again.',
-		});
-		return;
-	}
-	createdKeywords.value = value;
-};
-
-const acceptPicKeywords = () => {
-	const existingKeywords = profilePicturePrompt.value;
-	if (existingKeywords) {
-		profilePicturePrompt.value = `${existingKeywords}, ${createdKeywords.value}`;
-	} else {
-		profilePicturePrompt.value = createdKeywords.value;
-	}
-	createdKeywords.value = '';
-	profilePicPopover.value = false;
-
-	refreshProfilePicture();
 };
 </script>
 
@@ -464,34 +354,20 @@ const acceptPicKeywords = () => {
 								<p class="text-sm text-gray-300 text-center mb-1">
 									These affect how {{ buddyName || 'your Buddy' }} talks with you.
 								</p>
-								<TagsInput v-model="buddyKeywordsArr" class="w-full mt-2">
-									<TagsInputItem
-										v-for="item in buddyKeywordsArr"
-										:key="item"
-										:value="item"
-									>
-										<TagsInputItemText />
-										<TagsInputItemDelete />
-									</TagsInputItem>
-
-									<TagsInputInput :placeholder="'Keywords'" />
-								</TagsInput>
-
-								<blockquote
-									class="text-sm text-gray-400 text-center mt-2 select-none border-l border-gray-300 p-2"
-								>
-									<i>{{ buddyName || 'Your Buddy' }} is...</i>
-									<br />
-									{{ buddyKeywords }}
-								</blockquote>
+								<BuddyTagsInput
+									type="create"
+									:buddyName="buddyName"
+									:buddyKeywords="buddyKeywords"
+									:updateBuddyKeywords="
+										(keywords) => (buddyKeywords = keywords.join(', '))
+									"
+								/>
 
 								<div>
-									<Button
-										@click="acceptBuddy(createdDescription ? 'description' : 'keywords')"
-										class="mt-4 p-2 rounded"
-									>
+									<Button @click="acceptBuddy()" class="mt-4 p-2 rounded">
 										Create Buddy
 									</Button>
+									<Spinner v-if="isSaving" />
 								</div>
 							</div>
 						</CardContent>
@@ -502,7 +378,7 @@ const acceptPicKeywords = () => {
 								Your first Buddy
 							</h2>
 							<p class="my-2 text-center">
-								<span class="text-lg ml-3">{{ buddyName }}</span>
+								<span class="text-lg">{{ buddyName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
 								<BuddyAvatar
@@ -524,6 +400,8 @@ const acceptPicKeywords = () => {
 									:profile-pic-prompt="profilePicturePrompt"
 									@update-profile-pic-prompt="profilePicturePrompt = $event"
 									@refresh-profile-picture="refreshProfilePicture"
+									v-model:appearance-options="generatedAppearanceOptions"
+									v-model:selected-appearance-options="selectedAppearanceOptions"
 								/>
 
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />

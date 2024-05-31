@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCompletion } from 'ai/vue';
-import { ref, onMounted, toRefs } from 'vue';
+import { ref, onMounted, toRefs, type PropType } from 'vue';
 import { RefreshCw, Plus } from 'lucide-vue-next';
 
 import { Button } from '@/components/ui/button';
@@ -17,21 +17,44 @@ import {
 import { Input } from '@/components/ui/input';
 import Spinner from '@/components/Spinner.vue';
 import DevOnly from '@/components/DevOnly.vue';
-import { appearanceOptionsFromNameAndDescription } from '../lib/prompt/sd';
+import { appearanceOptionsFromNameAndDescription } from '../lib/prompt/appearance';
 import urls from '../lib/api/urls';
 import type { BuddyVersionMerged } from '../lib/api/types-db';
 import { appearanceToPrompt } from '../lib/prompt/appearance';
 import { attemptToFixJson } from '../lib/utils';
 import { useAppStore } from '../stores/main';
 import { useToast } from './ui/toast';
+import {
+	categories,
+	type AppearanceCategory,
+	type SelectedAppearanceOptions,
+} from '../lib/ai/appearance-options';
 
 const store = useAppStore();
 const { toast } = useToast();
 
-const props = defineProps<{
-	buddy: BuddyVersionMerged;
-	profilePicPrompt: string;
-}>();
+// const props = defineProps<{
+// 	buddy: BuddyVersionMerged;
+// 	profilePicPrompt: string;
+// 	appearanceOptions?: ExpectedAppearanceOptions;
+// }>();
+const appearanceOptions =
+	defineModel<ExpectedAppearanceOptions>('appearanceOptions');
+const selectedAppearanceOptions = defineModel<SelectedAppearanceOptions>(
+	'selectedAppearanceOptions'
+);
+
+console.log(selectedAppearanceOptions.value);
+const props = defineProps({
+	buddy: {
+		type: Object as PropType<BuddyVersionMerged>,
+		required: true,
+	},
+	profilePicPrompt: {
+		type: String,
+		required: true,
+	},
+});
 const { buddy, profilePicPrompt } = toRefs(props);
 
 const emit = defineEmits(['updateProfilePicPrompt', 'refreshProfilePic']);
@@ -41,34 +64,24 @@ const { complete } = useCompletion({ api: urls.message.completion() });
 interface ExpectedAppearanceOptions {
 	[key: string]: string[];
 }
-interface SelectedAppearanceOptions {
-	[key: string]: string;
-}
-interface AppearanceOptionsLoading {
-	[key: string]: boolean;
-}
+type AppearanceOptionsLoading = Record<AppearanceCategory, boolean>;
 
-const appearanceOptions = ref({
-	'hair color': [],
-	'hair style': [],
-	'eye color': [],
-	'body type': [],
-	clothing: [],
-} as ExpectedAppearanceOptions);
+if (!appearanceOptions.value) {
+	appearanceOptions.value = {
+		'hair color': [],
+		'hair style': [],
+		'eye color': [],
+		'body type': [],
+		'clothing style': [],
+	};
+}
 const loadingAppearanceOptions = ref({
 	'hair color': false,
 	'hair style': false,
 	'eye color': false,
 	'body type': false,
-	clothing: false,
+	'clothing style': false,
 } as AppearanceOptionsLoading);
-
-type AppearanceCategory =
-	| 'hair color'
-	| 'hair style'
-	| 'eye color'
-	| 'body type'
-	| 'clothing';
 
 const newAppearanceOptions = async (category?: AppearanceCategory) => {
 	if (!store.chatServerRunning) {
@@ -79,32 +92,31 @@ const newAppearanceOptions = async (category?: AppearanceCategory) => {
 		});
 		return;
 	}
-	const toLoad: AppearanceCategory[] = category
-		? [category]
-		: ['hair color', 'hair style', 'eye color', 'body type', 'clothing'];
+	const toLoad: AppearanceCategory[] = category ? [category] : categories;
 
-	console.log(appearanceOptions.value['body type']);
+	console.log(appearanceOptions.value?.['body type']);
 
 	const existingOptionValues = {
 		'hair color': JSON.parse(
-			JSON.stringify(appearanceOptions.value['hair color'] || '[]')
+			JSON.stringify(appearanceOptions.value?.['hair color'] || '[]')
 		),
 		'hair style': JSON.parse(
-			JSON.stringify(appearanceOptions.value['hair style'] || '[]')
+			JSON.stringify(appearanceOptions.value?.['hair style'] || '[]')
 		),
 		'eye color': JSON.parse(
-			JSON.stringify(appearanceOptions.value['eye color'] || '[]')
+			JSON.stringify(appearanceOptions.value?.['eye color'] || '[]')
 		),
 		'body type': JSON.parse(
-			JSON.stringify(appearanceOptions.value['body type'] || '[]')
+			JSON.stringify(appearanceOptions.value?.['body type'] || '[]')
 		),
-		clothing: JSON.parse(
-			JSON.stringify(appearanceOptions.value.clothing || '[]')
+		'clothing style': JSON.parse(
+			JSON.stringify(appearanceOptions.value?.['clothing style'] || '[]')
 		),
 	};
 
 	for (const key of toLoad) {
 		loadingAppearanceOptions.value[key] = true;
+		if (!appearanceOptions.value) continue;
 		appearanceOptions.value[key] = [];
 	}
 
@@ -132,14 +144,12 @@ const newAppearanceOptions = async (category?: AppearanceCategory) => {
 			console.log(prompt);
 			console.log(res);
 			const options = JSON.parse(res);
-			appearanceOptions.value[key] = options;
+			if (appearanceOptions.value) appearanceOptions.value[key] = options;
 		}
 
 		loadingAppearanceOptions.value[key] = false;
 	}
 };
-
-const selectedAppearanceOptions = ref({} as SelectedAppearanceOptions);
 
 // (disjointed) TODO option(s) to change composition of profile pic (e.g. close up, full body, etc.)
 //   also want to specifically set a background color + have option to change it
@@ -149,12 +159,12 @@ const selectedAppearanceOptions = ref({} as SelectedAppearanceOptions);
 // 		otherwise, we feed whatever other function call's result into the context when getting response
 
 // function to set appearance option
-const setAppearanceOption = (key: string, value: string) => {
+const setAppearanceOption = (key: AppearanceCategory, value: string) => {
+	if (!selectedAppearanceOptions.value) return;
+
 	selectedAppearanceOptions.value[key] = value;
 
-	console.log(JSON.stringify(selectedAppearanceOptions.value));
 	const newPrompt = appearanceToPrompt(selectedAppearanceOptions.value);
-	console.log(newPrompt);
 
 	if (!newPrompt) {
 		return;
@@ -171,7 +181,6 @@ const setAppearanceOption = (key: string, value: string) => {
 
 <template>
 	<div class="flex flex-col items-center justify-center w-full">
-		<!-- appearance options -->
 		<div class="flex flex-col items-center justify-center w-full">
 			<Label class="text-lg">Appearance Options</Label>
 			<div class="flex items-center justify-center w-full">
@@ -196,53 +205,55 @@ const setAppearanceOption = (key: string, value: string) => {
 					:key="key"
 					class="flex flex-wrap items-center justify-center w-full my-2"
 				>
-					<div>
-						<Button type="button" size="xs" variant="secondary" title="More options">
-							<Plus />
-						</Button>
-						<Button
-							type="button"
-							size="xs"
-							variant="secondary"
-							@click="newAppearanceOptions(key as AppearanceCategory)"
-							title="Refresh options"
-						>
-							<RefreshCw />
-						</Button>
-					</div>
 					<Label class="text-lg mr-1">
 						{{ key }}
 					</Label>
-					<Spinner v-if="loadingAppearanceOptions[key]" class="ml-2" />
-					<!-- @vue-ignore -->
-					<Select
-						class="my-2"
-						@update:model-value="setAppearanceOption(key, $event)"
-					>
-						<SelectTrigger>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectLabel>{{ key }}</SelectLabel>
-							<SelectGroup>
-								<SelectItem v-for="option in options" :key="option" :value="option">
-									{{ option }}
-								</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<div>
+						<!-- @vue-ignore -->
+						<Select
+							class="my-2"
+							:default-value="selectedAppearanceOptions[key as AppearanceCategory] || ''"
+							@update:model-value="setAppearanceOption(key, $event)"
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectLabel>
+									<div class="flex gap-2">
+										{{ key }}
+										<Button
+											type="button"
+											size="xs"
+											variant="secondary"
+											@click="newAppearanceOptions(key as AppearanceCategory)"
+											title="Refresh options"
+										>
+											<RefreshCw />
+										</Button>
+									</div>
+									<Spinner v-if="loadingAppearanceOptions[key as AppearanceCategory]" />
+								</SelectLabel>
+								<SelectGroup>
+									<SelectItem v-for="option in options" :key="option" :value="option">
+										{{ option }}
+									</SelectItem>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<DevOnly class="w-full">
-			<Input
-				id="profile-picture"
-				v-model="profilePicPrompt"
-				@blur="emit('updateProfilePicPrompt', $event.target.value)"
-				class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
-				@keydown.enter="emit('refreshProfilePic')"
-			/>
-		</DevOnly>
+			<DevOnly class="w-full">
+				<Input
+					id="profile-picture"
+					v-model="profilePicPrompt"
+					@blur="emit('updateProfilePicPrompt', $event.target.value)"
+					class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
+					@keydown.enter="emit('refreshProfilePic')"
+				/>
+			</DevOnly>
+		</div>
 	</div>
 </template>

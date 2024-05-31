@@ -42,11 +42,13 @@ import { descriptionFromKeywords } from '@/src/lib/prompt/buddy';
 import {
 	genderFromName,
 	keywordsFromNameAndDescription,
-	appearanceOptionsFromNameAndDescription,
 } from '@/lib/prompt/sd';
 import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
 import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue';
-import { isNameValid } from '@/src/lib/ai/general';
+import { isDescriptionValid, isNameValid } from '@/src/lib/ai/general';
+import DevOnly from '@/src/components/DevOnly.vue';
+import BuddyTagsInput from '@/src/components/BuddyTagsInput.vue';
+import type { AppearanceCategory } from '@/src/lib/ai/appearance-options';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -65,6 +67,20 @@ const selectedTTSVoice = ref('');
 const descriptionValue = ref('');
 const profilePictureValue = ref('');
 const profilePicturePrompt = ref('');
+const generatedAppearanceOptions = ref({
+	'hair color': [],
+	'hair style': [],
+	'eye color': [],
+	'body type': [],
+	'clothing style': [],
+} as Record<AppearanceCategory, string[]>);
+const selectedAppearanceOptions = ref({
+	'hair color': '',
+	'hair style': '',
+	'eye color': '',
+	'body type': '',
+	'clothing style': '',
+} as Record<AppearanceCategory, string>);
 
 const wizInput = ref('');
 
@@ -123,21 +139,31 @@ onBeforeMount(async () => {
 	if (buddy.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = buddy.value.profile_pic_prompt;
 	}
+	if (buddy.value?.appearance_options) {
+		generatedAppearanceOptions.value = JSON.parse(buddy.value.appearance_options);
+	}
+	if (buddy.value?.selected_appearance_options) {
+		selectedAppearanceOptions.value = JSON.parse(
+			buddy.value.selected_appearance_options
+		);
+	}
 
 	allProfilePics.value = await api.buddy.profilePic.getAll(id);
 
 	updateModels('tts');
 });
 
+const isLoading = ref(false);
+
 const validateName = async () => {
-	const existingName = store.buddies.find((b) => b.name === nameValue.value);
-	if (existingName) {
+	const existing = store.buddies.find((b) => b.name === nameValue.value);
+	if (existing && existing.id !== id) {
 		toast({
 			variant: 'destructive',
 			description:
 				'You have a buddy with that name already, pleaser choose another name.',
 		});
-		return;
+		return false;
 	}
 
 	const nameIsValid = await isNameValid(nameValue.value, complete);
@@ -147,20 +173,59 @@ const validateName = async () => {
 			title: 'Invalid Name',
 			description: 'Please enter a valid name for your buddy.',
 		});
+		isLoading.value = false;
+		return false;
 	}
+	isLoading.value = false;
 	return nameIsValid;
 };
 
+const validateKeywords = async () => {
+	if (!descriptionValue.value) {
+		toast({
+			variant: 'destructive',
+			description: 'Please enter some keywords for your buddy.',
+		});
+		isLoading.value = false;
+		return false;
+	}
+
+	const descIsValid = await isDescriptionValid(
+		descriptionValue.value,
+		nameValue.value,
+		complete
+	);
+	if (!descIsValid) {
+		toast({
+			variant: 'destructive',
+			title: 'Invalid Description',
+			description: 'Please enter a valid description for your buddy.',
+		});
+		isLoading.value = false;
+		return false;
+	}
+	isLoading.value = false;
+	return descIsValid;
+};
+
 const handleSave = async () => {
+	isLoading.value = true;
 	if (!(await validateName())) return;
+	if (!(await validateKeywords())) return;
+
+	const appOptStr = JSON.stringify(generatedAppearanceOptions.value);
+	const selectedAppOptStr = JSON.stringify(selectedAppearanceOptions.value);
 
 	await api.buddy.updateOne({
 		id,
 		name: nameValue.value,
 		description: descriptionValue.value,
 		tts_voice: selectedTTSVoice.value,
+		appearance_options: appOptStr,
+		selected_appearance_options: selectedAppOptStr,
 	});
 	await router.push(`/buddy/${id}/view`);
+	isLoading.value = false;
 };
 
 const picQuality = ref(3 as ProfilePicQuality);
@@ -338,6 +403,8 @@ const acceptKeywords = () => {
 						:profile-pic-prompt="profilePicturePrompt"
 						@refresh-profile-pic="refreshProfilePicture"
 						@update-profile-pic-prompt="profilePicturePrompt = $event"
+						v-model:appearance-options="generatedAppearanceOptions"
+						v-model:selected-appearance-options="selectedAppearanceOptions"
 					/>
 
 					<div class="flex flex-col items-center justify-center w-full">
@@ -348,7 +415,7 @@ const acceptKeywords = () => {
 					</div>
 
 					<Label class="mt-4 flex flex-col items-center">
-						<span class="text-lg">{{ buddy?.name }}'s Voice</span>
+						<span class="text-xl">{{ buddy?.name }}'s Voice</span>
 						<Select
 							:default-value="buddy?.tts_voice || ''"
 							v-model="selectedTTSVoice"
@@ -368,47 +435,35 @@ const acceptKeywords = () => {
 						</Select>
 					</Label>
 				</div>
-				<div class="flex flex-col items-center space-y-4">
-					<label class="text-lg w-full text-center">
-						Description
+				<div class="flex flex-col items-center mt-4">
+					<label class="text-xl w-full text-center"> Description </label>
+					<p>
+						<span class="text-sm ml-4 select-none italic">
+							{{ buddy?.name }} is...
+						</span>
+						<br />
+						<span class="text-lg">
+							{{ buddy?.description }}
+						</span>
+					</p>
+					<BuddyTagsInput
+						type="edit"
+						:buddyName="buddy?.name || ''"
+						:buddyKeywords="descriptionValue"
+						:updateBuddyKeywords="
+							(keywords) => (descriptionValue = keywords.join(', '))
+						"
+					/>
+					<DevOnly class="w-full">
 						<Textarea
 							v-model="descriptionValue"
 							:placeholder="`${buddy?.name} is...`"
-							class="w-full min-h-48"
+							class="min-h-24"
 						/>
-					</label>
-					<Button @click="handleSave">Save</Button>
+					</DevOnly>
+					<Button type="button" @click="handleSave" class="mt-4">Save</Button>
+					<Spinner v-if="isLoading" class="mt-2" />
 				</div>
-				<Card class="w-full mt-4">
-					<CardHeader>
-						<h2 class="font-bold">Description Wizard</h2>
-						<p class="text-sm text-gray-500">
-							Create a new description for {{ buddy?.name }} using the AI Description
-							Wizard.
-						</p>
-					</CardHeader>
-					<CardContent>
-						<Label>
-							<span class="text-lg">Keywords that describe {{ buddy?.name }}</span>
-							<Input
-								v-model="wizInput"
-								placeholder="helpful, approachable, talkative..."
-								@keydown.enter="remixDescription"
-							/>
-						</Label>
-						<div class="flex items-center">
-							<Button class="mt-2" @click="remixDescription">Remix Description</Button>
-							<Spinner v-if="generating" />
-						</div>
-						<div v-if="remixedDescription">
-							<p class="text-lg">New Description:</p>
-							<p class="text-lg">{{ remixedDescription }}</p>
-							<Button class="mt-2 success" @click="acceptRemixedDescription">
-								Accept
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
 			</CardContent>
 		</Card>
 	</ScrollArea>
