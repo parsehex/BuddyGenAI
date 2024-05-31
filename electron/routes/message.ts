@@ -98,7 +98,7 @@ async function useAlternateCompletion(options: any, res: any) {
 	// maybe follow note below a bit, basically we still end up using streamToResponse
 
 	const { messages, max_tokens, temperature, jsonSchema } = options;
-	console.log(max_tokens, temperature);
+	console.log('max_tokens, temperature:', max_tokens, temperature);
 
 	const payload = {
 		// prompt: convertToPhi3Format(messages),
@@ -141,6 +141,9 @@ async function useAlternateCompletion(options: any, res: any) {
 
 		// /v1/chat/completions:
 		const parsed = JSON.parse(data);
+		// if (parsed.usage) {
+		// 	console.log('usage', parsed.usage);
+		// }
 		return parsed.choices[0].delta.content;
 	});
 	streamToResponse(stream, res);
