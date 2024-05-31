@@ -60,20 +60,12 @@ class AppSettingsCls {
 		const row = this.db
 			.prepare('SELECT value FROM app_settings WHERE name = ?')
 			.get(key) as {
-			value: SQLiteVal;
+			value: string;
 		};
 		if (!row) {
 			throw new Error('Setting not found');
 		}
-		return row.value;
-	}
-	public async set(key: AppSettingsKeys, value: string): Promise<void> {
-		if (!this.db) {
-			throw new Error('Database not set');
-		}
-		this.db
-			.prepare('INSERT OR REPLACE INTO app_settings (name, value) VALUES (?, ?)')
-			.run(key, value);
+		return JSON.parse(`"${row.value}"`);
 	}
 }
 

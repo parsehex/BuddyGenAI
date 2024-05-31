@@ -74,7 +74,7 @@ class AppSettingsCls {
 	public set(key: AppSettingsKeys, value: string): void {
 		// try to prevent resetting values
 		// TODO do better
-		if (!value && this.settings[key]) return;
+		if (value === undefined && this.settings[key]) return;
 		this.settings[key] = value;
 	}
 
@@ -92,7 +92,7 @@ class AppSettingsCls {
 		const sqlSettings = select('app_settings', ['*']);
 		const settings = (await dbAll(sqlSettings[0], sqlSettings[1])) as {
 			name: string;
-			value: SQLiteVal;
+			value: string;
 		}[];
 
 		if (!settings) {
@@ -103,7 +103,7 @@ class AppSettingsCls {
 
 		let setDefaults = false;
 		settings.forEach((setting) => {
-			this.settings[setting.name] = setting.value;
+			this.settings[setting.name] = JSON.parse(`"${setting.value}"`);
 		});
 
 		// are there settings missing from AppSettingsDefaults?
