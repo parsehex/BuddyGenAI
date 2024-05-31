@@ -27,16 +27,17 @@ const classStr = computed(() => {
 		</DialogTrigger>
 		<DialogContent>
 			<div class="flex flex-col items-center">
-				<!-- TODO title & desc? -->
-				<DialogTitle>Image Preview</DialogTitle>
-				<DialogDescription class="mb-2"> </DialogDescription>
+				<!-- TODO what to do with title & desc? -->
+				<DialogTitle>Image</DialogTitle>
+				<DialogDescription class="mb-4"> </DialogDescription>
 
 				<img :src="imgUrl" class="max-h-[75vh]" />
 				<p
 					v-if="imgUrl !== 'loading'"
-					class="text-sm text-center text-gray-500 select-none mt-2"
+					class="text-md font-bold text-center text-gray-600 dark:text-gray-400 select-none mt-2"
 				>
-					AI-created images may have unexpected results
+					AI-created images may have unexpected results and do not depict real
+					people.
 				</p>
 			</div>
 		</DialogContent>

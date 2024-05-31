@@ -12,6 +12,7 @@ import useElectron from '@/src/composables/useElectron';
 import { useAppStore } from '@/src/stores/main';
 import ImportModel from '@/src/components/ImportModel.vue';
 import OptionSection from './OptionSection.vue';
+import ImportModelPack from '../../ImportModelPack.vue';
 
 const { openModelsDirectory } = useElectron();
 const store = useAppStore();
@@ -62,6 +63,7 @@ const openModels = async () => {
 						<RefreshCw class="w-4 h-4" />
 					</Button>
 				</div>
+				<ImportModelPack />
 				<ImportModel />
 			</OptionSection>
 		</AccordionContent>

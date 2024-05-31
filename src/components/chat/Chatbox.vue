@@ -31,7 +31,7 @@ import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
 import { AppSettings } from '@/lib/api/AppSettings';
-import { negPromptFromName } from '@/lib/prompt/sd';
+import { genderFromName, negPromptFromName } from '@/lib/prompt/sd';
 import { makePicture } from '@/lib/ai/img';
 import Message from './ChatMessage.vue';
 import {
@@ -154,7 +154,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			let ttsToSave = await makeAndReadTTS(lastMessage.content, ttsModel);
 			if (ttsToSave) {
 				// @ts-ignore
-				lastMessage.tts = urls.tts.get(filename);
+				lastMessage.tts = ttsToSave;
 				const newMessages = [...messages.value].map((m) => m);
 				newMessages[messages.value.length - 1] = lastMessage;
 				setMessages(newMessages);
@@ -203,8 +203,19 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			console.log(chatImageEnabled, isChatImageEnabled, explicit, cmdObj.do_send);
 			if (isChatImageEnabled && !explicit && cmdObj.do_send) {
 				let buddyAppearance = '';
+				let gender = '';
+				const genderPrompt = genderFromName(
+					currentBuddy.value?.name || '',
+					currentBuddy.value?.profile_pic_prompt || ''
+				);
+				const completion = await complete(genderPrompt);
+				if (completion) {
+					gender = completion.toLowerCase();
+					buddyAppearance += gender + ', ';
+				}
+
 				if (currentBuddy.value?.profile_pic_prompt) {
-					buddyAppearance = currentBuddy.value.profile_pic_prompt;
+					buddyAppearance += currentBuddy.value.profile_pic_prompt;
 				}
 				const imgDescPrompt = imgDescriptionFromChat(
 					userName,
@@ -261,7 +272,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							outputSubDir,
 							outputFilename: filename,
 							posPrompt: p,
-							negPrompt: negPromptFromName(currentBuddy.value?.name || ''),
+							negPrompt: negPromptFromName(currentBuddy.value?.name || '', gender),
 							size: 768,
 							quality: quality as any,
 						});
@@ -738,7 +749,7 @@ const startRecording = async () => {
 			</div>
 		</form>
 		<p
-			class="mt-4 text-sm text-gray-400 select-none"
+			class="mt-4 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
 			<u><i>Reminder</i></u>

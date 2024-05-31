@@ -24,9 +24,9 @@ export function negPromptFromName(name: string, gender = '') {
 	gender = gender.toLowerCase();
 
 	if (gender === 'female') {
-		extra = 'male, boy, man';
+		extra = '(male), boy, man';
 	} else if (gender === 'male') {
-		extra = 'female, girl, woman';
+		extra = '(female), girl, woman';
 	}
 
 	const prompt = `${
@@ -47,64 +47,6 @@ Keywords should be visually descriptive of an individual and be comma-separated.
 	if (existingKeywords)
 		prompt += `\nExisting keywords (do not include):\n${existingKeywords}`;
 	prompt += `\n\nInput:\n${description}`;
-	return prompt;
-}
-
-// maybe break clothing up into top and bottom
-const examples = {
-	'hair color': ['brown', 'blonde', 'black', 'red'],
-	'hair style': ['short', 'long', 'curly'],
-	'eye color': ['brown', 'green', 'blue'],
-	'body type': ['thin', 'muscular', 'overweight', 'curvy'],
-	clothing: ['casual t-shirt', 'sundress', 'sweater', 'gray suit'],
-} as Record<string, string[]>;
-
-const notesMap = {
-	'hair color': 'Use typical colors',
-	'hair style': 'Use typical hair styles',
-	'eye color': 'Use typical eye colors for people',
-	'body type': '',
-	clothing: '',
-} as Record<string, string>;
-export function appearanceOptionsFromNameAndDescription(
-	name: string,
-	description: string,
-	category: string,
-	existingOptions?: string[]
-) {
-	// TODO have preset categories for ai to choose from
-	// hair color, hair style, eyes color, skin color, body type, clothing
-
-	// ideas:
-	// category: face shape, facial hair, glasses, hat, skin color
-
-	console.log('category', category);
-
-	const example = examples[category];
-	example.sort(() => Math.random() - 0.5);
-	const exampleStr = JSON.stringify(example, null, ' ')
-		.replace(/[\n\t]/g, '')
-		.replace('[ ', '[');
-	const existingOptionsStr = JSON.stringify(existingOptions, null, ' ')
-		.replace(/[\n\t]/g, '')
-		.replace('[ ', '[');
-
-	let prompt = `The following is a name and description of a character. Assistant's task is to generate options for the character's appearance based on the description. Respond with a valid JSON array containing between 5 and 10 strings to represent options that are typical for the specified category. Each option should be simple and visual-based.${
-		existingOptions?.length ? ' Respond with new options only.' : ''
-	}
-
-Category: ${category}${
-		existingOptions?.length ? '\nExisting options: ' + existingOptionsStr : ''
-	}
-Short example response: ${exampleStr}
-
-Notes:${notesMap[category] ? '\n- ' + notesMap[category] : ''}
-- Use the following seed for randomness: ${Math.random()
-		.toFixed(10)
-		.slice(2, 8)}`;
-	prompt += `\n\nName: ${name}`;
-	prompt += `\nDescription: ${description}`;
-	// console.log(prompt);
 	return prompt;
 }
 

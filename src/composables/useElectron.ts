@@ -144,6 +144,14 @@ export default function useElectron() {
 		const result = await electron.ipcRenderer.invoke('pickFile:app', fileType);
 		return result;
 	};
+	const pickPackFile = async () => {
+		const result = await electron.ipcRenderer.invoke('pickPackFile:app');
+		return result;
+	};
+	const importPack = async (source: string) => {
+		const result = await electron.ipcRenderer.invoke('importPack:app', source);
+		return result;
+	};
 	const moveFile = async (source: string, destination: string) => {
 		const result = await electron.ipcRenderer.invoke(
 			'moveFile:app',
@@ -170,6 +178,8 @@ export default function useElectron() {
 		toggleDevTools,
 		pickDirectory,
 		pickFile,
+		pickPackFile,
+		importPack,
 		moveFile,
 		linkFile,
 		verifyModelDirectory,

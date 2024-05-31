@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import ImportModel from '@/components/ImportModel.vue';
 import useLlamaCpp from '../composables/useLlamaCpp';
+import ImportModelPack from './ImportModelPack.vue';
 
 const { openExternalLink } = useElectron();
 
@@ -85,6 +86,7 @@ const onChatModelChange = () => {
 			</p>
 			<div class="mt-4 flex items-center gap-2">
 				<ImportModel @model-import="onChatModelChange" />
+				<ImportModelPack />
 			</div>
 			<div
 				class="mt-4"

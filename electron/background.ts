@@ -187,6 +187,23 @@ async function createWindow() {
 		return result.filePaths;
 	});
 
+	ipcMain.handle('pickPackFile:app', async () => {
+		const result = await dialog.showOpenDialog({
+			properties: ['openFile'],
+			filters: [{ name: 'Model Pack files (.zip)', extensions: ['zip'] }],
+		});
+
+		// TODO get files in zip to verify and return
+
+		return result.filePaths;
+	});
+
+	ipcMain.handle('importPack:app', async (_, src: string) => {
+		// inspect the zip to contain correct files
+		// extract the zip to the models directory
+		// delete the zip
+	});
+
 	ipcMain.handle(
 		'moveFile:app',
 		async (_, source: string, destination: string) => {

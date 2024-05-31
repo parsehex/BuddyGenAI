@@ -215,7 +215,6 @@ export const useAppStore = defineStore('app', () => {
 		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
 	};
 	const getTTSModelPath = (buddyId?: string) => {
-		console.log('TEST', settings.value.selected_model_tts);
 		if (!settings.value.local_model_directory) return '';
 		if (!settings.value.selected_model_tts) return '';
 		if (settings.value.selected_model_tts === '0') return '';

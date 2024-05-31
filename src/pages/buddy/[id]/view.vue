@@ -110,13 +110,19 @@ const createThread = async () => {
 			Version History
 		</RouterLink> -->
 		<Card class="w-full md:w-2/3 mx-auto text-left">
-			<CardHeader class="text-lg font-bold flex flex-col items-center space-x-2">
+			<CardHeader class="text-lg flex flex-col justify-center items-center">
 				<BuddyAvatar
 					v-if="buddy"
 					:buddy="buddy"
 					size="lg"
-					class="hover:scale-150 text-3xl"
+					class="hover:scale-150 text-3xl mr-0"
 				/>
+				<p
+					v-if="profilePic && profilePic !== 'loading'"
+					class="text-sm font-semibold text-center text-gray-400 dark:text-gray-600 select-none"
+				>
+					AI-Created Image
+				</p>
 			</CardHeader>
 			<CardContent class="whitespace-pre-wrap">
 				{{ description }}

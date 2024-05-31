@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeMount, watch, toRefs } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
+import router from '@/lib/router';
 import { Button } from '@/components/ui/button';
 import {
 	HoverCard,
@@ -78,16 +79,28 @@ watch(
 				<Button variant="link" size="lg">{{ name }}</Button>
 			</div>
 		</HoverCardTrigger>
-		<HoverCardContent class="w-96" :hide-when-detached="true">
+		<HoverCardContent class="w-96 p-0 py-2" :hide-when-detached="true">
 			<div class="flex items-center space-x-4">
-				<BuddyAvatar :buddy="buddy" size="base" />
+				<BuddyAvatar :buddy="buddy" size="base" class="ml-4" />
 				<div class="space-y-1">
-					<div class="flex justify-around">
-						<RouterLink :to="`/buddy/${id}/edit`">Edit</RouterLink>
-						<RouterLink :to="`/buddy/${id}/view`">View</RouterLink>
+					<div class="flex justify-around mb-2">
+						<Button
+							type="button"
+							@click="router.push(`/buddy/${id}/edit`)"
+							variant="outline"
+						>
+							Edit
+						</Button>
+						<Button
+							type="button"
+							@click="router.push(`/buddy/${id}/view`)"
+							variant="outline"
+						>
+							View
+						</Button>
 					</div>
 					<p class="text-sm">{{ description }}</p>
-					<div class="flex items-center pt-2">
+					<div class="flex items-center py-2">
 						<span class="text-xs text-muted-foreground">
 							{{ time_label }} {{ time_at }}
 						</span>

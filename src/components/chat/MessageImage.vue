@@ -49,7 +49,7 @@ const imgLoading = computed(() => {
 		/>
 		<p
 			v-if="!imgLoading"
-			class="text-sm text-center text-gray-500 select-none mt-1"
+			class="text-sm font-semibold text-center text-gray-400 dark:text-gray-600 select-none mt-1"
 		>
 			AI-Created Image
 		</p>
