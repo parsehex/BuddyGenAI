@@ -103,7 +103,11 @@ class AppSettingsCls {
 
 		let setDefaults = false;
 		settings.forEach((setting) => {
-			this.settings[setting.name] = JSON.parse(`"${setting.value}"`);
+			try {
+				this.settings[setting.name] = JSON.parse(`"${setting.value}"`);
+			} catch (e) {
+				this.settings[setting.name] = setting.value;
+			}
 		});
 
 		// are there settings missing from AppSettingsDefaults?

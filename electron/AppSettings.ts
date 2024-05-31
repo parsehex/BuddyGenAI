@@ -65,7 +65,11 @@ class AppSettingsCls {
 		if (!row) {
 			throw new Error('Setting not found');
 		}
-		return JSON.parse(`"${row.value}"`);
+		try {
+			return JSON.parse(`"${row.value}"`);
+		} catch (e) {
+			return row.value;
+		}
 	}
 }
 
