@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ScrollArea } from '@/components/ui/scroll-area';
 import useElectron from '@/composables/useElectron';
 const { openExternalLink } = useElectron();
 
@@ -74,6 +75,7 @@ const deps = [
 		link: 'https://github.com/EternalC0der/electron-nuxt3',
 		author: 'EternalC0der',
 		license: 'Unknown',
+		note: 'BuddyGenAI is a fork of electron-nuxt3',
 	},
 	{
 		name: 'electron-updater',
@@ -116,6 +118,7 @@ const deps = [
 		link: 'https://github.com/ggerganov/llama.cpp',
 		author: 'The ggml authors',
 		license: 'MIT',
+		licenseLink: 'https://github.com/ggerganov/llama.cpp/blob/master/LICENSE',
 	},
 	{
 		name: 'lucide-vue-next',
@@ -167,6 +170,13 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'Piper TTS',
+		link: 'https://github.com/rhasspy/piper',
+		author: 'Michael Hansen',
+		license: 'MIT',
+		licenseLink: 'https://github.com/rhasspy/piper/blob/master/LICENSE.md',
+	},
+	{
 		name: 'prettier',
 		link: 'https://github.com/prettier/prettier',
 		author: 'James Long and contributors',
@@ -207,6 +217,8 @@ const deps = [
 		link: 'https://github.com/leejet/stable-diffusion.cpp',
 		author: 'leejet',
 		license: 'MIT',
+		licenseLink:
+			'https://github.com/leejet/stable-diffusion.cpp/blob/master/LICENSE',
 	},
 	{
 		name: 'tailwindcss',
@@ -257,10 +269,59 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'whisper.cpp',
+		link: 'https://github.com/ggerganov/whisper.cpp',
+		author: 'The ggml authors',
+		license: 'MIT',
+		licenseLink: 'https://github.com/ggerganov/whisper.cpp/blob/master/LICENSE',
+	},
+	{
 		name: 'zod',
 		link: 'https://github.com/colinhacks/zod',
 		author: 'Colin McDonnell',
 		license: 'MIT',
+	},
+];
+
+const aiModels = [
+	{
+		name: 'Distil-Whisper',
+		link:
+			'https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/hfc_female/medium',
+		author: 'Distil-Whisper',
+		license: 'MIT',
+		licenseLink:
+			'https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/mit.md',
+	},
+	{
+		name: '(TTS Voice) hfc_female_medium',
+		link:
+			'https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/hfc_female/medium',
+		author: 'Michael Henson',
+		license: 'CC BY-NC-SA 4.0 DEED',
+		licenseLink: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en',
+	},
+	{
+		name: '(TTS Voice) hfc_male_medium',
+		link:
+			'https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/hfc_male/medium',
+		author: 'Michael Henson',
+		license: 'CC BY-NC-SA 4.0 DEED',
+		licenseLink: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en',
+	},
+	{
+		name: 'Llama 3',
+		link: 'https://llama.meta.com/llama3/',
+		author: 'Meta Platforms, Inc.',
+		license: 'llama-3',
+		licenseLink: 'https://llama.meta.com/llama3/license',
+	},
+	{
+		name: 'Toonify Remastered',
+		link: 'https://civitai.com/models/36281?modelVersionId=244831',
+		author: 'Robin Rombach and Patrick Esser and contributors',
+		license: 'CreativeML Open RAIL-M',
+		licenseLink: 'https://civitai.com/models/license/244831',
 	},
 ];
 
@@ -277,7 +338,10 @@ const openLink = (link: string) => {
 			<h1 class="text-2xl font-bold">BuddyGen AI Credits</h1>
 
 			<div class="mt-4">
-				<p class="text-lg">BuddyGen AI was made using the following software:</p>
+				<p class="text-xl">Built with Meta Llama 3</p>
+				<p class="text-md mt-2">
+					BuddyGen AI was made using the following software projects and AI models:
+				</p>
 				<ul class="list-disc list-inside mt-2">
 					<li v-for="dep in deps" :key="dep.name">
 						<span @click="openLink(dep.link)" class="text-blue-500 cursor-pointer">
@@ -285,14 +349,42 @@ const openLink = (link: string) => {
 						</span>
 						by
 						<b>{{ dep.author }}</b>
-						{{ ' - ' }}
 						<span
 							v-for="license in dep.license.split(',')"
+							@click="dep.licenseLink && openLink(dep.licenseLink)"
 							:key="license"
-							class="text-sm bg-gray-200 px-2 rounded-full ml-1"
+							:class="
+								'text-sm px-2 rounded-full ml-2 bg-gray-200 dark:bg-gray-800' +
+								(dep.licenseLink ? ' cursor-pointer' : '')
+							"
 						>
-							{{ license }}&nbsp;license
+							{{ license }}&nbsp;license</span
+						>
+						<span v-if="dep.note">
+							{{ ' - ' + dep.note }}
 						</span>
+					</li>
+				</ul>
+
+				<p class="text-lg mt-4">
+					As of the writing of this, the following are part of the free and separate
+					AI Models Pack for conveniently setting up BuddyGenAI.
+				</p>
+				<ul class="list-disc list-inside mt-2">
+					<li v-for="model in aiModels" :key="model.name">
+						<span @click="openLink(model.link)" class="text-blue-500 cursor-pointer">
+							{{ model.name }}
+						</span>
+						by
+						<b>{{ model.author }}</b>
+						<span
+							v-for="license in model.license.split(',')"
+							:key="license"
+							@click="openLink(model.licenseLink)"
+							class="text-sm px-2 rounded-full ml-2 cursor-pointer bg-gray-200 dark:bg-gray-800"
+						>
+							{{ license }}&nbsp;license</span
+						>
 					</li>
 				</ul>
 
@@ -313,7 +405,7 @@ const openLink = (link: string) => {
 						parsehex
 					</span>
 					)
-					<span class="text-sm bg-gray-200 px-2 rounded-full ml-1">
+					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
 						MIT license
 					</span>
 				</p>
