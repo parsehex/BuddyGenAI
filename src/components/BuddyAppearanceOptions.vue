@@ -174,19 +174,33 @@ const setAppearanceOption = (key: AppearanceCategory, value: string) => {
 	emit('updateProfilePicPrompt', newPrompt);
 };
 
-// onMounted(() => {
-// 	newAppearanceOptions();
-// });
+onMounted(() => {
+	let hasGeneratedOptions = false;
+	for (const key of categories) {
+		if (!appearanceOptions.value) continue;
+		if (appearanceOptions.value[key].length > 0) {
+			hasGeneratedOptions = true;
+			break;
+		}
+	}
+	if (hasGeneratedOptions) return;
+
+	newAppearanceOptions();
+});
 </script>
 
 <template>
 	<div class="flex flex-col items-center justify-center w-full">
 		<div class="flex flex-col items-center justify-center w-full">
 			<Label class="text-lg">Appearance Options</Label>
-			<div class="flex items-center justify-center w-full">
-				<Button type="button" @click="newAppearanceOptions()" variant="secondary">
+			<div class="flex flex-col items-center justify-center w-full">
+				<Button type="button" @click="newAppearanceOptions()" variant="outline">
 					Refresh All Options
 				</Button>
+				<p>
+					Please select each option below to describe
+					{{ buddy?.name || 'your buddy' }}'s appearance.
+				</p>
 			</div>
 			<div class="flex flex-row items-center justify-center w-full">
 				<!--
@@ -203,7 +217,7 @@ const setAppearanceOption = (key: AppearanceCategory, value: string) => {
 				<div
 					v-for="(options, key) in appearanceOptions"
 					:key="key"
-					class="flex flex-wrap items-center justify-center w-full my-2"
+					class="flex flex-col flex-wrap items-center justify-center w-full my-2"
 				>
 					<Label class="text-lg mr-1">
 						{{ key }}

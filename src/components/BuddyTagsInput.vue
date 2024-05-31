@@ -48,6 +48,9 @@ const buddyKeywordsArr = computed({
 		<TagsInputInput :placeholder="'Keywords'" />
 	</TagsInput>
 
+	<label v-if="type === 'edit'" class="text-xl w-full text-center">
+		New Description
+	</label>
 	<blockquote
 		class="text-sm text-gray-400 text-center mt-2 select-none border-l border-gray-300 p-2"
 	>

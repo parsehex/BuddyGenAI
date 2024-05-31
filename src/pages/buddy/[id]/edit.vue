@@ -436,16 +436,15 @@ const acceptKeywords = () => {
 					</Label>
 				</div>
 				<div class="flex flex-col items-center mt-4">
-					<label class="text-xl w-full text-center"> Description </label>
+					<label class="text-xl w-full text-center"> Current Description </label>
 					<p>
-						<span class="text-sm ml-4 select-none italic">
-							{{ buddy?.name }} is...
-						</span>
+						<span class="text-sm select-none italic"> {{ buddy?.name }} is... </span>
 						<br />
 						<span class="text-lg">
 							{{ buddy?.description }}
 						</span>
 					</p>
+
 					<BuddyTagsInput
 						type="edit"
 						:buddyName="buddy?.name || ''"
