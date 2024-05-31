@@ -84,9 +84,10 @@ const triggerEdit = async () => {
 	editingMessage.value = message.value.content;
 	modalOpen.value = true;
 };
-const handleEdit = async (e: KeyboardEvent) => {
-	if (e.key !== 'Enter') return;
-	if (!e.ctrlKey) return;
+const handleEdit = async (e: KeyboardEvent | null, confirm = false) => {
+	if (!confirm) return;
+	if (e?.key !== 'Enter' && !confirm) return;
+	if (!e?.ctrlKey && !confirm) return;
 
 	await api.message.updateOne(message.value.id, editingMessage.value);
 	editingMessage.value = '';
@@ -274,7 +275,7 @@ const doTTS = async () => {
 					<Button @click="handleCancel" type="button" variant="outline"
 						>Cancel</Button
 					>
-					<Button @click="handleEdit" type="button">Confirm</Button>
+					<Button @click="handleEdit(null, true)" type="button">Confirm</Button>
 				</DialogClose>
 			</DialogFooter>
 		</DialogContent>
