@@ -140,6 +140,10 @@ export default function useElectron() {
 		return result;
 	};
 
+	const closeApp = async () => {
+		await electron.ipcRenderer.invoke('closeApp');
+	};
+
 	return {
 		copyToClipboard,
 		isElectron,
@@ -166,5 +170,6 @@ export default function useElectron() {
 		getDataPath,
 		openExternalLink,
 		openModelsDirectory,
+		closeApp,
 	};
 }

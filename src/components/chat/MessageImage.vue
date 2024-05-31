@@ -47,11 +47,5 @@ const imgLoading = computed(() => {
 			:img-url="imgValue"
 			class="shadow-md cursor-pointer hover:shadow-lg hover:scale-110 transition-transform"
 		/>
-		<p
-			v-if="!imgLoading"
-			class="text-sm font-semibold text-center text-gray-400 dark:text-gray-600 select-none mt-1"
-		>
-			AI-Created Image
-		</p>
 	</div>
 </template>

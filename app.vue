@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import './assets/css/index.css';
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import { Sidebar } from '@/components/sidebar';
@@ -7,9 +8,26 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import useElectron from '@/composables/useElectron';
+import { useColorMode } from '@vueuse/core';
+import { isDevMode } from '@/lib/utils';
 
-const { toggleDevTools } = useElectron();
+useColorMode();
+
+const { toggleDevTools, closeApp } = useElectron();
+
+const enteredApp = ref(isDevMode());
 
 (window as any).latestAppKeyDownHandlerId = Math.random();
 const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
@@ -30,13 +48,21 @@ const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
 })((window as any).latestAppKeyDownHandlerId);
 
 window.addEventListener('keydown', handleAppKeyDown);
+
+const doCloseApp = () => {
+	enteredApp.value = false;
+	if (closeApp) closeApp();
+};
+
+const container = ref<HTMLElement | null>(null);
 </script>
 
 <template>
 	<div
+		ref="container"
 		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950"
 	>
-		<Suspense>
+		<Suspense v-if="enteredApp">
 			<ResizablePanelGroup direction="horizontal">
 				<ResizablePanel
 					class="min-w-min"
@@ -52,6 +78,25 @@ window.addEventListener('keydown', handleAppKeyDown);
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</Suspense>
+		<AlertDialog :open="!enteredApp">
+			<AlertDialogContent :portal-to="container">
+				<AlertDialogHeader>
+					<AlertDialogTitle>Adults Only</AlertDialogTitle>
+					<AlertDialogDescription>
+						This game uses AI-generated content that may be inappropriate for
+						children.
+						<br />
+						<b class="text-lg">Are you 18 years or older?</b>
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel @click="doCloseApp"> No / Exit </AlertDialogCancel>
+					<AlertDialogAction @click="enteredApp = true">
+						Yes / Enter
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 		<Toaster />
 	</div>
 </template>

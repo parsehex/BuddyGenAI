@@ -302,6 +302,10 @@ async function createWindow() {
 		return getDataPath(path);
 	});
 
+	ipcMain.handle('closeApp', async (_, path: string) => {
+		app.quit();
+	});
+
 	// Lock app to single instance
 	if (singleInstance(app, mainWindow)) return;
 

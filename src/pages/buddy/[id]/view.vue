@@ -117,12 +117,6 @@ const createThread = async () => {
 					size="lg"
 					class="hover:scale-150 text-3xl mr-0"
 				/>
-				<p
-					v-if="profilePic && profilePic !== 'loading'"
-					class="text-sm font-semibold text-center text-gray-400 dark:text-gray-600 select-none"
-				>
-					AI-Created Image
-				</p>
 			</CardHeader>
 			<CardContent class="whitespace-pre-wrap">
 				{{ description }}

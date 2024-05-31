@@ -383,13 +383,6 @@ const acceptKeywords = () => {
 					/>
 					<BuddyAvatar v-if="buddy" :buddy="buddy" size="lg" class="text-3xl" />
 
-					<p
-						class="text-sm text-gray-500 select-none"
-						v-if="buddy && buddy.profile_pic"
-					>
-						Images are created using AI and may have unexpected results.
-					</p>
-
 					<BuddyAvatarSelect
 						v-if="buddy"
 						:buddy="buddy"
