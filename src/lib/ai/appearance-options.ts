@@ -28,5 +28,5 @@ export const notes = {
 	'hair style': 'Use typical hair styles',
 	'eye color': 'Use typical eye colors for people',
 	'body type': '',
-	'clothing style': 'Describe the style of clothing, not the clothing itself',
+	'clothing style': 'Use typical styles/types of clothing',
 } as Record<AppearanceCategory, string>;
