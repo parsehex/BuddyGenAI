@@ -91,7 +91,7 @@ const fileNames = computed(() => {
 </script>
 
 <template>
-	<Dialog :modal="true">
+	<Dialog :modal="true" v-if="false">
 		<DialogTrigger as-child>
 			<Button variant="default" class="self-center px-2">
 				<span class="flex items-center gap-1">

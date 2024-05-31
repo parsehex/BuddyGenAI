@@ -139,7 +139,7 @@ const fileNames = computed(() => {
 <template>
 	<Dialog :modal="true">
 		<DialogTrigger as-child>
-			<Button variant="secondary" class="self-center px-2">
+			<Button variant="default" class="self-center px-2">
 				<span v-if="!type && !label" class="flex items-center gap-1">
 					<Import />
 					Import Models
