@@ -13,35 +13,6 @@ export default function useElectron() {
 	// Initialize electron
 	const electron = window.require('electron');
 
-	// Window title bar actions
-	// ========================
-	const titleBarActions = {
-		minimize: () => electron.ipcRenderer.invoke('titlebar:action', 'minimize'),
-		toggleMaximize: () =>
-			electron.ipcRenderer.invoke('titlebar:action', 'toggleMaximize'),
-		isMaximized: () => electron.ipcRenderer.invoke('isMaximized:app', null),
-		close: () => electron.ipcRenderer.invoke('close:app', null),
-	};
-
-	// Window title bar stats
-	// ======================
-	const windowStats = ref({
-		isMaximized: false,
-		isFullscreen: false,
-	});
-
-	electron.ipcRenderer.on('window:maximizeChanged', (_event, value) => {
-		windowStats.value.isMaximized = value;
-	});
-	electron.ipcRenderer.on('window:fullscreenChanged', (_event, value) => {
-		windowStats.value.isFullscreen = value;
-	});
-
-	const getAppEdition = async () => {
-		const result = await electron.ipcRenderer.invoke('getAppEdition:app');
-		return result;
-	};
-
 	const copyToClipboard = (text: string) => {
 		electron.clipboard.writeText(text);
 	};
@@ -170,11 +141,8 @@ export default function useElectron() {
 	};
 
 	return {
-		getAppEdition,
 		copyToClipboard,
 		isElectron,
-		titleBarActions,
-		windowStats,
 		toggleDevTools,
 		pickDirectory,
 		pickFile,

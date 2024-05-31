@@ -8,23 +8,6 @@ const sourceEnv = path.join(__dirname, '.env');
 const destEnv = path.join(__dirname, '.output', '.env');
 fs.copyFileSync(sourceEnv, destEnv);
 
-const env = fs.readFileSync(destEnv, 'utf8');
-const envObj = env
-	.split('\n')
-	.filter((line) => line.trim() !== '')
-	.reduce((acc, line) => {
-		const [key, value] = line.split('=');
-		acc[key.trim()] = JSON.parse((value || '').trim());
-		return acc;
-	}, {});
-console.log(envObj);
-const AppEdition = envObj.APP_EDITION;
-
-if (!AppEdition) {
-	console.error('Could not find APP_EDITION in the .env file.');
-	process.exit(1);
-}
-
 const platform = 'WINDOWS';
 // const platform = 'LINUX'
 // const platform = 'MAC'

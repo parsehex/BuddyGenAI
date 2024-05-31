@@ -32,7 +32,7 @@ async function runPiper(model: string, output: string, text: string) {
 		log.info('Running Piper:', args);
 		const command = execFile(piperPath, args, (error, stdout, stderr) => {
 			if (error) {
-				log.error(`Piper Error: ${error.message}`);
+				log.error(`Piper exError: ${error.message}`);
 				reject(error);
 			} else {
 				console.log(stdout);
@@ -48,7 +48,7 @@ async function runPiper(model: string, output: string, text: string) {
 		stdinStream.pipe(command.stdin as any);
 
 		command.on('error', (error) => {
-			log.error(`Piper Error: ${error.message}`);
+			log.error(`Piper onError: ${error.message}`);
 			reject(error);
 		});
 

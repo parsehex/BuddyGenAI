@@ -4,7 +4,6 @@ import * as fs from 'fs/promises';
 import { app, BrowserWindow, session, dialog, shell } from 'electron';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
-import titleBarActionsModule from './modules/titleBarActions';
 // import updaterModule from '../updater';
 import macMenuModule from './modules/macMenu';
 import { ipcMain } from 'electron/main';
@@ -36,7 +35,6 @@ const isProduction = process.env.NODE_ENV !== 'development';
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32';
 const headerSize = 32;
-const modules = [titleBarActionsModule, macMenuModule];
 
 // Initialize app window
 // =====================
@@ -80,10 +78,6 @@ async function createWindow() {
 	await whisperModule(mainWindow);
 
 	mainWindow.removeMenu();
-
-	ipcMain.handle('getAppEdition', async () => {
-		return process.env.APP_EDITION;
-	});
 
 	ipcMain.handle('pathJoin', async (_, path: string, ...paths: string[]) => {
 		return join(path, ...paths);
@@ -358,7 +352,6 @@ app.whenReady().then(async () => {
 	// }
 	macMenu(mainWindow);
 	// updaterModule(mainWindow);
-	titleBarActionsModule(mainWindow);
 
 	console.log('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
 
