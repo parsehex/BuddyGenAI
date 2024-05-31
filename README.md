@@ -19,7 +19,7 @@ You may [check the releases page](https://github.com/parsehex/BuddyGenAI/release
 
 ## Building
 
-(section is incomplete)
+(section is incomplete/outdated -- e.g. project is using llama.cpp again instead of llamafile)
 
 ### Acquiring Binaries
 
