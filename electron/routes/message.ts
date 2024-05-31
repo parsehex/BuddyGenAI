@@ -6,6 +6,7 @@ import type { ChatCompletionMessageParam } from 'openai/resources/chat/completio
 import { AppSettings } from '../AppSettings';
 import { Message } from 'openai/resources/beta/threads/messages/messages';
 import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { contextLengthMap } from '../LCPP-const';
 
 const chatProviderUrls = {
 	external: 'https://api.openai.com/v1',
@@ -117,7 +118,39 @@ async function useAlternateCompletion(options: any, res: any) {
 	const url = `http://localhost:${llamacppPort}/v1/chat/completions`;
 	const apiKey = getLlamaCppApiKey();
 
-	// console.log('payload', payload);
+	// console.time('tokenizeData');
+	// let prompt = '';
+	// // construct prompt to get approx token count
+	// for (let i = 0; i < messages.length; i++) {
+	// 	const message = messages[i];
+	// 	prompt += `${message.role}: ${message.content}\n\n`;
+	// }
+
+	// this is a bit slow for my liking -- any way to optimize?
+	// call /tokenize to get token count
+	// const tokenizeResponse = await fetch(
+	// 	`http://localhost:${llamacppPort}/tokenize`,
+	// 	{
+	// 		method: 'POST',
+	// 		headers: {
+	// 			Authorization: `Bearer ${apiKey}`,
+	// 			'Content-Type': 'application/json',
+	// 		},
+	// 		body: JSON.stringify({ content: prompt }),
+	// 	}
+	// );
+	// const tokenizeData = await tokenizeResponse.json();
+	// console.timeEnd('tokenizeData');
+	// const tokenCount = tokenizeData.tokens.length * 1.1;
+	// console.log('token count:', tokenCount);
+
+	// // is token count within 25% of model's limit?
+	// const model = currentModel;
+	// const contextLength = contextLengthMap[model];
+	// const tokenLimit = contextLength;
+	// if (tokenCount > tokenLimit) {
+	// 	// remove 2 messages at a time starting from the beginning (leaving 1st msg) until token count is within limit
+	// }
 
 	const response = await fetch(url, {
 		method: 'POST',
