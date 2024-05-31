@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import OpenAI from 'openai';
 import { findBinaryPath } from '../fs';
 import fs from 'fs-extra';
+import path from 'path';
 import { BrowserWindow, ipcMain } from 'electron';
 import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 import { AppSettings } from '../AppSettings';
@@ -81,6 +82,14 @@ async function runSD(
 	size = 256,
 	steps = 16
 ) {
+	const modelName = model.split('/').pop()?.toLowerCase();
+	if (!modelName) {
+		throw new Error('Invalid model name (should not be a directory)');
+	}
+
+	const isToonifyRemastered =
+		modelName.includes('toonify') && modelName.includes('remastered');
+
 	const useGpu = (await AppSettings.get('gpu_enabled_image')) as 0 | 1;
 	// @ts-ignore
 	const useGpuBool = useGpu === 1 || useGpu === '1.0';
@@ -97,8 +106,6 @@ async function runSD(
 		const args = [
 			'-m',
 			model,
-			'-p',
-			removeAccents(pos),
 			'-o',
 			output,
 			'--seed',
@@ -114,8 +121,24 @@ async function runSD(
 			'-H',
 			`${H}`,
 		];
+
+		const loraDir = path.join(path.dirname(sdPath), '../sd-loras');
+		const loraFiles = fs.readdirSync(loraDir);
+		const lowraFile = loraFiles.find((file) => /lowra/i.test(file));
+		let p = removeAccents(pos);
+		if (isToonifyRemastered && lowraFile) {
+			args.push('--lora-model-dir', loraDir);
+
+			const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
+			args.push('-p', `${p}, ${loraStr}`);
+			log.info('Using LowRA:', loraStr);
+		} else {
+			args.push('-p', p);
+		}
+
 		if (neg) {
-			args.splice(4, 0, '-n', removeAccents(neg));
+			neg = removeAccents(neg);
+			args.push('-n', neg);
 		}
 
 		log.info('SD Path:', sdPath, `(GPU: ${useGpuBool})`);
