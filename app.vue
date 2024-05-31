@@ -33,7 +33,6 @@ const enteredApp = ref(isDevMode());
 const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
 	if (!toggleDevTools) return console.error('useElectron not available');
 	if (id !== (window as any).latestAppKeyDownHandlerId) return;
-	if (!isDevMode()) return;
 
 	const key = e.key.toLowerCase();
 
@@ -43,7 +42,7 @@ const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
 	if (key === 'r' && holdingCtrl && !holdingShift) {
 		e.preventDefault();
 		window.location.reload();
-	} else if (key === 'i' && holdingCtrl && holdingShift) {
+	} else if (key === 'i' && holdingCtrl && holdingShift && !isDevMode()) {
 		e.preventDefault();
 		toggleDevTools();
 	}
