@@ -45,7 +45,7 @@ const buddyKeywordsArr = computed({
 			<TagsInputItemDelete />
 		</TagsInputItem>
 
-		<TagsInputInput :placeholder="'Keywords (press Enter to add)'" />
+		<TagsInputInput :placeholder="'Keywords (press Enter or comma to add)'" />
 	</TagsInput>
 
 	<label v-if="type === 'edit'" class="text-xl w-full text-center">
