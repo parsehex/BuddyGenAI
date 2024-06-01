@@ -374,8 +374,8 @@ const refreshProfilePicture = async () => {
 					</Card>
 					<Card v-else class="mt-4 p-2 w-full">
 						<CardContent>
-							<h2 v-if="store.newHere" class="text-lg mt-4 text-center underline">
-								Your first Buddy
+							<h2 v-if="store.newHere" class="text-lg mt-4 text-center">
+								{{ `Customize ${buddyName || 'your buddy'}'s appearance` }}
 							</h2>
 							<p class="my-2 text-center">
 								<span class="text-lg">{{ buddyName }}</span>
