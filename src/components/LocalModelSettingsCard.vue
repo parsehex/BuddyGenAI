@@ -71,18 +71,17 @@ const onChatModelChange = () => {
 		<CardContent>
 			<p class="my-1 italic">
 				Download models and then click <b>Import Models</b> below to choose them.
-				<!-- <br />
+				<br />
 				<span
 					class="text-blue-500 cursor-pointer hover:underline"
 					@click="
 						openExternalLink &&
-							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#download-ai-models'
-							)
+							openExternalLink('https://parsehex.itch.io/buddygenai#download')
 					"
 				>
-					{{ 'Example Models' }}
-				</span> -->
+					{{ 'AI Model Pack' }}
+				</span>
+				is available on itch.io and includes a variety of models to get you started.
 			</p>
 			<div class="mt-4 flex items-center gap-2">
 				<ImportModel @model-import="onChatModelChange" />
