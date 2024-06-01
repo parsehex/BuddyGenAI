@@ -319,7 +319,11 @@ export const useAppStore = defineStore('app', () => {
 			(!threads.value.length && !buddies.value.length)
 	);
 
+	const proceed = ref(false);
+
 	const isModelsSetup = computed(() => {
+		if (proceed.value) return true;
+
 		if (isExternalProvider.value) {
 			return (
 				!!settings.value.external_api_key &&
@@ -378,6 +382,7 @@ export const useAppStore = defineStore('app', () => {
 		getWhisperModelPath,
 
 		isExternalProvider,
+		proceed,
 		isModelsSetup,
 
 		chatServerRunning,

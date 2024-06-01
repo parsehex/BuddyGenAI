@@ -302,13 +302,13 @@ const refreshProfilePicture = async () => {
 			</div>
 
 			<LocalModelSettingsCard
-				v-if="!store.isModelsSetup"
+				v-if="!store.proceed"
 				:first-time="store.newHere"
 				@open-model-directory="openModelDirectory"
 			/>
 
 			<Card
-				v-if="!store.chatServerStarting && store.isModelsSetup"
+				v-if="store.proceed && !store.chatServerStarting && store.isModelsSetup"
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
 				<CardHeader class="pt-0 pb-0">

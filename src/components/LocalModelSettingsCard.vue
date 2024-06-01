@@ -16,6 +16,7 @@ import {
 import ImportModel from '@/components/ImportModel.vue';
 import useLlamaCpp from '../composables/useLlamaCpp';
 import ImportModelPack from './ImportModelPack.vue';
+import { Button } from './ui/button';
 
 const { openExternalLink } = useElectron();
 
@@ -172,6 +173,27 @@ const onChatModelChange = () => {
 						</SelectGroup>
 					</SelectContent>
 				</Select>
+
+				<span
+					class="mt-4 inline-block"
+					:title="
+						!store.settings.selected_model_chat ||
+						!store.settings.selected_model_image
+							? 'Please select at least a chat and image model first.'
+							: ''
+					"
+				>
+					<Button
+						type="button"
+						:disabled="
+							!store.settings.selected_model_chat ||
+							!store.settings.selected_model_image
+						"
+						@click="store.proceed = true"
+					>
+						Continue
+					</Button>
+				</span>
 			</div>
 		</CardContent>
 	</Card>
