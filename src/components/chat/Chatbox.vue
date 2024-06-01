@@ -663,8 +663,10 @@ const startRecording = async () => {
 			<h2 class="text-2xl font-bold">
 				{{ threadTitle }}
 			</h2>
-			<!-- @vue-ignore -->
-			<ThreadImages :images="threadImages.map((m) => ({ url: m.image }))" />
+			<ThreadImages
+				v-if="threadImages.length > 0"
+				:images="threadImages.map((m: any) => ({ url: m.image }))"
+			/>
 			<BuddyCard
 				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
 				:buddy="currentBuddy"
