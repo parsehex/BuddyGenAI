@@ -19,7 +19,7 @@ You may [check the releases page](https://github.com/parsehex/BuddyGenAI/release
 
 ## Building
 
-(section is incomplete)
+(section is incomplete/outdated -- e.g. project is using llama.cpp again instead of llamafile)
 
 ### Acquiring Binaries
 
@@ -82,9 +82,17 @@ npm run dev
 
 - There are 2 `AppSettings.ts` files. One in `electron/` and one in `lib/api/`. The electron one is to get settings when running LlamaFile/SDCPP and so it doesn't do any saving of settings. The one in `lib/api/` is for the app UI and does save settings.
   - Additionally, `stores/main.ts` includes a copy of the Settings interface and thus also needs updated when changes are made to `AppSettings.ts`.
+- Apologies for the lack of testing and the overall messiness of the project.
+  - Several refactors are needed.
+    - Lots of duplicated code (AppSettings, anything else shared between electron/client)
+    - Project minimally uses Vercel's AI SDK (really just for message streaming), I want to re-implement to avoid the need for a server (just llama.cpp server then) and reduce dependencies.
+    - Accessing data from db is a mess, want to use [tRPC](https://trpc.io/) with electron's IPC to reduce complexity.
+  - Planning to use [Vitest](https://vitest.dev/) for testing before undergoing major refactors.
 
 # License
 
-This program is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
 Copyright (C) 2024 Thomas Mays
+
+All AI Models are licensed under their respective licenses. See the [Licenses](./licenses/) folder for more details.

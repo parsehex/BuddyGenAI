@@ -6,29 +6,11 @@ import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
 import log from 'electron-log/main';
 import { AppSettings } from '../AppSettings';
+import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
-};
-
-// by default, llamacpp uses template embedded in gguf if available
-// TODO any way to get this from the model?
-// https://github.com/ahoylabs/gguf.js
-const chatTemplateMap: { [key: string]: string } = {
-	Moistral: 'vicuna',
-	'WizardLM-2': 'vicuna',
-	'Lexi-': 'chatml',
-	'Hermes-2': 'chatml',
-	'Llama-3': 'llama3',
-	'llama-3': 'llama3',
-};
-
-const contextLengthMap: { [key: string]: number } = {
-	'WizardLM-2': 4096,
-	Moistral: 8192,
-	'Lexi-': 8192,
-	'Llama-3': 8192,
-	'llama-3': 8192,
 };
 
 let lastModel = '';
@@ -36,32 +18,15 @@ let pid = 0;
 let hasResolved = false;
 
 // TODO i think error 3221225781 means dll not found
+// error 35504 is bad args?
 
 let isReady = false;
 
 function startServer(modelPath: string, nGpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
-		const isExternal =
-			(await AppSettings.get('selected_provider_chat')) === 'external';
-		const apiKey = (await AppSettings.get('external_api_key')) as string;
-		const selectedChatModel = (await AppSettings.get(
-			'selected_model_chat'
-		)) as string;
-
-		if (isExternal) {
-			// this shouldnt happen right?
-			if (!apiKey) {
-				log.error('External API key not set');
-				reject();
-				return;
-			}
-			if (!selectedChatModel) {
-				log.error('External model not set');
-				reject();
-				return;
-			}
-			return;
-		}
+		const port = getLlamaCppPort();
+		const apiKey = getLlamaCppApiKey();
+		log.log('using port:', port, 'and api key:', apiKey);
 
 		modelPath = path.normalize(modelPath);
 		try {
@@ -72,15 +37,21 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 			return;
 		}
 
-		nGpuLayers = Math.floor(+nGpuLayers);
-		const serverPath = await findBinaryPath('llamafile', 'llamafile');
-		const args = [
-			'--nobrowser',
-			'--model',
-			modelPath,
-			'--n-gpu-layers',
-			nGpuLayers + '',
-		];
+		const useGpu = (await AppSettings.get('gpu_enabled_chat')) as 0 | 1;
+		// @ts-ignore
+		const useGpuBool = useGpu === 1 || useGpu === '1.0';
+
+		const llamaCppPath = await findBinaryPath('llama.cpp', 'server', useGpuBool);
+		const args = ['--port', port + '', '--model', modelPath];
+
+		if (useGpuBool) {
+			nGpuLayers = Math.floor(+nGpuLayers);
+			args.push('--n-gpu-layers', nGpuLayers + '');
+		}
+
+		if (apiKey) {
+			args.push('--api-key', apiKey);
+		}
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			modelPath.includes(key)
@@ -101,11 +72,11 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 			log.info('Using default context length:', 4096);
 		}
 
-		log.info('Llama.cpp Server Path:', serverPath);
+		log.info('Llama.cpp Server Path:', llamaCppPath, `(GPU: ${useGpuBool})`);
 		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
-			serverPath,
+			llamaCppPath,
 			args,
 			{ windowsHide: true, killSignal: 'SIGKILL' },
 			(error: any, stdout: any, stderr: any) => {

@@ -1,0 +1,8 @@
+-- todo implement db versions and all
+
+BEGIN TRANSACTION;
+
+ALTER TABLE chat_message ADD image TEXT;
+ALTER TABLE chat_message ADD tts TEXT;
+
+COMMIT;

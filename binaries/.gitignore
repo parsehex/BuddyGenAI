@@ -1,5 +1,2 @@
-builds
-build/**/*
-*.cpp/**
 !**/.gitkeep
-/llamafile*
+/**/*

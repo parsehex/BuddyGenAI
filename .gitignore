@@ -1,8 +1,5 @@
-# Nuxt
 node_modules
 *.log*
-.nuxt
-.nitro
 .cache
 .output
 .env
@@ -24,3 +21,7 @@ build/config.gypi
 
 /*.old
 bark.cpp
+llama.log
+/*.wav
+/*.webm
+/result.json

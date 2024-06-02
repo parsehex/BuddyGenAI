@@ -1,4 +1,71 @@
 {
-	// https://nuxt.com/docs/guide/concepts/typescript
-	"extends": "./.nuxt/tsconfig.json"
+  "compilerOptions": {
+    "paths": {
+      "@": [
+        "."
+      ],
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/composables/*": [
+        "./src/composables/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/stores/*": [
+        "./src/stores/*"
+      ],
+      "assets": [
+        "./assets"
+      ],
+      "assets/*": [
+        "./assets/*"
+      ],
+      "public": [
+        "./public"
+      ],
+      "public/*": [
+        "./public/*"
+      ],
+    },
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "strict": true,
+    "noImplicitThis": true,
+    "esModuleInterop": true,
+    "types": [
+			"unplugin-vue-router/client"
+
+		],
+    "verbatimModuleSyntax": true,
+    "allowJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+		"./typed-router.d.ts",
+    "./src/lib/**/*",
+    "./src/components/**/*",
+    "./src/composables/**/*",
+    "./src/pages/**/*",
+    "./src/store/**/*",
+    "./"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./dist",
+    "./.output"
+  ]
 }

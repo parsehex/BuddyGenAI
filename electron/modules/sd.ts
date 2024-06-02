@@ -2,18 +2,20 @@ import { execFile } from 'child_process';
 import OpenAI from 'openai';
 import { findBinaryPath } from '../fs';
 import fs from 'fs-extra';
+import path from 'path';
 import { BrowserWindow, ipcMain } from 'electron';
 import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
 
-// @/lib/api/types-api
+// also in @/lib/api/types-api
 interface SDOptions {
 	model: string;
 	pos: string;
 	output: string;
 	neg?: string;
 	size?: number;
+	steps?: number;
 }
 
 // TODO catch diff errors && bubble them up to the UI
@@ -77,30 +79,70 @@ async function runSD(
 	pos: string,
 	output: string,
 	neg?: string,
-	size = 256
+	size = 256,
+	steps = 16
 ) {
-	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd');
+	const modelName = model.split('/').pop()?.toLowerCase();
+	if (!modelName) {
+		throw new Error('Invalid model name (should not be a directory)');
+	}
+
+	const isToonifyRemastered =
+		modelName.includes('toonify') && modelName.includes('remastered');
+
+	const useGpu = (await AppSettings.get('gpu_enabled_image')) as 0 | 1;
+	// @ts-ignore
+	const useGpuBool = useGpu === 1 || useGpu === '1.0';
+	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd', useGpuBool);
+
 	return new Promise((resolve, reject) => {
+		let W = size;
+		let H = size;
+		if (size === 768) {
+			W = 512;
+			H = 768;
+		}
+
 		const args = [
 			'-m',
 			model,
-			'-p',
-			removeAccents(pos),
 			'-o',
 			output,
 			'--seed',
 			'-1',
-			'-H',
-			`${size}`,
+			'--steps',
+			`${steps}`,
+			// '--cfg-scale',
+			// '2.5',
+			// '--clip-skip',
+			// '2',
 			'-W',
-			`${size}`,
+			`${W}`,
+			'-H',
+			`${H}`,
 		];
-		if (neg) {
-			args.push('-n', removeAccents(neg));
+
+		const loraDir = path.join(path.dirname(sdPath), '../sd-loras');
+		const loraFiles = fs.readdirSync(loraDir);
+		const lowraFile = loraFiles.find((file) => /lowra/i.test(file));
+		let p = removeAccents(pos);
+		if (isToonifyRemastered && lowraFile) {
+			args.push('--lora-model-dir', loraDir);
+
+			const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
+			args.push('-p', `${p}, ${loraStr}`);
+			log.info('Using LowRA:', loraStr);
+		} else {
+			args.push('-p', p);
 		}
 
-		log.info('SD Path:', sdPath);
-		log.info('Running SD:', args);
+		if (neg) {
+			neg = removeAccents(neg);
+			args.push('-n', neg);
+		}
+
+		log.info('SD Path:', sdPath, `(GPU: ${useGpuBool})`);
+		// log.info('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
@@ -121,7 +163,7 @@ async function runSD(
 
 		command.stdout?.on('data', (data: any) => {
 			const str = data.toString();
-			console.log('SD stdout:', str);
+			// console.log('SD stdout:', str);
 			let isProgressLine = false;
 			isProgressLine = str.match(/(\d+\/\d+)/) !== null;
 			if (isProgressLine) {
@@ -166,7 +208,8 @@ export default function sdModule(mainWindow: BrowserWindow) {
 			options.pos,
 			options.output,
 			options.neg,
-			options.size
+			options.size,
+			options.steps
 		);
 	});
 }

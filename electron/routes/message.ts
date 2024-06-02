@@ -5,6 +5,8 @@ import cors from 'cors';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { AppSettings } from '../AppSettings';
 import { Message } from 'openai/resources/beta/threads/messages/messages';
+import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { contextLengthMap } from '../LCPP-const';
 
 const chatProviderUrls = {
 	external: 'https://api.openai.com/v1',
@@ -13,7 +15,16 @@ const chatProviderUrls = {
 
 const router = Router();
 
-const stop = ['<|eot_id|>', 'USER:', 'user:', '</s>', '<|end|>'];
+const stop = [
+	'<|eot_id|>',
+	'USER:',
+	'user:',
+	'</s>',
+	'<|end|>',
+	'<|im_0|>',
+	'<|im_end|>',
+	'<|im_start|>',
+];
 let currentModel = '';
 
 export function updateModel(modelName: string) {
@@ -22,7 +33,6 @@ export function updateModel(modelName: string) {
 
 const openai = new OpenAI({
 	apiKey: 'sk-1234',
-	// baseURL: 'http://localhost:8080/v1',
 });
 
 async function updateOpenai() {
@@ -33,12 +43,15 @@ async function updateOpenai() {
 		'selected_model_chat'
 	)) as string;
 
-	const baseURL = isExternal
-		? chatProviderUrls.external
-		: chatProviderUrls.local;
+	const llamaCppPort = getLlamaCppPort();
+	const llamaCppApiKey = getLlamaCppApiKey();
+	const llamaCppUrl = `http://localhost:${llamaCppPort}/v1`;
+
+	const baseURL = isExternal ? chatProviderUrls.external : llamaCppUrl;
 	openai.baseURL = baseURL;
+
 	if (isExternal) openai.apiKey = apiKey;
-	else openai.apiKey = 'sk-1234';
+	else openai.apiKey = llamaCppApiKey;
 
 	return selectedChatModel;
 }
@@ -85,22 +98,67 @@ async function useAlternateCompletion(options: any, res: any) {
 	//   i think we can do pretty much everything normally
 	// maybe follow note below a bit, basically we still end up using streamToResponse
 
-	const { messages, max_tokens, temperature } = options;
+	const { messages, max_tokens, temperature, jsonSchema } = options;
+	console.log('max_tokens, temperature:', max_tokens, temperature);
 
 	const payload = {
-		prompt: convertToPhi3Format(messages),
-		n_predict: max_tokens,
+		// prompt: convertToPhi3Format(messages),
+		messages,
+		max_tokens,
 		temperature,
 		stream: true,
-	};
+		stop,
+	} as any;
 
-	const url = 'http://localhost:8080/completion';
+	if (jsonSchema) {
+		payload.json_schema = jsonSchema;
+	}
+
+	const llamacppPort = getLlamaCppPort();
+	const url = `http://localhost:${llamacppPort}/v1/chat/completions`;
+	const apiKey = getLlamaCppApiKey();
+
+	// console.time('tokenizeData');
+	// let prompt = '';
+	// // construct prompt to get approx token count
+	// for (let i = 0; i < messages.length; i++) {
+	// 	const message = messages[i];
+	// 	prompt += `${message.role}: ${message.content}\n\n`;
+	// }
+
+	// this is a bit slow for my liking -- any way to optimize?
+	// call /tokenize to get token count
+	// const tokenizeResponse = await fetch(
+	// 	`http://localhost:${llamacppPort}/tokenize`,
+	// 	{
+	// 		method: 'POST',
+	// 		headers: {
+	// 			Authorization: `Bearer ${apiKey}`,
+	// 			'Content-Type': 'application/json',
+	// 		},
+	// 		body: JSON.stringify({ content: prompt }),
+	// 	}
+	// );
+	// const tokenizeData = await tokenizeResponse.json();
+	// console.timeEnd('tokenizeData');
+	// const tokenCount = tokenizeData.tokens.length * 1.1;
+	// console.log('token count:', tokenCount);
+
+	// // is token count within 25% of model's limit?
+	// const model = currentModel;
+	// const contextLength = contextLengthMap[model];
+	// const tokenLimit = contextLength;
+	// if (tokenCount > tokenLimit) {
+	// 	// remove 2 messages at a time starting from the beginning (leaving 1st msg) until token count is within limit
+	// }
+
 	const response = await fetch(url, {
 		method: 'POST',
-		body: JSON.stringify(payload),
 		headers: {
+			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
+		body: JSON.stringify(payload),
 	});
 
 	let i = 0;
@@ -109,8 +167,17 @@ async function useAlternateCompletion(options: any, res: any) {
 		// 	console.log(data);
 		// 	i++;
 		// }
+
+		// when using /completion:
+		// const parsed = JSON.parse(data);
+		// return parsed.content;
+
+		// /v1/chat/completions:
 		const parsed = JSON.parse(data);
-		return parsed.content;
+		// if (parsed.usage) {
+		// 	console.log('usage', parsed.usage);
+		// }
+		return parsed.choices[0].delta.content;
 	});
 	streamToResponse(stream, res);
 }
@@ -173,9 +240,9 @@ router.post('/api/message', async (req, res) => {
 router.options('/api/completion', cors());
 router.post('/api/completion', async (req, res) => {
 	const selectedChatModel = await updateOpenai();
-	const { prompt, max_tokens, temperature } = req.body;
+	const { prompt, max_tokens, temperature, json_schema, messages } = req.body;
 
-	const messages: ChatCompletionMessageParam[] = [
+	const messagesToComplete: ChatCompletionMessageParam[] = [
 		{
 			role: 'system',
 			content:
@@ -187,26 +254,37 @@ router.post('/api/completion', async (req, res) => {
 		},
 		{
 			role: 'assistant',
-			content: 'Output:',
+			content: 'Response: ',
 		},
 	];
 
-	if (selectedChatModel.toLowerCase().includes('phi-3')) {
-		useAlternateCompletion(
-			{
-				messages,
-				max_tokens,
-				temperature,
-			},
-			res
-		);
-		return;
+	let messagesToPass = messagesToComplete;
+
+	if (messages) {
+		messagesToPass = messages.slice();
+		// set the first/system message to prompt
+		messagesToPass[0].content = prompt;
 	}
+
+	// console.log('messagesToPass', messagesToPass);
+
+	// if (selectedChatModel.toLowerCase().includes('phi-3')) {
+	useAlternateCompletion(
+		{
+			messages: messagesToPass,
+			max_tokens,
+			temperature,
+			jsonSchema: json_schema,
+		},
+		res
+	);
+	return;
+	// }
 
 	const response = await openai.chat.completions.create({
 		model: selectedChatModel,
 		stream: true,
-		messages,
+		messages: messagesToComplete,
 		max_tokens,
 		temperature,
 		top_p: 1,
@@ -221,7 +299,9 @@ router.post('/api/completion', async (req, res) => {
 
 router.get('/health', async (req, res) => {
 	try {
-		const response = await fetch('http://localhost:8080/health');
+		const port = getLlamaCppPort();
+		const url = `http://localhost:${port}/health`;
+		const response = await fetch(url);
 		const data = await response.json();
 		res.json({ isRunning: data.status === 'ok', currentModel });
 	} catch (error) {

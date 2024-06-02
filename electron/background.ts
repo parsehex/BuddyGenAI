@@ -4,12 +4,10 @@ import * as fs from 'fs/promises';
 import { app, BrowserWindow, session, dialog, shell } from 'electron';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
-import titleBarActionsModule from './modules/titleBarActions';
 // import updaterModule from '../updater';
 import macMenuModule from './modules/macMenu';
 import { ipcMain } from 'electron/main';
 import macMenu from './modules/macMenu';
-import { title } from 'process';
 import db from './modules/db';
 import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
@@ -18,6 +16,14 @@ import sdModule from './modules/sd';
 import { getDataPath } from './fs';
 // @ts-ignore
 import log from 'electron-log/main';
+import piperModule from './modules/piper';
+import whisperModule from './modules/whisper';
+
+import dotenv from 'dotenv';
+import rememberWindowState, { loadWindowState } from './window-state';
+dotenv.config({
+	path: path.join(__dirname, '..', '.env'),
+});
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -29,19 +35,21 @@ const isProduction = process.env.NODE_ENV !== 'development';
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32';
 const headerSize = 32;
-const modules = [titleBarActionsModule, macMenuModule];
 
 // Initialize app window
 // =====================
 async function createWindow() {
 	console.log('System info', { isProduction, platform, architucture });
-	// TODO better sizing, remember window size/shape/position
+
+	const initialWindowState = loadWindowState();
+
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		width: 1024,
-		height: 710,
+		width: initialWindowState.width,
+		height: initialWindowState.height,
+		x: initialWindowState.x,
+		y: initialWindowState.y,
 		minWidth: 950,
-		// minHeight: 676,
 		maximizable: true,
 		webPreferences: {
 			// devTools: !isProduction,
@@ -57,9 +65,17 @@ async function createWindow() {
 		title: 'BuddyGenAI',
 	});
 
+	if (initialWindowState.maximized) {
+		mainWindow.maximize();
+	}
+
+	rememberWindowState(mainWindow);
+
 	await db(mainWindow);
 	await llamaCppModule(mainWindow);
 	await sdModule(mainWindow);
+	await piperModule(mainWindow);
+	await whisperModule(mainWindow);
 
 	mainWindow.removeMenu();
 
@@ -126,13 +142,60 @@ async function createWindow() {
 		return result.filePaths[0];
 	});
 
-	ipcMain.handle('pickFile:app', async () => {
+	ipcMain.handle('pickFile:app', async (_, fileType: string) => {
+		let extensions = ['safetensors', 'gguf', 'onnx', 'bin'];
+		let name = 'Model files';
+		if (fileType === 'chat') {
+			extensions = ['gguf'];
+			name = 'Chat model files';
+		} else if (fileType === 'image') {
+			extensions = ['safetensors'];
+			name = 'Image model files';
+		} else if (fileType === 'tts') {
+			extensions = ['onnx'];
+			name = 'TTS voice files';
+		} else if (fileType === 'stt') {
+			extensions = ['bin'];
+			name = 'STT model files';
+		}
 		const result = await dialog.showOpenDialog({
 			properties: ['openFile', 'multiSelections'],
-			filters: [{ name: 'Model files', extensions: ['safetensors', 'gguf'] }],
+			filters: [{ name, extensions }],
 		});
 
+		if (fileType === 'tts') {
+			const onnxFiles = result.filePaths;
+			const configFiles = [];
+			for (const onnxFile of onnxFiles) {
+				const jsonFile = onnxFile + '.json';
+				try {
+					await fs.access(jsonFile);
+					configFiles.push(jsonFile);
+				} catch (err) {
+					console.log('json file not found for onnx file', onnxFile);
+				}
+			}
+			return [...onnxFiles, ...configFiles];
+		}
+
 		return result.filePaths;
+	});
+
+	ipcMain.handle('pickPackFile:app', async () => {
+		const result = await dialog.showOpenDialog({
+			properties: ['openFile'],
+			filters: [{ name: 'Model Pack files (.zip)', extensions: ['zip'] }],
+		});
+
+		// TODO get files in zip to verify and return
+
+		return result.filePaths;
+	});
+
+	ipcMain.handle('importPack:app', async (_, src: string) => {
+		// inspect the zip to contain correct files
+		// extract the zip to the models directory
+		// delete the zip
 	});
 
 	ipcMain.handle(
@@ -239,6 +302,10 @@ async function createWindow() {
 		return getDataPath(path);
 	});
 
+	ipcMain.handle('closeApp', async (_, path: string) => {
+		app.quit();
+	});
+
 	// Lock app to single instance
 	if (singleInstance(app, mainWindow)) return;
 
@@ -289,7 +356,6 @@ app.whenReady().then(async () => {
 	// }
 	macMenu(mainWindow);
 	// updaterModule(mainWindow);
-	titleBarActionsModule(mainWindow);
 
 	console.log('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
 
