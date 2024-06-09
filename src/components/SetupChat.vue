@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useChat, useCompletion } from 'ai/vue';
 import urls from '@/lib/api/urls';
 import { delay } from '@/lib/utils';
 import GenericChatMessage from './GenericChatMessage.vue';
 import { useToast } from './ui/toast';
+import { complete } from '@/lib/ai/complete';
+import useChat from '../composables/useChat';
 
 const { toast } = useToast();
-const { complete } = useCompletion({ api: urls.message.completion() });
 
 let stage = 0;
 let failed = false;
@@ -57,20 +57,8 @@ Input: ${input}`;
 
 const validating = ref(false);
 
-const {
-	messages,
-	input,
-	handleSubmit,
-	append,
-	setMessages,
-	reload,
-	isLoading,
-	stop,
-} = useChat({
-	api: urls.message.create(),
-	body: {
-		temperature: 0.25,
-	},
+const { messages, input, handleSubmit, append, setMessages } = useChat({
+	body: { temperature: 0.25 },
 	onFinish: async (response) => {
 		const hasUserMessage = messages.value.some((m: any) => m.role === 'user');
 		if (hasUserMessage) {
@@ -155,7 +143,7 @@ onMounted(async () => {
 		id: '1',
 		role: 'system',
 		content: createSystemPrompt(stage),
-	});
+	} as any);
 });
 </script>
 

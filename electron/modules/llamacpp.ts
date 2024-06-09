@@ -191,4 +191,8 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 	ipcMain.handle('llamacpp/lastModel', async () => {
 		return { lastModel };
 	});
+
+	ipcMain.handle('llamacpp/baseUrl', async () => {
+		return 'http://localhost:' + getLlamaCppPort();
+	});
 }

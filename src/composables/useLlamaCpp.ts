@@ -37,10 +37,15 @@ export default function useLlamaCpp() {
 		return filename;
 	};
 
+	const getBaseUrl = async () => {
+		return (await electron.ipcRenderer.invoke('llamacpp/baseUrl')) as string;
+	};
+
 	return {
 		startServer,
 		stopServer,
 		isServerRunning,
 		getLastModel,
+		getBaseUrl,
 	};
 }

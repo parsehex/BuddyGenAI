@@ -11,7 +11,7 @@ import type { RequestOptions } from 'ai';
 
 type CompleteFunc = (
 	prompt: string,
-	options?: RequestOptions | undefined
+	options?: any
 ) => Promise<string | null | undefined>;
 
 const { toast } = useToast();

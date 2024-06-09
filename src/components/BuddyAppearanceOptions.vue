@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useCompletion } from 'ai/vue';
 import { ref, onMounted, toRefs, type PropType } from 'vue';
 import { RefreshCw, Plus } from 'lucide-vue-next';
 
@@ -29,6 +28,7 @@ import {
 	type AppearanceCategory,
 	type SelectedAppearanceOptions,
 } from '../lib/ai/appearance-options';
+import { complete } from '@/lib/ai/complete';
 
 const store = useAppStore();
 const { toast } = useToast();
@@ -58,8 +58,6 @@ const props = defineProps({
 const { buddy, profilePicPrompt } = toRefs(props);
 
 const emit = defineEmits(['updateProfilePicPrompt', 'refreshProfilePic']);
-
-const { complete } = useCompletion({ api: urls.message.completion() });
 
 interface ExpectedAppearanceOptions {
 	[key: string]: string[];

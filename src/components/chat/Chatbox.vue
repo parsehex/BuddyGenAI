@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
-import { useChat, useCompletion } from 'ai/vue';
 import { storeToRefs } from 'pinia';
 import { RefreshCw, RefreshCcwDot, Mic, MicOff } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
@@ -46,12 +45,13 @@ import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
+import useChat from '@/src/composables/useChat';
+import { complete } from '@/src/lib/ai/complete';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
-const { complete } = useCompletion({ api: urls.message.completion() });
 const { pathJoin } = useElectron();
 
 // https://github.com/parsehex/BuddyGenAI/issues/2
@@ -130,11 +130,15 @@ const reloadingId = ref('');
 
 const userName = AppSettings.get('user_name') as string;
 
+// what does useChat do (that we use it for)?
+// - handles messages array
+//   - updates the `content` of the latest message to stream completion response
+// - manages the `isLoading` state
+// - handles reloading
+
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
 		initialMessages: await initialMessages.value,
-		sendExtraMessageFields: true,
-		api: urls.message.create(),
 		body: apiPartialBody.value,
 		onFinish: async () => {
 			// so what all happens here?
@@ -172,10 +176,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					temperature: 0.01,
 					messages: messages.value
 						.slice()
-						.map((m) => ({
-							role: m.role === 'user' ? user : assistantName,
-							content: m.content,
-						}))
+						.map(
+							(m) =>
+								({
+									role: m.role === 'user' ? user : assistantName,
+									content: m.content,
+								} as ChatMessage)
+						)
 						.slice(-6),
 				},
 			})) as string;
@@ -233,7 +240,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				console.log('img description', img);
 				if (img) {
 					explicit = img?.includes('explicit');
-					cmdObj.description = img;
+					try {
+						const o = JSON.parse(img);
+						cmdObj.description = o.description;
+					} catch (e) {
+						console.log('error parsing img description', e);
+						cmdObj.description = img;
+					}
 				}
 
 				if (cmdObj.description && cmdObj.do_send && !explicit) {
@@ -347,13 +360,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			// TODO break out into a function
 			if (messages.value.length === 3) {
 				// 3 incl. system message
-				console.log('generating title');
 				console.time('completion');
 				const [msg1, msg2, msg3] = messages.value;
 				isLoading.value = true;
 				let value = await complete(titleFromMessages(msg1, msg2, msg3), {
 					body: { max_tokens: 20, temperature: 0.01 },
 				});
+				console.log('title completion', value);
 				if (value) {
 					// TODO improve this (llm response parsing)
 					if (value.startsWith('Title: ')) {
@@ -391,7 +404,7 @@ watch(
 
 		const initMsgs = await initialMessages.value;
 		if (initMsgs.length) {
-			setMessages(apiMsgsToOpenai(initMsgs));
+			setMessages(initMsgs);
 		} else {
 			await refreshMessages();
 		}
@@ -420,7 +433,7 @@ async function updateThread() {
 	return newThread;
 }
 async function refreshMessages() {
-	const newMessages = apiMsgsToOpenai(await api.message.getAll(threadId.value));
+	const newMessages = await api.message.getAll(threadId.value);
 	setMessages(newMessages);
 	return newMessages;
 }
@@ -440,6 +453,7 @@ const doSubmit = async (e: Event) => {
 	if ((e as KeyboardEvent).shiftKey) return;
 	if (!canSend || input.value === '' || isLoading.value) return;
 	if (isLoading.value) {
+		// won't happen yeah? Send is disabled if isLoading
 		e.preventDefault();
 		stop();
 		console.log('prevented submit & stopped');

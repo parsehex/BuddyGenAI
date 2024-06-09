@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
-import { useCompletion } from 'ai/vue';
 import router from '@/lib/router';
 import { useToast } from '@/components/ui/toast';
 import { useAppStore } from '@/stores/main';
@@ -39,12 +38,12 @@ import {
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ExternalModelSettingsCard from './ExternalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
+import { complete } from '@/lib/ai/complete';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
 const { openExternalLink } = useElectron();
 const { toast } = useToast();
-const { complete } = useCompletion({ api: urls.message.completion() });
 const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
 const buddies = useAppStore().buddies as BuddyVersionMerged[];
 const store = useAppStore();

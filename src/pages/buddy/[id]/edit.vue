@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useCompletion } from 'ai/vue';
 import { Sparkles, ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { ref, onBeforeMount, watch, computed } from 'vue';
 import { useRoute } from 'vue-router/auto';
@@ -49,11 +48,11 @@ import { isDescriptionValid, isNameValid } from '@/src/lib/ai/general';
 import DevOnly from '@/src/components/DevOnly.vue';
 import BuddyTagsInput from '@/src/components/BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/src/lib/ai/appearance-options';
+import { complete } from '@/lib/ai/complete';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
 const { toast } = useToast();
-const { complete } = useCompletion({ api: urls.message.completion() });
 const { updateBuddies, updateModels, ttsModels } = useAppStore();
 const store = useAppStore();
 

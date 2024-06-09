@@ -1,3 +1,5 @@
+import useLlamaCpp from '@/src/composables/useLlamaCpp';
+
 const isDev = process.env.NODE_ENV === 'development';
 
 const other = {
@@ -6,6 +8,11 @@ const other = {
 			return 'http://localhost:8079/health';
 		}
 		return '/health';
+	},
+	llamacppBaseUrl: async () => {
+		const lcpp = useLlamaCpp();
+		if (!lcpp) return '';
+		return await lcpp.getBaseUrl();
 	},
 };
 
