@@ -18,6 +18,7 @@ import { getDataPath } from './fs';
 import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
+import { CreateBuddyOptions } from '@/types/api';
 
 import dotenv from 'dotenv';
 import rememberWindowState, { loadWindowState } from './window-state';
@@ -30,7 +31,6 @@ log.errorHandler.startCatching();
 
 // Initilize
 // =========
-process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 const isProduction = process.env.NODE_ENV !== 'development';
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32';
@@ -330,6 +330,15 @@ app.whenReady().then(async () => {
 			console.log('[Electron::loadExtensions] An error occurred: ', err);
 		}
 	}
+
+	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+		callback({
+			responseHeaders: {
+				...details.responseHeaders,
+				'Content-Security-Policy': ["script-src 'self'"],
+			},
+		});
+	});
 
 	const mainWindow = await createWindow();
 	if (!mainWindow) return;
