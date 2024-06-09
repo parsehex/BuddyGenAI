@@ -25,3 +25,5 @@ llama.log
 /*.wav
 /*.webm
 /result.json
+
+/binaries
