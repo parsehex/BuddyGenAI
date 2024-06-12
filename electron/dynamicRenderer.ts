@@ -11,6 +11,7 @@ import { findDirectoryInPath } from './fs';
 import { pathToFileURL } from 'url';
 import llamaCppRouter from './routes/message';
 import sdRouter from './routes/sd';
+import { getServerPort } from './rand';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -50,6 +51,9 @@ const isProduction = process.env.NODE_ENV !== 'development';
 // ================
 export default function (mainWindow: BrowserWindow) {
 	console.log('isProduction', isProduction);
+
+	const port = getServerPort();
+
 	if (!isProduction) {
 		const app = express();
 		app.use(
@@ -58,11 +62,11 @@ export default function (mainWindow: BrowserWindow) {
 			})
 		);
 		app.use('/images', serveStatic(imgPath));
+		app.use('/tts', serveStatic(imgPath.replace('images', 'tts')));
 		app.use(llamaCppRouter);
 		app.use(sdRouter);
 
-		const listener = app.listen(8079, 'localhost', () => {
-			const port = (listener.address() as any).port;
+		app.listen(port, 'localhost', () => {
 			console.log('Dev Express Server Listening on', port);
 			mainWindow.loadURL(`http://localhost:3000`);
 		});
@@ -72,6 +76,7 @@ export default function (mainWindow: BrowserWindow) {
 	const app = express();
 	app.use('/', serveStatic(path.join(__dirname, '../public')));
 	app.use('/images', serveStatic(imgPath));
+	app.use('/tts', serveStatic(imgPath.replace('images', 'tts')));
 
 	app.use(llamaCppRouter);
 	app.use(sdRouter);
@@ -80,8 +85,7 @@ export default function (mainWindow: BrowserWindow) {
 		res.sendFile(path.resolve(__dirname, '../public', 'index.html')); // replace with the path to your SPA's entry point
 	});
 
-	const listener = app.listen(8079, 'localhost', () => {
-		const port = (listener.address() as any).port;
+	app.listen(port, 'localhost', () => {
 		console.log('Dynamic-Renderer Listening on', port);
 		mainWindow.loadURL(`http://localhost:${port}`);
 	});

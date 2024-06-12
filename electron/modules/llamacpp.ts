@@ -1,56 +1,60 @@
-import { exec, spawn, execFile, ChildProcess } from 'child_process';
+import { execFile, ChildProcess } from 'child_process';
 import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
-// @ts-ignore
 import log from 'electron-log/main';
+import { AppSettings } from '../AppSettings';
+import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,
-};
-
-// by default, llamacpp uses template embedded in gguf if available
-// TODO any way to get this from the model?
-const chatTemplateMap: { [key: string]: string } = {
-	Moistral: 'vicuna',
-	'WizardLM-2': 'vicuna',
-	'Lexi-': 'chatml',
-	'Hermes-2': 'chatml',
-	'Llama-3': 'llama3',
-	'llama-3': 'llama3',
-};
-
-const contextLengthMap: { [key: string]: number } = {
-	'WizardLM-2': 4096,
-	'Lexi-': 8192,
-	'Llama-3': 8192,
-	'llama-3': 8192,
 };
 
 let lastModel = '';
 let pid = 0;
 let hasResolved = false;
 
-// TODO i think error 3221225781 means vcredist is needed
+// TODO i think error 3221225781 means dll not found
+// error 35504 is bad args?
 
 let isReady = false;
 
-function startServer(model: string, gpuLayers = 99) {
+function startServer(modelPath: string, nGpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
-		model = path.normalize(model);
-		gpuLayers = Math.floor(+gpuLayers);
-		const serverPath = await findBinaryPath('llamafile', 'llamafile-0.8.4');
-		const args = [
-			'--nobrowser',
-			'--model',
-			model,
-			'--n-gpu-layers',
-			gpuLayers + '',
-		];
+		const port = getLlamaCppPort();
+		const apiKey = getLlamaCppApiKey();
+		log.log('using port:', port, 'and api key:', apiKey);
+
+		modelPath = path.normalize(modelPath);
+		try {
+			await fs.access(modelPath);
+		} catch (e) {
+			log.error('Model file not found:', modelPath);
+			reject();
+			return;
+		}
+
+		const useGpu = (await AppSettings.get('gpu_enabled_chat')) as 0 | 1;
+		// @ts-ignore
+		const useGpuBool = useGpu === 1 || useGpu === '1.0';
+
+		const llamaCppPath = await findBinaryPath('llama.cpp', 'server', useGpuBool);
+		const args = ['--port', port + '', '--model', modelPath];
+
+		if (useGpuBool) {
+			nGpuLayers = Math.floor(+nGpuLayers);
+			args.push('--n-gpu-layers', nGpuLayers + '');
+		}
+
+		if (apiKey) {
+			args.push('--api-key', apiKey);
+		}
 
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
-			model.includes(key)
+			modelPath.includes(key)
 		);
 		if (chatTemplate) {
 			args.push('--chat-template', chatTemplateMap[chatTemplate]);
@@ -58,7 +62,7 @@ function startServer(model: string, gpuLayers = 99) {
 		}
 
 		const contextLength = Object.keys(contextLengthMap).find((key) =>
-			model.includes(key)
+			modelPath.includes(key)
 		);
 		if (contextLength && contextLengthMap[contextLength]) {
 			args.push('-c', contextLengthMap[contextLength] + '');
@@ -68,11 +72,11 @@ function startServer(model: string, gpuLayers = 99) {
 			log.info('Using default context length:', 4096);
 		}
 
-		log.info('Llama.cpp Server Path:', serverPath);
+		log.info('Llama.cpp Server Path:', llamaCppPath, `(GPU: ${useGpuBool})`);
 		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
 		commandObj.cmd = execFile(
-			serverPath,
+			llamaCppPath,
 			args,
 			{ windowsHide: true, killSignal: 'SIGKILL' },
 			(error: any, stdout: any, stderr: any) => {
@@ -91,7 +95,7 @@ function startServer(model: string, gpuLayers = 99) {
 		);
 		pid = commandObj.cmd.pid || 0;
 		commandObj.cmd.stdin?.end();
-		updateModel(model);
+		updateModel(modelPath);
 
 		commandObj.cmd.on('error', (error: any) => {
 			log.error(`Llama.cpp-Server Error: ${error.message}`);
@@ -163,11 +167,15 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 		'llamacpp/start',
 		async (_, modelPath: string, nGpuLayers: number) => {
 			if (await isServerRunning()) {
-				return { message: 'Server already running' };
+				return { message: 'Server already running', error: false };
 			}
 			lastModel = modelPath;
-			await startServer(modelPath, nGpuLayers);
-			return { message: 'Server started' };
+			try {
+				await startServer(modelPath, nGpuLayers);
+				return { message: 'Server started', error: false };
+			} catch (e) {
+				return { message: 'Server failed to start', error: true };
+			}
 		}
 	);
 
@@ -182,5 +190,9 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 
 	ipcMain.handle('llamacpp/lastModel', async () => {
 		return { lastModel };
+	});
+
+	ipcMain.handle('llamacpp/baseUrl', async () => {
+		return 'http://localhost:' + getLlamaCppPort();
 	});
 }

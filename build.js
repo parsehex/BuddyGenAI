@@ -4,6 +4,10 @@ const Platform = builder.Platform;
 const fs = require('fs-extra');
 const path = require('path');
 
+const sourceEnv = path.join(__dirname, '.env');
+const destEnv = path.join(__dirname, '.output', '.env');
+fs.copyFileSync(sourceEnv, destEnv);
+
 const platform = 'WINDOWS';
 // const platform = 'LINUX'
 // const platform = 'MAC'
@@ -29,77 +33,46 @@ const compression = 'maximum';
 
 console.time(`build (${compression} compression-level)`);
 
-// check for the required binaries
-const binPath = path.join(__dirname, 'binaries/build');
-// const LCPP = path.join(binPath, 'llama.cpp', 'cuda12');
-// const LCPPmainBin =
-// 	platform === 'WINDOWS' ? path.join(LCPP, 'main.exe') : path.join(LCPP, 'main');
-// const LCPPserverBin =
-// 	platform === 'WINDOWS'
-// 		? path.join(LCPP, 'server.exe')
-// 		: path.join(LCPP, 'server');
+// TODO check for the required binaries
+// const binPath = path.join(__dirname, 'binaries/');
 
-const sdCPP = path.join(binPath, 'stable-diffusion.cpp', 'cuda12');
-const sdCPPbin =
-	process.platform === 'win32'
-		? path.join(sdCPP, 'sd.exe')
-		: path.join(sdCPP, 'sd');
+// const sdCPP = path.join(binPath, 'stable-diffusion.cpp', 'cuda12');
+// const sdCPPbin =
+// 	process.platform === 'win32'
+// 		? path.join(sdCPP, 'sd.exe')
+// 		: path.join(sdCPP, 'sd');
 
-// if (!fs.existsSync(LCPPmainBin)) {
-// 	console.error(`Required binary not found: ${LCPPmainBin}`);
+// if (!fs.existsSync(sdCPPbin)) {
+// 	console.error(`Required binary not found: ${sdCPPbin}`);
 // 	process.exit(1);
 // }
 
-// if (!fs.existsSync(LCPPserverBin)) {
-// 	console.error(`Required binary not found: ${LCPPserverBin}`);
-// 	process.exit(1);
-// }
-
-if (!fs.existsSync(sdCPPbin)) {
-	console.error(`Required binary not found: ${sdCPPbin}`);
-	process.exit(1);
-}
-
-// const llamaVersionExists = fs.existsSync(
-// 	path.join(binPath, 'build', 'llama.cpp', 'version ' + versions.llamaCpp)
+// const sdVersionExists = fs.existsSync(
+// 	path.join(
+// 		binPath,
+// 		'stable-diffusion.cpp',
+// 		'version ' + versions.stabeDiffusionCpp
+// 	)
 // );
-const sdVersionExists = fs.existsSync(
-	path.join(
-		binPath,
-		'build',
-		'stable-diffusion.cpp',
-		'version ' + versions.stabeDiffusionCpp
-	)
-);
 
 // copy version folders to binaries/build under their project names
 // add file to folder called `version ${ver}`
-// if (!llamaVersionExists) {
+// if (!sdVersionExists) {
 // 	fs.copySync(
-// 		LCPP.replace('cuda12', ''),
-// 		path.join(binPath, 'build', 'llama.cpp')
+// 		sdCPP.replace('cuda12', ''),
+// 		path.join(binPath, 'build', 'stable-diffusion.cpp')
 // 	);
 // 	const verPath = path.join(
 // 		binPath,
-// 		'build',
-// 		'llama.cpp',
-// 		'version ' + versions.llamaCpp
+// 		'stable-diffusion.cpp',
+// 		'version ' + versions.stabeDiffusionCpp
 // 	);
 // 	fs.writeFileSync(verPath, '');
 // }
-if (!sdVersionExists) {
-	fs.copySync(
-		sdCPP.replace('cuda12', ''),
-		path.join(binPath, 'build', 'stable-diffusion.cpp')
-	);
-	const verPath = path.join(
-		binPath,
-		'build',
-		'stable-diffusion.cpp',
-		'version ' + versions.stabeDiffusionCpp
-	);
-	fs.writeFileSync(verPath, '');
-}
+
+// copy binaries to the output folder
+// const outputBinPath = path.join(__dirname, '.output', 'binaries');
+// fs.copySync(binPath, outputBinPath);
 
 /**
  * @type {import('electron-builder').Configuration}
@@ -120,12 +93,7 @@ const options = {
 
 		app: '.output',
 	},
-	extraResources: [
-		'./binaries/build/**/*',
-		'./binaries/llamafile-0.8.4*',
-		'./licenses/**/*',
-		'./migrations/**/*',
-	],
+	extraResources: ['./binaries/**/*', './licenses/**/*', './migrations/**/*'],
 
 	win: {
 		// eslint-disable-next-line no-template-curly-in-string
@@ -182,6 +150,7 @@ builder
 	})
 	.then((result) => {
 		console.log('----------------------------');
+		console.log(new Date().toLocaleString());
 		console.log('Platform:', platform);
 		console.log('Output:', JSON.stringify(result, null, 2));
 		console.timeEnd(`build (${compression} compression-level)`);

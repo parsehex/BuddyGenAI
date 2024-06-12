@@ -5,6 +5,9 @@ CREATE TABLE persona (
 	profile_pic TEXT,
 	profile_pic_prompt TEXT,
 	profile_pic_use_prompt INTEGER NOT NULL CHECK(profile_pic_use_prompt IN (0, 1)),
+	appearance_options TEXT,
+	selected_appearance_options TEXT,
+	tts_voice TEXT,
 	current_version_id TEXT,
 	FOREIGN KEY(current_version_id) REFERENCES persona_version(id) ON DELETE CASCADE
 );
@@ -27,10 +30,14 @@ CREATE TABLE chat_message (
 	updated TIMESTAMP,
 	role TEXT NOT NULL CHECK(role IN ('user', 'assistant', 'system')),
 	content TEXT NOT NULL,
+	image TEXT,
+	tts TEXT,
 	thread_id TEXT NOT NULL,
 	thread_index INTEGER NOT NULL,
 	FOREIGN KEY(thread_id) REFERENCES chat_thread(id) ON DELETE CASCADE
 );
+
+-- need to make separate table for images
 
 CREATE TABLE persona_version (
 	id TEXT PRIMARY KEY,

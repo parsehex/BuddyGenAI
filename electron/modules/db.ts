@@ -1,8 +1,10 @@
-import Database from 'better-sqlite3';
+import Database, { Database as DB } from 'better-sqlite3';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
+import log from 'electron-log/main';
 import { findDirectoryInPath, getDirname } from '../fs';
+import { initAppSettings } from '../AppSettings';
 
 const VERBOSE = false;
 
@@ -32,7 +34,6 @@ if (isDev) {
 		}
 	} else if (platform === 'linux') {
 		dbPath = dbPath.replace('~', process.env.HOME as string);
-		console.log('l');
 	} else if (platform === 'darwin') {
 		dbPath = dbPath.replace('~', '/Users/' + process.env.USER);
 	}
@@ -66,11 +67,19 @@ function fixParams(arr: any[]) {
 	});
 }
 
+let sqlDb: DB | null = null;
+export function getDb() {
+	if (!sqlDb) {
+		throw new Error('Database not initialized');
+	}
+	return sqlDb;
+}
+
 export default async (mainWindow: BrowserWindow) => {
-	console.log('[-] MODULE::db Initializing');
+	log.log('[-] MODULE::db Initializing');
 	const migrationsDir = await getMigrationsDir();
 
-	console.log('dbPath', dbPath);
+	log.log('dbPath', dbPath);
 
 	let applyMigrations = false;
 	const dbExists = await fs
@@ -84,11 +93,11 @@ export default async (mainWindow: BrowserWindow) => {
 	let migrations = await fs.readdir(migrationsDir);
 	migrations = migrations.filter((file) => file.endsWith('.sql'));
 	migrations.sort();
-	if (applyMigrations) console.log('will apply migrations', migrations);
+	// if (applyMigrations) console.log('will apply migrations', migrations);
 
 	const verbose = isDev && VERBOSE ? console.log.bind(console) : undefined;
 
-	const sqlDb = new Database(dbPath, { verbose });
+	sqlDb = new Database(dbPath, { verbose });
 
 	// run migrations
 	for (const migration of migrations) {
@@ -102,7 +111,7 @@ export default async (mainWindow: BrowserWindow) => {
 		sqlDb.exec(content);
 	}
 
-	console.log('migrations applied');
+	// console.log('migrations applied');
 
 	if (applyMigrations) {
 		// TODO fix table name
@@ -115,7 +124,7 @@ export default async (mainWindow: BrowserWindow) => {
 	} else {
 		const stmt = sqlDb.prepare('SELECT value FROM app_settings WHERE name = ?');
 		let result = stmt.get('fresh_db') as string | number;
-		console.log('fresh_db', result);
+		// console.log('fresh_db', result);
 		result = +result;
 		if (result === 1) {
 			const stmt = sqlDb.prepare(
@@ -129,43 +138,60 @@ export default async (mainWindow: BrowserWindow) => {
 
 	ipcMain.handle('db:run', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const tx = sqlDb.transaction(() => {
 				try {
 					stmt.run(params);
 				} catch (error) {
-					console.log('dbRun query resulted in error:', query, params);
-					console.log('dbRun error:', error);
+					log.error('dbRun query resulted in error:', query, params);
+					log.error('dbRun error:', error);
 				}
 			});
 			tx();
 		} catch (error) {
+			if (error) log.error('dbRun query resulted in error:', query, params);
+			if (error) log.error('dbRun error:', error);
 			return error;
 		}
 	});
 
 	ipcMain.handle('db:get', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.get(params);
 			return result;
 		} catch (error) {
+			if (error) log.error('dbGet query resulted in error:', query, params);
+			if (error) log.error('dbGet error:', error);
 			return error;
 		}
 	});
 
 	ipcMain.handle('db:all', async (_, query: string, params) => {
 		try {
+			if (!sqlDb) {
+				throw new Error('Database not initialized');
+			}
 			params = fixParams(params);
 			const stmt = sqlDb.prepare(query);
 			const result = stmt.all(params);
 			return result;
 		} catch (error) {
+			if (error) log.error('dbAll query resulted in error:', query, params);
+			if (error) log.error('dbAll error:', error);
 			return error;
 		}
 	});
 
-	console.log('[-] MODULE::db Initialized');
+	initAppSettings();
+
+	log.log('[-] MODULE::db Initialized');
 };
