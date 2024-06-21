@@ -18,9 +18,11 @@ import { getDataPath } from './fs';
 import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
+import rememberWindowState, { loadWindowState } from './window-state';
+import { RoutesType } from '@/shared/types/rpc';
 
 import dotenv from 'dotenv';
-import rememberWindowState, { loadWindowState } from './window-state';
+import { routes } from './rpc';
 dotenv.config({
 	path: path.join(__dirname, '..', '.env'),
 });
@@ -54,7 +56,7 @@ async function createWindow() {
 		webPreferences: {
 			// devTools: !isProduction,
 			nodeIntegration: true,
-			contextIsolation: false,
+			contextIsolation: true,
 			preload: path.join(__dirname, 'preload.js'),
 		},
 
@@ -76,6 +78,16 @@ async function createWindow() {
 	await sdModule(mainWindow);
 	await piperModule(mainWindow);
 	await whisperModule(mainWindow);
+
+	// on getFunctions, return all the routes
+	const routeKeys = Object.keys(routes);
+	ipcMain.handle('getFunctions', async () => {
+		return routeKeys;
+	});
+	for (const routeKey of routeKeys) {
+		// @ts-ignore
+		ipcMain.handle(routeKey, routes[routeKey as keyof RoutesType]);
+	}
 
 	mainWindow.removeMenu();
 
