@@ -19,6 +19,9 @@
       "@/stores/*": [
         "./src/stores/*"
       ],
+      "@/types/*": [
+        "./shared/types/*"
+      ],
       "assets": [
         "./assets"
       ],

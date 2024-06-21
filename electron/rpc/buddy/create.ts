@@ -1,12 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { BuddyVersionMerged } from '@/lib/api/types-db';
-import { insert, select, update } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
+import type { Buddy, BuddyVersionMerged } from '@/types/db';
+import { insert, select, update } from '@/sql';
 import type { CreateBuddyOptions } from '@/types/api';
+import { get, run } from '@/modules/db';
 
-const { dbGet, dbRun } = useElectron();
-
-export default async function createOne({
+export async function createBuddy({
 	name,
 	tts_voice = '',
 	description,
@@ -16,12 +14,6 @@ export default async function createOne({
 	appearance_options,
 	selected_appearance_options,
 }: CreateBuddyOptions): Promise<BuddyVersionMerged> {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
-	if (!name) {
-		throw new Error('Name is required');
-	}
-
 	const firstVersionId = uuidv4();
 	const buddyId = uuidv4();
 
@@ -35,9 +27,9 @@ export default async function createOne({
 		appearance_options,
 		selected_appearance_options,
 	});
-	await dbRun(sqlBuddy[0], sqlBuddy[1]);
+	await run(sqlBuddy[0], sqlBuddy[1]);
 	const sqlBuddyGet = select('persona', ['*'], { id: buddyId });
-	const buddy = await dbGet(sqlBuddyGet[0], sqlBuddyGet[1]);
+	const buddy = (await get(sqlBuddyGet[0], sqlBuddyGet[1])) as Buddy;
 
 	const sqlBuddyVersion = insert('persona_version', {
 		id: firstVersionId,
@@ -47,15 +39,16 @@ export default async function createOne({
 		name,
 		description,
 	});
-	await dbRun(sqlBuddyVersion[0], sqlBuddyVersion[1]);
+	await run(sqlBuddyVersion[0], sqlBuddyVersion[1]);
 
 	const sqlBuddyUpdate = update(
 		'persona',
 		{ current_version_id: firstVersionId },
 		{ id: buddyId }
 	);
-	await dbRun(sqlBuddyUpdate[0], sqlBuddyUpdate[1]);
+	await run(sqlBuddyUpdate[0], sqlBuddyUpdate[1]);
 
+	// TODO this is actually just a Buddy
 	return {
 		...buddy,
 		name,

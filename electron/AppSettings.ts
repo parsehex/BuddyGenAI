@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import { getDb } from './modules/db';
 type SQLiteVal = string | number | null;
 

@@ -1,12 +1,8 @@
 import { execFile } from 'child_process';
-import OpenAI from 'openai';
-import { findBinaryPath } from '../fs';
-import fs from 'fs-extra';
 import { BrowserWindow, ipcMain } from 'electron';
-import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
-import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
 import stream from 'stream';
+import { findBinaryPath } from '@/fs';
 
 // @/lib/api/types-api
 interface PiperOptions {

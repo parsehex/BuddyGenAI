@@ -1,3 +1,4 @@
+import { rpc } from '../rpc';
 import getAll from './all.get';
 import removeAll from './all.remove';
 import createOne from './one.create';
@@ -7,11 +8,10 @@ import updateOne from './one.update';
 import updateSystemMessage from './system-message.update';
 
 export default {
-	getAll,
-	removeAll,
-	createOne,
-	getOne,
-	removeOne,
-	updateOne,
-	updateSystemMessage,
+	getAll: rpc.getAllThreads,
+	removeAll: rpc.removeAllBuddyThreads,
+	createOne: rpc.createThread,
+	getOne: rpc.getThread,
+	removeOne: rpc.removeThread,
+	updateOne: rpc.updateThread,
 };

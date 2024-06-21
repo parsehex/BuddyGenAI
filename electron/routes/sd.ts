@@ -1,9 +1,5 @@
-import { Router, json } from 'express';
-import OpenAI from 'openai';
-import { OpenAIStream, streamToResponse } from 'ai';
-import cors from 'cors';
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { listenForProgress, state } from '../sd-state';
+import { Router } from 'express';
+import { listenForProgress, state } from '@/sd-state';
 
 const router = Router();
 

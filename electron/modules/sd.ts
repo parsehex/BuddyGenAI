@@ -1,12 +1,12 @@
 import { execFile } from 'child_process';
 import OpenAI from 'openai';
-import { findBinaryPath } from '../fs';
 import fs from 'fs-extra';
 import path from 'path';
 import { BrowserWindow, ipcMain } from 'electron';
-import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
-import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
+import { findBinaryPath } from '@/fs';
+import { startGenerating, stopGenerating, updateProgress } from '@/sd-state';
+import { AppSettings } from '@/AppSettings';
 
 // also in @/lib/api/types-api
 interface SDOptions {
@@ -74,7 +74,7 @@ async function runOpenai(
 
 let hasResolved = false;
 
-async function runSD(
+export async function runSD(
 	model: string,
 	pos: string,
 	output: string,

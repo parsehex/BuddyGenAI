@@ -1,13 +1,13 @@
 import { execFile, ChildProcess } from 'child_process';
-import { findBinaryPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
-import { updateModel } from '../routes/message';
 import log from 'electron-log/main';
-import { AppSettings } from '../AppSettings';
-import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
-import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
+import { findBinaryPath } from '@/fs';
+import { updateModel } from '@/routes/message';
+import { AppSettings } from '@/AppSettings';
+import { getLlamaCppApiKey, getLlamaCppPort } from '@/rand';
+import { chatTemplateMap, contextLengthMap } from '@/LCPP-const';
 
 const commandObj = {
 	cmd: null as ChildProcess | null,

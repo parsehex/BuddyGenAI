@@ -6,13 +6,14 @@ import removeOne from './one.remove';
 
 import profilePic from './profile-pic';
 import version from './version';
+import { rpc } from '../rpc';
 
 export default {
-	getAll,
-	getOne,
-	createOne,
-	updateOne,
-	removeOne,
+	getAll: rpc.getAllBuddies,
+	getOne: rpc.getBuddy,
+	createOne: rpc.createBuddy,
+	updateOne: rpc.updateBuddy,
+	removeOne: rpc.removeBuddy,
 
 	profilePic,
 	version,

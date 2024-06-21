@@ -1,10 +1,13 @@
-// This is the preload script for Electron.
-// It runs in the renderer process before the page is loaded.
-// --------------------------------------------
+import { contextBridge, ipcRenderer } from 'electron';
 
-// import { contextBridge } from 'electron'
-
-// process.once('loaded', () => {
-//   - Exposed variables will be accessible at "window.versions".
-//   contextBridge.exposeInMainWorld('versions', process.env)
-// })
+process.once('loaded', () => {
+	// call getFunctions
+	ipcRenderer.invoke('getFunctions').then((functions: string[]) => {
+		// expose functions, handler calls back to ipc
+		functions.forEach((func) => {
+			contextBridge.exposeInMainWorld(func, (...args: any[]) => {
+				return ipcRenderer.invoke(func, ...args);
+			});
+		});
+	});
+});

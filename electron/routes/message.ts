@@ -3,10 +3,9 @@ import OpenAI from 'openai';
 import { OpenAIStream, streamToResponse, AIStream } from 'ai';
 import cors from 'cors';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { AppSettings } from '../AppSettings';
 import { Message } from 'openai/resources/beta/threads/messages/messages';
-import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
-import { contextLengthMap } from '../LCPP-const';
+import { AppSettings } from '@/AppSettings';
+import { getLlamaCppApiKey, getLlamaCppPort } from '@/rand';
 
 const chatProviderUrls = {
 	external: 'https://api.openai.com/v1',

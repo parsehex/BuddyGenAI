@@ -1,10 +1,10 @@
-import Database, { Database as DB } from 'better-sqlite3';
+import Database, { type Database as DB } from 'better-sqlite3';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import log from 'electron-log/main';
-import { findDirectoryInPath, getDirname } from '../fs';
-import { initAppSettings } from '../AppSettings';
+import { findDirectoryInPath, getDirname } from '@/fs';
+import { initAppSettings } from '@/AppSettings';
 
 const VERBOSE = false;
 
@@ -195,3 +195,35 @@ export default async (mainWindow: BrowserWindow) => {
 
 	log.log('[-] MODULE::db Initialized');
 };
+
+export async function get(sql: string, params: any[]) {
+	if (!sqlDb) {
+		throw new Error('Database not initialized');
+	}
+	params = fixParams(params);
+	const stmt = sqlDb.prepare(sql);
+	const result = stmt.get(params);
+	return result;
+}
+
+export async function all(sql: string, params: any[]) {
+	if (!sqlDb) {
+		throw new Error('Database not initialized');
+	}
+	params = fixParams(params);
+	const stmt = sqlDb.prepare(sql);
+	const result = stmt.all(params);
+	return result;
+}
+
+export async function run(sql: string, params: any[]) {
+	if (!sqlDb) {
+		throw new Error('Database not initialized');
+	}
+	params = fixParams(params);
+	const stmt = sqlDb.prepare(sql);
+	const tx = sqlDb.transaction(() => {
+		stmt.run(params);
+	});
+	tx();
+}
