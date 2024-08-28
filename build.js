@@ -12,18 +12,18 @@ const platform = 'WINDOWS';
 // const platform = 'LINUX'
 // const platform = 'MAC'
 
-const versions = {
-	llamaCpp: 'b2787',
-	stabeDiffusionCpp: 'ce1bcc7',
-};
+// const versions = {
+// 	llamaCpp: 'b2787',
+// 	stabeDiffusionCpp: 'ce1bcc7',
+// };
 
-const isVersionsSet = Object.values(versions).every((v) => v !== undefined);
-if (!isVersionsSet) {
-	console.error(
-		'Please set the versions of the required binaries in the build.js file.'
-	);
-	process.exit(1);
-}
+// const isVersionsSet = Object.values(versions).every((v) => v !== undefined);
+// if (!isVersionsSet) {
+// 	console.error(
+// 		'Please set the versions of the required binaries in the build.js file.'
+// 	);
+// 	process.exit(1);
+// }
 
 /**
  * @type {import('electron-builder').CompressionLevel}

@@ -27,7 +27,7 @@ useColorMode();
 
 const { toggleDevTools, closeApp } = useElectron();
 
-const enteredApp = ref(isDevMode());
+const enteredApp = ref(true);
 
 (window as any).latestAppKeyDownHandlerId = Math.random();
 const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {

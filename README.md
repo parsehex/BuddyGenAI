@@ -23,23 +23,36 @@ You may [check the releases page](https://github.com/parsehex/BuddyGenAI/release
 
 ### Acquiring Binaries
 
-First you'll need to place binaries in the `./binaries/` folder. You can build them yourself or download them from their releases page. You'll need:
+First, you'll need to create a `./binaries/` folder in the root of the project. Now, download the latest release of [Piper](https://github.com/rhasspy/piper/releases) and extract the contents to the `./binaries` folder.
 
-- [LlamaFile](https://github.com/Mozilla-Ocho/llamafile) - `./binaries/llamafile` or `./binaries/llamafile.exe`
-- [Stable-Diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp) - You should at least have a `./binaries/stable-diffusion.cpp/cuda12` folder with the `stable-diffusion` binary in it. Besides `cuda12`, the following are also checked at runtime in this order:
-  - rocm5.5
-  - clblast
-  - vulkan
-  - avx512
-  - avx2
-  - avx
-  - noavx
+Next, you'll need one or more of the following folders within the `./binaries/` folder:
 
-### Steps to Build BuddyGenAI
+- `cuda12`
+- `rocm5.5`
+- `clblast`
+- `vulkan`
+- `avx512`
+- `avx2`
+- `avx`
+- `noavx`
 
-Node v18 is recommended. I personally use [nvm](https://github.com/nvm-sh/nvm) or [NVM for Windows](https://github.com/coreybutler/nvm-windows) to manage Node versions.
+These will be checked at runtime in the order listed above. Within each of these folders, you'll need the following binaries:
 
-You'll need to download the latest release of [LlamaFile](https://github.com/Mozilla-Ocho/llamafile). Place the binary at `./binaries/llamafile` and make it executable (for Windows: add ".exe" to the end of the file's name).
+- `ggml_shared.dll`
+- `llama.dll`
+- `llamacpp-main.exe`
+- `llamacpp-server.exe`
+- `stable-diffusion.dll`
+- `stable-diffusioncpp-sd.exe`
+- `whisper.dll`
+- `whispercpp-main.exe`
+- **Important**: Include license files (e.g. `ggml.txt`) when redistributing your build.
+
+The `cuda12` folder should also contain the files contained within one of the `cudart-llama-bin-win-cuXX.x.x-x64.zip` files from the [LlamaFile releases page](https://github.com/ggerganov/llama.cpp/releases). These files will be used for all of the binaries that are CUDA-capable.
+
+### Steps to Build / Develop BuddyGenAI
+
+Node v18+ is recommended. I personally use [nvm](https://github.com/nvm-sh/nvm) or [NVM for Windows](https://github.com/coreybutler/nvm-windows) to manage Node versions.
 
 ```bash
 git clone https://github.com/parsehex/BuddyGenAI
@@ -49,33 +62,8 @@ cd BuddyGenAI
 # Install dependencies
 npm install
 
-# ./scripts/[linux or windows]/setup_llamacpp.[sh or ps1]
-./scripts/[linux or windows]/setup_stablediffusioncpp.[sh or ps1]
-# ./scripts/[linux or windows]/setup_whispercpp.[sh or ps1]
-
 # Start the app in development mode (in electron)
-npm run dev:electron
-
-code .
-```
-
-# 📡 Usage
-
-### Development
-
-Commonly Used Scripts:
-
-```bash
-# Start the app in development mode (in electron)
-npm run dev:electron
-# 'npm run dev:electron:win' for windows
-
-# same as dev:electron but deletes db first
-npm run reset-dev
-# npm run reset-dev:win
-
-# Start the app in development mode (in browser)
-npm run dev
+npm run dev:electron # or `npm run dev:electron:win` for windows
 ```
 
 # Developer Notes

@@ -18,7 +18,6 @@ import { getDataPath } from './fs';
 import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
-import { CreateBuddyOptions } from '@/types/api';
 
 import dotenv from 'dotenv';
 import rememberWindowState, { loadWindowState } from './window-state';

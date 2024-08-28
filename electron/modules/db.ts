@@ -81,6 +81,8 @@ export default async (mainWindow: BrowserWindow) => {
 
 	log.log('dbPath', dbPath);
 
+	await fs.mkdir(path.dirname(dbPath), { recursive: true });
+
 	let applyMigrations = false;
 	const dbExists = await fs
 		.access(dbPath)
