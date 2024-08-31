@@ -1,4 +1,6 @@
-BuddyGenAI is a chat application designed to create and interact with virtual buddies
+BuddyGenAI is a chat application designed to create and interact with virtual buddies.
+
+The app is built for my own use mainly and as such I don't plan to publicly share builds of the app. However, I attempt to keep the build instructions up-to-date -- again, for myself but also for anyone else with the know-how to build the app as well.
 
 ## Motivation / Purpose / Next Iteration
 
