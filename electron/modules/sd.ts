@@ -45,7 +45,7 @@ async function runOpenai(
 		const n = 1;
 
 		try {
-			log.info('Running OpenAI:', model, prompt, output);
+			log.debug('Running OpenAI:', model, prompt, output);
 			const response = await openai.images.generate({
 				model,
 				prompt,
@@ -72,8 +72,6 @@ async function runOpenai(
 	});
 }
 
-let hasResolved = false;
-
 async function runSD(
 	model: string,
 	pos: string,
@@ -86,6 +84,8 @@ async function runSD(
 	if (!modelName) {
 		throw new Error('Invalid model name (should not be a directory)');
 	}
+
+	model = model.replace(/\//g, '\\');
 
 	const isToonifyRemastered =
 		modelName.includes('toonify') && modelName.includes('remastered');
@@ -104,7 +104,7 @@ async function runSD(
 		}
 
 		const args = [
-			'-m',
+			'--model',
 			model,
 			'-o',
 			output,
@@ -127,11 +127,12 @@ async function runSD(
 		const lowraFile = loraFiles.find((file) => /lowra/i.test(file));
 		let p = removeAccents(pos);
 		if (isToonifyRemastered && lowraFile) {
-			args.push('--lora-model-dir', loraDir);
+			// args.push('--lora-model-dir', loraDir);
 
-			const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
-			args.push('-p', `${p}, ${loraStr}`);
-			log.info('Using LowRA:', loraStr);
+			// const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
+			args.push('-p', p);
+			// args.push('-p', `${p}, ${loraStr}`);
+			// log.info('Using LowRA:', loraStr);
 		} else {
 			args.push('-p', p);
 		}
@@ -142,13 +143,12 @@ async function runSD(
 		}
 
 		log.info('SD Path:', sdPath, `(GPU: ${useGpuBool})`);
-		// log.info('Running SD:', args);
+		log.debug('Running SD:', args);
 		startGenerating();
 		const command = execFile(sdPath, args, { shell: false });
 
 		command.on('error', (error) => {
 			log.error(`SD Error: ${error.message}`);
-			hasResolved = true;
 			stopGenerating();
 			reject(error);
 		});
@@ -156,7 +156,6 @@ async function runSD(
 		command.on('exit', (code, signal) => {
 			if (code) log.info(`SD Process exited with code: ${code}`);
 			if (signal) log.info(`SD Process killed with signal: ${signal}`);
-			hasResolved = true;
 			stopGenerating();
 			resolve(output);
 		});
@@ -179,7 +178,6 @@ async function runSD(
 
 		process.on('exit', () => {
 			command.kill();
-			hasResolved = true;
 			stopGenerating();
 			resolve(output);
 		});
