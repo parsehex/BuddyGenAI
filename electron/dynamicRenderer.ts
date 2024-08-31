@@ -19,8 +19,6 @@ const isProduction = process.env.NODE_ENV !== 'development';
 // Dynamic Renderer
 // ================
 export default function (mainWindow: BrowserWindow) {
-	console.log('isProduction', isProduction);
-
 	const port = getServerPort();
 
 	if (!isProduction) {

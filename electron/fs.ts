@@ -25,7 +25,6 @@ export async function findResourcesPath() {
 	if (process.env.NODE_ENV === 'development') {
 		let dir = await getDirname();
 		let p = await findDirectoryInPath('.vscode', dir);
-		console.log('p', p);
 		if (p) return path.resolve(p, '..');
 	}
 
@@ -54,7 +53,6 @@ function tryBinary(p: string) {
 				!error.message.includes(whisperGoodError) &&
 				error.code !== 3221226505 // good piper error
 			) {
-				console.log('execFile', error);
 				reject(error);
 			} else {
 				resolve(stdout);
@@ -102,7 +100,6 @@ export async function findBinaryPath<T extends ProjectName>(
 
 	const cached = binaryCache[projectName];
 	if (cached[gpu ? 'gpu' : 'noGpu']) {
-		console.log('using cached binary path for', projectName);
 		return cached[gpu ? 'gpu' : 'noGpu'];
 	}
 
@@ -155,11 +152,9 @@ export async function findBinaryPath<T extends ProjectName>(
 				continue;
 			}
 
-			console.log('checking', binPath);
 			await fs.access(binPath);
-			// console.log('found', binPath);
 			await tryBinary(binPath);
-			console.log('using', directories[i], 'version of', projectName);
+			console.info('using', directories[i], 'version of', projectName);
 			binaryCache[projectName][gpu ? 'gpu' : 'noGpu'] = binPath;
 			return binPath;
 		} catch (error) {}
