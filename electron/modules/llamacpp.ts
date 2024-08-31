@@ -75,24 +75,10 @@ function startServer(modelPath: string, nGpuLayers = 99) {
 		log.info('Llama.cpp Server Path:', llamaCppPath, `(GPU: ${useGpuBool})`);
 		log.info('Starting Llama.cpp Server with args:', args);
 		// NOTE do not use shell: true -- keeps server running as zombie
-		commandObj.cmd = execFile(
-			llamaCppPath,
-			args,
-			{ windowsHide: true, killSignal: 'SIGKILL' },
-			(error: any, stdout: any, stderr: any) => {
-				console.log('execFile callback', commandObj.cmd?.pid);
-				if (error) {
-					console.error(`Llama.cpp-Server error: ${error.message}`);
-					if (reject) {
-						hasResolved = false;
-						isReady = false;
-						reject();
-					}
-				}
-				if (stdout) console.log(`Llama.cpp-Server stdout: ${stdout}`);
-				if (stderr) console.error(`Llama.cpp-Server stderr: ${stderr}`);
-			}
-		);
+		commandObj.cmd = execFile(llamaCppPath, args, {
+			windowsHide: true,
+			killSignal: 'SIGKILL',
+		});
 		pid = commandObj.cmd.pid || 0;
 		commandObj.cmd.stdin?.end();
 		updateModel(modelPath);

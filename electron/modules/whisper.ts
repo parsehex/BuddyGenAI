@@ -21,7 +21,6 @@ function runFfmpeg(input: string, output: string) {
 			throw new Error('ffmpeg-static not found');
 		}
 
-		console.log('ffmpegStatic:', ffmpegStatic);
 		const ffmpeg = execFile(
 			ffmpegStatic,
 			['-i', input, '-ac', '1', '-ar', '16000', output, '-y'],
@@ -31,9 +30,6 @@ function runFfmpeg(input: string, output: string) {
 					log.error(`FFMPEG Error: ${error.message}`);
 					reject(error);
 				} else {
-					console.log(stdout);
-					console.log(stderr);
-					console.log('resolved');
 					resolve('');
 				}
 			}
@@ -50,10 +46,10 @@ function runFfmpeg(input: string, output: string) {
 			reject(error);
 		});
 
-		ffmpeg.stdout?.on('data', (data: any) => {
-			const str = data.toString();
-			console.log('ffmpeg stdout:', str);
-		});
+		// ffmpeg.stdout?.on('data', (data: any) => {
+		// 	const str = data.toString();
+		// 	console.log('ffmpeg stdout:', str);
+		// });
 	});
 }
 
@@ -103,20 +99,7 @@ async function runWhisper(model: string, input: ArrayBuffer) {
 
 		log.info('Whisper Path:', whisperPath);
 		log.info('Running Whisper:', args);
-		const command = execFile(whisperPath, args, (error, stdout, stderr) => {
-			if (error) {
-				log.error(`Whisper Error: ${error.message}`);
-				reject(error);
-			} else {
-				// console.log(stdout);
-				console.log(stderr);
-
-				const result = fs.readFileSync('result.json');
-				const json = JSON.parse(result.toString());
-				resolve(combineTranscriptChunks(json['transcription']));
-			}
-		});
-
+		const command = execFile(whisperPath, args);
 		command.on('error', (error) => {
 			log.error(`Whisper Error: ${error.message}`);
 			reject(error);

@@ -208,7 +208,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				// @ts-ignore
 				chatImageEnabled === '1.0' || chatImageEnabled === 1;
 			console.log(chatImageEnabled, isChatImageEnabled, explicit, cmdObj.do_send);
-			if (isChatImageEnabled && !explicit && cmdObj.do_send) {
+			if (isChatImageEnabled && cmdObj.do_send) {
 				let buddyAppearance = '';
 				let gender = '';
 				const genderPrompt = genderFromName(
@@ -357,34 +357,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			console.timeEnd('message');
 
-			// TODO break out into a function
-			if (messages.value.length === 3) {
-				// 3 incl. system message
-				console.time('completion');
-				const [msg1, msg2, msg3] = messages.value;
-				isLoading.value = true;
-				let value = await complete(titleFromMessages(msg1, msg2, msg3), {
-					body: { max_tokens: 20, temperature: 0.01 },
-				});
-				console.log('title completion', value);
-				if (value) {
-					// TODO improve this (llm response parsing)
-					if (value.startsWith('Title: ')) {
-						value = value.slice(7);
-					}
-					value = value.trim();
-					if (value[0] === '"' && value[value.length - 1] === '"') {
-						value = value.slice(1, -1);
-					}
-					await api.thread.updateOne(threadId.value, { name: value });
-					await updateThreads();
-					console.timeEnd('completion');
-				}
-				isLoading.value = false;
-			}
-
-			const m = await refreshMessages();
-
+			await condWriteThreadTitle();
+			await refreshMessages();
 			scrollToBottom();
 		},
 		onError: (e) => {
@@ -392,13 +366,43 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			toast({ variant: 'destructive', description: e.message });
 		},
 	});
+
+/** Conditionally genertate chat thread title after sending first message. */
+const condWriteThreadTitle = async () => {
+	if (messages.value.length !== 3) return; // 3 incl. system message
+
+	console.time('completion');
+	const [msg1, msg2, msg3] = messages.value;
+	isLoading.value = true;
+	let value = await complete(titleFromMessages(msg1, msg2, msg3), {
+		body: { max_tokens: 20, temperature: 0.01 },
+	});
+	console.debug('Thread title completion', value);
+
+	if (value) {
+		// TODO improve this (llm response parsing)
+		if (value.startsWith('Title: ')) {
+			value = value.slice(7);
+		}
+		value = value.trim();
+		if (value[0] === '"' && value[value.length - 1] === '"') {
+			value = value.slice(1, -1);
+		}
+		console.debug('Thread title parsed value', value);
+		await api.thread.updateOne(threadId.value, { name: value });
+		await updateThreads();
+		console.timeEnd('completion');
+	}
+
+	isLoading.value = false;
+};
+
 watch(
 	() => threadId.value,
 	async () => {
 		const thread = await api.thread.getOne(threadId.value);
 		threadMode.value = thread.mode;
 		if (thread.mode === 'persona' && thread.persona_id) {
-			console.log('thread has persona', thread.persona_id);
 			selectedBuddy.value = thread.persona_id;
 		}
 

@@ -30,16 +30,7 @@ async function runPiper(model: string, output: string, text: string) {
 
 		log.info('Piper Path:', piperPath);
 		log.info('Running Piper:', args);
-		const command = execFile(piperPath, args, (error, stdout, stderr) => {
-			if (error) {
-				log.error(`Piper exError: ${error.message}`);
-				reject(error);
-			} else {
-				console.log(stdout);
-				console.log(stderr);
-			}
-		});
-
+		const command = execFile(piperPath, args);
 		const input = text;
 
 		var stdinStream = new stream.Readable();
@@ -58,10 +49,10 @@ async function runPiper(model: string, output: string, text: string) {
 			resolve(output);
 		});
 
-		command.stdout?.on('data', (data: any) => {
-			const str = data.toString();
-			console.log('Piper stdout:', str);
-		});
+		// command.stdout?.on('data', (data: any) => {
+		// 	const str = data.toString();
+		// 	console.log('Piper stdout:', str);
+		// });
 
 		process.on('exit', () => {
 			command.kill();

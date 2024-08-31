@@ -21,7 +21,7 @@ export function imgDescriptionFromChat(
 }
 
 export function imgPromptFromDescription(description: string) {
-	const prompt = `The following is a description of an image. Assistant's task is to write a relevant keyword-based prompt based on the provided description. The prompt should contain the details from the description. Respond with a single string in quotes. Use the example to understand the format.
+	const prompt = `The following is a description of an image. Assistant's task is to write a relevant keyword-based prompt based on the provided description. The prompt should contain the details from the description. Respond with a single string in quotes without further prose. Use the example to understand the format.
 
 Description:
 ${description}

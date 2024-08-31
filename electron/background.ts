@@ -38,7 +38,7 @@ const headerSize = 32;
 // Initialize app window
 // =====================
 async function createWindow() {
-	console.log('System info', { isProduction, platform, architucture });
+	log.log('System info', { isProduction, platform, architucture });
 
 	const initialWindowState = loadWindowState();
 
@@ -171,7 +171,7 @@ async function createWindow() {
 					await fs.access(jsonFile);
 					configFiles.push(jsonFile);
 				} catch (err) {
-					console.log('json file not found for onnx file', onnxFile);
+					log.error('json file not found for onnx file', onnxFile);
 				}
 			}
 			return [...onnxFiles, ...configFiles];
@@ -222,7 +222,6 @@ async function createWindow() {
 	);
 
 	ipcMain.handle('verifyModelDirectory:app', async (_) => {
-		console.log('verifyModelDirectory:app');
 		try {
 			const modelsPath = getDataPath('Models');
 			await fs.mkdir(modelsPath, { recursive: true });
@@ -234,7 +233,6 @@ async function createWindow() {
 
 	ipcMain.handle('openModelDirectory:app', async () => {
 		const modelsPath = getDataPath('Models');
-		console.log('openModelDirectory:app', modelsPath);
 		await shell.openPath(modelsPath);
 	});
 
@@ -242,7 +240,7 @@ async function createWindow() {
 		return getDataPath(path);
 	});
 
-	ipcMain.handle('closeApp', async (_, path: string) => {
+	ipcMain.handle('closeApp', async (_) => {
 		app.quit();
 	});
 
@@ -267,7 +265,7 @@ app.whenReady().then(async () => {
 				path.join(__dirname, '../..', '__extensions', 'vue-devtools')
 			);
 		} catch (err) {
-			console.log('[Electron::loadExtensions] An error occurred: ', err);
+			log.error('[Electron::loadExtensions] An error occurred: ', err);
 		}
 	}
 
@@ -287,12 +285,12 @@ app.whenReady().then(async () => {
 	dynamicRenderer(mainWindow);
 
 	// Initialize modules
-	console.log('-'.repeat(30) + '\n[+] Loading modules...');
+	// log.debug('-'.repeat(30) + '\n[+] Loading modules...');
 	// modules.forEach((module) => {
 	// 	try {
 	// 		module(mainWindow);
 	// 	} catch (err: any) {
-	// 		console.log('[!] Module error: ', err.message || err);
+	// 		log.error('[!] Module error: ', err.message || err);
 	// 	}
 	// });
 	// allow for modules to be async
@@ -300,13 +298,13 @@ app.whenReady().then(async () => {
 	// 	try {
 	// 		await modules[i](mainWindow);
 	// 	} catch (err: any) {
-	// 		console.log('[!] Module error: ', err.message || err);
+	// 		log.error('[!] Module error: ', err.message || err);
 	// 	}
 	// }
 	macMenu(mainWindow);
 	// updaterModule(mainWindow);
 
-	console.log('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
+	// log.debug('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
 
 	app.on('activate', function () {
 		// On macOS it's common to re-create a window in the app when the
