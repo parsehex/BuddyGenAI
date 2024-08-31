@@ -155,7 +155,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			const lastMessage = messages.value[messages.value.length - 1];
 
 			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-			let ttsToSave = await makeAndReadTTS(lastMessage.content, ttsModel);
+			let ttsToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
 			if (ttsToSave) {
 				// @ts-ignore
 				lastMessage.tts = ttsToSave;
@@ -164,6 +164,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				setMessages(newMessages);
 			}
 
+			// begin image sending
 			const assistantName =
 				threadMode.value === 'persona'
 					? currentBuddy.value?.name || ''
@@ -202,12 +203,12 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (isValidJSON) {
 				cmdObj = JSON.parse(cmd);
 			}
-			let explicit = !isValidJSON && cmd?.includes('explicit');
+			// let explicit = !isValidJSON && cmd?.includes('explicit');
 			const chatImageEnabled = store.settings.chat_image_enabled;
 			const isChatImageEnabled =
 				// @ts-ignore
 				chatImageEnabled === '1.0' || chatImageEnabled === 1;
-			console.log(chatImageEnabled, isChatImageEnabled, explicit, cmdObj.do_send);
+			console.log(chatImageEnabled, isChatImageEnabled, cmdObj.do_send);
 			if (isChatImageEnabled && cmdObj.do_send) {
 				let buddyAppearance = '';
 				let gender = '';
@@ -239,7 +240,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				});
 				console.log('img description', img);
 				if (img) {
-					explicit = img?.includes('explicit');
+					// explicit = img?.includes('explicit');
 					try {
 						const o = JSON.parse(img);
 						cmdObj.description = o.description;
@@ -249,7 +250,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					}
 				}
 
-				if (cmdObj.description && cmdObj.do_send && !explicit) {
+				if (cmdObj.description && cmdObj.do_send) {
+					// if (cmdObj.description && cmdObj.do_send && !explicit) {
 					const lastMessage = JSON.parse(
 						JSON.stringify(messages.value[messages.value.length - 1])
 					);
@@ -295,42 +297,17 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					}
 				}
 			}
-			if (explicit) {
-				toast({
-					variant: 'destructive',
-					description:
-						'The requested image was considered explicit. Please try again.',
-				});
-			}
+			// if (explicit) {
+			// 	toast({
+			// 		variant: 'destructive',
+			// 		description:
+			// 			'The requested image was considered explicit. Please try again.',
+			// 	});
+			// }
 
 			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {
-				// TODO NOTE below is part of workaround https://github.com/parsehex/BuddyGenAI/issues/2
-				const reloadingMsg = messages.value.find((m) => m.id === reloadingId.value);
-				if (reloadingMsg?.role === 'user') {
-					// shouldn't normally happen but add the assistant's response to the thread
-					const lastMessage = messages.value[messages.value.length - 1];
-					await api.message.createOne(threadId.value, {
-						role: 'assistant',
-						content: lastMessage.content.trim(),
-					});
-					await refreshMessages();
-					reloadingId.value = '';
-					return;
-				}
-
-				let lastMessage = messages.value[messages.value.length - 1];
-				lastMessage = { ...lastMessage, content: lastMessage.content.trim() };
-				await api.message.updateOne(
-					reloadingId.value,
-					lastMessage.content.trim(),
-					imgToSave,
-					ttsToSave
-				);
-				await refreshMessages();
-				reloadingId.value = '';
-
-				// TODO regen title if first msg, like below
+				await handleReloading(ttsToSave, imgToSave);
 				return;
 			}
 
@@ -366,6 +343,35 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			toast({ variant: 'destructive', description: e.message });
 		},
 	});
+
+const handleReloading = async (ttsToSave: string, imgToSave: string) => {
+	// TODO NOTE Begin part of workaround https://github.com/parsehex/BuddyGenAI/issues/2
+	const reloadingMsg = messages.value.find((m) => m.id === reloadingId.value);
+	if (reloadingMsg?.role === 'user') {
+		// shouldn't normally happen but add the assistant's response to the thread
+		const lastMessage = messages.value[messages.value.length - 1];
+		await api.message.createOne(threadId.value, {
+			role: 'assistant',
+			content: lastMessage.content.trim(),
+		});
+		await refreshMessages();
+		reloadingId.value = '';
+		return;
+	}
+	// TODO NOTE End part of workaround
+
+	let lastMessage = messages.value[messages.value.length - 1];
+	lastMessage = { ...lastMessage, content: lastMessage.content.trim() };
+	await api.message.updateOne(
+		reloadingId.value,
+		lastMessage.content.trim(),
+		imgToSave,
+		ttsToSave
+	);
+	await refreshMessages();
+	reloadingId.value = '';
+	await condWriteThreadTitle();
+};
 
 /** Conditionally genertate chat thread title after sending first message. */
 const condWriteThreadTitle = async () => {
