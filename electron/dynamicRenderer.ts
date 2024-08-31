@@ -2,46 +2,15 @@
 // You can implement your custom renderer process configuration etc. here!
 // --------------------------------------------
 import * as path from 'path';
-import fs from 'fs/promises';
 import cors from 'cors';
-import { app, BrowserWindow, utilityProcess } from 'electron';
+import { BrowserWindow } from 'electron';
 import express, { static as serveStatic } from 'express';
-import { spawn, fork } from 'child_process';
-import { findDirectoryInPath } from './fs';
-import { pathToFileURL } from 'url';
+import { getDataPath } from './fs';
 import llamaCppRouter from './routes/message';
 import sdRouter from './routes/sd';
 import { getServerPort } from './rand';
 
-const isDev = process.env.NODE_ENV === 'development';
-
-const dbLocations = {
-	win32: '%APPDATA%/BuddyGenAI/images',
-	linux: '~/.config/BuddyGenAI/images',
-	darwin: '~/Library/Application Support/BuddyGenAI/images',
-};
-
-const platform = process.platform;
-// @ts-ignore
-const dir = dbLocations[platform];
-let imgPath = '';
-if (isDev) {
-	imgPath = path.join('data', 'images');
-} else {
-	imgPath = path.join(dir);
-	// resolve ~ and %APPDATA%
-	if (platform === 'win32') {
-		const appData = process.env.APPDATA;
-		if (appData) {
-			imgPath = imgPath.replace('%APPDATA%', appData);
-		}
-	} else if (platform === 'linux') {
-		imgPath = imgPath.replace('~', process.env.HOME as string);
-		console.log('l');
-	} else if (platform === 'darwin') {
-		imgPath = imgPath.replace('~', '/Users/' + process.env.USER);
-	}
-}
+const imgPath = getDataPath('images');
 
 // Internals
 // =========

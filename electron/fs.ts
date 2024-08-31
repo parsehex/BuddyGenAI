@@ -177,34 +177,43 @@ export async function findBinaryPath<T extends ProjectName>(
 		throw new Error(`Binary ${exe} not found for ${projectName}`);
 	}
 }
-export function getDataPath(subPath?: string) {
-	const dbLocations = {
+export function getDataPath(subPath = '') {
+	const dataLocations = {
 		win32: '%APPDATA%/BuddyGenAI',
 		linux: '~/.config/BuddyGenAI',
 		darwin: '~/Library/Application Support/BuddyGenAI',
 	};
 
 	const platform = process.platform;
+
+	const isWin = platform === 'win32';
+	const isLinux = platform === 'linux';
+	const isMac = platform === 'darwin';
+
 	// @ts-ignore
-	const dir = dbLocations[platform];
+	const dir = dataLocations[platform];
 	let p = '';
 	if (process.env.NODE_ENV === 'development') {
-		p = path.join('data', subPath || '');
-	} else {
-		p = path.join(dir, subPath || '');
-
-		// resolve ~ and %APPDATA%
-		if (platform === 'win32') {
-			const appData = process.env.APPDATA;
-			if (appData) {
-				p = p.replace('%APPDATA%', appData);
-			}
-		} else if (platform === 'linux') {
-			p = p.replace('~', process.env.HOME as string);
-		} else if (platform === 'darwin') {
-			p = p.replace('~', '/Users/' + process.env.USER);
+		if (isWin && subPath.toLowerCase().includes('models')) {
+			return 'C:/Users/User/BuddyGen Models';
 		}
+
+		return path.resolve(path.join('data', subPath || ''));
 	}
+
+	p = path.join(dir, subPath || '');
+
+	if (isWin) {
+		const appData = process.env.APPDATA;
+		if (appData) {
+			p = p.replace('%APPDATA%', appData);
+		}
+	} else if (isLinux) {
+		p = p.replace('~', process.env.HOME as string);
+	} else if (isMac) {
+		p = p.replace('~', '/Users/' + process.env.USER);
+	}
+
 	p = path.resolve(p);
 	return p;
 }

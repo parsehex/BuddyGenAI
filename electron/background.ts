@@ -223,40 +223,8 @@ async function createWindow() {
 
 	ipcMain.handle('verifyModelDirectory:app', async (_) => {
 		console.log('verifyModelDirectory:app');
-		const modelsLocations = {
-			win32: '%APPDATA%/BuddyGenAI/Models',
-			linux: '~/.config/BuddyGenAI/Models',
-			darwin: '~/Library/Application Support/BuddyGenAI/Models',
-		};
-
-		const isDev = process.env.NODE_ENV === 'development';
-		const platform = process.platform;
-		// @ts-ignore
-		const dir = modelsLocations[platform];
-		let modelsPath = '';
-		if (isDev) {
-			if (platform === 'win32') {
-				modelsPath = 'C:/Users/User/BuddyGen Models';
-			} else {
-				modelsPath = path.join('/home/user/BuddyGen Models');
-			}
-		} else {
-			modelsPath = path.join(dir);
-			// resolve ~ and %APPDATA%
-			if (platform === 'win32') {
-				const appData = process.env.APPDATA;
-				if (appData) {
-					modelsPath = modelsPath.replace('%APPDATA%', appData);
-				}
-			} else if (platform === 'linux') {
-				modelsPath = modelsPath.replace('~', process.env.HOME as string);
-				console.log('l');
-			} else if (platform === 'darwin') {
-				modelsPath = modelsPath.replace('~', '/Users/' + process.env.USER);
-			}
-		}
-
 		try {
+			const modelsPath = getDataPath('Models');
 			await fs.mkdir(modelsPath, { recursive: true });
 			return modelsPath;
 		} catch (err) {
@@ -265,36 +233,9 @@ async function createWindow() {
 	});
 
 	ipcMain.handle('openModelDirectory:app', async () => {
-		const modelsLocations = {
-			win32: '%APPDATA%/BuddyGenAI/Models',
-			linux: '~/.config/BuddyGenAI/Models',
-			darwin: '~/Library/Application Support/BuddyGenAI/Models',
-		};
-
-		const isDev = process.env.NODE_ENV === 'development';
-		const platform = process.platform;
-		// @ts-ignore
-		const dir = modelsLocations[platform];
-		let modelsPath = '';
-		if (isDev) {
-			modelsPath = 'C:/Users/User/BuddyGen Models';
-		} else {
-			modelsPath = path.join(dir);
-			// resolve ~ and %APPDATA%
-			if (platform === 'win32') {
-				const appData = process.env.APPDATA;
-				if (appData) {
-					modelsPath = modelsPath.replace('%APPDATA%', appData);
-				}
-			} else if (platform === 'linux') {
-				modelsPath = modelsPath.replace('~', process.env.HOME as string);
-				console.log('l');
-			} else if (platform === 'darwin') {
-				modelsPath = modelsPath.replace('~', '/Users/' + process.env.USER);
-			}
-		}
-
-		shell.openPath(modelsPath);
+		const modelsPath = getDataPath('Models');
+		console.log('openModelDirectory:app', modelsPath);
+		await shell.openPath(modelsPath);
 	});
 
 	ipcMain.handle('getDataPath', async (_, path: string) => {

@@ -3,46 +3,14 @@ import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import log from 'electron-log/main';
-import { findDirectoryInPath, getDirname } from '../fs';
+import { findDirectoryInPath, getDataPath, getDirname } from '../fs';
 import { initAppSettings } from '../AppSettings';
 
 const VERBOSE = false;
 
 const isDev = process.env.NODE_ENV === 'development';
-
-const dbLocations = {
-	win32: '%APPDATA%/BuddyGenAI',
-	linux: '~/.config/BuddyGenAI',
-	darwin: '~/Library/Application Support/BuddyGenAI',
-};
-
-const platform = process.platform;
-// @ts-ignore
-const dir = dbLocations[platform];
 const filename = 'db.sqlite';
-let dbPath = '';
-if (isDev) {
-	dbPath = path.join('data', 'db.sqlite');
-} else {
-	dbPath = path.join(dir, filename);
-
-	// resolve ~ and %APPDATA%
-	if (platform === 'win32') {
-		const appData = process.env.APPDATA;
-		if (appData) {
-			dbPath = dbPath.replace('%APPDATA%', appData);
-		}
-	} else if (platform === 'linux') {
-		dbPath = dbPath.replace('~', process.env.HOME as string);
-	} else if (platform === 'darwin') {
-		dbPath = dbPath.replace('~', '/Users/' + process.env.USER);
-	}
-}
-
-export function getDataPath() {
-	// TODO break out
-	return dbPath.replace('db.sqlite', '');
-}
+const dbPath = getDataPath(filename);
 
 async function getMigrationsDir() {
 	const __dirname = await getDirname();
