@@ -127,12 +127,12 @@ async function runSD(
 		const lowraFile = loraFiles.find((file) => /lowra/i.test(file));
 		let p = removeAccents(pos);
 		if (isToonifyRemastered && lowraFile) {
-			// args.push('--lora-model-dir', loraDir);
+			args.push('--lora-model-dir', loraDir);
 
-			// const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
-			args.push('-p', p);
-			// args.push('-p', `${p}, ${loraStr}`);
-			// log.info('Using LowRA:', loraStr);
+			const loraStr = `<lora:${lowraFile.replace('.pt', '')}:0.1>`;
+			// args.push('-p', p);
+			args.push('-p', `${p}, ${loraStr}`);
+			log.info('Using LowRA:', loraStr);
 		} else {
 			args.push('-p', p);
 		}
