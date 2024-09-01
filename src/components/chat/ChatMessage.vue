@@ -100,7 +100,6 @@ const handleCancel = () => {
 };
 
 const doDelete = async () => {
-	if (message.value.role !== 'user') return;
 	await api.message.removeOne(message.value.id);
 	emit('delete', message.value.id);
 };
@@ -249,7 +248,7 @@ const doTTS = async () => {
 						Edit
 					</ContextMenuItem>
 				</DialogTrigger>
-				<ContextMenuItem @click="doDelete" v-if="isUser">Delete</ContextMenuItem>
+				<ContextMenuItem @click="doDelete">Delete</ContextMenuItem>
 
 				<!-- TODO confirm (reuse same dialog) -->
 				<ContextMenuSeparator v-if="isDevMode()" />

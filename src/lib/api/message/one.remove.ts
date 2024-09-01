@@ -14,10 +14,6 @@ export default async function removeOne(id: string): Promise<DeleteResponse> {
 		throw new Error('Message not found');
 	}
 
-	if (message.role !== 'user') {
-		throw new Error('Forbidden');
-	}
-
 	const sqlNextMessage = select('chat_message', ['*'], {
 		thread_id: message.thread_id,
 		thread_index: message.thread_index + 1,
