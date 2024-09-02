@@ -154,6 +154,16 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			const lastMessage = messages.value[messages.value.length - 1];
 
+			// TODO idea here is to allow the user to specify a note that is extracted and placed in a new
+			//   system message that instructs the ai buddy in some way
+			let addedInstruction = '';
+			const noteRegex = /^\[Note: (.*)\]/;
+			const noteMatch = lastMessage.content.match(noteRegex);
+			if (noteMatch) {
+				addedInstruction = noteMatch[1];
+				lastMessage.content = lastMessage.content.replace(noteRegex, '').trim();
+			}
+
 			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
 			let ttsToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
 			if (ttsToSave) {
