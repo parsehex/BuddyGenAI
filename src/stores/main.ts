@@ -47,6 +47,7 @@ interface Settings {
 	auto_send_stt: number;
 	auto_read_chat: number;
 	auto_start_server: number;
+	skip_start_dialog: number;
 }
 
 let firstRun = true;

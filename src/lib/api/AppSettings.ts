@@ -23,7 +23,8 @@ type AppSettingsKeys =
 	| 'n_gpu_layers'
 	| 'auto_send_stt'
 	| 'auto_read_chat'
-	| 'auto_start_server';
+	| 'auto_start_server'
+	| 'skip_start_dialog';
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
@@ -45,6 +46,7 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	auto_send_stt: 0,
 	auto_read_chat: 0,
 	auto_start_server: 0,
+	skip_start_dialog: 0,
 	// preferred_pic_quality (1 | 2 | 3)
 	// used_binary_type_llamacpp (avx2 | clblast | cuda12 | arm64 | etc.)
 	// used_binary_type_sd (avx2 | clblast | cuda12 | arm64 | etc.)

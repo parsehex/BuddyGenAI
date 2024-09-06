@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import './assets/css/index.css';
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import { Sidebar } from '@/components/sidebar';
@@ -19,15 +19,34 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import useElectron from '@/composables/useElectron';
 import { useColorMode } from '@vueuse/core';
-import { isDevMode } from '@/lib/utils';
+import { delay, isDevMode } from '@/lib/utils';
+import { useAppStore } from './src/stores/main';
+import { Label } from './src/components/ui/label';
+
+const store = useAppStore();
 
 useColorMode();
 
 const { toggleDevTools, closeApp } = useElectron();
 
-const enteredApp = ref(true);
+const skipDialog = computed(
+	() =>
+		// @ts-ignore
+		store.settings.skip_start_dialog === '1.0' ||
+		store.settings.skip_start_dialog === 1
+);
+const enteredApp = ref(skipDialog.value ? 1 : 0);
+const initialSkipDialog = skipDialog.value;
+const isMounted = ref(false);
+
+onMounted(async () => {
+	await delay(50);
+	if (skipDialog.value) enteredApp.value = 1;
+	isMounted.value = true;
+});
 
 (window as any).latestAppKeyDownHandlerId = Math.random();
 const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
@@ -51,8 +70,15 @@ const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
 window.addEventListener('keydown', handleAppKeyDown);
 
 const doCloseApp = () => {
-	enteredApp.value = false;
 	if (closeApp) closeApp();
+};
+
+const updateSkipDialog = async (boolVal: boolean) => {
+	const numVal = boolVal ? 1 : 0;
+	if (store.settings.skip_start_dialog === numVal) return;
+
+	// @ts-ignore
+	store.settings.skip_start_dialog = numVal + '.0';
 };
 
 const container = ref<HTMLElement | null>(null);
@@ -80,7 +106,7 @@ const container = ref<HTMLElement | null>(null);
 			</ResizablePanelGroup>
 		</Suspense>
 		<AlertDialog :open="!enteredApp">
-			<AlertDialogContent :portal-to="container">
+			<AlertDialogContent :portal-to="container" v-if="isMounted">
 				<AlertDialogHeader>
 					<AlertDialogTitle>Adults Only</AlertDialogTitle>
 					<AlertDialogDescription>
@@ -95,9 +121,23 @@ const container = ref<HTMLElement | null>(null);
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel @click="doCloseApp"> No / Exit </AlertDialogCancel>
-					<AlertDialogAction @click="enteredApp = true">
+					<AlertDialogAction
+						@click="
+							() => {
+								enteredApp = 1;
+								if (initialSkipDialog !== skipDialog) {
+									updateSkipDialog(skipDialog);
+								}
+							}
+						"
+					>
 						Yes / Enter
 					</AlertDialogAction>
+					<br />
+					<Label class="flex items-center gap-2">
+						<Checkbox :checked="skipDialog" @update:checked="updateSkipDialog" />
+						Don't ask again
+					</Label>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>
