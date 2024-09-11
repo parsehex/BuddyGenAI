@@ -24,7 +24,8 @@ const { type, label } = toRefs(props);
 
 const filePaths = ref<string[]>([]);
 
-const { pathJoin, pickFile, moveFile, linkFile, basename } = useElectron();
+const { pathJoin, pickFile, moveFile, linkFile, basename, openExternalLink } =
+	useElectron();
 const store = useAppStore();
 
 const emit = defineEmits(['modelImport']);
@@ -134,6 +135,9 @@ const fileNames = computed(() => {
 		return { name, truncated };
 	});
 });
+
+const modelsPage =
+	'https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md';
 </script>
 
 <template>
@@ -160,6 +164,15 @@ const fileNames = computed(() => {
 					<span v-else-if="type === 'tts'">Import TTS Model(s)</span>
 					<span v-else-if="type === 'stt'">Import STT Model(s)</span>
 				</DialogTitle>
+
+				<p class="flex justify-center mt-2">
+					<Button
+						variant="link"
+						@click="openExternalLink && openExternalLink(modelsPage)"
+					>
+						Help: Getting Models
+					</Button>
+				</p>
 			</DialogHeader>
 			<DialogDescription>
 				<div class="my-1 text-center">
