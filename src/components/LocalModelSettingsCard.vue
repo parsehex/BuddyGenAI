@@ -65,11 +65,11 @@ const onChatModelChange = () => {
 					@click="
 						openExternalLink &&
 							openExternalLink(
-								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md'
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-started.md#getting-started-with-buddygenai'
 							)
 					"
 				>
-					{{ 'How to Download Models' }}
+					{{ 'Help: Getting Started with BuddyGenAI' }}
 				</span>
 			</p>
 			<div class="mt-4 flex items-center gap-2">
