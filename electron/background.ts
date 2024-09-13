@@ -18,12 +18,8 @@ import { getDataPath } from './fs';
 import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
-
-import dotenv from 'dotenv';
 import rememberWindowState, { loadWindowState } from './window-state';
-dotenv.config({
-	path: path.join(__dirname, '..', '.env'),
-});
+import { getLlamaCppPort } from './rand';
 
 log.initialize();
 log.errorHandler.startCatching();

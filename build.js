@@ -2,15 +2,10 @@
 const builder = require('electron-builder');
 const Platform = builder.Platform;
 const fs = require('fs-extra');
-const path = require('path');
-
-const sourceEnv = path.join(__dirname, '.env');
-const destEnv = path.join(__dirname, '.output', '.env');
-fs.copyFileSync(sourceEnv, destEnv);
 
 const platform = 'WINDOWS';
-// const platform = 'LINUX'
-// const platform = 'MAC'
+// const platform = 'LINUX';
+// const platform = 'MAC';
 
 // const versions = {
 // 	llamaCpp: 'b2787',
@@ -122,7 +117,7 @@ const options = {
 		],
 	},
 	linux: {
-		maintainer: 'Your Name',
+		maintainer: 'parsehex',
 		desktop: {
 			StartupNotify: 'false',
 			Encoding: 'UTF-8',
