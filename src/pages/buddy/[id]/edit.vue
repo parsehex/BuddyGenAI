@@ -165,18 +165,19 @@ const validateName = async () => {
 		return false;
 	}
 
-	const nameIsValid = await isNameValid(nameValue.value, complete);
-	if (!nameIsValid) {
-		toast({
-			variant: 'destructive',
-			title: 'Invalid Name',
-			description: 'Please enter a valid name for your buddy.',
-		});
-		isLoading.value = false;
-		return false;
-	}
-	isLoading.value = false;
-	return nameIsValid;
+	// const nameIsValid = await isNameValid(nameValue.value, complete);
+	// if (!nameIsValid) {
+	// 	toast({
+	// 		variant: 'destructive',
+	// 		title: 'Invalid Name',
+	// 		description: 'Please enter a valid name for your buddy.',
+	// 	});
+	// 	isLoading.value = false;
+	// 	return false;
+	// }
+	// isLoading.value = false;
+	// return nameIsValid;
+	return true;
 };
 
 const validateKeywords = async () => {

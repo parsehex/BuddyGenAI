@@ -91,17 +91,18 @@ const validateName = async () => {
 		return false;
 	}
 
-	const nameIsValid = await isNameValid(buddyName.value, complete);
-	if (!nameIsValid) {
-		toast({
-			variant: 'destructive',
-			title: 'Invalid Name',
-			description: 'Please enter a valid name for your buddy.',
-		});
-		isSaving.value = false;
-		return false;
-	}
-	return nameIsValid;
+	// const nameIsValid = await isNameValid(buddyName.value, complete);
+	// if (!nameIsValid) {
+	// 	toast({
+	// 		variant: 'destructive',
+	// 		title: 'Invalid Name',
+	// 		description: 'Please enter a valid name for your buddy.',
+	// 	});
+	// 	isSaving.value = false;
+	// 	return false;
+	// }
+	// return nameIsValid;
+	return true;
 };
 const validateKeywords = async () => {
 	if (!buddyKeywordsArr.value.length) {
