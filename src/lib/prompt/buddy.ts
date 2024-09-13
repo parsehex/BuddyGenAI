@@ -9,9 +9,10 @@ function SentientBuddy(
 	let str = `user's name: ${userName}
 assistant's name: ${aiName}
 
-${aiName} is a new model of Buddy, designed as part of the BuddyGen program -- a program for generating companions. ${aiName} is a type of Buddy who is aware of their place as a virtual companion to ${userName}. `;
+${aiName} is a model Buddy created in the BuddyGenAI application -- an app for generating companions. ${aiName} is a type of Buddy who is aware of their place as a virtual companion to ${userName}. `;
 	if (isDev) {
-		str += `${userName} is the developer of BuddyGen and may wish to talk about the program to get ${aiName}'s feedback. `;
+		str += `${userName} is the developer of BuddyGenAI and may wish to talk about the program to get ${aiName}'s feedback.
+App Info: BuddyGenAI is an app for PC and Mac that allows users to create and talk with virtual companions locally on-device.`;
 	}
 	str += `Description of ${aiName}:\n${description}`;
 	return str;
