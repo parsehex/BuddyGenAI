@@ -390,6 +390,7 @@ const condWriteThreadTitle = async () => {
 	// TODO sometimes the output is like { "description": "something" } which might be cut off
 	// TODO use fix JSON function (is it generic? pass in options to fix?)
 	//   an option like "pickFirstString" shouold work here, where an object is expected to just have one value
+	//   or a separate function specifically for one-value objects (could have a "expectedKey" option)
 
 	console.time('completion');
 	const [msg1, msg2, msg3] = messages.value;

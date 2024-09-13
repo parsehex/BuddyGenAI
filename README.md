@@ -88,6 +88,8 @@ npm install
 
 # Start the app in development mode (in electron)
 npm run dev:electron # or `npm run dev:electron:win` for windows
+
+npm run build:electron
 ```
 
 # Developer Notes

@@ -57,32 +57,20 @@ const onChatModelChange = () => {
 	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
 		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
 			Local Models Setup
-			<!-- <span
-				class="text-blue-500 cursor-pointer hover:underline"
-				@click="
-					openExternalLink &&
-						openExternalLink(
-							'https://github.com/parsehex/BuddyGenAI/blob/main/docs/how-to-setup.md#local-models-setup'
-						)
-				"
-			>
-				{{ 'Instructions' }}
-			</span> -->
 		</CardHeader>
 		<CardContent>
-			<p class="my-1 italic">
-				Download models and then click <b>Import Models</b> below to choose them.
-				<br />
+			<p class="my-1">
 				<span
 					class="text-blue-500 cursor-pointer hover:underline"
 					@click="
 						openExternalLink &&
-							openExternalLink('https://parsehex.itch.io/buddygenai#download')
+							openExternalLink(
+								'https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md'
+							)
 					"
 				>
-					{{ 'AI Model Pack' }}
+					{{ 'How to Download Models' }}
 				</span>
-				is available on itch.io and includes a variety of models to get you started.
 			</p>
 			<div class="mt-4 flex items-center gap-2">
 				<ImportModel @model-import="onChatModelChange" />
