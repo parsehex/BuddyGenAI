@@ -15,6 +15,7 @@ import {
 	DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const props = defineProps<{
 	type?: 'chat' | 'image' | 'tts' | 'stt';
@@ -148,11 +149,18 @@ const modelsPage =
 					<Import />
 					Import Models
 				</span>
-				<span v-else-if="label" class="flex items-center gap-1">
-					<Import />
-					{{ label }}
-				</span>
-				<Import v-else />
+				<Tooltip v-else>
+					<TooltipTrigger as-child>
+						<span v-if="label" class="flex items-center gap-1">
+							<Import />
+							{{ label }}
+						</span>
+						<Import v-else />
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>Import Models</p>
+					</TooltipContent>
+				</Tooltip>
 			</Button>
 		</DialogTrigger>
 		<DialogContent>
