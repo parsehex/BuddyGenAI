@@ -106,8 +106,8 @@ const updateChatImageEnabled = async (boolVal: boolean) => {
 			</OptionSection>
 
 			<OptionSection
-				label="Chat Image Quality"
-				labelName="chat-image-quality"
+				label="Chat Images"
+				labelName="chat-images"
 				orientation="vertical"
 			>
 				<Label class="flex items-center gap-2">
@@ -117,27 +117,30 @@ const updateChatImageEnabled = async (boolVal: boolean) => {
 					/>
 					Enable chat images
 				</Label>
-				<Select
-					:default-value="store.settings.chat_image_quality"
-					@update:model-value="updateChatImageQuality"
-					id="chat-image-quality"
-				>
-					<SelectTrigger :title="store.settings.chat_image_quality">
-						<SelectValue placeholder="Select an image quality" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Image Quality</SelectLabel>
-							<SelectItem
-								v-for="quality in ['low', 'medium', 'high']"
-								:key="quality"
-								:value="quality"
-							>
-								{{ quality }}
-							</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<Label class="text-sm flex items-center gap-2">
+					Quality
+					<Select
+						:default-value="store.settings.chat_image_quality"
+						@update:model-value="updateChatImageQuality"
+						id="chat-image-quality"
+					>
+						<SelectTrigger :title="store.settings.chat_image_quality">
+							<SelectValue placeholder="Select an image quality" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Image Quality</SelectLabel>
+								<SelectItem
+									v-for="quality in ['low', 'medium', 'high']"
+									:key="quality"
+									:value="quality"
+								>
+									{{ quality }}
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</Label>
 			</OptionSection>
 		</AccordionContent>
 	</AccordionItem>
