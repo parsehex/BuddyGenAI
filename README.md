@@ -37,9 +37,13 @@ If you find an issue with the app, please report it on the [issues page](https:/
 
 ## ⚙️ Setup
 
+[Getting Started Instructions](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-started.md)
+
 BuddyGenAI is in pre-release stage and so the experience will be unstable at times. If you encounter any issues, please report them on the [issues page](https://github.com/parsehex/BuddyGenAI/issues).
 
 You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app, or follow the section below to build it yourself.
+
+**Note**: You'll need AI model files in order to use the app. These are not included in the app due to their size. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
 
 ## Building
 
