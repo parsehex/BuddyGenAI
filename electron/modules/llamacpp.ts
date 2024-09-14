@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import { updateModel } from '../routes/message';
 import log from 'electron-log/main';
 import { AppSettings } from '../AppSettings';
-import { getLlamaCppApiKey, getLlamaCppPort } from '../rand';
+import { getLlamaCppApiKey, getLlamaCppPort, getServerPort } from '../rand';
 import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
 
 const commandObj = {
@@ -180,5 +180,9 @@ export default function llamaCppModule(mainWindow: BrowserWindow) {
 
 	ipcMain.handle('llamacpp/baseUrl', async () => {
 		return 'http://localhost:' + getLlamaCppPort();
+	});
+
+	ipcMain.handle('llamacpp/serverUrl', async () => {
+		return 'http://localhost:' + getServerPort();
 	});
 }

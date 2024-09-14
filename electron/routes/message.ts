@@ -236,64 +236,134 @@ router.post('/api/message', async (req, res) => {
 	streamToResponse(stream, res);
 });
 
+router.options('/api/complete', cors());
+router.post('/api/complete', async (req, res) => {
+	const llamaCppPort = getLlamaCppPort();
+	const llamaCppApiKey = getLlamaCppApiKey();
+	const url = `http://localhost:${llamaCppPort}/v1/chat/completions`;
+
+	try {
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${llamaCppApiKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(req.body),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		// Set headers to match the LCP response
+		res.writeHead(response.status, {
+			'Content-Type': response.headers.get('Content-Type') || 'application/json',
+			'Transfer-Encoding': 'chunked',
+		});
+
+		// Stream the response back to the client
+		const reader = response.body?.getReader();
+		if (!reader) {
+			throw new Error('Unable to read response stream');
+		}
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			res.write(value);
+		}
+
+		res.end();
+	} catch (error) {
+		console.error('Error in LCP proxy:', error);
+		res
+			.status(500)
+			.json({ error: 'An error occurred while proxying the request' });
+	}
+});
+
 router.options('/api/completion', cors());
 router.post('/api/completion', async (req, res) => {
 	const selectedChatModel = await updateOpenai();
 	const { prompt, max_tokens, temperature, json_schema, messages } = req.body;
 
-	const messagesToComplete: ChatCompletionMessageParam[] = [
-		{
-			role: 'system',
-			content:
-				"Assistant's task is to answer the following immediately and without further prose.",
-		},
-		{
-			role: 'user',
-			content: prompt,
-		},
-		{
-			role: 'assistant',
-			content: 'Response: ',
-		},
-	];
+	// const messagesToComplete: ChatCompletionMessageParam[] = [
+	// 	{
+	// 		role: 'system',
+	// 		content:
+	// 			"Assistant's task is to answer the following immediately and without further prose.",
+	// 	},
+	// 	{
+	// 		role: 'user',
+	// 		content: prompt,
+	// 	},
+	// 	{
+	// 		role: 'assistant',
+	// 		content: 'Response: ',
+	// 	},
+	// ];
 
-	let messagesToPass = messagesToComplete;
+	// let messagesToPass = messagesToComplete;
 
-	if (messages) {
-		messagesToPass = messages.slice();
-		// set the first/system message to prompt
-		messagesToPass[0].content = prompt;
-	}
+	// if (messages) {
+	// 	messagesToPass = messages.slice();
+	// 	// set the first/system message to prompt
+	// 	messagesToPass[0].content = prompt;
+	// }
 
 	// console.log('messagesToPass', messagesToPass);
 
 	// if (selectedChatModel.toLowerCase().includes('phi-3')) {
-	useAlternateCompletion(
-		{
-			messages: messagesToPass,
-			max_tokens,
-			temperature,
-			jsonSchema: json_schema,
-		},
-		res
-	);
-	return;
+	// useAlternateCompletion(
+	// 	{
+	// 		messages: messagesToPass,
+	// 		max_tokens,
+	// 		temperature,
+	// 		jsonSchema: json_schema,
+	// 	},
+	// 	res
+	// );
+	// return;
 	// }
 
-	const response = await openai.chat.completions.create({
-		model: selectedChatModel,
-		stream: true,
-		messages: messagesToComplete,
+	// const response = await openai.chat.completions.create({
+	// 	model: selectedChatModel,
+	// 	stream: true,
+	// 	messages: messagesToComplete,
+	// 	max_tokens,
+	// 	temperature,
+	// 	top_p: 1,
+	// 	frequency_penalty: 1,
+	// 	presence_penalty: 1,
+	// 	stop,
+	// });
+
+	// const stream = OpenAIStream(response);
+	// streamToResponse(stream, res);
+
+	const payload = {
+		messages,
 		max_tokens,
 		temperature,
-		top_p: 1,
-		frequency_penalty: 1,
-		presence_penalty: 1,
+		stream: false,
 		stop,
-	});
+	} as any;
 
-	const stream = OpenAIStream(response);
-	streamToResponse(stream, res);
+	const llamaCppPort = getLlamaCppPort();
+	const llamaCppApiKey = getLlamaCppApiKey();
+	const llamaCppUrl = `http://localhost:${llamaCppPort}/v1`;
+
+	const aiResponse = await fetch(`${llamaCppUrl}/chat/completions`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${llamaCppApiKey}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(payload),
+	});
+	const data = await aiResponse.json();
+	res.json(data);
 });
 
 router.get('/health', async (req, res) => {

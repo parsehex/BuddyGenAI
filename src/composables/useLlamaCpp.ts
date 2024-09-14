@@ -41,11 +41,16 @@ export default function useLlamaCpp() {
 		return (await electron.ipcRenderer.invoke('llamacpp/baseUrl')) as string;
 	};
 
+	const getServerUrl = async () => {
+		return (await electron.ipcRenderer.invoke('llamacpp/serverUrl')) as string;
+	};
+
 	return {
 		startServer,
 		stopServer,
 		isServerRunning,
 		getLastModel,
 		getBaseUrl,
+		getServerUrl,
 	};
 }

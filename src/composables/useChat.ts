@@ -120,7 +120,7 @@ export default function useChat(options: UseChatOptions) {
 		setMessages(options.initialMessages);
 	}
 	(async () => {
-		BaseUrl.value = (await urls.other.llamacppBaseUrl()) + '/v1/chat/completions';
+		BaseUrl.value = (await urls.other.llamacppServerUrl()) + '/api/complete';
 	})();
 
 	return {

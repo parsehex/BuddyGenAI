@@ -18,7 +18,7 @@ export async function complete(
 	}
 
 	const response = await fetch(
-		(await urls.other.llamacppBaseUrl()) + '/v1/chat/completions',
+		(await urls.other.llamacppServerUrl()) + '/api/completion',
 		{
 			method: 'POST',
 			headers: {

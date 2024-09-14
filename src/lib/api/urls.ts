@@ -14,6 +14,11 @@ const other = {
 		if (!lcpp) return '';
 		return await lcpp.getBaseUrl();
 	},
+	llamacppServerUrl: async () => {
+		const lcpp = useLlamaCpp();
+		if (!lcpp) return '';
+		return await lcpp.getServerUrl();
+	},
 };
 
 const message = {
