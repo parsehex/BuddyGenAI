@@ -26,6 +26,12 @@ You may [check the releases page](https://github.com/parsehex/BuddyGenAI/release
 
 **Note**: You'll need AI model files in order to use the app. These are not included in the app due to their size. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
 
+## Troubleshooting
+
+**Chat keeps starting forever**
+
+This happens occasionally and I think is a frontend issue. First, try pressing Ctrl+R to refresh the app. If that doesn't work, restarting the app should fix the issue.
+
 ## ❓ Support / Help
 
 If you find an issue with the app, please report it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help setting up the app or anything else, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
