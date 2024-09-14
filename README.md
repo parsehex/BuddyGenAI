@@ -16,10 +16,6 @@ BuddyGenAI is an offline-only chat app made to create and interact with virtual 
 - Buddies can send images in chat 🖼️
 - Completely offline and private
 
-## ❓ Support / Help
-
-If you find an issue with the app, please report it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help setting up the app or anything else, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
-
 ## ⚙️ Setup
 
 [Getting Started Instructions](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-started.md)
@@ -29,6 +25,10 @@ BuddyGenAI is in pre-release stage and so the experience will be unstable at tim
 You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app, or follow the section below to build it yourself.
 
 **Note**: You'll need AI model files in order to use the app. These are not included in the app due to their size. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
+
+## ❓ Support / Help
+
+If you find an issue with the app, please report it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help setting up the app or anything else, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
 
 ## Build Guides
 
