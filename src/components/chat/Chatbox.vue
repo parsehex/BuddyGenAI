@@ -181,44 +181,48 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					: 'Assistant';
 			const user = userName;
 
-			let cmd = (await complete(shouldSendImg(userName, assistantName), {
-				body: {
-					max_tokens: 512,
-					temperature: 0.01,
-					messages: messages.value
-						.slice()
-						.map(
-							(m) =>
-								({
-									role: m.role === 'user' ? user : assistantName,
-									content: m.content,
-								} as ChatMessage)
-						)
-						.slice(-6),
-				},
-			})) as string;
-
-			console.log('cmd', cmd.length, cmd);
-			cmd = attemptToFixJson(cmd);
-
-			let imgToSave = '';
-			let isValidJSON = false;
-			try {
-				JSON.parse(cmd);
-				isValidJSON = true;
-			} catch (e) {
-				isValidJSON = false;
-			}
-			let cmdObj = {} as any;
-			if (isValidJSON) {
-				cmdObj = JSON.parse(cmd);
-			}
-			// let explicit = !isValidJSON && cmd?.includes('explicit');
 			const chatImageEnabled = store.settings.chat_image_enabled;
 			const isChatImageEnabled =
 				// @ts-ignore
 				chatImageEnabled === '1.0' || chatImageEnabled === 1;
-			console.log(chatImageEnabled, isChatImageEnabled, cmdObj.do_send);
+			let cmdObj = {} as any;
+			let cmd = '';
+			if (isChatImageEnabled) {
+				cmd = (await complete(shouldSendImg(userName, assistantName), {
+					body: {
+						max_tokens: 512,
+						temperature: 0.01,
+						messages: messages.value
+							.slice()
+							.map(
+								(m) =>
+									({
+										role: m.role === 'user' ? user : assistantName,
+										content: m.content,
+									} as ChatMessage)
+							)
+							.slice(-6),
+					},
+				})) as string;
+
+				console.log('cmd', cmd.length, cmd);
+				cmd = attemptToFixJson(cmd);
+
+				let isValidJSON = false;
+				try {
+					JSON.parse(cmd);
+					isValidJSON = true;
+				} catch (e) {
+					isValidJSON = false;
+				}
+				if (isValidJSON) {
+					cmdObj = JSON.parse(cmd);
+				}
+			}
+
+			let imgToSave = '';
+			// let explicit = !isValidJSON && cmd?.includes('explicit');
+
 			if (isChatImageEnabled && cmdObj.do_send) {
 				let buddyAppearance = '';
 				let gender = '';
