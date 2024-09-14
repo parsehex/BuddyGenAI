@@ -10,7 +10,7 @@ This is the setup that I have been using so I would expect it to work for you as
 - Node v20
   - Install [NVM for Windows](https://github.com/coreybutler/nvm-windows/releases)
   - Run `nvm install 20` and then `nvm use 20`, and restart your terminal
-- [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)\
+- [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
   - Optional if you download and use the `cudart*` zip below.
 
 ## Acquire Binaries
