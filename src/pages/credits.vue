@@ -335,12 +335,11 @@ const openLink = (link: string) => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="container flex flex-col items-center pb-8">
-			<h1 class="text-2xl font-bold">BuddyGen AI Credits</h1>
+			<h1 class="text-2xl font-bold">BuddyGenAI Credits</h1>
 
 			<div class="mt-4">
-				<p class="text-xl">Built with Meta Llama 3</p>
 				<p class="text-md mt-2">
-					BuddyGen AI was made using the following software projects and AI models:
+					BuddyGenAI was made using the following software projects and AI models:
 				</p>
 				<ul class="list-disc list-inside mt-2">
 					<li v-for="dep in deps" :key="dep.name">
@@ -367,33 +366,11 @@ const openLink = (link: string) => {
 				</ul>
 
 				<p class="text-lg mt-4">
-					As of the writing of this, the following are part of the free and separate
-					AI Models Pack for conveniently setting up BuddyGenAI.
-				</p>
-				<ul class="list-disc list-inside mt-2">
-					<li v-for="model in aiModels" :key="model.name">
-						<span @click="openLink(model.link)" class="text-blue-500 cursor-pointer">
-							{{ model.name }}
-						</span>
-						by
-						<b>{{ model.author }}</b>
-						<span
-							v-for="license in model.license.split(',')"
-							:key="license"
-							@click="openLink(model.licenseLink)"
-							class="text-sm px-2 rounded-full ml-2 cursor-pointer bg-gray-200 dark:bg-gray-800"
-						>
-							{{ license }}&nbsp;license</span
-						>
-					</li>
-				</ul>
-
-				<p class="text-lg mt-4">
 					<span
 						class="text-blue-500 cursor-pointer"
 						@click="openLink('https://github.com/parsehex/BuddyGenAI')"
 					>
-						BuddyGen AI
+						BuddyGenAI
 					</span>
 					is a project by
 					<b>Thomas Mays</b>
@@ -407,6 +384,14 @@ const openLink = (link: string) => {
 					)
 					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
 						MIT license
+					</span>
+				</p>
+				<p class="text-lg mt-2">
+					<span
+						class="text-blue-500 underline cursor-pointer"
+						@click="openLink('https://buddygenai.com')"
+					>
+						BuddyGenAI.com
 					</span>
 				</p>
 			</div>
