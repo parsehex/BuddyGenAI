@@ -143,25 +143,27 @@ const modelsPage =
 
 <template>
 	<Dialog :modal="true">
-		<DialogTrigger as-child>
-			<Button variant="default" class="self-center px-2">
-				<span v-if="!type && !label" class="flex items-center gap-1">
-					<Import />
-					Import Models
-				</span>
-				<Tooltip v-else>
-					<TooltipTrigger as-child>
+		<DialogTrigger>
+			<Tooltip :delay-duration="25">
+				<TooltipTrigger as-child>
+					<Button variant="default" class="self-center px-2">
+						<span v-if="!type && !label" class="flex items-center gap-1">
+							<Import />
+							Import Models
+						</span>
 						<span v-if="label" class="flex items-center gap-1">
 							<Import />
 							{{ label }}
 						</span>
 						<Import v-else />
-					</TooltipTrigger>
-					<TooltipContent>
-						<p>Import Models</p>
-					</TooltipContent>
-				</Tooltip>
-			</Button>
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent
+					class="dark:bg-gray-500 dark:text-gray-100 font-bold opacity-90"
+				>
+					<p>Import Models</p>
+				</TooltipContent>
+			</Tooltip>
 		</DialogTrigger>
 		<DialogContent>
 			<DialogHeader>
