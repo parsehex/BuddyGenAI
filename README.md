@@ -1,13 +1,20 @@
-BuddyGenAI is a chat application designed to create and interact with virtual buddies.
+# BuddyGenAI
 
-The app is built for my own use mainly and as such I don't plan to publicly share builds of the app. However, I attempt to keep the build instructions up-to-date -- again, for myself but also for anyone else with the know-how to build the app as well.
+BuddyGenAI is an offline-only chat app made to create and interact with virtual buddies. BuddyGenAI uses the following local AI projects:
+
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)
+- [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
+- [Piper](https://github.com/rhasspy/piper)
+- [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 ## ✅ Features
 
-- Generate Buddies to chat with 🤖
-- Create a detailed Buddy from just a few words 📝
-  - Or customize your Buddy to behave exactly how you want 🎨
-- Generate profile pictures for your Buddy 🖼️
+- Create, manage and chat with buddies 🤖
+- Generate profile pictures for your buddies
+- Hear buddies with text-to-speech
+- Speak messages to buddies with speech-to-text
+- Buddies can send images in chat 🖼️
+- Completely offline and private
 
 ## ❓ Support / Help
 
