@@ -7,6 +7,8 @@ BuddyGenAI is an offline-only chat app made to create and interact with virtual 
 - [Piper](https://github.com/rhasspy/piper)
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
+This is a passion project of mine to create an experience that somewhat realistically emulates having virtual friends to talk to and interact with. The above projects and several others have helped make this possible and I couldn't have made this without their work. I hope others find this project interesting and enjoyable as well.
+
 ## ✅ Features
 
 - Create, manage and chat with buddies 🤖
@@ -40,27 +42,22 @@ If you find an issue with the app, please report it on the [issues page](https:/
 
 - [Building on Windows for NVIDIA GPU](https://github.com/parsehex/BuddyGenAI/blob/main/docs/building_windows_nvidia.md)
 
-## Motivation / Purpose / Next Iteration
+## Future Plans
 
-<!-- this won't be well-structured at first but i kinda keep forgetting why this app exists -->
+My overall goal with this is ease and simplicity for the user. While I am interested in LLMs and imagegen models, I wanted to make an app that is more about creating an interesting experience that's jargon-free and approachable to those with novice computer skills.
 
-While this app may be better as a web app that is easily accessible on different platforms, this iteration of BuddyGenAI was made to provide a seamless and simple experience for users to be able to download an app to get access to local AI models. I wanted something that could be built and given to friends on a flash drive which would have everything to get going with a talking and listening AI buddy that has a visual representation. This is my own take on creating an app using 4 these forms of AI, packaged up in a way that is easy to use and share as well as extend by using other models.
+Aside from overall cleaning up the project and improving the look of it, I have some ideas for larger features to improve quality or increase immersion:
 
-The next iteration of this might be better suited as a multi-user web app (with a single-user mode?) that serves approximately the same interface as the current app. The app would be installed on the machine with the appropriate hardware and would act as the server for clients to connect to.
+(all of these would be optional and/or able to be disabled in settings)
 
-We could shed the electron dependency and use a web server to serve the app. I guess we'd put server administration/maintenance in the web interface for the admin user. The admin user would be able to add/remove models, manage users, and view logs (eventually).
-
-Now that I think about it, I think this would open up the possibility to do the idea I've had to have buddies initiate conversation and have the user get a push notification when they do. There's a lot of details to work out like avoiding spamming the user or having unmanageable background performance.
-
-With it being a server, it makes sense to allow just disabling certain features like Imagen or TTS. A server might be a better form form BuddyGenAI as it still does require some knowledge to setup and configure depending on the user's hardware or preferences. Could also have controls to set limitations on what you can make with Imagen for instance (i.e. parental / content controls would be more attainable since there would be actual access control).
-
-I think I need to consult an AI on this, but I think we can use Supabase to handle a lot of the access control with users and roles. Using a starter app would go a long way. It should have:
-
-- Admin-only section
-- Database (ideally that's actually being used for something)
-- Auth ofc
-
-Maybe find a multi-user chat app that uses supabase?
+- Topics: A form of RAG that I want to implement. This would allow buddies to learn things about you and recall it across chats.
+- Games: Text adventure games involving your buddy sounds fun to me and I have some ideas that I think would make for an interesting experience.
+- More variety to chats:
+  - Delays in responses: Buddies would (occasionally) take longer to respond to messages based on the chat's context or random events.
+  - Buddies go Idle: Sometimes, a buddy might "go away" and not respond to messages for a while.
+- Random Buddy Encounters: The app creates a new buddy in the background and the user has the option to add them to their buddy list.
+  - Current buddies might even be the ones to introduce the new buddy to the user.
+- Group Chats: Chat with multiple buddies at once.
 
 ## Developer Notes
 
