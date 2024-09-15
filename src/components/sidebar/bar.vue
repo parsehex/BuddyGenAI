@@ -42,22 +42,18 @@ const doCreateThread = async () => {
 	let buddy_id = '';
 	console.log('selected buddy', selectedBuddy.value);
 	let errorMsg = '';
-	if (selectedBuddy.value) {
-		const buddy = store.buddies.find(
-			(buddy: BuddyVersionMerged) => buddy.id === selectedBuddy.value
-		);
-		if (buddy) {
-			name = `Chat with ${buddy.name}`;
-			mode = 'persona';
-			buddy_id = buddy.id;
-		} else if (selectedBuddy.value === 'ai') {
-			name = 'Chat with AI';
-			mode = 'custom';
-		} else {
-			errorMsg = 'Could not find buddy' + selectedBuddy.value;
-		}
+	const buddy = store.buddies.find(
+		(buddy: BuddyVersionMerged) => buddy.id === selectedBuddy.value
+	);
+	if (buddy) {
+		name = `Chat with ${buddy.name}`;
+		mode = 'persona';
+		buddy_id = buddy.id;
+	} else if (selectedBuddy.value === 'ai') {
+		name = 'Chat with AI';
+		mode = 'custom';
 	} else {
-		errorMsg = 'Please select a buddy';
+		errorMsg = 'Could not find buddy' + selectedBuddy.value;
 	}
 	if (errorMsg) {
 		toast({
@@ -108,8 +104,12 @@ watch(
 				<div class="bg-background mb-1">
 					<ChatServerStatus v-if="!store.isExternalProvider" />
 					<div class="flex w-full px-2 my-1 items-end">
-						<BuddySelect v-model="selectedBuddy" include-ai />
-						<Button class="ml-1" @click="doCreateThread">+</Button>
+						<BuddySelect
+							@select="(id: any) => {
+							selectedBuddy = id;
+							doCreateThread();
+						}"
+						/>
 					</div>
 				</div>
 				<ScrollArea class="h-screen">
