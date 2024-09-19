@@ -73,6 +73,10 @@ export default function useChat(options: UseChatOptions) {
 				let isLast = false;
 				for (const chunkStr of chunks) {
 					if (!chunkStr) continue;
+					if (chunkStr.trim() === '[DONE]') {
+						isLast = true;
+						break;
+					}
 
 					const chunk = JSON.parse(chunkStr);
 					content += chunk.choices[0].delta.content || '';

@@ -210,8 +210,8 @@ const validateKeywords = async () => {
 
 const handleSave = async () => {
 	isLoading.value = true;
-	if (!(await validateName())) return;
-	if (!(await validateKeywords())) return;
+	// if (!(await validateName())) return;
+	// if (!(await validateKeywords())) return;
 
 	const appOptStr = JSON.stringify(generatedAppearanceOptions.value);
 	const selectedAppOptStr = JSON.stringify(selectedAppearanceOptions.value);

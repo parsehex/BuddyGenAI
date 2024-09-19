@@ -88,7 +88,7 @@ const options = {
 
 		app: '.output',
 	},
-	extraResources: ['./binaries/**/*', './licenses/**/*', './migrations/**/*'],
+	extraResources: ['./binaries-*/**/*', './licenses/**/*', './migrations/**/*'],
 
 	win: {
 		// eslint-disable-next-line no-template-curly-in-string
@@ -123,8 +123,8 @@ const options = {
 			Encoding: 'UTF-8',
 			MimeType: 'x-scheme-handler/deeplink',
 		},
-		target: ['dir'],
-		// target: ['AppImage']
+		// target: ['dir'],
+		target: ['AppImage']
 		// target: ['AppImage', 'rpm', 'deb']
 	},
 };
@@ -134,9 +134,9 @@ let dest = './.output/package.json';
 fs.copyFileSync(source, dest);
 
 // TODO how can we install deps programmatically?
-source = './node_modules';
-dest = './.output/node_modules';
-fs.copySync(source, dest);
+// source = './node_modules';
+// dest = './.output/node_modules';
+// fs.copySync(source, dest);
 
 builder
 	.build({

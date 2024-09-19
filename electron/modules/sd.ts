@@ -7,6 +7,8 @@ import { BrowserWindow, ipcMain } from 'electron';
 import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
 import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
+import { getLlamaCppPort } from '../rand';
+import axios from 'axios';
 
 // also in @/lib/api/types-api
 interface SDOptions {
@@ -80,6 +82,31 @@ async function runSD(
 	size = 256,
 	steps = 16
 ) {
+	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
+	// if platform is linux, instead call kobold api and save img
+
+	if (platform === 'linux') {
+		const port = getLlamaCppPort();
+		const url = `http://localhost:${port}/sdapi/v1/txt2img`;
+
+		const response = await axios.post(url, {
+			prompt:pos,
+			negative_prompt: neg,
+			width: size,
+			height: size,
+			steps,
+			sampler_name: 'Euler a'
+		});
+
+		const img = response.data.images[0]; // base64
+
+		// save to output
+		const buffer = Buffer.from(img, 'base64');
+		await fs.writeFile(output, buffer, 'base64');
+		return output;
+	}
+
+
 	const modelName = model.split('/').pop()?.toLowerCase();
 	if (!modelName) {
 		throw new Error('Invalid model name (should not be a directory)');

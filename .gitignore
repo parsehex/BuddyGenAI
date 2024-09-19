@@ -26,4 +26,4 @@ llama.log
 /*.webm
 /result.json
 
-/binaries
+/binaries*

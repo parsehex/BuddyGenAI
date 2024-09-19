@@ -1,5 +1,5 @@
 import { execFile, ChildProcess } from 'child_process';
-import { findBinaryPath } from '../fs';
+import { findBinaryPath, getDataPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
@@ -22,20 +22,88 @@ let hasResolved = false;
 
 let isReady = false;
 
-function startServer(modelPath: string, nGpuLayers = 99) {
+async function verifyModel(modelPath:string) {
+	modelPath = path.normalize(modelPath);
+		try {
+			await fs.access(modelPath);
+			return true;
+		} catch (e) {
+			log.error('Model file not found:', modelPath);
+			return false;
+		}
+}
+
+function startKobold(chatModelPath: string, sdModel: string, whisperModel = '', nGpuLayers = 99) {
 	return new Promise<void>(async (resolve, reject) => {
 		const port = getLlamaCppPort();
 		const apiKey = getLlamaCppApiKey();
 		log.log('using port:', port, 'and api key:', apiKey);
 
-		modelPath = path.normalize(modelPath);
-		try {
-			await fs.access(modelPath);
-		} catch (e) {
-			log.error('Model file not found:', modelPath);
-			reject();
-			return;
+		const sdModelPath = getDataPath('Models/' +sdModel);
+		const whisperModelPath = getDataPath('Models/' + whisperModel);
+
+		console.log(chatModelPath, sdModel, whisperModel);
+
+		if (await verifyModel(chatModelPath) === false) return reject();
+		if (await verifyModel(sdModelPath) === false) return reject();
+		if (whisperModel && whisperModel !== '0' && await verifyModel(whisperModelPath) === false) return reject();
+
+		const koboldcppPath = await findBinaryPath('koboldcpp', 'koboldcpp', true);
+		const args = ['--port', port + '', '--model', chatModelPath, '--gpulayers', '-1', '--sdmodel', sdModelPath, '--usevulkan'];
+
+		//
+console.log(whisperModel);
+		if (whisperModel && whisperModel !== '0') {
+			args.push('--whispermodel', whisperModelPath);
 		}
+
+		// TODO --password
+
+		log.info('Koboldcpp Server Path:', koboldcppPath);
+		log.info('Starting Koboldcpp Server with args:', args);
+		// NOTE do not use shell: true -- keeps server running as zombie
+		commandObj.cmd = execFile(koboldcppPath, args, {
+			windowsHide: true,
+			killSignal: 'SIGKILL',
+		}, (e, stdout) => {
+			console.log('cb');
+		});
+
+		pid = commandObj.cmd.pid || 0;
+		commandObj.cmd.stdin?.end();
+		updateModel(chatModelPath);
+
+		commandObj.cmd.stdout?.on('data', (data: any) => {
+			const str = data.toString() as string;
+			console.log('SD stdout:', str);
+			let isFinishLine = false;
+			isFinishLine = str.includes('Please connect to custom endpoint at');
+			if (isFinishLine) {
+				console.log('resolving');
+				isReady = true;
+				resolve();
+			}
+		});
+	});
+}
+
+async function startServer(modelPath: string, nGpuLayers = 99) {
+	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
+	// if linux, load kobold instead:
+	// get and use image model and whisper model(s)
+
+	const sdModel = await AppSettings.get('selected_model_image') as string
+	const whisperModel = await AppSettings.get('selected_model_whisper') as string
+
+	if (platform === 'linux') return startKobold(modelPath,sdModel,whisperModel,nGpuLayers);
+
+	return new Promise<void>(async (resolve, reject) => {
+		const port = getLlamaCppPort();
+		const apiKey = getLlamaCppApiKey();
+		log.log('using port:', port, 'and api key:', apiKey);
+
+		if (await verifyModel(modelPath) === false) return reject();
+
 
 		const useGpu = (await AppSettings.get('gpu_enabled_chat')) as 0 | 1;
 		// @ts-ignore

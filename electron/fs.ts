@@ -70,6 +70,7 @@ const binaryCache: Record<string, BinaryPaths> = {
 	'stable-diffusion.cpp': { gpu: '', noGpu: '' },
 	'whisper.cpp': { gpu: '', noGpu: '' },
 	piper: { gpu: '', noGpu: '' }, // only one binary (noGpu)
+	koboldcpp: { gpu: '', noGpu: '' }, // only one binary (noGpu)
 };
 
 const gpuTypes = ['cuda12', 'rocm5.5', 'clblast'];
@@ -78,11 +79,13 @@ type ProjectName =
 	| 'stable-diffusion.cpp'
 	| 'whisper.cpp'
 	| 'piper'
+	| 'koboldcpp'
 	| 'llamafile'; // bark.cpp?
 type Binaries = {
 	'llama.cpp': 'main' | 'server';
 	'stable-diffusion.cpp': 'sd';
 	piper: 'piper';
+	koboldcpp: 'koboldcpp';
 	'whisper.cpp': 'main' | 'server';
 	llamafile: 'llamafile';
 };
@@ -103,13 +106,13 @@ export async function findBinaryPath<T extends ProjectName>(
 		return cached[gpu ? 'gpu' : 'noGpu'];
 	}
 
-	if (projectName === 'llamafile' || projectName === 'piper') {
-		let binPath = path.join(resPath, 'binaries/', exe);
+	if (projectName === 'llamafile' || projectName === 'piper' || projectName === 'koboldcpp') {
+		let binPath = path.join(resPath, `binaries-${process.platform}/`, exe);
 		await fs.access(binPath);
 		return binPath;
 	}
 
-	let binPath = path.join(resPath, 'binaries/');
+	let binPath = path.join(resPath, `binaries-${process.platform}/`);
 
 	// NOTE as of now, this only affects using SDCPP since we're using llamafile instead of llama.cpp
 	const directories = [

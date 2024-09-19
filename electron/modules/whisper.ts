@@ -8,6 +8,17 @@ import { AppSettings } from '../AppSettings';
 import log from 'electron-log/main';
 import stream from 'stream';
 import ffmpegStatic from 'ffmpeg-static';
+import { getLlamaCppPort, getLlamaCppApiKey } from '../rand';
+
+const apiKey = getLlamaCppApiKey();
+const openai = new OpenAI({
+	apiKey: apiKey
+});
+
+const port = getLlamaCppPort();
+	const url = `http://localhost:${port}/v1`;
+
+	openai.baseURL = url;
 
 // @/lib/api/types-api
 interface WhisperOptions {
@@ -75,6 +86,24 @@ function combineTranscriptChunks(chunks: TranscriptChunk[]) {
 }
 
 async function runWhisper(model: string, input: ArrayBuffer) {
+	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
+	// if platform is linux, call kobold api instead
+
+	if (platform === 'linux') {
+		const inputName = 'C:/Users/User/Code/GitHub/BuddyGenAI/input.webm';
+		const outputName = 'C:/Users/User/Code/GitHub/BuddyGenAI/input.wav';
+		await fs.writeFile(inputName, input);
+		await runFfmpeg(inputName, outputName);
+
+		const transcription = await openai.audio.transcriptions.create({
+			file: fs.createReadStream(outputName),
+			model: "whisper-1",
+			response_format: "text",
+		});
+
+		return transcription.text;
+	}
+
 	const useGpu = (await AppSettings.get('gpu_enabled_whisper')) as 0 | 1;
 	// @ts-ignore
 	const useGpuBool = useGpu === 1 || useGpu === '1.0';
