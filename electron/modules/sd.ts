@@ -85,17 +85,19 @@ async function runSD(
 	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 	// if platform is linux, instead call kobold api and save img
 
-	if (platform === 'linux') {
+	if (platform === 'linux' || platform === 'darwin') {
+		// TODO: add "external backend" option to specify kobold endpoint
+		//   can evolve this into just supporting pointing the app to kobold
 		const port = getLlamaCppPort();
 		const url = `http://localhost:${port}/sdapi/v1/txt2img`;
 
 		const response = await axios.post(url, {
-			prompt:pos,
+			prompt: pos,
 			negative_prompt: neg,
 			width: size,
 			height: size,
 			steps,
-			sampler_name: 'Euler a'
+			sampler_name: 'Euler a',
 		});
 
 		const img = response.data.images[0]; // base64
@@ -105,7 +107,6 @@ async function runSD(
 		await fs.writeFile(output, buffer, 'base64');
 		return output;
 	}
-
 
 	const modelName = model.split('/').pop()?.toLowerCase();
 	if (!modelName) {

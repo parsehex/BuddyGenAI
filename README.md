@@ -26,7 +26,7 @@ BuddyGenAI is in pre-release stage and so the experience will be unstable at tim
 
 You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app, or follow the section below to build it yourself.
 
-**Note**: You'll need AI model files in order to use the app. These are not included in the app due to their size. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
+**Note**: You'll need AI model files in order to use the app. These are not included in the app itself. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
 
 ## Troubleshooting
 
@@ -41,8 +41,8 @@ If you find an issue with the app, please report it on the [issues page](https:/
 ## Build Guides
 
 - [Building on Windows for NVIDIA GPU](https://github.com/parsehex/BuddyGenAI/blob/main/docs/building_windows_nvidia.md)
-- Linux
-  - Instead of using the `cuda12` folder for the `*.cpp` projects, simply place a `koboldcpp` binary in the `binaries-linux` folder.
+- Linux, Mac
+  - Instead of using the `cuda12` folder for the `*.cpp` projects, simply place a `koboldcpp` binary in the `binaries-{linux | darwin}` folder.
 
 ## Future Plans
 
