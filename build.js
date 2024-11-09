@@ -7,19 +7,6 @@ const platform = 'WINDOWS';
 // const platform = 'LINUX';
 // const platform = 'MAC';
 
-// const versions = {
-// 	llamaCpp: 'b2787',
-// 	stabeDiffusionCpp: 'ce1bcc7',
-// };
-
-// const isVersionsSet = Object.values(versions).every((v) => v !== undefined);
-// if (!isVersionsSet) {
-// 	console.error(
-// 		'Please set the versions of the required binaries in the build.js file.'
-// 	);
-// 	process.exit(1);
-// }
-
 /**
  * @type {import('electron-builder').CompressionLevel}
  */
@@ -27,47 +14,6 @@ const compression = 'maximum';
 // set to 'maximum' for production builds
 
 console.time(`build (${compression} compression-level)`);
-
-// TODO check for the required binaries
-// const binPath = path.join(__dirname, 'binaries/');
-
-// const sdCPP = path.join(binPath, 'stable-diffusion.cpp', 'cuda12');
-// const sdCPPbin =
-// 	process.platform === 'win32'
-// 		? path.join(sdCPP, 'sd.exe')
-// 		: path.join(sdCPP, 'sd');
-
-// if (!fs.existsSync(sdCPPbin)) {
-// 	console.error(`Required binary not found: ${sdCPPbin}`);
-// 	process.exit(1);
-// }
-
-// const sdVersionExists = fs.existsSync(
-// 	path.join(
-// 		binPath,
-// 		'stable-diffusion.cpp',
-// 		'version ' + versions.stabeDiffusionCpp
-// 	)
-// );
-
-// copy version folders to binaries/build under their project names
-// add file to folder called `version ${ver}`
-// if (!sdVersionExists) {
-// 	fs.copySync(
-// 		sdCPP.replace('cuda12', ''),
-// 		path.join(binPath, 'build', 'stable-diffusion.cpp')
-// 	);
-// 	const verPath = path.join(
-// 		binPath,
-// 		'stable-diffusion.cpp',
-// 		'version ' + versions.stabeDiffusionCpp
-// 	);
-// 	fs.writeFileSync(verPath, '');
-// }
-
-// copy binaries to the output folder
-// const outputBinPath = path.join(__dirname, '.output', 'binaries');
-// fs.copySync(binPath, outputBinPath);
 
 /**
  * @type {import('electron-builder').Configuration}
@@ -98,7 +44,6 @@ const options = {
 			{
 				target: 'nsis',
 				arch: ['x64'],
-				// arch: ['x64', 'ia32']
 			},
 		],
 	},
@@ -124,7 +69,7 @@ const options = {
 			MimeType: 'x-scheme-handler/deeplink',
 		},
 		// target: ['dir'],
-		target: ['AppImage']
+		target: ['AppImage'],
 		// target: ['AppImage', 'rpm', 'deb']
 	},
 };
