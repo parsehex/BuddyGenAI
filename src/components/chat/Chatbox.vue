@@ -154,8 +154,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			const lastMessage = messages.value[messages.value.length - 1];
 
-			// TODO idea here is to allow the user to specify a note that is extracted and placed in a new
-			//   system message that instructs the ai buddy in some way
+			// TODO idea here is to allow the user to specify a note that is extracted + added as a new
+			//   system message that further instructs the ai buddy
 			let addedInstruction = '';
 			const noteRegex = /^\[Note: (.*)\]/;
 			const noteMatch = lastMessage.content.match(noteRegex);
