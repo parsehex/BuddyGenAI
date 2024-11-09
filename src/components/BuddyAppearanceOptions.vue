@@ -139,8 +139,8 @@ const newAppearanceOptions = async (category?: AppearanceCategory) => {
 
 		if (res) {
 			res = attemptToFixJson(res, 'array');
-			console.log(prompt);
-			console.log(res);
+			// console.log(prompt);
+			// console.log(res);
 			const options = JSON.parse(res);
 			if (appearanceOptions.value) appearanceOptions.value[key] = options;
 		}
