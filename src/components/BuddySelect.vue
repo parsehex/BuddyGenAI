@@ -40,10 +40,11 @@ const startChat = (id: string | null) => {
 </script>
 
 <template>
-	<div class="flex items-center space-x-2">
-		<Label>New Chat:</Label>
+	<div class="flex items-center space-x-2 justify-around w-full">
+		<Label>Chat with:</Label>
 		<Button v-if="includeAi" @click="startChat('ai')"> Assistant </Button>
 		<Select
+			v-if="store.buddies.length > 0"
 			class="my-2"
 			@update:modelValue="
 				(id) => {
