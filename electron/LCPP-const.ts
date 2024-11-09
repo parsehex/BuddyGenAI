@@ -6,8 +6,8 @@ export const chatTemplateMap: { [key: string]: string } = {
 	'WizardLM-2': 'vicuna',
 	'Lexi-': 'llama3',
 	'Hermes-2': 'chatml',
-	'Llama-3': 'llama3',
-	'llama-3': 'llama3',
+	'Llama-3': '',
+	'llama-3': '',
 };
 
 export const contextLengthMap: { [key: string]: number } = {
@@ -16,4 +16,6 @@ export const contextLengthMap: { [key: string]: number } = {
 	'Lexi-': 8192,
 	'Llama-3': 8192,
 	'llama-3': 8192,
+	'Llama-3.1': 16384,
+	'llama-3.1': 16384,
 };

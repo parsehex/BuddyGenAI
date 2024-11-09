@@ -1,4 +1,4 @@
-import { execFile, ChildProcess } from 'child_process';
+import { execFile, type ChildProcess } from 'child_process';
 import { findBinaryPath, getDataPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
@@ -114,7 +114,7 @@ function startKobold(
 
 async function startServer(modelPath: string, nGpuLayers = 99) {
 	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
-	// if linux, load kobold instead:
+	// if linux or mac, load kobold instead:
 	// get and use image model and whisper model(s)
 
 	const sdModel = (await AppSettings.get('selected_model_image')) as string;
@@ -151,7 +151,7 @@ async function startServer(modelPath: string, nGpuLayers = 99) {
 		const chatTemplate = Object.keys(chatTemplateMap).find((key) =>
 			modelPath.includes(key)
 		);
-		if (chatTemplate) {
+		if (chatTemplate && chatTemplateMap[chatTemplate]) {
 			args.push('--chat-template', chatTemplateMap[chatTemplate]);
 			log.info('Using chat template:', chatTemplateMap[chatTemplate]);
 		}
@@ -215,7 +215,17 @@ async function startServer(modelPath: string, nGpuLayers = 99) {
 		process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
 		process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
+		// check if server is ready on stdout and stderr
 		commandObj.cmd.stdout?.on('data', (data: any) => {
+			const str = data.toString();
+			if (!hasResolved && str?.includes('all slots are idle')) {
+				log.info('Llama.cpp-Server ready');
+				hasResolved = true;
+				isReady = true;
+				resolve();
+			}
+		});
+		commandObj.cmd.stderr?.on('data', (data: any) => {
 			const str = data.toString();
 			if (!hasResolved && str?.includes('all slots are idle')) {
 				log.info('Llama.cpp-Server ready');
