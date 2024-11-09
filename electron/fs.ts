@@ -106,7 +106,11 @@ export async function findBinaryPath<T extends ProjectName>(
 		return cached[gpu ? 'gpu' : 'noGpu'];
 	}
 
-	if (projectName === 'llamafile' || projectName === 'piper' || projectName === 'koboldcpp') {
+	if (
+		projectName === 'llamafile' ||
+		projectName === 'piper' ||
+		projectName === 'koboldcpp'
+	) {
 		let binPath = path.join(resPath, `binaries-${process.platform}/`, exe);
 		await fs.access(binPath);
 		return binPath;
@@ -146,10 +150,12 @@ export async function findBinaryPath<T extends ProjectName>(
 			const dir = directories[i];
 			binPath = path.join(
 				resPath,
-				'binaries/',
+				`binaries-${process.platform}/`,
 				dir,
 				projectName.replace('.', '') + '-' + exe
 			);
+
+			// console.log('trying binPath', binPath);
 
 			if (gpu && !gpuTypes.includes(dir)) {
 				continue;
