@@ -15,7 +15,11 @@ interface PiperOptions {
 	text: string;
 }
 
-async function runPiper(model: string, output: string, text: string) {
+async function runPiper(
+	model: string,
+	output: string,
+	text: string
+): Promise<string> {
 	const piperPath = await findBinaryPath('piper', 'piper');
 	return new Promise((resolve, reject) => {
 		// echo "Test" | .\piper.exe --model .\model.onnx --output_file ./out.wav

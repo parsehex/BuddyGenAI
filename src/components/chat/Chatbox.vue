@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
-import { RefreshCw, RefreshCcwDot, Mic, MicOff } from 'lucide-vue-next';
+import { RefreshCcwDot, Mic, MicOff } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -18,15 +18,9 @@ import {
 } from '@/components/ui/collapsible';
 import { useToast } from '@/components/ui/toast';
 import BuddyCard from '@/components/BuddyCard.vue';
-import type {
-	ChatThread,
-	MergedChatThread,
-	BuddyVersionMerged,
-	ChatMessage,
-} from '@/lib/api/types-db';
+import type { ChatThread, ChatMessage } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
-import { apiMsgsToOpenai } from '@/lib/api/utils';
 import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
 import { AppSettings } from '@/lib/api/AppSettings';
@@ -39,9 +33,8 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { attemptToFixJson, delay, isDevMode, playAudio } from '@/src/lib/utils';
-import { makeAndReadTTS, makeTTS } from '@/src/lib/ai/tts';
-import { cleanTextForTTS } from '@/src/lib/ai/utils';
+import { attemptToFixJson, delay, isDevMode } from '@/src/lib/utils';
+import { makeAndReadTTS } from '@/src/lib/ai/tts';
 import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';

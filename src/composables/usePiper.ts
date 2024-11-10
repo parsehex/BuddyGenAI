@@ -16,7 +16,7 @@ export default function usePiper() {
 		console.time('runPiper');
 		const res = await electron.ipcRenderer.invoke('piper/run', options);
 		console.timeEnd('runPiper');
-		return res;
+		return res as string;
 	};
 
 	return {
