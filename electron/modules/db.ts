@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import log from 'electron-log/main';
 import { findDirectoryInPath, getDataPath, getDirname } from '../fs';
-import { initAppSettings } from '../AppSettings';
+// import { initAppSettings } from '../AppSettings';
 
 const VERBOSE = false;
 
@@ -161,7 +161,8 @@ export default async (mainWindow: BrowserWindow) => {
 		}
 	});
 
-	initAppSettings();
+	// TODO electron doesnt use appsettings now right?
+	// initAppSettings();
 
 	log.log('[-] MODULE::db Initialized');
 };

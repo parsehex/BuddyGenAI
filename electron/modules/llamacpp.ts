@@ -3,9 +3,9 @@ import { findBinaryPath, getDataPath } from '../fs';
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs-extra';
-import { updateModel } from '../routes/message';
+import { updateModel } from '../routes/chat';
 import log from 'electron-log/main';
-import { AppSettings } from '../AppSettings';
+import * as config from '../config';
 import { getLlamaCppApiKey, getLlamaCppPort, getServerPort } from '../rand';
 import { chatTemplateMap, contextLengthMap } from '../LCPP-const';
 
@@ -113,17 +113,11 @@ function startKobold(
 }
 
 async function startServer(modelPath: string, nGpuLayers = 99) {
-	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
-	// if linux or mac, load kobold instead:
-	// get and use image model and whisper model(s)
+	const cfg = config.get();
+	const sdModel = cfg.selected_model_image;
+	const whisperModel = cfg.selected_model_whisper;
 
-	const sdModel = (await AppSettings.get('selected_model_image')) as string;
-	const whisperModel = (await AppSettings.get(
-		'selected_model_whisper'
-	)) as string;
-
-	if (platform === 'linux' || platform === 'darwin')
-		return startKobold(modelPath, sdModel, whisperModel, nGpuLayers);
+	// TODO use providers
 
 	return new Promise<void>(async (resolve, reject) => {
 		const port = getLlamaCppPort();
@@ -132,10 +126,7 @@ async function startServer(modelPath: string, nGpuLayers = 99) {
 
 		if ((await verifyModel(modelPath)) === false) return reject();
 
-		const useGpu = (await AppSettings.get('gpu_enabled_chat')) as 0 | 1;
-		// @ts-ignore
-		const useGpuBool = useGpu === 1 || useGpu === '1.0';
-
+		const useGpuBool = cfg.gpu_enabled_chat;
 		const llamaCppPath = await findBinaryPath('llama.cpp', 'server', useGpuBool);
 		const args = ['--port', port + '', '--model', modelPath];
 
@@ -254,9 +245,17 @@ async function isServerRunning() {
 export default function llamaCppModule(mainWindow: BrowserWindow) {
 	log.info('[-] MODULE::llamacpp Initializing');
 
+	const cfg = config.get();
+
 	ipcMain.handle(
 		'llamacpp/start',
 		async (_, modelPath: string, nGpuLayers: number) => {
+			if (cfg.selected_provider_chat !== 'local') {
+				return { message: 'Provider is not local', error: false };
+			}
+			if (!cfg.selected_model_chat || !modelPath) {
+				return { message: 'No chat model selected', error: true };
+			}
 			if (await isServerRunning()) {
 				return { message: 'Server already running', error: false };
 			}

@@ -1,10 +1,10 @@
-import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
 import { select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
 import useElectron from '@/composables/useElectron';
 import { makePicture } from '@/src/lib/ai/img';
+import appConfig from '@/src/composables/useConfig';
 
 const { dbGet, dbRun, fsAccess, pathJoin } = useElectron();
 
@@ -34,11 +34,12 @@ export default async function createProfilePic(
 	gender = ''
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
+	if (!appConfig) throw new Error('appConfig is not defined');
 
-	const isExternal = AppSettings.get('selected_provider_image') === 'external';
+	const isExternal = appConfig.isExternal('image');
 
-	const modelDir = AppSettings.get('local_model_directory') as string;
-	const selectedImageModel = AppSettings.get('selected_model_image') as string;
+	const selectedImageModel = appConfig.config.value.selected_model_image;
+	const modelDir = appConfig.modelPath('image');
 	let modelPath = '';
 
 	if (!selectedImageModel) throw new Error('No image model selected');

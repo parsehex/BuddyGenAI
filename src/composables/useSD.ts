@@ -2,6 +2,7 @@ import type { SDOptions } from '@/lib/api/types-api';
 
 export default function useSD() {
 	const isServer =
+		// @ts-ignore
 		process.server ||
 		typeof window === 'undefined' ||
 		typeof window.require === 'undefined';
@@ -10,15 +11,25 @@ export default function useSD() {
 
 	if (!isElectron || isServer) return;
 
-	const electron = window.require('electron');
-
 	// TODO getProgress
 
 	const runSD = async (options: SDOptions) => {
-		console.time('runSD');
-		const res = await electron.ipcRenderer.invoke('SD/run', options);
-		console.timeEnd('runSD');
-		return res;
+		// call /api/img/generate
+		const url = 'http://localhost:8079/api/img/generate';
+		const body = {
+			prompt: options.pos,
+			output: options.output,
+			negative: options.neg,
+		};
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		});
+		const data = await response.json();
+		return data.output;
 	};
 
 	return {

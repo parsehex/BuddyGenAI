@@ -40,6 +40,7 @@ import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
 import { complete } from '@/src/lib/ai/complete';
+import appConfig from '@/src/composables/useConfig';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -106,6 +107,12 @@ const scrollToBottom = () => {
 	document.body.scrollTop = 0;
 };
 
+const hasSTT = computed(
+	() =>
+		appConfig?.getActiveProvider('whisper') !== 'disabled' &&
+		appConfig?.modelPath('whisper')
+);
+
 interface Message {
 	role: 'user' | 'assistant';
 	content: string;
@@ -141,6 +148,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			// - save the messages
 			// - generate a title if we're at 3 messages (first message pair)
 
+			if (!appConfig) throw new Error('appConfig not available');
 			if (!pathJoin) throw new Error('pathJoin not available');
 
 			// TODO keep isloading on until we finish everything here
@@ -157,7 +165,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				lastMessage.content = lastMessage.content.replace(noteRegex, '').trim();
 			}
 
-			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
+			// TODO add function to get buddy voice
+			const ttsModel = appConfig.modelPath('tts');
 			let ttsToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
 			if (ttsToSave) {
 				// @ts-ignore
@@ -172,7 +181,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				threadMode.value === 'persona'
 					? currentBuddy.value?.name || ''
 					: 'Assistant';
-			const user = userName;
 
 			const chatImageEnabled = store.settings.chat_image_enabled;
 			const isChatImageEnabled =
@@ -190,7 +198,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							.map(
 								(m) =>
 									({
-										role: m.role === 'user' ? user : assistantName,
+										role: m.role,
 										content: m.content,
 									} as ChatMessage)
 							)
@@ -290,7 +298,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						const quality = store.settings.chat_image_quality;
 
 						await makePicture({
-							absModelPath: store.getImageModelPath(),
+							absModelPath: appConfig.modelPath('image'),
 							outputSubDir,
 							outputFilename: filename,
 							posPrompt: p,
@@ -614,7 +622,8 @@ const startRecording = async () => {
 		return;
 	}
 
-	const whisperModelPath = store.getWhisperModelPath();
+	const whisperModelPath = appConfig?.modelPath('whisper');
+	console.log('whisperModelPath', whisperModelPath);
 	const whisperEnabled = whisperModelPath && whisperModelPath !== '0';
 	if (!whisperEnabled) {
 		toast({
@@ -748,6 +757,7 @@ const startRecording = async () => {
 
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
 			<Button
+				v-if="hasSTT"
 				type="button"
 				size="sm"
 				@click="startRecording"
@@ -796,7 +806,3 @@ const startRecording = async () => {
 		</p>
 	</div>
 </template>
-
-<style lang="scss" scoped>
-//
-</style>

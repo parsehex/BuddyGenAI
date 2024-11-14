@@ -7,6 +7,7 @@ type Settings = Record<string, any>;
 export default async function update(
 	values: Record<string, any>
 ): Promise<Settings> {
+	// TODO this isnt used either right?
 	const keys = Object.keys(values);
 
 	keys.forEach((key: any) => {

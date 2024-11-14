@@ -17,6 +17,7 @@ import ImportModel from '@/components/ImportModel.vue';
 import useLlamaCpp from '../composables/useLlamaCpp';
 import ImportModelPack from './ImportModelPack.vue';
 import { Button } from './ui/button';
+import appConfig from '../composables/useConfig';
 
 const { openExternalLink } = useElectron();
 
@@ -34,10 +35,20 @@ onMounted(() => {
 	setTimeout(() => {
 		updateModels();
 	}, 250);
+
+	const chatProvider = appConfig?.getActiveProvider('chat');
+	const chatModel = appConfig?.modelPath('chat');
+	const hasChat = chatProvider && chatModel;
+	const imageProvider = appConfig?.getActiveProvider('image');
+	const imageModel = appConfig?.modelPath('image');
+	const hasImage = imageProvider && imageModel;
+	if (hasChat && hasImage) {
+		store.proceed = true;
+	}
 });
 
 const onChatModelChange = () => {
-	const selectedChatModel = store.getChatModelPath();
+	const selectedChatModel = appConfig?.modelPath('chat');
 	if (!selectedChatModel) return;
 
 	const llamaCpp = useLlamaCpp();
@@ -45,7 +56,7 @@ const onChatModelChange = () => {
 
 	store.chatServerStarting = true;
 
-	const gpuLayers = store.getNGpuLayers();
+	const gpuLayers = appConfig?.config.value.n_gpu_layers;
 
 	llamaCpp.startServer(selectedChatModel, gpuLayers);
 

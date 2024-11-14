@@ -1,46 +1,36 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
-import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
+import type { MergedChatThread } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
-import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
-import { delay } from '@/lib/utils';
 import { storeToRefs } from 'pinia';
+import appConfig from '../composables/useConfig';
 
 const { toast } = useToast();
 
 const store = useAppStore();
-const {
-	updateModels,
-	updateBuddies,
-	updateSettings,
-	updateThreads,
-	getChatModelPath,
-	getNGpuLayers,
-} = useAppStore();
+const { updateModels, updateBuddies, updateSettings, updateThreads } =
+	useAppStore();
 const { buddies, settings, threads } = storeToRefs(store);
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();
+const isExternal = appConfig?.isExternal('chat');
 
 onMounted(async () => {
-	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
-	if (
-		!isExternal &&
-		!store.chatServerStarting &&
-		!store.chatServerRunning &&
-		settings.value.local_model_directory &&
-		settings.value.selected_model_chat
-	) {
+	if (!isExternal && !store.chatServerStarting && !store.chatServerRunning) {
 		store.chatServerStarting = true;
-		const result = await startServer(getChatModelPath(), getNGpuLayers());
+		const result = await startServer(
+			appConfig?.modelPath('chat'),
+			appConfig?.config.value.n_gpu_layers
+		);
 
 		if (!result) {
 			toast({
@@ -78,26 +68,12 @@ if (settings.value.user_name && settings.value.user_name !== 'User') {
 	console.log(settings.value);
 }
 
-if (settings.value.local_model_directory) {
+if (
+	!appConfig?.isExternal('chat') &&
+	appConfig?.config.value.local_model_directory
+) {
 	await updateModels();
 }
-
-const handleModelChange = async () => {
-	await delay(10);
-
-	if (store.isModelsSetup) {
-		store.chatServerStarting = true;
-		const result = await startServer(getChatModelPath(), getNGpuLayers());
-		if (result.error) {
-			toast({
-				variant: 'destructive',
-				title: 'Error starting chat server',
-				description: result.error,
-			});
-		}
-		store.chatServerRunning = !result.error;
-	}
-};
 
 const getMessageName = (thread: MergedChatThread) => {
 	if (thread.latest_message?.role === 'user') {
@@ -223,7 +199,7 @@ const sortedThreads = computed(() => {
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
 	<FirstTimeSetup v-if="!threads.length && !buddies.length" />
 	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
-		<!-- TODO improve -->
+		<!-- TODO show the Assistant btn / Buddy Dropdown from sidebar here -->
 		You have no chats yet. Create one to get started!
 	</p>
 </template>

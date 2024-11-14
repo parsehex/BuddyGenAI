@@ -57,7 +57,7 @@ const tts = {
 };
 const sd = {
 	progress: () => {
-		const sd = `/api/sd/progress`;
+		const sd = `/api/img/progress`;
 
 		if (isDev) {
 			return `http://localhost:8079${sd}`;

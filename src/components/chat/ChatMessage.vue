@@ -36,6 +36,7 @@ import { makeTTS } from '@/src/lib/ai/tts';
 import urls from '@/src/lib/api/urls';
 import { useToast } from '../ui/toast';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
+import appConfig from '@/src/composables/useConfig';
 
 const { toast } = useToast();
 
@@ -75,7 +76,7 @@ const editingMessage = ref('');
 const modalOpen = ref(false);
 
 const userName = computed(() => {
-	if (isUser.value) return store.settings.user_name;
+	if (isUser.value) return store.settings.user_name || 'User';
 	return '';
 });
 
@@ -121,6 +122,11 @@ const msgInitials = computed(() => {
 	return firstName[0];
 });
 
+const ttsEnabled = computed(
+	() =>
+		appConfig?.getActiveProvider('tts') !== 'disabled' &&
+		appConfig?.modelPath('tts')
+);
 const hasTTS = computed(() => {
 	// @ts-ignore
 	if (!message.value.tts) return false;
@@ -136,7 +142,7 @@ const doTTS = async () => {
 	if (isUser.value) return;
 
 	if (!hasTTS.value) {
-		const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
+		const ttsModel = appConfig?.modelPath('tts');
 		const ttsEnabled = !!ttsModel;
 
 		if (!ttsEnabled) {
@@ -205,7 +211,7 @@ const doTTS = async () => {
 						</span>
 
 						<Button
-							v-if="!isUser"
+							v-if="!isUser && ttsEnabled"
 							@click="doTTS"
 							variant="secondary"
 							size="sm"

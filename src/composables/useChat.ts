@@ -124,7 +124,7 @@ export default function useChat(options: UseChatOptions) {
 		setMessages(options.initialMessages);
 	}
 	(async () => {
-		BaseUrl.value = (await urls.other.llamacppServerUrl()) + '/api/complete';
+		BaseUrl.value = 'http://localhost:8079/api/message';
 	})();
 
 	return {

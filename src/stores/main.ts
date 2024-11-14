@@ -11,6 +11,7 @@ import type {
 import { api } from '@/lib/api';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import urls from '@/lib/api/urls';
+import appConfig from '../composables/useConfig';
 
 // @ts-ignore
 const { isServerRunning } = useLlamaCpp();
@@ -68,7 +69,7 @@ export const useAppStore = defineStore('app', () => {
 	const threads = ref([] as MergedChatThread[]);
 
 	const isExternalProvider = computed(
-		() => settings.value.selected_provider_chat === 'external'
+		() => appConfig?.config.value.selected_provider_chat !== 'local'
 	);
 
 	onBeforeMount(async () => {
@@ -195,66 +196,33 @@ export const useAppStore = defineStore('app', () => {
 		return res;
 	};
 
-	const getNGpuLayers = () => {
-		return settings.value.n_gpu_layers;
-	};
-
-	const getChatModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_chat) return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_chat}`;
-	};
-	const getImageModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_image) return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
-	};
-	const getTTSModelPath = (buddyId?: string) => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_tts) return '';
-		if (settings.value.selected_model_tts === '0') return '';
-
-		let modelToUse = settings.value.selected_model_tts;
-		if (buddyId) {
-			const buddy = buddies.value.find((b) => b.id === buddyId);
-			if (buddy && buddy.tts_voice) {
-				modelToUse = buddy.tts_voice;
-			}
-		}
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${modelToUse}`;
-	};
-	const getWhisperModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_whisper) return '';
-		if (settings.value.selected_model_whisper === '0') return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_whisper}`;
-	};
-
-	// watch(
-	// 	() => route,
-	// 	async (newVal) => {
-	// 		// if we're on a chat thread, get its messages
-	// 		if (newVal.path.includes('chat')) {
-	// 			const threadId = newVal.params.id as string;
-	// 			const res = await api.message.getAll(threadId);
-	// 			if (!res) return;
-	// 			threadMessages.value.length = 0;
-	// 			threadMessages.value.push(...res);
-	// 		}
-	// 	}
-	// );
+	const local_model_directory = computed(
+		() => appConfig?.config.value.local_model_directory
+	);
+	const selected_provider_chat = computed(
+		() => appConfig?.config.value.selected_provider_chat
+	);
+	const selected_provider_image = computed(
+		() => appConfig?.config.value.selected_provider_image
+	);
+	const selected_provider_tts = computed(
+		() => appConfig?.config.value.selected_provider_tts
+	);
+	const selected_provider_whisper = computed(
+		() => appConfig?.config.value.selected_provider_whisper
+	);
+	const selected_model_chat = computed(
+		() => appConfig?.config.value.selected_model_chat
+	);
+	const selected_model_image = computed(
+		() => appConfig?.config.value.selected_model_image
+	);
+	const selected_model_tts = computed(
+		() => appConfig?.config.value.selected_model_tts
+	);
+	const selected_model_whisper = computed(
+		() => appConfig?.config.value.selected_model_whisper
+	);
 
 	watch(
 		settings.value,
@@ -322,21 +290,22 @@ export const useAppStore = defineStore('app', () => {
 
 	const proceed = ref(false);
 
+	// TODO
 	const isModelsSetup = computed(() => {
 		if (proceed.value) return true;
 
 		if (isExternalProvider.value) {
 			return (
 				!!settings.value.external_api_key &&
-				!!settings.value.selected_model_chat &&
-				!!settings.value.selected_model_image
+				!!selected_model_chat.value &&
+				!!selected_model_chat.value
 			);
 		}
-		const hasModelDir = !!settings.value.local_model_directory;
-		const hasChatModel = !!settings.value.selected_model_chat;
-		const hasImageModel = !!settings.value.selected_model_image;
-		const hasTTSModel = !!settings.value.selected_model_tts;
-		const hasWhisperModel = !!settings.value.selected_model_whisper;
+		const hasModelDir = !!local_model_directory.value;
+		const hasChatModel = !!selected_model_chat.value;
+		const hasImageModel = !!selected_model_image.value;
+		const hasTTSModel = !!selected_model_tts.value;
+		const hasWhisperModel = !!selected_model_whisper.value;
 		return (
 			hasModelDir &&
 			hasChatModel &&
@@ -376,11 +345,6 @@ export const useAppStore = defineStore('app', () => {
 		updateSettings,
 		saveSettings,
 		updateThreads,
-		getNGpuLayers,
-		getChatModelPath,
-		getImageModelPath,
-		getTTSModelPath,
-		getWhisperModelPath,
 
 		isExternalProvider,
 		proceed,

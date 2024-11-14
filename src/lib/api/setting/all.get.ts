@@ -1,5 +1,6 @@
-import { AppSettings } from '@/lib/api/AppSettings';
+import appConfig from '@/src/composables/useConfig';
 
 export default async function getAll() {
-	return AppSettings.getSettings();
+	// TODO this isnt used right?
+	return appConfig?.config.value;
 }

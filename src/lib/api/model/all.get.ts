@@ -1,5 +1,5 @@
-import { AppSettings } from '@/lib/api/AppSettings';
 import useElectron from '@/composables/useElectron';
+import appConfig from '@/src/composables/useConfig';
 
 const { dbGet, listDirectory } = useElectron();
 
@@ -8,7 +8,7 @@ export default async function getAll(
 ): Promise<string[]> {
 	if (!dbGet) throw new Error('dbGet not available');
 
-	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
+	const isExternal = appConfig?.isExternal(type);
 
 	if (isExternal) {
 		if (type === 'chat') {
@@ -18,12 +18,13 @@ export default async function getAll(
 		}
 	}
 
-	const directory = AppSettings.get('local_model_directory') as string;
+	const directory = appConfig?.modelPath(type);
 	if (!directory) {
 		console.log('No directory');
 		return [];
 	}
 
+	// TODO get models from api
 	const files = await listDirectory(directory);
 
 	// chat models: .gguf

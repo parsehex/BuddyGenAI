@@ -5,9 +5,8 @@ import { app, BrowserWindow, session, dialog, shell } from 'electron';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
 // import updaterModule from '../updater';
-import macMenuModule from './modules/macMenu';
 import { ipcMain } from 'electron/main';
-import macMenu from './modules/macMenu';
+import appMenu from './modules/appMenu';
 import db from './modules/db';
 import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
@@ -20,9 +19,13 @@ import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
 import rememberWindowState, { loadWindowState } from './window-state';
 import { getLlamaCppPort } from './rand';
+import * as config from './config';
+import settingsLauncherModule from './modules/settings-launcher';
 
 log.initialize();
 log.errorHandler.startCatching();
+
+const cacheObj = {} as Record<string, any>;
 
 // Initilize
 // =========
@@ -53,12 +56,11 @@ async function createWindow() {
 			preload: path.join(__dirname, 'preload.js'),
 		},
 
-		titleBarStyle: 'hiddenInset',
-		// frame: platform === 'darwin',
-		frame: true,
+		frame: platform === 'darwin',
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
 		title: 'BuddyGenAI',
 	});
+	cacheObj.mainWindow = mainWindow;
 
 	if (initialWindowState.maximized) {
 		mainWindow.maximize();
@@ -71,9 +73,12 @@ async function createWindow() {
 	await sdModule(mainWindow);
 	await piperModule(mainWindow);
 	await whisperModule(mainWindow);
+	await settingsLauncherModule(mainWindow);
 
-	mainWindow.removeMenu();
+	// mainWindow.removeMenu();
+	// TODO add native electron menu
 
+	// TODO: move to modules, add composables (useFS, etc)
 	ipcMain.handle('pathJoin', async (_, path: string, ...paths: string[]) => {
 		return join(path, ...paths);
 	});
@@ -278,6 +283,9 @@ app.whenReady().then(async () => {
 	if (!mainWindow) return;
 
 	// Load renderer process
+	// TODO in here is where the settings launcher would go
+	// ui should be able to open launcher too
+	//   which would close main window and open settings window
 	dynamicRenderer(mainWindow);
 
 	// Initialize modules
@@ -297,7 +305,7 @@ app.whenReady().then(async () => {
 	// 		log.error('[!] Module error: ', err.message || err);
 	// 	}
 	// }
-	macMenu(mainWindow);
+	appMenu(mainWindow);
 	// updaterModule(mainWindow);
 
 	// log.debug('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));

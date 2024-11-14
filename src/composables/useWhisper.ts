@@ -10,13 +10,21 @@ export default function useWhisper() {
 
 	if (!isElectron || isServer) return;
 
-	const electron = window.require('electron');
-
 	const runWhisper = async (options: WhisperOptions) => {
-		console.time('runWhisper');
-		const res = await electron.ipcRenderer.invoke('whisper/run', options);
-		console.timeEnd('runWhisper');
-		return res;
+		// send input buffer to /api/stt/transcribe
+		const { input, model } = options;
+		const formData = new FormData();
+		// buffer to blob
+		const blob = new Blob([input], { type: 'audio/webm' });
+		formData.append('file', blob, 'audio.webm');
+		formData.append('model', model);
+
+		const response = await fetch('http://localhost:8079/api/stt/transcribe', {
+			method: 'POST',
+			body: formData,
+		});
+		const data = await response.json();
+		return data;
 	};
 
 	return {

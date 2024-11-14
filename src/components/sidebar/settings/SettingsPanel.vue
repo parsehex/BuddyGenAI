@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import useElectron from '@/composables/useElectron';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -10,60 +10,27 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion } from '@/components/ui/accordion';
 
 import GeneralOptions from './GeneralOptions.vue';
-import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
+import appConfig from '@/src/composables/useConfig';
 
-const { pickDirectory, verifyModelDirectory } = useElectron();
-
-const { updateModels } = useAppStore();
-const store = useAppStore();
-
-const { settings } = storeToRefs(store);
+const hasTTS = computed(
+	() =>
+		appConfig?.getActiveProvider('tts') !== 'disabled' &&
+		appConfig?.modelPath('tts')
+);
+const hasSTT = computed(
+	() =>
+		appConfig?.getActiveProvider('whisper') !== 'disabled' &&
+		appConfig?.modelPath('whisper')
+);
 
 const error = ref('');
-
-const refreshModels = async () => {
-	await updateModels();
-};
-
-if (settings.value.local_model_directory) {
-	await refreshModels();
-}
 
 const reloadPage = () => {
 	window.location.reload();
 };
-
-const pickModelDirectory = async () => {
-	if (!pickDirectory) return console.error('Electron not available');
-
-	if (settings.value.local_model_directory) {
-		console.log(
-			'Local model directory already set:',
-			settings.value.local_model_directory
-		);
-		return;
-	}
-
-	const directory = await verifyModelDirectory();
-	if (!directory) {
-		error.value =
-			'Cound not find a valid model directory. Please select a valid directory.';
-		return;
-	} else {
-		error.value = '';
-	}
-	settings.value.local_model_directory = directory;
-
-	await refreshModels();
-};
-onMounted(() => {
-	if (!settings.value.local_model_directory) {
-		pickModelDirectory();
-	}
-});
 </script>
 
 <template>
@@ -84,10 +51,9 @@ onMounted(() => {
 		</Alert>
 		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
-			<ChatAIOptions />
 			<ImageAIOptions />
-			<TTSOptions />
-			<STTOptions />
+			<TTSOptions v-if="hasTTS" />
+			<STTOptions v-if="hasSTT" />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
 			<Button

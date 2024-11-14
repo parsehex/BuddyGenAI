@@ -6,6 +6,7 @@ module.exports = {
 		'./**/*.html',
 		'./src/**/*.{vue,ts}',
 		'./app.vue',
+		'./settings.vue',
 		'./assets/css/*.css',
 	],
 

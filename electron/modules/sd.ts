@@ -5,10 +5,11 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BrowserWindow, ipcMain } from 'electron';
 import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
-import { AppSettings } from '../AppSettings';
+import * as config from '../config';
 import log from 'electron-log/main';
 import { getLlamaCppPort } from '../rand';
 import axios from 'axios';
+import { getProviderKey } from '../providers/keys';
 
 // also in @/lib/api/types-api
 interface SDOptions {
@@ -35,7 +36,7 @@ async function runOpenai(
 	output: string
 ) {
 	return new Promise(async (resolve, reject) => {
-		const apiKey = (await AppSettings.get('external_api_key')) as string;
+		const apiKey = getProviderKey('openai');
 		const baseURL = 'https://api.openai.com/v1';
 		const openai = new OpenAI({
 			apiKey,
@@ -81,7 +82,7 @@ async function runSD(
 	neg?: string,
 	size = 256,
 	steps = 16
-) {
+): Promise<string> {
 	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 	// if platform is linux, instead call kobold api and save img
 
@@ -118,9 +119,8 @@ async function runSD(
 	const isToonifyRemastered =
 		modelName.includes('toonify') && modelName.includes('remastered');
 
-	const useGpu = (await AppSettings.get('gpu_enabled_image')) as 0 | 1;
-	// @ts-ignore
-	const useGpuBool = useGpu === 1 || useGpu === '1.0';
+	const cfg = config.get();
+	const useGpuBool = cfg.gpu_enabled_image;
 	const sdPath = await findBinaryPath('stable-diffusion.cpp', 'sd', useGpuBool);
 
 	return new Promise((resolve, reject) => {
@@ -214,16 +214,16 @@ async function runSD(
 
 export default function sdModule(mainWindow: BrowserWindow) {
 	log.log('[-] MODULE::SD Initializing');
+	const cfg = config.get();
 
 	ipcMain.handle('SD/run', async (_, options: SDOptions) => {
 		log.log('[-] MODULE::SD Running');
 
-		const isExternal =
-			(await AppSettings.get('selected_provider_image')) === 'external';
-		const apiKey = (await AppSettings.get('external_api_key')) as string;
+		const isExternal = cfg.selected_provider_image !== 'local';
+		const apiKey = getProviderKey(cfg.selected_provider_image as any);
 		if (isExternal && apiKey) {
 			return await runOpenai(
-				(await AppSettings.get('selected_model_image')) as 'dall-e-2' | 'dall-e-3',
+				cfg.selected_model_image as 'dall-e-2' | 'dall-e-3',
 				options.pos,
 				options.output
 			);

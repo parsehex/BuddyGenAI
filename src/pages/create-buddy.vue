@@ -4,18 +4,12 @@ import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import { useToast } from '@/components/ui/toast';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { useAppStore } from '@/stores/main';
+import appConfig from '../composables/useConfig';
 
 const { toast } = useToast();
 
-const {
-	settings,
-	updateModels,
-	updateBuddies,
-	updateSettings,
-	updateThreads,
-	getChatModelPath,
-	getNGpuLayers,
-} = useAppStore();
+const { settings, updateModels, updateBuddies, updateSettings, updateThreads } =
+	useAppStore();
 const store = useAppStore();
 
 // @ts-ignore
@@ -52,10 +46,13 @@ const handleModelChange = async () => {
 		const hasImageModel = !!settings.selected_model_image;
 		const isSetup = hasModelDir && hasChatModel && hasImageModel;
 
-		if (isSetup) {
+		if (isSetup && appConfig) {
 			isModelsSetup.value = true; // hide model setup while waiting
 			store.chatServerStarting = true;
-			const result = await startServer(getChatModelPath(), getNGpuLayers());
+			const result = await startServer(
+				appConfig.modelPath('chat'),
+				appConfig.config.value.n_gpu_layers
+			);
 			store.chatServerRunning = !result.error;
 			store.chatServerStarting = false;
 

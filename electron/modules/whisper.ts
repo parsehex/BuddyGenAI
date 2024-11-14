@@ -3,22 +3,20 @@ import OpenAI from 'openai';
 import { findBinaryPath } from '../fs';
 import fs from 'fs-extra';
 import { BrowserWindow, ipcMain } from 'electron';
-import { startGenerating, stopGenerating, updateProgress } from '../sd-state';
-import { AppSettings } from '../AppSettings';
+import * as config from '../config';
 import log from 'electron-log/main';
-import stream from 'stream';
 import ffmpegStatic from 'ffmpeg-static';
 import { getLlamaCppPort, getLlamaCppApiKey } from '../rand';
 
 const apiKey = getLlamaCppApiKey();
 const openai = new OpenAI({
-	apiKey: apiKey
+	apiKey: apiKey,
 });
 
 const port = getLlamaCppPort();
-	const url = `http://localhost:${port}/v1`;
+const url = `http://localhost:${port}/v1`;
 
-	openai.baseURL = url;
+openai.baseURL = url;
 
 // @/lib/api/types-api
 interface WhisperOptions {
@@ -89,7 +87,7 @@ async function runWhisper(model: string, input: ArrayBuffer) {
 	const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 	// if platform is linux, call kobold api instead
 
-	if (platform === 'linux') {
+	if (platform === 'linux' || platform === 'darwin') {
 		const inputName = 'C:/Users/User/Code/GitHub/BuddyGenAI/input.webm';
 		const outputName = 'C:/Users/User/Code/GitHub/BuddyGenAI/input.wav';
 		await fs.writeFile(inputName, input);
@@ -97,16 +95,14 @@ async function runWhisper(model: string, input: ArrayBuffer) {
 
 		const transcription = await openai.audio.transcriptions.create({
 			file: fs.createReadStream(outputName),
-			model: "whisper-1",
-			response_format: "text",
+			model: 'whisper-1',
+			response_format: 'text',
 		});
 
 		return transcription.text;
 	}
 
-	const useGpu = (await AppSettings.get('gpu_enabled_whisper')) as 0 | 1;
-	// @ts-ignore
-	const useGpuBool = useGpu === 1 || useGpu === '1.0';
+	const useGpuBool = config.get().gpu_enabled_whisper;
 	const whisperPath = await findBinaryPath('whisper.cpp', 'main', useGpuBool);
 
 	return new Promise(async (resolve, reject) => {

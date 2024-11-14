@@ -245,18 +245,18 @@ const refreshProfilePicture = async () => {
 		id,
 		profile_pic_prompt: profilePicturePrompt.value,
 	});
-	const genderPrompt = genderFromName(
-		buddy.value.name,
-		profilePicturePrompt.value
-	);
+	// const genderPrompt = genderFromName(
+	// 	buddy.value.name,
+	// 	profilePicturePrompt.value
+	// );
 	let gender = '';
-	const completion = await complete(genderPrompt, {
-		body: { max_tokens: 5, temperature: 0.01 },
-	});
-	console.log(genderPrompt, completion);
-	if (completion) {
-		gender = completion;
-	}
+	// const completion = await complete(genderPrompt, {
+	// 	body: { max_tokens: 5, temperature: 0.01 },
+	// });
+	// console.log(genderPrompt, completion);
+	// if (completion) {
+	// 	gender = completion;
+	// }
 	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
 
 	buddy.value = await api.buddy.getOne(id);

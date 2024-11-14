@@ -1,5 +1,9 @@
 import type { PiperOptions } from '@/lib/api/types-api';
 
+// TODO route endpoint to get tts
+//   - run-piper
+//   - run-openai
+
 export default function usePiper() {
 	const isServer =
 		process.server ||
@@ -10,13 +14,16 @@ export default function usePiper() {
 
 	if (!isElectron || isServer) return;
 
-	const electron = window.require('electron');
-
 	const runPiper = async (options: PiperOptions) => {
-		console.time('runPiper');
-		const res = await electron.ipcRenderer.invoke('piper/run', options);
-		console.timeEnd('runPiper');
-		return res as string;
+		const res = await fetch('http://localhost:8079/api/tts/generate', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(options),
+		});
+		const data = await res.json();
+		return data.output;
 	};
 
 	return {

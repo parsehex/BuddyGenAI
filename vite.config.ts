@@ -27,5 +27,11 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: isDev,
+		rollupOptions: {
+			input: {
+				index: 'index.html',
+				settings: 'settings.html',
+			},
+		},
 	},
 });

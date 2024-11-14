@@ -3,7 +3,6 @@ import { ref, onMounted, watch, computed } from 'vue';
 import router from '@/lib/router';
 import { useToast } from '@/components/ui/toast';
 import { useAppStore } from '@/stores/main';
-import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

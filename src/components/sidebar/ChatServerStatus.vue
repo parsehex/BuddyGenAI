@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/toast';
 import { delay } from '@/lib/utils';
+import appConfig from '@/src/composables/useConfig';
 
 // @ts-ignore
 const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const { getNGpuLayers, getChatModelPath, updateChatServerRunning } =
-	useAppStore();
+const { updateChatServerRunning } = useAppStore();
 const store = useAppStore();
 
 const { toast } = useToast();
@@ -26,8 +26,19 @@ const { toast } = useToast();
 const lastModel = ref<string | null>(null);
 
 const doStartServer = async () => {
-	const modelPath = getChatModelPath();
-	const nGpuLayers = getNGpuLayers();
+	const isExternal = appConfig?.isExternal('chat');
+	if (isExternal) {
+		// the ui for this shouldnt show up
+		toast({
+			variant: 'destructive',
+			title: 'External',
+			description: 'Cannot start server -- this should not happen, please report',
+		});
+		return;
+	}
+
+	const modelPath = appConfig?.modelPath('chat');
+	const nGpuLayers = appConfig?.config.value.n_gpu_layers;
 	console.log('Starting server with model:', modelPath, nGpuLayers);
 	if (!modelPath) {
 		toast({
@@ -142,6 +153,7 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 			</div>
 		</PopoverTrigger>
 		<PopoverContent class="w-72" :hide-when-detached="true" side="right">
+			<!-- TODO improve info display, show provider + other info -->
 			<div class="flex items-center space-x-4">
 				<div class="space-y-1">
 					<p

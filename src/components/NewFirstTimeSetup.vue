@@ -6,6 +6,7 @@ import { useToast } from './ui/toast';
 import useElectron from '@/composables/useElectron';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import SetupChat from './SetupChat.vue';
+import appConfig from '../composables/useConfig';
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();
@@ -35,19 +36,17 @@ onMounted(async () => {
 const checkToStartServer = async () => {
 	if (store.chatServerStarting || store.chatServerRunning) return;
 
-	const isExternal = store.modelProvider === 'external';
+	// TODO refactor handling
+	const isExternal = appConfig?.isExternal('chat');
+	const model = appConfig?.modelPath('chat');
 	if (
 		!isExternal &&
 		!store.chatServerStarting &&
 		!store.chatServerRunning &&
-		store.settings.local_model_directory &&
-		store.settings.selected_model_chat
+		model
 	) {
 		store.chatServerStarting = true;
-		const result = await startServer(
-			store.getChatModelPath(),
-			store.getNGpuLayers()
-		);
+		const result = await startServer(model, appConfig?.config.value.n_gpu_layers);
 		store.chatServerRunning = !result.error;
 		store.chatServerStarting = false;
 
