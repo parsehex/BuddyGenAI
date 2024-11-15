@@ -16,6 +16,9 @@ import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
 import ProviderOptions from './ProviderOptions.vue';
 import appFeatureSupport from '@/src/composables/useFeatureSupport';
+import useSettingsLauncher from '@/src/composables/useSettingsLauncher';
+
+const launcher = useSettingsLauncher();
 
 const { pickDirectory, verifyModelDirectory } = useElectron();
 
@@ -95,20 +98,11 @@ onMounted(() => {
 		<div class="mt-4 flex flex-col items-center">
 			<Button
 				type="button"
-				@click="reloadPage"
+				@click="launcher?.restartApp()"
 				class="px-4 py-2 rounded-md"
 				variant="ghost"
-				>Reload Page</Button
+				>Restart App</Button
 			>
-			<RouterLink to="/credits">App Credits</RouterLink>
-			<DevOnly>
-				<Button
-					type="button"
-					class="px-4 py-2 mt-2 rounded-md"
-					variant="destructive"
-					>Reset & Close App</Button
-				>
-			</DevOnly>
 		</div>
 	</ScrollArea>
 </template>
