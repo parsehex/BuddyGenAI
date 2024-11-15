@@ -37,17 +37,15 @@ const isExternal = computed(() => appConfig?.isExternal('chat'));
 
 const updateModel = async (model: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_model_chat: model,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedModel.value = model;
 };
 const updateProvider = async (provider: Provider) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_provider_chat: provider,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedProvider.value = provider;
 };
@@ -87,18 +85,16 @@ const nglFocus = () => {
 const nglBlur = async () => {
 	const val = ngl.value;
 	const newCfg = {
-		...appConfig?.config.value,
 		n_gpu_layers: val,
-	} as Config;
+	};
 	if (val !== initialNgl) appConfig?.updateConfig(newCfg);
 };
 
 const useGpu = computed(() => appConfig?.config.value.gpu_enabled_chat);
 const updateUseGPU = async (boolVal: boolean) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		gpu_enabled_chat: boolVal,
-	} as Config;
+	};
 	appConfig?.updateConfig(newCfg);
 };
 </script>

@@ -27,41 +27,36 @@ onMounted(async () => {
 
 const updateOpenaiKey = async (key: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		openai_api_key: key,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	openaiKey.value = key;
 };
 const updateTogetheraiKey = async (key: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		togetherai_api_key: key,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	togetheraiKey.value = key;
 };
 const updateAimlapiKey = async (key: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		aimlapi_api_key: key,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	aimlapiKey.value = key;
 };
 const updateElevenlabsKey = async (key: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		elevenlabs_api_key: key,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	elevenlabsKey.value = key;
 };
 const updateDeepinfraKey = async (key: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		deepinfra_api_key: key,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	deepinfraKey.value = key;
 };

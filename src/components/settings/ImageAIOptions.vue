@@ -34,17 +34,15 @@ const isExternal = computed(() => appConfig?.isExternal('image'));
 
 const updateModel = async (model: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_model_image: model,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedModel.value = model;
 };
 const updateProvider = async (provider: Provider) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_provider_image: provider,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedProvider.value = provider;
 };
@@ -79,9 +77,8 @@ watch(
 const useGpu = computed(() => appConfig?.config.value.gpu_enabled_image);
 const updateUseGPU = async (boolVal: boolean) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		gpu_enabled_image: boolVal,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 };
 </script>
