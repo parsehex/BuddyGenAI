@@ -172,11 +172,11 @@ const pickModelDirectory = async () => {
 
 	await updateModels();
 };
-onMounted(() => {
-	if (!settings.local_model_directory) {
-		pickModelDirectory();
-	}
-});
+// onMounted(() => {
+// 	if (!settings.local_model_directory) {
+// 		pickModelDirectory();
+// 	}
+// });
 
 const handleSave = async () => {
 	if (
