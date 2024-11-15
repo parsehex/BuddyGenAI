@@ -56,7 +56,7 @@ async function createWindow() {
 			preload: path.join(__dirname, 'preload.js'),
 		},
 
-		frame: platform === 'darwin',
+		frame: true,
 		titleBarOverlay: platform === 'darwin' && { height: headerSize },
 		title: 'BuddyGenAI',
 	});
