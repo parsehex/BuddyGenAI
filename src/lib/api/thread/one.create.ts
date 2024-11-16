@@ -4,7 +4,7 @@ import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
 import useElectron from '@/composables/useElectron';
 import * as prompt from '@/src/lib/prompt/buddy';
 import { insert, select } from '@/lib/sql';
-import { defaultAIChatPrompt } from '../../prompt/chat';
+import { defaultAIChatPrompt } from '@/lib/prompt/chat';
 
 const { dbGet, dbRun } = useElectron();
 
