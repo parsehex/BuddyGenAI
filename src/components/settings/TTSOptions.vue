@@ -32,17 +32,15 @@ const isExternal = computed(() => appConfig?.isExternal('tts'));
 
 const updateModel = async (model: string) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_model_tts: model,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedModel.value = model;
 };
 const updateProvider = async (provider: Provider) => {
 	const newCfg = {
-		...appConfig?.config.value,
 		selected_provider_tts: provider,
-	} as Config;
+	};
 	await appConfig?.updateConfig(newCfg);
 	selectedProvider.value = provider;
 };

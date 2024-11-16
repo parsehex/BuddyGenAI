@@ -127,9 +127,10 @@ function UseConfig() {
 
 	return {
 		config,
-		updateConfig: async (newConfig: Config) => {
+		updateConfig: async (newConfig: Partial<Config>) => {
+			console.trace('updateConfig', newConfig);
 			const res = await electron.ipcRenderer.invoke('config:set', newConfig);
-			config.value = { ...newConfig };
+			config.value = { ...res };
 			return res;
 		},
 		isExternal,

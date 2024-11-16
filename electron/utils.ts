@@ -15,3 +15,6 @@ export function debounce(func: (...args: any[]) => void, wait: number) {
 export function removeAccents(input: string): string {
 	return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+export function delay(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}

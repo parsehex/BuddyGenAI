@@ -50,7 +50,10 @@ function UseFeatureSupport() {
 		const list: Provider[] = [];
 		for (const provider in ProviderModelSupport) {
 			if (ProviderModelSupport[provider as Provider].includes(type)) {
-				if (provider === 'local') continue;
+				if (provider === 'local') {
+					list.push(provider as Provider);
+					continue;
+				}
 				// @ts-ignore
 				const key = appConfig?.config.value[`${provider}_api_key`];
 				if (!key) continue;
@@ -82,14 +85,26 @@ function UseFeatureSupport() {
 		appConfig.config,
 		async (newConfig) => {
 			const chatProviders = await getProviders('chat');
+			const chatProvider = appConfig?.getActiveProvider('chat');
+			const chatModel = appConfig?.modelPath('chat');
+			const chatReady = !!(chatProvider && chatModel);
 			const imageProviders = await getProviders('image');
+			const imageProvider = appConfig?.getActiveProvider('image');
+			const imageModel = appConfig?.modelPath('image');
+			const imageReady = !!(imageProvider && imageModel);
 			const ttsProviders = await getProviders('tts');
+			const ttsProvider = appConfig?.getActiveProvider('tts');
+			const ttsModel = appConfig?.modelPath('tts');
+			const ttsReady = !!(ttsProvider && ttsModel);
 			const whisperProviders = await getProviders('whisper');
+			const whisperProvider = appConfig?.getActiveProvider('whisper');
+			const whisperModel = appConfig?.modelPath('whisper');
+			const whisperReady = !!(whisperProvider && whisperModel);
 			featureSupport.value = {
-				chat: chatProviders.length > 0,
-				image: imageProviders.length > 0,
-				tts: ttsProviders.length > 0,
-				whisper: whisperProviders.length > 0,
+				chat: chatProviders.length > 0 && chatReady,
+				image: imageProviders.length > 0 && imageReady,
+				tts: ttsProviders.length > 0 && ttsReady,
+				whisper: whisperProviders.length > 0 && whisperReady,
 			};
 		},
 		{ immediate: true }

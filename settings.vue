@@ -9,7 +9,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import appFeatureSupport from '@/composables/useFeatureSupport';
 import ProviderOptions from '@/components/settings/ProviderOptions.vue';
 
-const launcher = useSettingsLauncher();
 const featSupport = appFeatureSupport;
 
 const settings = ref({} as any);
@@ -75,7 +74,6 @@ const container = ref<HTMLElement | null>(null);
 					</Suspense>
 				</div>
 			</div>
-			<button @click="launcher?.restartApp()">Restart</button>
 			<Toaster />
 		</TooltipProvider>
 	</div>

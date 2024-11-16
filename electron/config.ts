@@ -50,6 +50,7 @@ import { getDataPath } from './fs';
 import { ipcMain } from 'electron';
 import { getProviderModels } from './providers/models';
 import { ModelType } from './providers/types';
+import { delay } from './utils';
 
 let appSettings = { ...SettingsDefaults };
 
@@ -85,11 +86,20 @@ async function load() {
 		appSettings = data;
 	}
 }
-/** Initialize the config file with default settings */
+
+// alright so the problem here is that the mlodel dir is being set to blank on the first save
 async function init() {
 	const filePath = configFilePath();
 	if (!(await exists())) {
 		await fs.writeJson(filePath, SettingsDefaults, { spaces: 2 });
+	}
+
+	if (!appSettings.local_model_directory) {
+		const modelsPath = getDataPath('Models');
+		await fs.mkdir(modelsPath, { recursive: true });
+		appSettings.local_model_directory = modelsPath;
+		console.log(appSettings);
+		save();
 	}
 
 	ipcMain.emit('config:loaded', appSettings);
@@ -104,6 +114,8 @@ async function init() {
 	ipcMain.handle('getModels', async (_, type: ModelType) => {
 		return getProviderModels(type);
 	});
+
+	await delay(100);
 }
 function get() {
 	return appSettings;
@@ -118,8 +130,9 @@ const debounce = (func: (...args: any[]) => void, wait: number) => {
 };
 
 const saveDebounced = debounce(async () => {
+	console.log(appSettings);
 	await fs.writeJson(configFilePath(), appSettings, { spaces: 2 });
-}, 5000);
+}, 250);
 
 async function save() {
 	await saveDebounced();
