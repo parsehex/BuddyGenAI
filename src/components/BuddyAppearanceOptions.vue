@@ -16,18 +16,17 @@ import {
 import { Input } from '@/components/ui/input';
 import Spinner from '@/components/Spinner.vue';
 import DevOnly from '@/components/DevOnly.vue';
-import { appearanceOptionsFromNameAndDescription } from '../lib/prompt/appearance';
-import urls from '../lib/api/urls';
-import type { BuddyVersionMerged } from '../lib/api/types-db';
-import { appearanceToPrompt } from '../lib/prompt/appearance';
-import { attemptToFixJson } from '../lib/utils';
-import { useAppStore } from '../stores/main';
+import { appearanceOptionsFromNameAndDescription } from '@/lib/prompt/appearance';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
+import { appearanceToPrompt } from '@/lib/prompt/appearance';
+import { attemptToFixJson } from '@/lib/utils';
+import { useAppStore } from '@/stores/main';
 import { useToast } from './ui/toast';
 import {
 	categories,
 	type AppearanceCategory,
 	type SelectedAppearanceOptions,
-} from '../lib/ai/appearance-options';
+} from '@/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
 
 const store = useAppStore();

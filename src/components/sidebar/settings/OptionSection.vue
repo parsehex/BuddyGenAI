@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue';
-import { Label } from '../../ui/label';
+import { Label } from '@/components/ui/label';
 
 // props: take optional label and optional labelName
 const props = defineProps({

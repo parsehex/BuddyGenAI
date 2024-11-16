@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import urls from '@/lib/api/urls';
 import { delay } from '@/lib/utils';
 import GenericChatMessage from './GenericChatMessage.vue';
 import { useToast } from './ui/toast';
 import { complete } from '@/lib/ai/complete';
-import useChat from '../composables/useChat';
+import useChat from '@/composables/useChat';
 
 const { toast } = useToast();
 

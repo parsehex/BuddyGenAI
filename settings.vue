@@ -6,8 +6,8 @@ import useSettingsLauncher from '@/composables/useSettingsLauncher';
 import SettingsPanel from '@/components/settings/SettingsPanel.vue';
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import appFeatureSupport from './src/composables/useFeatureSupport';
-import ProviderOptions from './src/components/settings/ProviderOptions.vue';
+import appFeatureSupport from '@/composables/useFeatureSupport';
+import ProviderOptions from '@/components/settings/ProviderOptions.vue';
 
 const launcher = useSettingsLauncher();
 const featSupport = appFeatureSupport;

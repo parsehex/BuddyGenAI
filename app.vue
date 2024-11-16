@@ -24,8 +24,8 @@ import useElectron from '@/composables/useElectron';
 import { useColorMode } from '@vueuse/core';
 import { delay, isDevMode } from '@/lib/utils';
 import { useAppStore } from './src/stores/main';
-import { Label } from './src/components/ui/label';
-import { TooltipProvider } from './src/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const store = useAppStore();
 

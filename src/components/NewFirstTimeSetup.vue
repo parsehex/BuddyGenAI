@@ -6,7 +6,7 @@ import { useToast } from './ui/toast';
 import useElectron from '@/composables/useElectron';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import SetupChat from './SetupChat.vue';
-import appConfig from '../composables/useConfig';
+import appConfig from '@/composables/useConfig';
 
 // @ts-ignore
 const { startServer } = useLlamaCpp();

@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { computed } from 'vue';
 
 const route = useRoute();
-// const id = route.params.id as string;
+// @ts-ignore
 const id = computed(() => route.params.id as string);
 
 const getInitialMessages = async () => {

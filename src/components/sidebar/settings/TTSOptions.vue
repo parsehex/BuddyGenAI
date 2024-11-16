@@ -8,17 +8,7 @@ import {
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectGroup,
-	SelectLabel,
-	SelectItem,
-} from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
-import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 

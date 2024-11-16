@@ -17,7 +17,7 @@ import { genderFromName } from '@/lib/prompt/sd';
 import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
-import { isDescriptionValid, isNameValid } from '../lib/ai/general';
+import { isDescriptionValid, isNameValid } from '@/lib/ai/general';
 import BuddyTagsInput from './BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';

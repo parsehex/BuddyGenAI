@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import urls from '@/lib/api/urls';
-import type { BuddyVersionMerged } from '../lib/api/types-db';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;

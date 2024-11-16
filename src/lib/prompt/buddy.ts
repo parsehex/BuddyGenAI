@@ -1,4 +1,4 @@
-import { AppSettings } from '../api/AppSettings';
+import { AppSettings } from '@/lib/api/AppSettings';
 
 function SentientBuddy(
 	userName: string,

@@ -14,10 +14,10 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import ImportModel from '@/components/ImportModel.vue';
-import useLlamaCpp from '../composables/useLlamaCpp';
+import useLlamaCpp from '@/composables/useLlamaCpp';
 import ImportModelPack from './ImportModelPack.vue';
 import { Button } from './ui/button';
-import appConfig from '../composables/useConfig';
+import appConfig from '@/composables/useConfig';
 
 const { openExternalLink } = useElectron();
 

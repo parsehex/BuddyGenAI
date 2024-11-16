@@ -7,7 +7,6 @@ import router from '@/lib/router';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Button from '@/components/ui/button/Button.vue';
 import type {
-	ChatThread,
 	MergedChatThread,
 	BuddyVersionMerged,
 	ChatMessage,
@@ -19,6 +18,7 @@ import AllThreadsImages from '@/src/components/AllThreadsImages.vue';
 import { ScrollArea } from '@/src/components/ui/scroll-area';
 
 const route = useRoute();
+// @ts-ignore
 const id = route.params.id as string;
 
 const buddy = ref(null as BuddyVersionMerged | null);

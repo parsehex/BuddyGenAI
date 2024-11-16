@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,8 +11,7 @@ import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { useToast } from '@/components/ui/toast';
-import { storeToRefs } from 'pinia';
-import appConfig from '../composables/useConfig';
+import appConfig from '@/composables/useConfig';
 
 const { toast } = useToast();
 

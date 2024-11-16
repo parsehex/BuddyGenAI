@@ -4,7 +4,7 @@ import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
 import { useToast } from '@/components/ui/toast';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import { useAppStore } from '@/stores/main';
-import appConfig from '../composables/useConfig';
+import appConfig from '@/composables/useConfig';
 
 const { toast } = useToast();
 

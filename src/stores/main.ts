@@ -7,11 +7,10 @@ import type {
 	BuddyVersionMerged,
 	SQLiteVal,
 } from '@/lib/api/types-db';
-
 import { api } from '@/lib/api';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import urls from '@/lib/api/urls';
-import appConfig from '../composables/useConfig';
+import appConfig from '@/composables/useConfig';
 
 // @ts-ignore
 const { isServerRunning } = useLlamaCpp();

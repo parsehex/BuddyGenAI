@@ -3,7 +3,7 @@ import {
 	notes,
 	type AppearanceCategory,
 	type SelectedAppearanceOptions,
-} from '../ai/appearance-options';
+} from '@/lib/ai/appearance-options';
 
 export function appearanceToPrompt(
 	appearance: SelectedAppearanceOptions
