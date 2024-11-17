@@ -382,7 +382,12 @@ const openLink = (link: string) => {
 						parsehex
 					</span>
 					)
-					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
+					<span
+						class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800"
+						@click="
+							openLink('https://github.com/parsehex/BuddyGenAI/blob/main/LICENSE')
+						"
+					>
 						MIT license
 					</span>
 				</p>
