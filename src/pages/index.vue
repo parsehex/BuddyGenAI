@@ -27,44 +27,6 @@ const {
 } = useAppStore();
 const { buddies, settings, threads } = storeToRefs(store);
 
-// @ts-ignore
-const { startServer } = useLlamaCpp();
-
-onMounted(async () => {
-	const isExternal = AppSettings.get('selected_provider_chat') === 'external';
-	if (
-		!isExternal &&
-		!store.chatServerStarting &&
-		!store.chatServerRunning &&
-		settings.value.local_model_directory &&
-		settings.value.selected_model_chat
-	) {
-		store.chatServerStarting = true;
-		const result = await startServer(getChatModelPath(), getNGpuLayers());
-
-		if (!result) {
-			toast({
-				variant: 'destructive',
-				title: 'Error starting chat server',
-				description: 'No response from server',
-			});
-			// add error state
-			return;
-		}
-
-		store.chatServerRunning = !result.error;
-		store.chatServerStarting = false;
-
-		if (result.error) {
-			toast({
-				variant: 'destructive',
-				title: 'Error starting chat server',
-				description: result.error,
-			});
-		}
-	}
-});
-
 await updateBuddies();
 await updateThreads();
 
@@ -81,32 +43,6 @@ if (settings.value.user_name && settings.value.user_name !== 'User') {
 if (settings.value.local_model_directory) {
 	await updateModels();
 }
-
-const handleModelChange = async () => {
-	await delay(10);
-
-	if (store.isModelsSetup) {
-		store.chatServerStarting = true;
-		const result = await startServer(getChatModelPath(), getNGpuLayers());
-		if (result.error) {
-			toast({
-				variant: 'destructive',
-				title: 'Error starting chat server',
-				description: result.error,
-			});
-		}
-		store.chatServerRunning = !result.error;
-	}
-};
-
-const getMessageName = (thread: MergedChatThread) => {
-	if (thread.latest_message?.role === 'user') {
-		return userNameValue.value;
-	} else if (thread.latest_message?.role === 'assistant') {
-		// console.log(thread.selected_buddy);
-		return thread.selected_buddy?.name || 'AI';
-	}
-};
 
 const MaxMessageLength = 150;
 const getMessageContent = (thread: MergedChatThread) => {
@@ -146,12 +82,6 @@ const sortedThreads = computed(() => {
 </script>
 
 <template>
-	<!-- TODO remaining FTE -->
-	<!-- allow editing description (or something to fix broken generations) -->
-	<!-- instructions to acquire models -->
-
-	<!-- show spinner while chat is starting -->
-
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">
@@ -221,7 +151,7 @@ const sortedThreads = computed(() => {
 	</div>
 
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
-	<FirstTimeSetup v-if="!threads.length && !buddies.length" />
+	<FirstTimeSetup v-if="!AppSettings.get('openrouter_api_key')" />
 	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
 		<!-- TODO improve -->
 		You have no chats yet. Create one to get started!

@@ -9,6 +9,7 @@ import type {
 import axios from 'axios';
 import { v4 } from 'uuid';
 import urls from '@/lib/api/urls';
+import { AppSettings } from '@/lib/api/AppSettings'
 
 interface UseChatOptions {
 	initialMessages?: ChatMessage[];
@@ -19,6 +20,10 @@ interface UseChatOptions {
 
 export default function useChat(options: UseChatOptions) {
 	const BaseUrl = ref('');
+	const headers = ref({
+		'Content-Type': 'application/json',
+		'X-Title': 'BuddyGFenAI',
+	} as Record<string, any>);
 
 	const messages = ref([] as ChatMessage[]);
 	const input = ref('');
@@ -26,7 +31,18 @@ export default function useChat(options: UseChatOptions) {
 
 	const controller = new AbortController();
 
+	function setAPIKeyHeader() {
+		const key = AppSettings.get('openrouter_api_key') as string;
+		if (!key || key === 'demo') return;
+		headers.value['Authorization'] = 'Bearer ' + key;
+	}
+
 	async function handleSubmit(e: Event, skipUserMsg = false) {
+		setAPIKeyHeader();
+		if (!headers.value['Authorization']) {
+			throw new Error('Must connect OpenRouter account');
+		}
+
 		// construct message obj, add to messages
 		if (!skipUserMsg) {
 			const userMsg = {
@@ -59,9 +75,7 @@ export default function useChat(options: UseChatOptions) {
 		await axios({
 			url: BaseUrl.value,
 			method: 'post',
-			headers: {
-				'Content-Type': 'application/json',
-			},
+			headers: headers.value,
 			signal: controller.signal,
 			data: { ...options.body, messages: messages.value, stream: true },
 			onDownloadProgress: (progressEvent) => {
@@ -124,7 +138,7 @@ export default function useChat(options: UseChatOptions) {
 		setMessages(options.initialMessages);
 	}
 	(async () => {
-		BaseUrl.value = (await urls.other.llamacppServerUrl()) + '/api/complete';
+		BaseUrl.value = (await urls.other.llamacppServerUrl());
 	})();
 
 	return {

@@ -6,6 +6,7 @@ const { dbGet, dbAll, dbRun } = useElectron();
 
 type AppSettingsKeys =
 	| 'user_name'
+	| 'openrouter_api_key'
 	| 'local_model_directory'
 	| 'selected_provider_chat'
 	| 'selected_provider_image'
@@ -28,6 +29,7 @@ type AppSettingsKeys =
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
+	openrouter_api_key: '',
 	local_model_directory: '', // should have chat/ and image/ subdirectories
 	selected_provider_chat: 'local',
 	selected_provider_image: 'local',
@@ -47,16 +49,6 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	auto_read_chat: 0,
 	auto_start_server: 0,
 	skip_start_dialog: 0,
-	// preferred_pic_quality (1 | 2 | 3)
-	// used_binary_type_llamacpp (avx2 | clblast | cuda12 | arm64 | etc.)
-	// used_binary_type_sd (avx2 | clblast | cuda12 | arm64 | etc.)
-	//   ^^ base these options on what is available at runtime
-};
-
-// TODO AppSettings method to validate
-const validations = {
-	selected_provider_chat: ['external', 'local', 'custom'],
-	selected_provider_image: ['local'], // ['external', 'local', 'custom'],
 };
 
 class AppSettingsCls {

@@ -124,7 +124,7 @@ const doLinkFile = async () => {
 	emit('modelImport');
 };
 
-const slash = process.platform === 'win32' ? '\\' : '/';
+const slash = '/';
 const maxLength = 25;
 
 const fileNames = computed(() => {

@@ -102,7 +102,6 @@ watch(
 		<div class="h-screen">
 			<TabsContent value="chat">
 				<div class="bg-background mb-1">
-					<ChatServerStatus v-if="!store.isExternalProvider" />
 					<div class="flex w-full px-2 my-1 items-end">
 						<BuddySelect
 							@select="(id: any) => {

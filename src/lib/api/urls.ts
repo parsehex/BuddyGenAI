@@ -15,9 +15,7 @@ const other = {
 		return await lcpp.getBaseUrl();
 	},
 	llamacppServerUrl: async () => {
-		const lcpp = useLlamaCpp();
-		if (!lcpp) return '';
-		return await lcpp.getServerUrl();
+		return 'https://openrouter.ai/api/v1/chat/completions';
 	},
 };
 

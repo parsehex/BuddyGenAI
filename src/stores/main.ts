@@ -9,11 +9,7 @@ import type {
 } from '@/lib/api/types-db';
 
 import { api } from '@/lib/api';
-import useLlamaCpp from '@/composables/useLlamaCpp';
 import urls from '@/lib/api/urls';
-
-// @ts-ignore
-const { isServerRunning } = useLlamaCpp();
 
 const lastFetchMap: Record<string, number> = {};
 function shouldGet(name: string, interval: number) {
@@ -274,8 +270,7 @@ export const useAppStore = defineStore('app', () => {
 	const chatServerRunning = ref(false);
 	const chatServerStarting = ref(false);
 	const updateChatServerRunning = async () => {
-		const running: { isRunning: boolean } = await isServerRunning();
-		chatServerRunning.value = running.isRunning;
+		chatServerRunning.value = false;
 	};
 
 	const imgGenerating = ref(false);
@@ -286,32 +281,6 @@ export const useAppStore = defineStore('app', () => {
 	const updateImgProgress = (val: number) => {
 		imgProgress.value = val;
 	};
-
-	function getSDProgress() {
-		const eventSource = new EventSource(urls.sd.progress());
-
-		eventSource.onmessage = function (event) {
-			const data = JSON.parse(event.data);
-			if (data.type === 'start') {
-				updateImgProgress(0);
-				updateImgGenerating(true);
-			} else if (data.type === 'stop') {
-				updateImgProgress(1);
-				updateImgGenerating(false);
-			} else if (data.type === 'progress') {
-				if (data.progress >= 0.95) {
-					updateImgGenerating(false);
-				}
-				updateImgProgress(data.progress);
-			}
-		};
-
-		eventSource.onerror = function (error) {
-			updateImgGenerating(false);
-			updateImgProgress(0);
-		};
-	}
-	getSDProgress();
 
 	// newHere if db is fresh or if there are no threads or buddies
 	const newHere = computed(
