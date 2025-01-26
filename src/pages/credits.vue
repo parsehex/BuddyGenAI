@@ -53,6 +53,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'dexie',
+		link: 'https://github.com/dexie/Dexie.js',
+		author: 'David Fahlander, Awarica AB',
+		license: 'Apache-2.0',
+	},
+	{
 		name: 'electron',
 		link: 'https://github.com/electron/electron#readme',
 		author: 'Electron contributors, GitHub Inc.',
