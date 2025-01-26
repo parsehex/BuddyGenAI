@@ -1,48 +1,31 @@
 export default function useLlamaCpp() {
-	const isServer =
-		process.server ||
-		typeof window === 'undefined' ||
-		typeof window.require === 'undefined';
-	const isElectron =
-		!isServer && navigator.userAgent.toLowerCase().includes('electron');
-
-	if (!isElectron || isServer) return;
-
-	const electron = window.require('electron');
-
 	const startServer = async (modelPath: string, gpuLayers = 35) => {
-		console.log('Starting server', modelPath);
-		// return;
-		return await electron.ipcRenderer.invoke(
-			'llamacpp/start',
-			modelPath,
-			gpuLayers
-		);
+		console.log('no-op: startServer', modelPath, gpuLayers);
+		return false;
 	};
 
 	const stopServer = async () => {
-		console.log('Stopping server');
-		// return;
-		await electron.ipcRenderer.invoke('llamacpp/stop');
+		console.log('no-op: stopServer');
 	};
 
 	const isServerRunning = async () => {
-		return await electron.ipcRenderer.invoke('llamacpp/status');
+		console.log('no-op: isServerRunning');
+		return false;
 	};
 
 	const getLastModel = async () => {
-		const p = await electron.ipcRenderer.invoke('llamacpp/lastModel');
-		const slash = p.lastModel.includes('\\') ? '\\' : '/';
-		const filename = p.lastModel.split(slash).pop();
-		return filename;
+		console.log('no-op: getLastModel');
+		return '';
 	};
 
 	const getBaseUrl = async () => {
-		return (await electron.ipcRenderer.invoke('llamacpp/baseUrl')) as string;
+		console.log('no-op: getBaseUrl');
+		return '';
 	};
 
 	const getServerUrl = async () => {
-		return (await electron.ipcRenderer.invoke('llamacpp/serverUrl')) as string;
+		console.log('no-op: getServerUrl');
+		return '';
 	};
 
 	return {

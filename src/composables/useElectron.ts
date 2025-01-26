@@ -1,152 +1,159 @@
-import { ref } from 'vue';
+import { db } from '@/lib/db/schema';
+import type { RunOperation, SelectOperation } from '../lib/sql';
 
 export default function useElectron() {
-	const isServer =
-		process.server ||
-		typeof window === 'undefined' ||
-		typeof window.require === 'undefined';
-	const isElectron =
-		!isServer && navigator.userAgent.toLowerCase().includes('electron');
-
-	if (!isElectron || isServer) return { isElectron };
-
-	// Initialize electron
-	const electron = window.require('electron');
-
 	const copyToClipboard = (text: string) => {
-		electron.clipboard.writeText(text);
+		const input = document.createElement('input');
+		input.setAttribute('value', text);
+		document.body.appendChild(input);
+		input.select();
+		document.execCommand('copy');
+		document.body.removeChild(input);
 	};
 
 	const toggleDevTools = () => {
-		electron.ipcRenderer.invoke('toggleDevTools:app', null);
+		console.log('no-op: toggleDevTools');
 	};
 
 	const pickDirectory = async () => {
-		const result = await electron.ipcRenderer.invoke('pickDirectory:app', null);
-		return result;
+		console.log('no-op: pickDirectory');
 	};
 
 	const verifyModelDirectory = async () => {
-		const result = await electron.ipcRenderer.invoke('verifyModelDirectory:app');
-		return result;
+		console.log('no-op: verifyModelDirectory');
 	};
 
-	const dbRun = async (query: string, params: any[] = []) => {
-		const result = await electron.ipcRenderer.invoke('db:run', query, params);
-		if (result?.error) {
-			console.error(result.error);
+	async function dbGet(query: SelectOperation, params: any[]) {
+		const { type, table, conditions } = query;
+		const dbTable = (db as any)[table];
+
+		if (type === 'SELECT') {
+			if (conditions && Object.keys(conditions).length > 0) {
+				return await dbTable.where(conditions).first();
+			}
+			return await dbTable.toCollection().first();
 		}
-		return result;
-	};
-	const dbGet = async (query: string, params: any[] = []) => {
-		const result = await electron.ipcRenderer.invoke('db:get', query, params);
-		if (result?.error) {
-			console.error(result.error);
+
+		throw new Error(`Unsupported operation for dbGet: ${type}`);
+	}
+
+	async function dbAll(query: SelectOperation, params: any[]) {
+		const { type, table, conditions } = query;
+		const dbTable = (db as any)[table];
+
+		if (type === 'SELECT') {
+			if (conditions && Object.keys(conditions).length > 0) {
+				return await dbTable.where(conditions).toArray();
+			}
+			return await dbTable.toArray();
 		}
-		return result;
-	};
-	const dbAll = async (query: string, params: any[] = []) => {
-		const result = await electron.ipcRenderer.invoke('db:all', query, params);
-		if (result?.error) {
-			console.error(result.error);
+
+		throw new Error(`Unsupported operation for dbAll: ${type}`);
+	}
+
+	async function dbRun(query: RunOperation, params: any[]) {
+		const { type, table, conditions } = query;
+		const dbTable = (db as any)[table];
+
+		switch (type) {
+			case 'INSERT':
+				return await dbTable.add(query.data);
+
+			case 'UPDATE':
+				if (conditions && Object.keys(conditions).length > 0) {
+					return await dbTable.where(conditions).modify(query.data);
+				}
+				throw new Error('Update requires conditions');
+
+			case 'DELETE':
+				if (conditions && Object.keys(conditions).length > 0) {
+					return await dbTable.where(conditions).delete();
+				}
+				throw new Error('Delete requires conditions');
+
+			default:
+				throw new Error(`Unsupported operation: ${type}`);
 		}
-		return result;
-	};
+	}
 
 	const pathJoin = async (path: string, ...paths: string[]): Promise<string> => {
-		const result = await electron.ipcRenderer.invoke('pathJoin', path, ...paths);
-		return result;
+		console.log('no-op: pathJoin', path, ...paths);
+		return '';
 	};
 	const pathResolve = async (
 		path: string,
 		...paths: string[]
 	): Promise<string> => {
-		const result = await electron.ipcRenderer.invoke(
-			'pathResolve',
-			path,
-			...paths
-		);
-		return result;
+		console.log('no-op: pathResolve', path, ...paths);
+		return '';
 	};
 	const dirname = async (path: string): Promise<string> => {
-		const result = await electron.ipcRenderer.invoke('pathDirname', path);
-		return result;
+		console.log('no-op: dirname', path);
+		return '';
 	};
 	const basename = async (path: string): Promise<string> => {
-		const result = await electron.ipcRenderer.invoke('pathBasename', path);
-		return result;
+		console.log('no-op: basename', path);
+		return '';
 	};
 	const fsAccess = async (path: string): Promise<boolean> => {
-		const result = await electron.ipcRenderer.invoke('fsAccess', path);
-		return result;
+		console.log('no-op: fsAccess', path);
+		return false;
 	};
 	const fsUnlink = async (path: string): Promise<boolean> => {
-		const result = await electron.ipcRenderer.invoke('fsUnlink', path);
-		return result;
+		console.log('no-op: fsUnlink', path);
+		return false;
 	};
 	const listDirectory = async (directory: string): Promise<string[]> => {
-		const result = await electron.ipcRenderer.invoke('listDirectory', directory);
-		return result;
+		console.log('no-op: listDirectory', directory);
+		return [];
 	};
 	const mkdir = async (directory: string): Promise<boolean> => {
-		const result = await electron.ipcRenderer.invoke('mkdir', directory);
-		return result;
+		console.log('no-op: mkdir', directory);
+		return false;
 	};
 	const fileURLToPath = (url: string) => {
-		const result = electron.ipcRenderer.invoke('fileURLToPath', url);
-		return result;
+		console.log('no-op: fileURLToPath', url);
+		return '';
 	};
 
 	const getDataPath = async (subPath?: string) => {
-		const result = await electron.ipcRenderer.invoke('getDataPath', subPath);
-		return result;
+		console.log('no-op: getDataPath', subPath);
+		return '';
 	};
 
 	const openExternalLink = async (url: string) => {
-		await electron.ipcRenderer.invoke('openExternalLink', url);
+		console.log('no-op: openExternalLink', url);
 	};
 
 	const openModelsDirectory = async () => {
-		const result = await electron.ipcRenderer.invoke('openModelDirectory:app');
-		return result;
+		console.log('no-op: openModelsDirectory');
 	};
 
 	const pickFile = async (fileType?: 'chat' | 'image' | 'tts' | 'stt') => {
-		const result = await electron.ipcRenderer.invoke('pickFile:app', fileType);
-		return result;
+		console.log('no-op: pickFile', fileType);
+		return [];
 	};
 	const pickPackFile = async () => {
-		const result = await electron.ipcRenderer.invoke('pickPackFile:app');
-		return result;
+		console.log('no-op: pickPackFile');
+		return [];
 	};
 	const importPack = async (source: string) => {
-		const result = await electron.ipcRenderer.invoke('importPack:app', source);
-		return result;
+		console.log('no-op: importPack', source);
 	};
 	const moveFile = async (source: string, destination: string) => {
-		const result = await electron.ipcRenderer.invoke(
-			'moveFile:app',
-			source,
-			destination
-		);
-		return result;
+		console.log('no-op: moveFile', source, destination);
 	};
 	const linkFile = async (source: string, destination: string) => {
-		const result = await electron.ipcRenderer.invoke(
-			'linkFile:app',
-			source,
-			destination
-		);
-		return result;
+		console.log('no-op: linkFile', source, destination);
 	};
 
 	const closeApp = async () => {
-		await electron.ipcRenderer.invoke('closeApp');
+		console.log('no-op: closeApp');
 	};
 
 	return {
 		copyToClipboard,
-		isElectron,
+		isElectron: false,
 		toggleDevTools,
 		pickDirectory,
 		pickFile,
@@ -172,4 +179,14 @@ export default function useElectron() {
 		openModelsDirectory,
 		closeApp,
 	};
+}
+
+function parseOperation(query: string) {
+	try {
+		// This assumes the second parameter of the returned array from sql functions
+		// contains the operation object
+		return JSON.parse(query);
+	} catch {
+		return null;
+	}
 }

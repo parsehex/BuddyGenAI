@@ -1,54 +1,80 @@
 type QueryParams = { [key: string]: any };
 
-export function select(
-	table: string,
-	fields: string[] = ['*'],
-	conditions: QueryParams = {}
-): [string, any[]] {
-	const query = `SELECT ${fields.join(', ')} FROM ${table} ${buildWhereClause(
-		conditions
-	)}`;
-	const params = Object.values(conditions);
-	return [query, params];
+interface BaseOperation {
+  type: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';
+  table: string;
+  conditions?: QueryParams;
 }
 
-export function insert(table: string, data: QueryParams): [string, any[]] {
-	const entries = Object.entries(data).filter(
-		([key, value]) => value !== undefined
-	);
-	const fields = entries.map(([key, value]) => key);
-	const values = entries.map(([key, value]) => value);
-	const placeholders = fields.map((_, i) => `?`);
-	const query = `INSERT INTO ${table} (${fields.join(
-		', '
-	)}) VALUES (${placeholders.join(', ')})`;
-	return [query, values];
+export interface SelectOperation extends BaseOperation {
+  type: 'SELECT';
+  fields: string[] | null;
+}
+
+export interface InsertOperation extends BaseOperation {
+  type: 'INSERT';
+  data: QueryParams;
+}
+
+export interface UpdateOperation extends BaseOperation {
+  type: 'UPDATE';
+  data: QueryParams;
+}
+
+export interface DeleteOperation extends BaseOperation {
+  type: 'DELETE';
+}
+
+export type RunOperation = InsertOperation | UpdateOperation | DeleteOperation;
+
+function removeNullUndefined(obj: QueryParams): QueryParams {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, value]) => value !== null && value !== undefined)
+  );
+}
+
+export function select(
+  table: string,
+  fields: string[] = ['*'],
+  conditions: QueryParams = {}
+): [SelectOperation, any] {
+	const result: SelectOperation = {
+    type: 'SELECT',
+    table,
+    fields: fields.length === 1 && fields[0] === '*' ? null : fields,
+    conditions: removeNullUndefined(conditions)
+  };
+  return [result, null];
+}
+
+export function insert(table: string, data: QueryParams): [InsertOperation, any] {
+  const result: InsertOperation = {
+    type: 'INSERT',
+    table,
+    data: removeNullUndefined(data)
+  };
+	return [result, null];
 }
 
 export function update(
-	table: string,
-	data: QueryParams,
-	conditions: QueryParams
-): [string, any[]] {
-	const setClause = Object.keys(data)
-		.map((field, i) => `${field} = ?`)
-		.join(', ');
-	const whereClause = buildWhereClause(conditions, Object.keys(data).length);
-	const query = `UPDATE ${table} SET ${setClause} ${whereClause}`;
-	const params = [...Object.values(data), ...Object.values(conditions)];
-	return [query, params];
+  table: string,
+  data: QueryParams,
+  conditions: QueryParams
+): [UpdateOperation, any] {
+  const result: UpdateOperation = {
+    type: 'UPDATE',
+    table,
+    data: removeNullUndefined(data),
+    conditions: removeNullUndefined(conditions)
+  };
+	return [result, null];
 }
 
-export function del(table: string, conditions: QueryParams): [string, any[]] {
-	const query = `DELETE FROM ${table} ${buildWhereClause(conditions)}`;
-	const params = Object.values(conditions);
-	return [query, params];
-}
-
-function buildWhereClause(conditions: QueryParams, offset: number = 0): string {
-	if (Object.keys(conditions).length === 0) return '';
-	const clause = Object.keys(conditions)
-		.map((field, i) => `${field} = ?`)
-		.join(' AND ');
-	return `WHERE ${clause}`;
+export function del(table: string, conditions: QueryParams): [DeleteOperation, any] {
+  const result: DeleteOperation = {
+    type: 'DELETE',
+    table,
+    conditions: removeNullUndefined(conditions)
+  };
+	return [result, null];
 }
