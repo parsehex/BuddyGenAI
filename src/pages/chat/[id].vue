@@ -9,8 +9,15 @@ const route = useRoute();
 const id = computed(() => route.params.id as string);
 
 const getInitialMessages = async () => {
-	const messages = await api.message.getAll(id.value);
-	return messages;
+	try {
+		const messages = await api.message.getAll(id.value);
+		return messages;
+	} catch (err: any) {
+		if (err.message?.includes('not found')) {
+			window.location.href= '/';
+		}
+		return [];
+	}
 };
 </script>
 

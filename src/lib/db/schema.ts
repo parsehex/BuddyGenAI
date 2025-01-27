@@ -64,7 +64,7 @@ class AppDatabase extends Dexie {
       chat_thread: 'id, created, persona_id, name, current_persona_version_id',
       chat_message: 'id, created, updated, thread_id, thread_index',
       persona_version: 'id, [persona_id+version], persona_id, name, version, created',
-      app_settings: 'name, value'
+      app_settings: 'name'
   });
 
     // @ts-ignore

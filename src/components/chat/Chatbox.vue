@@ -747,7 +747,7 @@ const startRecording = async () => {
 		</ScrollArea>
 
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
-			<Button
+			<!-- <Button
 				type="button"
 				size="sm"
 				@click="startRecording"
@@ -758,7 +758,7 @@ const startRecording = async () => {
 			>
 				<Mic v-if="!recording" />
 				<MicOff v-else />
-			</Button>
+			</Button> -->
 			<Textarea
 				class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700"
 				tabindex="1"

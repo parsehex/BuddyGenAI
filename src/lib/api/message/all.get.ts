@@ -18,6 +18,9 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 
 	const sqlThread = select('chat_thread', ['*'], { id: threadId });
 	const thread = (await dbGet(sqlThread[0], sqlThread[1])) as ChatThread;
+	if (!thread) {
+		throw new Error('Thread not found');
+	}
 
 	const shouldReplaceSystem =
 		thread.mode === 'persona' && thread.persona_mode_use_current;

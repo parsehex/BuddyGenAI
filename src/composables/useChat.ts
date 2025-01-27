@@ -1,9 +1,5 @@
-import type { Chat, ChatCompletionMessage } from 'openai/resources/index';
 import { ref, computed } from 'vue';
 import type {
-	ChatThread,
-	MergedChatThread,
-	BuddyVersionMerged,
 	ChatMessage,
 } from '@/lib/api/types-db';
 import axios from 'axios';

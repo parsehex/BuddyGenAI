@@ -42,7 +42,7 @@ const startChat = (id: string | null) => {
 <template>
 	<div class="flex items-center space-x-2 justify-around w-full">
 		<Label>Chat with:</Label>
-		<Button v-if="includeAi" @click="startChat('ai')"> Assistant </Button>
+		<Button v-if="includeAi" @click="startChat('ai')"> AI Assistant </Button>
 		<Select
 			v-if="store.buddies.length > 0"
 			class="my-2"
