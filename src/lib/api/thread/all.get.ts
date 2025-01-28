@@ -39,6 +39,7 @@ export default async function getAll(
 
 		const mergedThreads = threads.map((thread, i) => {
 			const threadMessages = threadsMessages[i];
+			threadMessages.sort((a, b) => a.thread_index - b.thread_index);
 			return {
 				...thread,
 				latest_message: threadMessages[threadMessages.length - 1],
@@ -87,6 +88,7 @@ export default async function getAll(
 			const buddy = buddies[i][0];
 			const buddyVersion = buddies[i][1];
 			const threadMessages = threadsMessages[i];
+			threadMessages.sort((a, b) => a.thread_index - b.thread_index);
 			return {
 				...thread,
 				latest_message: threadMessages[threadMessages.length - 1],
