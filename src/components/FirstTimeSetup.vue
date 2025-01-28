@@ -22,6 +22,7 @@ import { isDescriptionValid, isNameValid } from '../lib/ai/general';
 import BuddyTagsInput from './BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
+import { useRoute } from 'vue-router/auto';
 
 // NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
 
@@ -270,6 +271,9 @@ const refreshProfilePicture = async () => {
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
 };
+
+const route = useRoute();
+const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 </script>
 
 <template>
@@ -293,27 +297,19 @@ const refreshProfilePicture = async () => {
 				</div>
 			</RouterLink>
 
-			<div
-				v-if="store.chatServerStarting"
-				class="text-center flex flex-col items-center justify-center gap-y-2"
-			>
-				<Spinner />
-				Getting ready...
-			</div>
-
 			<LocalModelSettingsCard
-				v-if="!store.proceed"
+				v-if="!store.settings.openrouter_api_key"
 				:first-time="store.newHere"
 				@open-model-directory="openModelDirectory"
 			/>
 
 			<Card
-				v-if="store.proceed && !store.chatServerStarting && store.isModelsSetup"
+				v-else
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
-				<CardHeader class="pt-0 pb-0">
-					<Label
-						v-if="store.newHere"
+			<CardHeader class="pt-0 pb-0">
+				<Label
+					v-if="!isCreatingCharacter"
 						class="mb-0 pb-3 text-center flex items-center justify-center text-lg"
 					>
 						Your Name

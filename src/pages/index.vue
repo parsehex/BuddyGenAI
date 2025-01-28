@@ -12,7 +12,19 @@ import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
 import { delay } from '@/lib/utils';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { storeToRefs } from 'pinia';
+import { api } from '@/lib/api';
+import router from '@/lib/router';
 
 const { toast } = useToast();
 
@@ -79,6 +91,46 @@ const sortedThreads = computed(() => {
 		);
 	});
 });
+
+const startChat = async (id: string) => {
+	let name = '';
+	let mode = '' as 'persona' | 'custom';
+	let buddy_id = '';
+	console.log('selected buddy', id);
+	let errorMsg = '';
+	const buddy = store.buddies.find(
+		(buddy: BuddyVersionMerged) => buddy.id === id
+	);
+	if (buddy) {
+		name = `Chat with ${buddy.name}`;
+		mode = 'persona';
+		buddy_id = buddy.id;
+	} else if (id === 'ai') {
+		name = 'Chat with AI';
+		mode = 'custom';
+	} else {
+		errorMsg = 'Could not find buddy' + id;
+	}
+	if (errorMsg) {
+		toast({
+			variant: 'destructive',
+			description: errorMsg,
+		});
+		return;
+	}
+
+	const options = {
+		name,
+		mode,
+	} as any;
+	if (mode === 'persona') {
+		options.persona_id = buddy_id;
+	}
+
+	const newThread = await api.thread.createOne(options);
+	await store.updateThreads();
+	router.push(`/chat/${newThread.id}`);
+};
 </script>
 
 <template>
@@ -151,11 +203,42 @@ const sortedThreads = computed(() => {
 	</div>
 
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
-	<FirstTimeSetup v-if="!AppSettings.get('openrouter_api_key')" />
-	<p v-if="!threads.length && buddies.length" class="text-center mt-4">
-		<!-- TODO improve -->
-		You have no chats yet. Create one to get started!
+	<p v-if="buddies.length && !threads.length" class="text-center mt-4">
+		You have no chats yet.
+		<br />
+		Click to
+		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
+		<Select
+			v-if="store.buddies.length > 0"
+			class="my-2"
+			@update:modelValue="
+				(id) => {
+					startChat(id);
+				}
+			"
+		>
+			<SelectTrigger>
+				<SelectValue placeholder="Chat with..." />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectLabel>Buddy</SelectLabel>
+				<SelectGroup>
+					<SelectItem
+						v-for="buddy in store.buddies"
+						:key="buddy.id"
+						:value="buddy.id"
+						@click="startChat(buddy.id)"
+					>
+						{{ buddy.name }}
+					</SelectItem>
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+		<Button v-else type="button" @click="$router.push('/create-buddy')" class="mt-2">
+			Create a Buddy
+		</Button>
 	</p>
+	<FirstTimeSetup v-else-if="!buddies.length && !threads.length" />
 </template>
 
 <style lang="scss" scoped>

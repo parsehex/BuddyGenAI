@@ -25,6 +25,7 @@ function shouldGet(name: string, interval: number) {
 type Provider = 'external' | 'local' | 'custom';
 interface Settings {
 	user_name: string;
+	openrouter_api_key: string;
 	local_model_directory: string;
 	selected_provider_chat: Provider;
 	selected_provider_image: Provider;

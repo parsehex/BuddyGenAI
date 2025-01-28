@@ -21,6 +21,7 @@ export default function useElectron() {
 
 	const verifyModelDirectory = async () => {
 		console.log('no-op: verifyModelDirectory');
+		return '';
 	};
 
 	async function dbGet(query: SelectOperation, params: any[]) {
