@@ -57,8 +57,6 @@ onMounted(async () => {
 	await AppSettings.waitForLoaded();
 	if (AppSettings.get('skip_start_dialog')) enteredApp.value = 1;
 	isMounted.value = true;
-
-	console.log(AppSettings.get('skip_start_dialog'));
 });
 
 (window as any).latestAppKeyDownHandlerId = Math.random();

@@ -2,6 +2,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import router from '@/lib/router';
 import { useToast } from '@/components/ui/toast';
+import AppTitle from './AppTitle.vue';
 import { useAppStore } from '@/stores/main';
 import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
@@ -287,14 +288,10 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 				alt="BuddyGen Logo"
 			/>
 			<RouterLink
-				class="text-xl font-bold dark:bg-gray-600 rounded-b px-1 mb-2"
+				class="text-xl font-bold"
 				to="/"
 			>
-				{{ store.newHere ? 'Welcome to' : '' }}
-				<div class="underline inline">
-					<span style="color: #61dafb">BuddyGen</span>
-					<span style="color: #111">AI</span>
-				</div>
+				<AppTitle :new-here="store.newHere" />
 			</RouterLink>
 
 			<LocalModelSettingsCard

@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { storeToRefs } from 'pinia';
 import { api } from '@/lib/api';
 import router from '@/lib/router';
+import AppTitle from '@/components/AppTitle.vue';
 
 const { toast } = useToast();
 
@@ -137,11 +138,7 @@ const startChat = async (id: string) => {
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">
-			{{ store.newHere ? 'Welcome to' : '' }}
-			<div class="underline inline dark:bg-gray-600 p-1 rounded">
-				<span style="color: #61dafb">BuddyGen</span>
-				<span style="color: #111">AI</span>
-			</div>
+			<AppTitle :new-here="store.newHere" />
 		</h1>
 		<div class="flex flex-col items-center gap-2">
 			<h2 class="text-lg">Your Chats</h2>
