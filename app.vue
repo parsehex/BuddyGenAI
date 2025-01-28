@@ -23,9 +23,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import useElectron from '@/composables/useElectron';
 import { useColorMode } from '@vueuse/core';
 import { delay, isDevMode } from '@/lib/utils';
-import { useAppStore } from './src/stores/main';
-import { Label } from './src/components/ui/label';
-import { TooltipProvider } from './src/components/ui/tooltip';
+import { useAppStore } from '@/stores/main';
+import { Label } from '@/components/ui/label';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { AppSettings } from '@/lib/api/AppSettings';
 
 const store = useAppStore();
 
@@ -37,16 +38,25 @@ const skipDialog = computed(
 	() =>
 		// @ts-ignore
 		store.settings.skip_start_dialog === '1.0' ||
+		// @ts-ignore
+		store.settings.skip_start_dialog === '1' ||
 		store.settings.skip_start_dialog === 1
 );
 const enteredApp = ref(skipDialog.value ? 1 : 0);
 const initialSkipDialog = skipDialog.value;
 const isMounted = ref(false);
 
+const isSetup = computed(() => {
+	const key = AppSettings.get('openrouter_api_key') as string;
+	return !!key;
+})
+
 onMounted(async () => {
-	await delay(50);
-	if (skipDialog.value) enteredApp.value = 1;
+	await AppSettings.waitForLoaded();
+	if (AppSettings.get('skip_start_dialog')) enteredApp.value = 1;
 	isMounted.value = true;
+
+	console.log(AppSettings.get('skip_start_dialog'));
 });
 
 (window as any).latestAppKeyDownHandlerId = Math.random();
@@ -74,12 +84,9 @@ const doCloseApp = () => {
 	if (closeApp) closeApp();
 };
 
-const updateSkipDialog = async (boolVal: boolean) => {
-	const numVal = boolVal ? 1 : 0;
-	if (store.settings.skip_start_dialog === numVal) return;
-
-	// @ts-ignore
-	store.settings.skip_start_dialog = numVal + '.0';
+const updateSkipDialog = async () => {
+	AppSettings.set('skip_start_dialog', 1);
+	AppSettings.saveSettings();
 };
 
 const container = ref<HTMLElement | null>(null);
@@ -91,9 +98,10 @@ const container = ref<HTMLElement | null>(null);
 		class="antialiased duration-300 transition-colors text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-950"
 	>
 		<TooltipProvider>
-			<Suspense v-if="enteredApp">
+			<Suspense v-if="enteredApp === 1">
 				<ResizablePanelGroup direction="horizontal">
 					<ResizablePanel
+						v-if="isSetup"
 						class="min-w-min"
 						:default-size="22"
 						:min-size="20"
@@ -101,13 +109,13 @@ const container = ref<HTMLElement | null>(null);
 					>
 						<Sidebar />
 					</ResizablePanel>
-					<ResizableHandle with-handle />
+					<ResizableHandle v-if="isSetup" with-handle />
 					<ResizablePanel>
 						<RouterView />
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</Suspense>
-			<AlertDialog :open="!enteredApp">
+			<AlertDialog :open="enteredApp === 0">
 				<AlertDialogContent :portal-to="container" v-if="isMounted">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Discretion is Advised</AlertDialogTitle>
@@ -127,19 +135,12 @@ const container = ref<HTMLElement | null>(null);
 							@click="
 								() => {
 									enteredApp = 1;
-									if (initialSkipDialog !== skipDialog) {
-										updateSkipDialog(skipDialog);
-									}
+									updateSkipDialog();
 								}
 							"
 						>
 							Yes / Enter
 						</AlertDialogAction>
-						<br />
-						<Label class="flex items-center gap-2">
-							<Checkbox :checked="skipDialog" @update:checked="updateSkipDialog" />
-							Don't ask again
-						</Label>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>

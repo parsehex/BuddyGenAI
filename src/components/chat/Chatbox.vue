@@ -92,6 +92,7 @@ const threadTitle = computed(() => {
 });
 
 const apiPartialBody = ref({
+	model: 'sao10k/l3-lunaris-8b',
 	threadId: threadId.value,
 	temperature: 0.75,
 	seed: -1,

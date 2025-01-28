@@ -18,6 +18,7 @@ import useLlamaCpp from '../composables/useLlamaCpp';
 import ImportModelPack from './ImportModelPack.vue';
 import { Button } from './ui/button';
 import { generateCodeVerifier, generateCodeChallenge } from '@/lib/api/utils';
+import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 
 async function startOAuthFlow() {
   // Generate and store code verifier
@@ -64,9 +65,21 @@ onMounted(() => {
 			Setup
 		</CardHeader>
 		<CardContent>
-			<div class="mt-4 flex items-center gap-2">
-				<button @click="startOAuthFlow">Connect OpenRouter Account</button>
-			</div>
+			<p>
+				To use BuddyGenAI, you must connect the app to a language model AI, which you can do via OpenRouter.
+				<br />
+				If you don't already have an account with OpenRouter then you'll need to sign up.
+			</p>
+			<Alert class="my-4 p-2" variant="info">
+				<AlertTitle>Tip</AlertTitle>
+				<AlertDescription>
+					Set a Credit limit for this app when you connect it below!
+				</AlertDescription>
+			</Alert>
+			<button type="button" class="bg-gray-200 px-2 py-3 rounded-md text-gray-800 flex items-center" @click="startOAuthFlow">
+				Connect
+				<img src="/assets/openrouter-logo.svg" class="h-10" />
+			</button>
 		</CardContent>
 	</Card>
 </template>

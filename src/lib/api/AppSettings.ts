@@ -1,6 +1,7 @@
 import { insert, select, update } from '@/lib/sql';
 import useElectron from '@/composables/useElectron';
 import type { SQLiteVal } from './types-db';
+import { delay } from '../utils';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
@@ -58,6 +59,13 @@ class AppSettingsCls {
 		this.loadSettings();
 	}
 
+	public async waitForLoaded() {
+		if (this.isLoaded) return;
+		while (!this.isLoaded) {
+			await delay(15);
+		}
+	}
+
 	private settings: Record<string, SQLiteVal> = JSON.parse(
 		JSON.stringify(AppSettingsDefaults)
 	);
@@ -65,7 +73,7 @@ class AppSettingsCls {
 	public get(key: AppSettingsKeys): SQLiteVal {
 		return this.settings[key];
 	}
-	public set(key: AppSettingsKeys, value: string): void {
+	public set(key: AppSettingsKeys, value: any): void {
 		// try to prevent resetting values
 		// TODO do better
 		if (value === undefined && this.settings[key]) return;

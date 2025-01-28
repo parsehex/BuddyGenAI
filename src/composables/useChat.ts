@@ -18,7 +18,7 @@ export default function useChat(options: UseChatOptions) {
 	const BaseUrl = ref('');
 	const headers = ref({
 		'Content-Type': 'application/json',
-		'X-Title': 'BuddyGFenAI',
+		'X-Title': 'BuddyGenAI',
 	} as Record<string, any>);
 
 	const messages = ref([] as ChatMessage[]);
