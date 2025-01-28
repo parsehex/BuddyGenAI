@@ -50,7 +50,6 @@ const userNameValue = ref(
 await updateSettings();
 if (settings.value.user_name && settings.value.user_name !== 'User') {
 	userNameValue.value = settings.value.user_name;
-	console.log(settings.value);
 }
 
 if (settings.value.local_model_directory) {

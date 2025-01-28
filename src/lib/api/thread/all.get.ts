@@ -82,8 +82,6 @@ export default async function getAll(
 			})
 		);
 
-		console.log(threadsMessages);
-
 		const mergedThreads = threads.map((thread, i) => {
 			const buddy = buddies[i][0];
 			const buddyVersion = buddies[i][1];
