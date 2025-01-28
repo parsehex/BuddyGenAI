@@ -82,7 +82,7 @@ export default function useChat(options: UseChatOptions) {
 				let content = '';
 				let isLast = false;
 				for (const chunkStr of chunks) {
-					if (!chunkStr) continue;
+					if (!chunkStr || chunkStr[0] === ':') continue;
 					if (chunkStr.trim() === '[DONE]') {
 						isLast = true;
 						break;

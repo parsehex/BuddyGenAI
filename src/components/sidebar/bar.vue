@@ -96,7 +96,7 @@ watch(
 		<TabsList class="w-full dark:bg-gray-800 rounded-none">
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger value="settings">Settings</TabsTrigger>
+			<!-- <TabsTrigger value="settings">Settings</TabsTrigger> -->
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">
@@ -118,9 +118,9 @@ watch(
 			<TabsContent value="buddy">
 				<BuddyList />
 			</TabsContent>
-			<TabsContent value="settings">
+			<!-- <TabsContent value="settings">
 				<SettingsPanel />
-			</TabsContent>
+			</TabsContent> -->
 		</div>
 	</Tabs>
 </template>

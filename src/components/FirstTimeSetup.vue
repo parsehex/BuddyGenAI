@@ -384,13 +384,13 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 									size="lg"
 									class="text-3xl"
 								/>
-								<p
+								<!-- <p
 									class="text-sm text-gray-500 select-none"
 									v-if="acceptedBuddy && newBuddy"
 								>
 									Images are created using AI and may have unexpected results.
-								</p>
-								<BuddyAppearanceOptions
+								</p> -->
+								<!-- <BuddyAppearanceOptions
 									v-if="acceptedBuddy && newBuddy"
 									:buddy="newBuddy"
 									:profile-pic-prompt="profilePicturePrompt"
@@ -398,7 +398,7 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 									@refresh-profile-picture="refreshProfilePicture"
 									v-model:appearance-options="generatedAppearanceOptions"
 									v-model:selected-appearance-options="selectedAppearanceOptions"
-								/>
+								/> -->
 
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button

@@ -205,8 +205,9 @@ const startChat = async (id: string) => {
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
 	<p v-if="buddies.length && !threads.length" class="text-center mt-4">
 		You have no chats yet.
-		<br />
-		Click to
+	</p>
+	<div v-if="buddies.length && !threads.length" class="mt-4 flex items-center">
+		<p>Click to</p>
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
 		<Select
 			v-if="store.buddies.length > 0"
@@ -217,7 +218,7 @@ const startChat = async (id: string) => {
 				}
 			"
 		>
-			<SelectTrigger>
+			<SelectTrigger class="max-w-[10vw]">
 				<SelectValue placeholder="Chat with..." />
 			</SelectTrigger>
 			<SelectContent>
@@ -237,7 +238,7 @@ const startChat = async (id: string) => {
 		<Button v-else type="button" @click="$router.push('/create-buddy')" class="mt-2">
 			Create a Buddy
 		</Button>
-	</p>
+	</div>
 	<FirstTimeSetup v-else-if="!buddies.length && !threads.length" />
 </template>
 

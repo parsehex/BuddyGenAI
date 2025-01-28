@@ -54,9 +54,6 @@ const buddyKeywordsArr = computed({
 	<blockquote
 		class="text-sm text-gray-400 text-center mt-2 select-none border-l border-gray-300 p-2"
 	>
-		<i v-if="type === 'create'">{{ buddyName || 'Your Buddy' }} is...</i>
-		<i v-else>{{ buddyName || 'Your Buddy' }} will be...</i>
-		<br />
 		{{ buddyKeywords }}
 	</blockquote>
 </template>

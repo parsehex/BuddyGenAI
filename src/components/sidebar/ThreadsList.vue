@@ -24,6 +24,9 @@ import { useAppStore } from '@/stores/main';
 import type { ChatThread } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import router from '@/lib/router';
+import useMobile from '@/src/composables/useMobile';
+
+const device = useMobile();
 
 // TODO add option to make temporary chat
 
@@ -101,7 +104,7 @@ const goToThread = async (threadId: string) => {
 </script>
 
 <template>
-	<ul class="pb-[150px]">
+	<ul class="pb-[150px] mt-1">
 		<Dialog>
 			<ContextMenu>
 				<ContextMenuTrigger>
@@ -122,7 +125,7 @@ const goToThread = async (threadId: string) => {
 						<!-- <RouterLink :to="`/chat/${thread.id}`" class="block p-2">
 							{{ thread.name }}
 						</RouterLink> -->
-						<div @click="goToThread(thread.id)" class="block p-2">
+						<div @click="goToThread(thread.id)" :class="['block', device.isMobile.value ? 'px-3 py-4' : 'p-2']">
 							{{ thread.name }}
 						</div>
 					</li>

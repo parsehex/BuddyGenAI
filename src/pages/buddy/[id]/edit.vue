@@ -390,7 +390,7 @@ const acceptKeywords = () => {
 						@select-profile-pic="handleSelectProfilePic"
 					/>
 
-					<BuddyAppearanceOptions
+					<!-- <BuddyAppearanceOptions
 						v-if="buddy"
 						:buddy="buddy"
 						:profile-pic-prompt="profilePicturePrompt"
@@ -398,16 +398,16 @@ const acceptKeywords = () => {
 						@update-profile-pic-prompt="profilePicturePrompt = $event"
 						v-model:appearance-options="generatedAppearanceOptions"
 						v-model:selected-appearance-options="selectedAppearanceOptions"
-					/>
+					/> -->
 
-					<div class="flex flex-col items-center justify-center w-full">
+					<!-- <div class="flex flex-col items-center justify-center w-full">
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
-					</div>
+					</div> -->
 
-					<Label class="mt-4 flex flex-col items-center">
+					<!-- <Label class="mt-4 flex flex-col items-center">
 						<span class="text-xl">{{ buddy?.name }}'s Voice</span>
 						<Select
 							:default-value="buddy?.tts_voice || ''"
@@ -426,13 +426,11 @@ const acceptKeywords = () => {
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-					</Label>
+					</Label> -->
 				</div>
 				<div class="flex flex-col items-center mt-4">
 					<label class="text-xl w-full text-center"> Current Description </label>
-					<p>
-						<span class="text-sm select-none italic"> {{ buddy?.name }} is... </span>
-						<br />
+					<p class="mt-1">
 						<span class="text-lg">
 							{{ buddy?.description }}
 						</span>
@@ -449,7 +447,6 @@ const acceptKeywords = () => {
 					<DevOnly class="w-full">
 						<Textarea
 							v-model="descriptionValue"
-							:placeholder="`${buddy?.name} is...`"
 							class="min-h-24"
 						/>
 					</DevOnly>

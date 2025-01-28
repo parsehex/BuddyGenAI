@@ -2,12 +2,6 @@
 import { computed, onMounted, ref } from 'vue';
 import './assets/css/index.css';
 import Toaster from '@/components/ui/toast/Toaster.vue';
-import { Sidebar } from '@/components/sidebar';
-import {
-	ResizableHandle,
-	ResizablePanel,
-	ResizablePanelGroup,
-} from '@/components/ui/resizable';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -21,18 +15,26 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import useElectron from '@/composables/useElectron';
+import useMobile from '@/composables/useMobile';
 import { useColorMode } from '@vueuse/core';
 import { delay, isDevMode } from '@/lib/utils';
 import { useAppStore } from '@/stores/main';
 import { Label } from '@/components/ui/label';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppSettings } from '@/lib/api/AppSettings';
+import DesktopLayout from './src/layout/desktop.vue';
+import MobileLayout from './src/layout/mobile.vue';
 
 const store = useAppStore();
+const device = useMobile();
 
 useColorMode();
 
 const { toggleDevTools, closeApp } = useElectron();
+
+// TODO
+// 1 - maybe remove the current dialog
+// 2 - add a dialog if the user is on mobile, warning about the layout
 
 const skipDialog = computed(
 	() =>
@@ -99,21 +101,8 @@ const container = ref<HTMLElement | null>(null);
 	>
 		<TooltipProvider>
 			<Suspense v-if="enteredApp === 1">
-				<ResizablePanelGroup direction="horizontal">
-					<ResizablePanel
-						v-if="isSetup"
-						class="min-w-min"
-						:default-size="22"
-						:min-size="20"
-						:max-size="35"
-					>
-						<Sidebar />
-					</ResizablePanel>
-					<ResizableHandle v-if="isSetup" with-handle />
-					<ResizablePanel>
-						<RouterView />
-					</ResizablePanel>
-				</ResizablePanelGroup>
+				<DesktopLayout v-if="!device.isMobile.value" :is-setup="isSetup" />
+				<MobileLayout v-else :is-setup="isSetup" />
 			</Suspense>
 			<AlertDialog :open="enteredApp === 0">
 				<AlertDialogContent :portal-to="container" v-if="isMounted">

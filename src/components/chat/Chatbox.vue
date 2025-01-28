@@ -40,6 +40,7 @@ import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
 import { complete } from '@/src/lib/ai/complete';
+import useMobile from '@/src/composables/useMobile';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -582,26 +583,28 @@ onBeforeMount(async () => {
 });
 
 const canSend = computed(() => {
-	if (!store.isExternalProvider) {
-		if (!store.chatServerRunning) {
-			return false;
-		}
-	}
-	if (!store.settings.selected_model_chat) {
-		return false;
-	}
+	// if (!store.isExternalProvider) {
+	// 	if (!store.chatServerRunning) {
+	// 		return false;
+	// 	}
+	// }
+	// if (!store.settings.selected_model_chat) {
+	// 	return false;
+	// }
+	if (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo') return false;
 	return input.value !== '' && !isLoading.value;
 });
 
 const canReload = computed(() => {
-	if (!store.isExternalProvider) {
-		if (!store.chatServerRunning) {
-			return false;
-		}
-	}
-	if (!store.settings.selected_model_chat) {
-		return false;
-	}
+	// if (!store.isExternalProvider) {
+	// 	if (!store.chatServerRunning) {
+	// 		return false;
+	// 	}
+	// }
+	// if (!store.settings.selected_model_chat) {
+	// 	return false;
+	// }
+	if (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo') return false;
 	return messages.value.length >= 2 && !isLoading.value;
 });
 
@@ -685,6 +688,8 @@ const startRecording = async () => {
 	}
 };
 
+const device = useMobile();
+
 // disjointed note:
 // TODO should save the keywords (extraPrompt) that we generate desc with
 </script>
@@ -695,6 +700,7 @@ const startRecording = async () => {
 		v-if="threadId !== ''"
 	>
 		<div
+			v-if="!device.isMobile.value"
 			class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700"
 		>
 			<h2 class="text-2xl font-bold">
@@ -709,29 +715,45 @@ const startRecording = async () => {
 				:buddy="currentBuddy"
 			/>
 		</div>
-		<Collapsible
-			v-if="threadMode === 'custom'"
-			class="my-2"
-			v-model:open="sysIsOpen"
-			:defaultOpen="false"
-		>
-			<CollapsibleTrigger @click="handleSysMessageOpen">
-				<Button type="button" variant="ghost" size="sm">
-					Instructions {{ sysIsOpen ? '▲' : '▼' }}
-				</Button>
-			</CollapsibleTrigger>
-			<CollapsibleContent>
-				<Card class="whitespace-pre-wrap">
-					<CardHeader>Custom Instructions</CardHeader>
-					<CardContent><Textarea v-model="newSysMessage" /></CardContent>
-					<!-- TODO add system presets-->
-					<CardFooter>
-						<Button type="button" @click="updateSysMessage">Update</Button>
-					</CardFooter>
-				</Card>
-			</CollapsibleContent>
-		</Collapsible>
 		<ScrollArea style="height: 100%" id="messages-scroll">
+			<div
+				v-if="device.isMobile.value"
+				class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700"
+			>
+				<h2 class="text-2xl font-bold">
+					{{ threadTitle }}
+				</h2>
+				<ThreadImages
+					v-if="threadImages.length > 0"
+					:images="threadImages.map((m: any) => ({ url: m.image }))"
+				/>
+				<BuddyCard
+					v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
+					:buddy="currentBuddy"
+				/>
+			</div>
+			<Collapsible
+				v-if="threadMode === 'custom'"
+				class="my-2"
+				v-model:open="sysIsOpen"
+				:defaultOpen="false"
+			>
+				<CollapsibleTrigger @click="handleSysMessageOpen">
+					<Button type="button" variant="ghost" size="sm">
+						Instructions {{ sysIsOpen ? '▲' : '▼' }}
+					</Button>
+				</CollapsibleTrigger>
+				<CollapsibleContent>
+					<Card class="whitespace-pre-wrap">
+						<CardHeader>Custom Instructions</CardHeader>
+						<CardContent><Textarea v-model="newSysMessage" /></CardContent>
+						<!-- TODO add system presets-->
+						<CardFooter>
+							<Button type="button" @click="updateSysMessage">Update</Button>
+						</CardFooter>
+					</Card>
+				</CollapsibleContent>
+			</Collapsible>
 			<div class="flex flex-col gap-1 my-1" id="chatbox">
 				<Message
 					v-for="m in uiMessages"
@@ -789,6 +811,7 @@ const startRecording = async () => {
 		</form>
 		<p
 			class="mt-4 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
+			:class="[device.isMobile.value ? 'pr-14' : '']"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
 		>
 			<u><i>Reminder</i></u>
@@ -797,7 +820,3 @@ const startRecording = async () => {
 		</p>
 	</div>
 </template>
-
-<style lang="scss" scoped>
-//
-</style>
