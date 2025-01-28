@@ -346,7 +346,7 @@ const openLink = (link: string) => {
 
 <template>
 	<ScrollArea class="h-screen">
-		<div class="container flex flex-col items-center pb-8">
+		<div class="container flex flex-col items-center pt-2 pb-8">
 			<h1 class="text-2xl font-bold">BuddyGenAI Credits</h1>
 
 			<div class="mt-4">
@@ -358,7 +358,7 @@ const openLink = (link: string) => {
 						BuddyGenAI
 					</span>
 					is a project by
-					<b>Thomas Mays</b>
+					<span class="font-bold underline cursor-pointer" @click="openLink('https://www.thomasmays.net')">Thomas Mays</span>
 					(
 					<span
 						class="text-blue-500 cursor-pointer"

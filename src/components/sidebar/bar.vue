@@ -20,7 +20,9 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import useMobile from '@/src/composables/useMobile';
 
+const device = useMobile();
 const { toast } = useToast();
 
 const store = useAppStore();
@@ -114,7 +116,7 @@ const handleClickChat = () => {
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<!-- <TabsTrigger value="settings">Settings</TabsTrigger> -->
-			<RouterLink class="mx-1 font-bold" to="/credits">About App</RouterLink>
+			<RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink>
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">
@@ -129,7 +131,7 @@ const handleClickChat = () => {
 						/>
 					</div>
 				</div>
-				<ScrollArea class="h-screen">
+				<ScrollArea :class="[device.isMobile.value ? 'h-[30vh]' : 'h-screen']">
 					<ThreadsList />
 				</ScrollArea>
 			</TabsContent>
