@@ -80,5 +80,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 	// log whether last message has tts
 	// console.log(messages[messages.length - 1].tts);
 
+	messages.sort((a, b) => a.thread_index - b.thread_index);
+
 	return messages || [];
 }
