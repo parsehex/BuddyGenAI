@@ -120,6 +120,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'identicon',
+		link: 'https://github.com/nkoepke/Identicon',
+		author: 'Nils Köpke',
+		license: 'MIT',
+	},
+	{
 		name: 'llama.cpp',
 		link: 'https://github.com/ggerganov/llama.cpp',
 		author: 'The ggml authors',
