@@ -15,6 +15,11 @@ import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
 import BuddySelect from '../BuddySelect.vue';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 const { toast } = useToast();
 
@@ -89,11 +94,23 @@ watch(
 		}
 	}
 );
+
+const handleClickChat = () => {
+	window.location.href = '/';
+}
 </script>
 
 <template>
 	<Tabs v-model:model-value="modelValue">
 		<TabsList class="w-full dark:bg-gray-800 rounded-none">
+			<Tooltip>
+				<TooltipTrigger>
+					<img src="/assets/logo.png" class="w-6 h-6 m-1 mx-2 cursor-pointer select-none" @click="handleClickChat" />
+				</TooltipTrigger>
+				<TooltipContent>
+					Go to home page
+				</TooltipContent>
+			</Tooltip>
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<!-- <TabsTrigger value="settings">Settings</TabsTrigger> -->
