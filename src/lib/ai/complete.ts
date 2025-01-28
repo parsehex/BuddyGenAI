@@ -1,5 +1,7 @@
+import { AppSettings } from '../api/AppSettings';
 import type { ChatMessage } from '../api/types-db';
 import urls from '../api/urls';
+import { MODEL_NAME } from '../constants';
 
 export async function complete(
 	prompt: string,
@@ -17,21 +19,24 @@ export async function complete(
 		options.body.messages = [{ content: prompt, role: 'user' } as ChatMessage];
 	}
 
+	const key = AppSettings.get('openrouter_api_key') as string;
 	const response = await fetch(
-		(await urls.other.llamacppServerUrl()) + '/api/completion',
+		(await urls.other.llamacppServerUrl()),
 		{
 			method: 'POST',
 			headers: {
+				'Authorization': 'Bearer ' + key,
 				'Content-Type': 'application/json',
+				'X-TITLE': 'BuddyGenAI'
 			},
 			body: JSON.stringify({
-				// prompt,
 				...options.body,
+				model: MODEL_NAME
 			}),
 		}
 	);
 	// return await response.text();
 	const res = await response.json();
-	console.log(res);
+	// console.log(res);
 	return res.choices[0].message.content;
 }

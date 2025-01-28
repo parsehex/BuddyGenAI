@@ -39,6 +39,7 @@ import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
+import { MODEL_NAME } from '@/lib/constants';
 import { complete } from '@/src/lib/ai/complete';
 import useMobile from '@/src/composables/useMobile';
 
@@ -93,7 +94,7 @@ const threadTitle = computed(() => {
 });
 
 const apiPartialBody = ref({
-	model: 'sao10k/l3-lunaris-8b',
+	model: MODEL_NAME,
 	threadId: threadId.value,
 	temperature: 0.75,
 	seed: -1,
