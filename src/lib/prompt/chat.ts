@@ -11,7 +11,7 @@ export function defaultAIChatPrompt(userName: string) {
 
 	const chatImages = AppSettings.get('chat_image_enabled') as string | number;
 	const chatImagesEnabled =
-		chatImages && chatImages !== '0.0' && chatImages !== 0;
+		chatImages && (chatImages === '1.0' || chatImages === '1' || chatImages === 1);
 	// TODO the below wont update existing threads if setting changes
 
 	const prompt = `The following is a chat between a user${
