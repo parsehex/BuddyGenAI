@@ -121,6 +121,7 @@ const msgInitials = computed(() => {
 	return firstName[0];
 });
 
+const ttsEnabled = computed(() => false);
 const hasTTS = computed(() => {
 	// @ts-ignore
 	if (!message.value.tts) return false;
@@ -137,9 +138,8 @@ const doTTS = async () => {
 
 	if (!hasTTS.value) {
 		const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-		const ttsEnabled = !!ttsModel;
 
-		if (!ttsEnabled) {
+		if (!ttsEnabled.value) {
 			toast({
 				variant: 'destructive',
 				title: 'TTS is disabled',
@@ -205,7 +205,7 @@ const doTTS = async () => {
 						</span>
 
 						<Button
-							v-if="!isUser"
+							v-if="!isUser && ttsEnabled"
 							@click="doTTS"
 							variant="secondary"
 							size="sm"
@@ -221,7 +221,7 @@ const doTTS = async () => {
 					>
 						{{ message.role === 'user' ? userName : 'AI' }}
 						<Button
-							v-if="!isUser"
+							v-if="!isUser && ttsEnabled"
 							@click="doTTS"
 							variant="secondary"
 							size="sm"
