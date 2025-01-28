@@ -123,7 +123,7 @@ export default function useElectron() {
 	};
 
 	const openExternalLink = async (url: string) => {
-		console.log('no-op: openExternalLink', url);
+		window.open(url, '_blank', 'noopener,noreferrer');
 	};
 
 	const openModelsDirectory = async () => {

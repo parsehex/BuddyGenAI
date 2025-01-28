@@ -97,6 +97,7 @@ watch(
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
 			<!-- <TabsTrigger value="settings">Settings</TabsTrigger> -->
+			<RouterLink class="mx-1 font-bold" to="/credits">About App</RouterLink>
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">

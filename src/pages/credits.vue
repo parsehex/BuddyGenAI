@@ -350,8 +350,29 @@ const openLink = (link: string) => {
 			<h1 class="text-2xl font-bold">BuddyGenAI Credits</h1>
 
 			<div class="mt-4">
+				<p class="text-lg mt-4">
+					<span
+						class="text-blue-500 cursor-pointer"
+						@click="openLink('https://github.com/parsehex/BuddyGenAI')"
+					>
+						BuddyGenAI
+					</span>
+					is a project by
+					<b>Thomas Mays</b>
+					(
+					<span
+						class="text-blue-500 cursor-pointer"
+						@click="openLink('https://github.com/parsehex')"
+					>
+						parsehex
+					</span>
+					)
+					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
+						MIT license
+					</span>
+				</p>
 				<p class="text-md mt-2">
-					BuddyGenAI was made using the following software projects and AI models:
+					This app was made possible using the following software projects and AI models:
 				</p>
 				<ul class="list-disc list-inside mt-2">
 					<li v-for="dep in deps" :key="dep.name">
@@ -377,27 +398,6 @@ const openLink = (link: string) => {
 					</li>
 				</ul>
 
-				<p class="text-lg mt-4">
-					<span
-						class="text-blue-500 cursor-pointer"
-						@click="openLink('https://github.com/parsehex/BuddyGenAI')"
-					>
-						BuddyGenAI
-					</span>
-					is a project by
-					<b>Thomas Mays</b>
-					(
-					<span
-						class="text-blue-500 cursor-pointer"
-						@click="openLink('https://github.com/parsehex')"
-					>
-						parsehex
-					</span>
-					)
-					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
-						MIT license
-					</span>
-				</p>
 				<p class="text-lg mt-2">
 					<span
 						class="text-blue-500 underline cursor-pointer"
