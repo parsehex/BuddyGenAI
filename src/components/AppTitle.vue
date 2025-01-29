@@ -7,9 +7,8 @@ defineProps({
 </script>
 
 <template>
+	{{ newHere ? 'Welcome to' : '' }}
 	<span class=" dark:bg-gray-600 rounded-b px-1 mb-2">
-
-		{{ newHere ? 'Welcome to' : '' }}
 		<div class="underline inline">
 			<span style="color: #61dafb">BuddyGen</span>
 			<span style="color: #111">AI</span>
