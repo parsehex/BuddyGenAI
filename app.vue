@@ -44,9 +44,8 @@ const skipDialog = computed(
 		store.settings.skip_start_dialog === '1' ||
 		store.settings.skip_start_dialog === 1
 );
+console.log('skipDialog', skipDialog.value);
 const enteredApp = ref(skipDialog.value ? 1 : 0);
-const initialSkipDialog = skipDialog.value;
-const isMounted = ref(false);
 
 const isSetup = computed(() => {
 	const key = AppSettings.get('openrouter_api_key') as string;
@@ -55,8 +54,7 @@ const isSetup = computed(() => {
 
 onMounted(async () => {
 	await AppSettings.waitForLoaded();
-	if (AppSettings.get('skip_start_dialog')) enteredApp.value = 1;
-	isMounted.value = true;
+	if (+(AppSettings.get('skip_start_dialog') as string)) enteredApp.value = 1;
 });
 
 (window as any).latestAppKeyDownHandlerId = Math.random();
@@ -103,7 +101,7 @@ const container = ref<HTMLElement | null>(null);
 				<MobileLayout v-else :is-setup="isSetup" />
 			</Suspense>
 			<AlertDialog :open="enteredApp === 0">
-				<AlertDialogContent :portal-to="container" v-if="isMounted">
+				<AlertDialogContent :portal-to="container">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Discretion is Advised - AI Content</AlertDialogTitle>
 						<AlertDialogDescription>
