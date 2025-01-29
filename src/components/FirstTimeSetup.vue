@@ -150,6 +150,9 @@ const acceptBuddy = async () => {
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
 	isSaving.value = false;
+
+	// TODO temporary
+	handleSave();
 };
 
 const updateName = async () => {

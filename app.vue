@@ -48,9 +48,9 @@ console.log('skipDialog', skipDialog.value);
 const enteredApp = ref(skipDialog.value ? 1 : 0);
 
 const isSetup = computed(() => {
-	const key = AppSettings.get('openrouter_api_key') as string;
+	const key = store.settings.openrouter_api_key;
 	return !!key;
-})
+});
 
 onMounted(async () => {
 	await AppSettings.waitForLoaded();

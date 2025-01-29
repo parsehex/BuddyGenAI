@@ -202,8 +202,7 @@ const startChat = async (id: string) => {
 	<p v-if="buddies.length && !threads.length" class="text-center mt-4">
 		You have no chats yet.
 	</p>
-	<div v-if="buddies.length && !threads.length" class="mt-4 flex items-center">
-		<p>Click to</p>
+	<div v-if="buddies.length && !threads.length" class="mt-4 flex items-center justify-center">
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
 		<Select
 			v-if="store.buddies.length > 0"

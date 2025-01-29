@@ -399,6 +399,15 @@ const openLink = (link: string) => {
 				</ul>
 
 				<p class="text-lg mt-2">
+					If you have enjoyed this app, I'd appreciate your feedback or support!
+					<span
+						class="text-blue-500 underline cursor-pointer inline-block"
+						@click="openLink('https://buymeacoffee.com/parsehex')"
+					>
+						Buy Me A Coffee
+					</span>
+				</p>
+				<p class="text-lg mt-2">
 					<span
 						class="text-blue-500 underline cursor-pointer"
 						@click="openLink('https://buddygenai.com')"
