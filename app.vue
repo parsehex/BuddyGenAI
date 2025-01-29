@@ -105,15 +105,14 @@ const container = ref<HTMLElement | null>(null);
 			<AlertDialog :open="enteredApp === 0">
 				<AlertDialogContent :portal-to="container" v-if="isMounted">
 					<AlertDialogHeader>
-						<AlertDialogTitle>Discretion is Advised</AlertDialogTitle>
+						<AlertDialogTitle>Discretion is Advised - AI Content</AlertDialogTitle>
 						<AlertDialogDescription>
 							This app generates content with AI based on what you type, which might
 							have unexpected reults.
 							<br />
-							Use good judgement and be responsible with the content that you
-							create!
+							Use good judgement and act responsiblly with what you create!
 							<br /><br />
-							<b class="text-lg py-1">Continue?</b>
+							<p class="text-lg py-1 font-bold text-center">Continue?</p>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
