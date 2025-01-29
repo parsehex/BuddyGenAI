@@ -71,9 +71,11 @@ onMounted(() => {
 				If you don't already have an account with OpenRouter then you'll need to sign up.
 			</p>
 			<Alert class="my-4 p-2" variant="info">
-				<AlertTitle>Tip</AlertTitle>
+				<AlertTitle>
+					<h2 class="text-lg">Tip</h2>
+				</AlertTitle>
 				<AlertDescription>
-					Set a Credit limit for this app when you connect it below!
+					Set a Credit limit when you connect this app below to prevent over-spending!
 				</AlertDescription>
 			</Alert>
 			<button type="button" class="bg-gray-200 px-2 py-3 rounded-md text-gray-800 flex items-center" @click="startOAuthFlow">
