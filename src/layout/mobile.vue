@@ -59,6 +59,7 @@ watch(
 
 	<!-- Mobile Sidebar Toggle Button -->
 	<button
+		v-if="isSetup"
 		@click="toggleSidebar"
 		class="fixed bottom-4 left-4 z-50 p-3 rounded-full bg-teal-500 text-primary-foreground shadow-lg opacity-70"
 	>
