@@ -24,7 +24,8 @@
     "llamacpp:win": "scripts/windows/start_llamacpp_server.ps1",
     "whispercpp:linux": "./scripts/linux/start_whispercpp_server.sh",
     "whispercpp:win": "scripts/windows/start_whispercpp_server.ps1",
-    "rebuild": "npx electron-builder node-gyp-rebuild"
+    "rebuild": "npx electron-builder node-gyp-rebuild",
+    "test": ""
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.10",
