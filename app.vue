@@ -107,7 +107,7 @@ const container = ref<HTMLElement | null>(null);
 					<AlertDialogHeader>
 						<AlertDialogTitle>Discretion is Advised - AI Content</AlertDialogTitle>
 						<AlertDialogDescription>
-							This app generates content with AI based on what you type, which might
+							This app generates content with AI from what you type, which might
 							have unexpected reults.
 							<br />
 							Use good judgement and act responsiblly with what you create!
