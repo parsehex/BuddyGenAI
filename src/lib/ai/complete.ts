@@ -27,6 +27,7 @@ export async function complete(
 			headers: {
 				'Authorization': 'Bearer ' + key,
 				'Content-Type': 'application/json',
+				'HTTP-Referer': 'https://buddygenai.com/',
 				'X-TITLE': 'BuddyGenAI'
 			},
 			body: JSON.stringify({

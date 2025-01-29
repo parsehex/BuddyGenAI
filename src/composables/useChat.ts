@@ -18,6 +18,7 @@ export default function useChat(options: UseChatOptions) {
 	const BaseUrl = ref('');
 	const headers = ref({
 		'Content-Type': 'application/json',
+		'HTTP-Referer': 'https://buddygenai.com/',
 		'X-Title': 'BuddyGenAI',
 	} as Record<string, any>);
 
