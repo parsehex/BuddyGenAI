@@ -1,7 +1,7 @@
 <template>
 	<Card class="whitespace-pre-wrap w-full p-2 pt-4">
 		<CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
-			External (OpenAI) Models Setup
+			OpenAI Models Setup
 			<span
 				class="text-blue-500 cursor-pointer hover:underline"
 				@click="
