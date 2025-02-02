@@ -1,4 +1,5 @@
 import useLlamaCpp from '@/src/composables/useLlamaCpp';
+import { useAppStore } from '@/src/stores/main';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -14,8 +15,26 @@ const other = {
 		if (!lcpp) return '';
 		return await lcpp.getBaseUrl();
 	},
+	koboldUrl: (subPath?: string) => {
+		const store = useAppStore();
+		let p = store.settings.koboldcpp_host;
+		if (subPath) {
+			subPath = subPath.trim();
+			if (subPath[0] !== '/') subPath = '/' + subPath;
+			p += subPath;
+		}
+		return p;
+	},
 	llamacppServerUrl: async () => {
-		return 'https://openrouter.ai/api/v1/chat/completions';
+		const store = useAppStore();
+		switch (store.settings.selected_provider_chat) {
+			case 'cloud':
+				return 'https://openrouter.ai/api/v1/chat/completions';
+			case 'local':
+				return store.settings.koboldcpp_host + '/v1/chat/completions';
+			case '':
+				return '';
+		}
 	},
 };
 

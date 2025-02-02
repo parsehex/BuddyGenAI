@@ -30,8 +30,8 @@ import { useRoute } from 'vue-router/auto';
 const { openExternalLink } = useElectron();
 const { toast } = useToast();
 const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
-const buddies = useAppStore().buddies as BuddyVersionMerged[];
 const store = useAppStore();
+const buddies = store.buddies as BuddyVersionMerged[];
 
 const gen = ref(false);
 const prog = ref(0);
@@ -325,8 +325,7 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 				<CardContent class="flex flex-col items-center">
 					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
 						<!-- TODO starters -->
-						<!-- TODO when settings change only update the values that changed -->
-						<!-- require name first? -->
+						<!-- require name first? to get buddy suggestions -->
 						<!-- ${userName} would like to talk to a buddy.\n\nYour task is to list names of buddies which the user might want to talk to.\nRespond with a valid JSON array of strings. -->
 						<CardContent class="flex flex-col items-center">
 							<h2 class="text-2xl text-center font-bold">

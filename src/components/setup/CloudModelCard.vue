@@ -2,28 +2,13 @@
 import { onBeforeMount, onMounted } from 'vue';
 import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import {
-	Select,
-	SelectTrigger,
-	SelectContent,
-	SelectGroup,
-	SelectLabel,
-	SelectItem,
-	SelectValue,
-} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	Collapsible,
-	CollapsibleTrigger,
 	CollapsibleContent,
-} from './ui/collapsible';
-import ImportModel from '@/components/ImportModel.vue';
-import useLlamaCpp from '../composables/useLlamaCpp';
-import ImportModelPack from './ImportModelPack.vue';
-import { Button } from './ui/button';
+} from '@/components/ui/collapsible';
 import { generateCodeVerifier, generateCodeChallenge } from '@/lib/api/utils';
-import { Alert, AlertTitle, AlertDescription } from './ui/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 async function startOAuthFlow() {
   // Generate and store code verifier
@@ -49,6 +34,7 @@ const { openExternalLink } = useElectron();
 
 const props = defineProps<{
 	firstTime: boolean;
+	isOpen: boolean;
 }>();
 
 const emits = defineEmits(['openModelDirectory']);
@@ -65,16 +51,11 @@ onMounted(() => {
 </script>
 
 <template>
-	<Collapsible>
+	<Collapsible :open="isOpen">
 		<CollapsibleContent>
 			<Card class="whitespace-pre-wrap w-full p-2 pt-4">
-				<!-- <CardHeader class="text-lg pt-0 pb-2 flex flex-row justify-between">
-					Setup
-				</CardHeader> -->
 				<CardContent>
 					<p>
-						To use BuddyGenAI, you must connect the app to an AI Provider.
-						<br />
 						If you don't already have an account with OpenRouter then you'll need to sign up.
 					</p>
 					<Alert class="my-4 p-2" variant="info">
@@ -82,10 +63,10 @@ onMounted(() => {
 							<h2 class="text-lg">Tip</h2>
 						</AlertTitle>
 						<AlertDescription>
-							Set a Credit limit when you connect this app below to prevent over-spending!
+							Set a Credit limit when you connect the app below to prevent over-spending!
 						</AlertDescription>
 					</Alert>
-					<button type="button" class="bg-gray-200 px-2 py-3 rounded-md text-gray-800 flex items-center" @click="startOAuthFlow">
+					<button type="button" class="bg-gray-200 px-2 py-3 rounded-sm text-gray-800 flex items-center" @click="startOAuthFlow">
 						Connect
 						<img src="/assets/openrouter-logo.svg" class="h-10" />
 					</button>

@@ -3,11 +3,19 @@ import useElectron from '@/composables/useElectron';
 import type { SQLiteVal } from './types-db';
 import { delay } from '../utils';
 
+type FeatureType = 'chat' | 'image' | 'tts' | 'stt';
+
+interface FeatureRequirements {
+  requiredSettings: AppSettingsKeys[];
+  validateFn?: (settings: Record<string, SQLiteVal>) => boolean;
+}
+
 const { dbGet, dbAll, dbRun } = useElectron();
 
 type AppSettingsKeys =
 	| 'user_name'
 	| 'openrouter_api_key'
+	| 'koboldcpp_host'
 	| 'local_model_directory'
 	| 'selected_provider_chat'
 	| 'selected_provider_image'
@@ -26,15 +34,17 @@ type AppSettingsKeys =
 	| 'auto_send_stt'
 	| 'auto_read_chat'
 	| 'auto_start_server'
-	| 'skip_start_dialog';
+	| 'skip_start_dialog'
+	| 'skip_setup';
 
 export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	user_name: 'User',
 	openrouter_api_key: '',
-	local_model_directory: '', // should have chat/ and image/ subdirectories
-	selected_provider_chat: 'local',
-	selected_provider_image: 'local',
-	selected_model_chat: '', // depends on selected_chat_api_provider
+	koboldcpp_host: '',
+	local_model_directory: '',
+	selected_provider_chat: '',
+	selected_provider_image: '',
+	selected_model_chat: '',
 	selected_model_image: '',
 	selected_model_tts: '0',
 	selected_model_whisper: '0',
@@ -50,7 +60,35 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	auto_read_chat: 0,
 	auto_start_server: 0,
 	skip_start_dialog: 0,
+	skip_setup: 0,
 };
+
+type Provider = 'cloud' | 'local' | '';
+export interface Settings {
+	user_name: string;
+	openrouter_api_key: string;
+	koboldcpp_host: string;
+	local_model_directory: string;
+	selected_provider_chat: Provider;
+	selected_provider_image: Provider;
+	selected_model_chat: string;
+	selected_model_image: string;
+	selected_model_tts: string;
+	selected_model_whisper: string;
+	gpu_enabled_chat: number;
+	gpu_enabled_image: number;
+	gpu_enabled_whisper: number;
+	chat_image_enabled: number;
+	chat_image_quality: string;
+	external_api_key: string;
+	fresh_db: number;
+	n_gpu_layers: number;
+	auto_send_stt: number;
+	auto_read_chat: number;
+	auto_start_server: number;
+	skip_start_dialog: number;
+	skip_setup: number;
+}
 
 class AppSettingsCls {
 	public isLoaded = false;
@@ -184,6 +222,61 @@ class AppSettingsCls {
 			}
 		}
 	}
+
+	private featureRequirements: Record<FeatureType, FeatureRequirements> = {
+    chat: {
+      requiredSettings: ['selected_model_chat', 'selected_provider_chat'],
+      validateFn: (settings) => {
+        if (settings.selected_provider_chat === 'local') {
+          return !!settings.koboldcpp_host;
+        }
+        return !!settings.openrouter_api_key;
+      }
+    },
+    image: {
+      requiredSettings: ['selected_model_image', 'selected_provider_image'],
+      validateFn: (settings) => {
+        if (settings.selected_provider_image === 'local') {
+          return !!settings.koboldcpp_host;
+        }
+        return false;
+      }
+    },
+    tts: {
+      requiredSettings: ['selected_model_tts'],
+      validateFn: (settings) => settings.selected_model_tts !== '0'
+    },
+    stt: {
+      requiredSettings: ['selected_model_whisper'],
+      validateFn: (settings) => settings.selected_model_whisper !== '0'
+    }
+  };
+
+  public isFeatureAvailable(feature: FeatureType): boolean {
+    const requirements = this.featureRequirements[feature];
+    if (!requirements) return false;
+
+    // Check if all required settings have non-empty values
+    const hasRequiredSettings = requirements.requiredSettings.every(
+      key => {
+        const value = this.settings[key];
+        return value !== undefined && value !== '' && value !== '0';
+      }
+    );
+
+    // If there's a custom validation function, use it
+    if (requirements.validateFn) {
+      return requirements.validateFn(this.settings);
+    }
+
+    return hasRequiredSettings;
+  }
+
+  public getAvailableFeatures(): FeatureType[] {
+    return Object.keys(this.featureRequirements).filter(
+      feature => this.isFeatureAvailable(feature as FeatureType)
+    ) as FeatureType[];
+  }
 }
 
 export const AppSettings = new AppSettingsCls();

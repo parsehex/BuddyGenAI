@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import FirstTimeSetup from '@/components/FirstTimeSetup.vue';
+import FirstTimeSetup from '@/components/setup/Main.vue';
 import useLlamaCpp from '@/composables/useLlamaCpp';
 import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
@@ -26,6 +26,7 @@ import { storeToRefs } from 'pinia';
 import { api } from '@/lib/api';
 import router from '@/lib/router';
 import AppTitle from '@/components/AppTitle.vue';
+import { toRefs } from '@vueuse/core';
 
 const { toast } = useToast();
 
@@ -131,6 +132,19 @@ const startChat = async (id: string) => {
 	await store.updateThreads();
 	router.push(`/chat/${newThread.id}`);
 };
+
+const canSkipSetup = computed(() => {
+	if (!store.settings.selected_provider_chat) return false;
+	if (store.settings.selected_provider_chat === 'cloud' && !store.settings.openrouter_api_key) return false;
+	if (!store.settings.user_name) return false;
+	return true;
+})
+
+const handleSkipSetup = () => {
+	store.settings.skip_setup = 1;
+	store.saveSettings(store.settings);
+};
+const {skip_setup} = toRefs(store.settings);
 </script>
 
 <template>
@@ -202,7 +216,7 @@ const startChat = async (id: string) => {
 	<p v-if="buddies.length && !threads.length" class="text-center mt-4">
 		You have no chats yet.
 	</p>
-	<div v-if="buddies.length && !threads.length" class="mt-4 flex items-center justify-center">
+	<div v-if="(buddies.length && !threads.length) || +skip_setup" class="mt-4 flex items-center justify-center">
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
 		<Select
 			v-if="store.buddies.length > 0"
@@ -230,7 +244,7 @@ const startChat = async (id: string) => {
 				</SelectGroup>
 			</SelectContent>
 		</Select>
-		<Button v-else type="button" @click="$router.push('/create-buddy')" class="mt-2">
+		<Button v-else type="button" @click="$router.push('/create-buddy')">
 			Create a Buddy
 		</Button>
 	</div>

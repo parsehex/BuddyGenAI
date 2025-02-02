@@ -5,7 +5,8 @@ import type {
 import axios from 'axios';
 import { v4 } from 'uuid';
 import urls from '@/lib/api/urls';
-import { AppSettings } from '@/lib/api/AppSettings'
+import { AppSettings } from '@/lib/api/AppSettings';
+import { useAppStore } from '../stores/main';
 
 interface UseChatOptions {
 	initialMessages?: ChatMessage[];
@@ -22,6 +23,7 @@ export default function useChat(options: UseChatOptions) {
 		'X-Title': 'BuddyGenAI',
 	} as Record<string, any>);
 
+	const store = useAppStore();
 	const messages = ref([] as ChatMessage[]);
 	const input = ref('');
 	const isLoading = ref(false);
@@ -36,7 +38,7 @@ export default function useChat(options: UseChatOptions) {
 
 	async function handleSubmit(e: Event, skipUserMsg = false) {
 		setAPIKeyHeader();
-		if (!headers.value['Authorization']) {
+		if (store.isExternalProvider && !headers.value['Authorization']) {
 			throw new Error('Must connect OpenRouter account');
 		}
 

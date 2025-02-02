@@ -48,8 +48,14 @@ console.log('skipDialog', skipDialog.value);
 const enteredApp = ref(skipDialog.value ? 1 : 0);
 
 const isSetup = computed(() => {
-	const key = store.settings.openrouter_api_key;
-	return !!key;
+	if (!AppSettings.isFeatureAvailable('chat')) return false;
+	const isDefaultUserName = store.settings.user_name?.toLowerCase() === 'user';
+	const hasThreads = store.threads.length > 0;
+	const hasBuddies = store.buddies.length > 0;
+	const skippedSetup = +store.settings.skip_setup;
+	if (skippedSetup) return true;
+	if (!hasBuddies && !isDefaultUserName) return false;
+	return true;
 });
 
 onMounted(async () => {

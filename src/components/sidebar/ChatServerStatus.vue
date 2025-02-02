@@ -107,6 +107,7 @@ watch(
 );
 onBeforeMount(async () => {
 	lastModel.value = await getLastModel();
+	store.updateChatServerRunning();
 });
 
 const bgColor = computed(() => {
@@ -151,7 +152,7 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 						<span class="font-semibold">Model:</span>
 						{{ lastModel }}
 					</p>
-					<div class="flex items-center space-x-2">
+					<!-- <div class="flex items-center space-x-2">
 						<Button
 							v-if="!store.chatServerRunning"
 							class="success"
@@ -169,7 +170,7 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 							Restart
 						</Button>
 						<Spinner v-if="store.chatServerStarting" />
-					</div>
+					</div> -->
 				</div>
 			</div>
 		</PopoverContent>

@@ -10,6 +10,7 @@ import type {
 
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
+import type { Settings } from '../lib/api/AppSettings';
 
 const lastFetchMap: Record<string, number> = {};
 function shouldGet(name: string, interval: number) {
@@ -20,31 +21,6 @@ function shouldGet(name: string, interval: number) {
 		return true;
 	}
 	return false;
-}
-
-type Provider = 'external' | 'local' | 'custom';
-interface Settings {
-	user_name: string;
-	openrouter_api_key: string;
-	local_model_directory: string;
-	selected_provider_chat: Provider;
-	selected_provider_image: Provider;
-	selected_model_chat: string;
-	selected_model_image: string;
-	selected_model_tts: string;
-	selected_model_whisper: string;
-	gpu_enabled_chat: number;
-	gpu_enabled_image: number;
-	gpu_enabled_whisper: number;
-	chat_image_enabled: number;
-	chat_image_quality: string;
-	external_api_key: string;
-	fresh_db: number;
-	n_gpu_layers: number;
-	auto_send_stt: number;
-	auto_read_chat: number;
-	auto_start_server: number;
-	skip_start_dialog: number;
 }
 
 let firstRun = true;
@@ -65,7 +41,7 @@ export const useAppStore = defineStore('app', () => {
 	const threads = ref([] as MergedChatThread[]);
 
 	const isExternalProvider = computed(
-		() => settings.value.selected_provider_chat === 'external'
+		() => settings.value.selected_provider_chat === 'cloud'
 	);
 
 	onBeforeMount(async () => {
@@ -271,7 +247,14 @@ export const useAppStore = defineStore('app', () => {
 	const chatServerRunning = ref(false);
 	const chatServerStarting = ref(false);
 	const updateChatServerRunning = async () => {
-		chatServerRunning.value = false;
+		try {
+			const res = await fetch(urls.other.koboldUrl('/api/extra/version'));
+			const data = await res.json();
+			if (data.llm) chatServerRunning.value = true;
+			else chatServerRunning.value = false;
+		} catch (err: any) {
+			chatServerRunning.value = false;
+		}
 	};
 
 	const imgGenerating = ref(false);
@@ -297,9 +280,7 @@ export const useAppStore = defineStore('app', () => {
 
 		if (isExternalProvider.value) {
 			return (
-				!!settings.value.external_api_key &&
-				!!settings.value.selected_model_chat &&
-				!!settings.value.selected_model_image
+				!!settings.value.openrouter_api_key
 			);
 		}
 		const hasModelDir = !!settings.value.local_model_directory;
