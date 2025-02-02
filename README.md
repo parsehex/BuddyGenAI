@@ -1,13 +1,25 @@
-# BuddyGenAI
+# BuddyGenAI (early release, in-progress)
 
-BuddyGenAI is an offline-only chat app made to create and interact with virtual buddies. BuddyGenAI uses the following local AI projects:
+BuddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
+
+In the app, you name your buddies as well as give them a description to influence how they chat with you. When you're connected to image AI,, you can generate profile pictures for your buddies which display in chat.
+
+This is a passion project of mine to create an experience that emulates having friends to talk to and hang out with. The above projects and several others have helped make this possible and I couldn't have made this without their work.
+
+I hope others find this project interesting and/or enjoyable as well.
+
+## Online Version
+
+This is a new version which runs as a frontend-only app, supporting OpenRouter for chat-only and KoboldCpp for chat/image/TTS/STT.
+
+## Electron Version
+
+The original version embeds the following local projects within the app (mostly only CUDA support):
 
 - [llama.cpp](https://github.com/ggerganov/llama.cpp)
 - [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
 - [Piper](https://github.com/rhasspy/piper)
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-
-This is a passion project of mine to create an experience that somewhat realistically emulates having virtual friends to talk to and interact with. The above projects and several others have helped make this possible and I couldn't have made this without their work. I hope others find this project interesting and enjoyable as well.
 
 ## ✅ Features
 
@@ -32,7 +44,7 @@ You may [check the releases page](https://github.com/parsehex/BuddyGenAI/release
 
 **Chat keeps starting forever**
 
-This happens occasionally and I think is a frontend issue. First, try pressing Ctrl+R to refresh the app. If that doesn't work, restarting the app should fix the issue.
+This happens occasionally and I think it's a frontend issue. First, try pressing Ctrl+R to refresh the app. If that doesn't work, restarting the app should fix the issue.
 
 ## ❓ Support / Help
 
@@ -71,6 +83,10 @@ Aside from overall cleaning up the project and improving the look of it, I have 
     - Project minimally uses Vercel's AI SDK (really just for message streaming), I want to re-implement to avoid the need for a server (just llama.cpp server then) and reduce dependencies.
     - Accessing data from db is a mess, want to use [tRPC](https://trpc.io/) with electron's IPC to reduce complexity.
   - Planning to use [Vitest](https://vitest.dev/) for testing before undergoing major refactors.
+
+## Collaborators Welcome!
+
+If you'd like to contribute or otherwise help make this app, I look forward to hearing from you! Please drop an issue in the repository or any other way you can find to contact me.
 
 ## License
 
