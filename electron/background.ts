@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs/promises';
 import { app, BrowserWindow, session, dialog, shell } from 'electron';
+import { installExtension, VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
 // import updaterModule from '../updater';
@@ -256,13 +257,9 @@ async function createWindow() {
 // ==========
 app.whenReady().then(async () => {
 	if (!isProduction) {
-		try {
-			await session.defaultSession.loadExtension(
-				path.join(__dirname, '../..', '__extensions', 'vue-devtools')
-			);
-		} catch (err) {
-			log.error('[Electron::loadExtensions] An error occurred: ', err);
-		}
+		installExtension(VUEJS_DEVTOOLS)
+			.then((ext) => console.log(`Added Extension:  ${ext.name}`))
+			.catch((err) => console.log('An error occurred: ', err));
 	}
 
 	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {

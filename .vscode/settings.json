@@ -1,14 +1,12 @@
 {
   "search.exclude": {
     "**/.git": true,
-    "**/__extensions": true,
     "***.cpp": true,
     "**/*dist": true,
     "**/.output": true,
   },
   "files.exclude": {
     "**/.git": true,
-    "**/__extensions": true,
     "***.cpp": true,
     "**/*dist": true,
     "**/.output": true,
