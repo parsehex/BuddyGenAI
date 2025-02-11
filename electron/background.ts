@@ -3,24 +3,22 @@ import * as os from 'os';
 import * as fs from 'fs/promises';
 import { app, BrowserWindow, session, dialog, shell } from 'electron';
 import { installExtension, VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+import log from 'electron-log/main';
+import { fileURLToPath } from 'url';
 import singleInstance from './singleInstance';
 import dynamicRenderer from './dynamicRenderer';
 // import updaterModule from '../updater';
 import macMenuModule from './modules/macMenu';
 import { ipcMain } from 'electron/main';
-import macMenu from './modules/macMenu';
+import appMenu from './modules/macMenu';
 import db from './modules/db';
 import { basename, dirname, join, resolve } from 'path';
 import llamaCppModule from './modules/llamacpp';
-import { fileURLToPath } from 'url';
 import sdModule from './modules/sd';
 import { getDataPath } from './fs';
-// @ts-ignore
-import log from 'electron-log/main';
 import piperModule from './modules/piper';
 import whisperModule from './modules/whisper';
 import rememberWindowState, { loadWindowState } from './window-state';
-import { getLlamaCppPort } from './rand';
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -31,6 +29,16 @@ const isProduction = process.env.NODE_ENV !== 'development';
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any;
 const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32';
 const headerSize = 32;
+
+const modules: ((win: BrowserWindow) => any)[] = [
+	rememberWindowState,
+	appMenu,
+	db,
+	llamaCppModule,
+	sdModule,
+	piperModule,
+	whisperModule,
+];
 
 // Initialize app window
 // =====================
@@ -64,14 +72,6 @@ async function createWindow() {
 	if (initialWindowState.maximized) {
 		mainWindow.maximize();
 	}
-
-	rememberWindowState(mainWindow);
-
-	await db(mainWindow);
-	await llamaCppModule(mainWindow);
-	await sdModule(mainWindow);
-	await piperModule(mainWindow);
-	await whisperModule(mainWindow);
 
 	mainWindow.removeMenu();
 
@@ -274,30 +274,20 @@ app.whenReady().then(async () => {
 	const mainWindow = await createWindow();
 	if (!mainWindow) return;
 
+	// Initialize modules
+	log.debug('-'.repeat(30) + '\n[+] Loading modules...');
+	for (let i = 0; i < modules.length; i++) {
+		try {
+			await modules[i](mainWindow);
+		} catch (err: any) {
+			log.error('[!] Module error: ', err.message || err);
+		}
+	}
+
 	// Load renderer process
 	dynamicRenderer(mainWindow);
 
-	// Initialize modules
-	// log.debug('-'.repeat(30) + '\n[+] Loading modules...');
-	// modules.forEach((module) => {
-	// 	try {
-	// 		module(mainWindow);
-	// 	} catch (err: any) {
-	// 		log.error('[!] Module error: ', err.message || err);
-	// 	}
-	// });
-	// allow for modules to be async
-	// for (let i = 0; i < modules.length; i++) {
-	// 	try {
-	// 		await modules[i](mainWindow);
-	// 	} catch (err: any) {
-	// 		log.error('[!] Module error: ', err.message || err);
-	// 	}
-	// }
-	macMenu(mainWindow);
-	// updaterModule(mainWindow);
-
-	// log.debug('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
+	log.debug('[!] Loading modules: Done.' + '\r\n' + '-'.repeat(30));
 
 	app.on('activate', function () {
 		// On macOS it's common to re-create a window in the app when the
