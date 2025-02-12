@@ -1,8 +1,8 @@
 import { app, type BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import { getDataPath } from './fs';
-import { debounce } from './utils';
+import { getDataPath } from '../fs';
+import { debounce } from '../utils';
 
 interface WindowState {
 	width: number;
