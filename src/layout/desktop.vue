@@ -39,8 +39,8 @@ defineProps({
 		<ResizablePanel
 			v-if="isSetup"
 			class="min-w-min"
-			:default-size="22"
-			:min-size="20"
+			:default-size="30"
+			:min-size="28"
 			:max-size="35"
 		>
 			<Sidebar />

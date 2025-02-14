@@ -107,7 +107,7 @@ const handleClickChat = () => {
 		<TabsList class="w-full dark:bg-gray-800 rounded-none">
 			<Tooltip>
 				<TooltipTrigger>
-					<img src="/assets/logo.png" class="w-6 h-6 m-1 mx-2 cursor-pointer select-none" @click="handleClickChat" />
+					<img src="/assets/logo.png" class="hidden lg:block w-6 h-6 m-1 mx-2 cursor-pointer select-none" @click="handleClickChat" />
 				</TooltipTrigger>
 				<TooltipContent>
 					Go to home page
