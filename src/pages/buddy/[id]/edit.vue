@@ -49,6 +49,7 @@ import DevOnly from '@/src/components/DevOnly.vue';
 import BuddyTagsInput from '@/src/components/BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/src/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
+import { getImage } from '@/src/lib/api/images';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -106,9 +107,7 @@ const handleSelectProfilePic = async (pic: string) => {
 		profile_pic: pic,
 	});
 	buddy.value = await api.buddy.getOne(id);
-	profilePictureValue.value = urls.buddy.getProfilePic(
-		`${buddy.value?.id}/${pic}`
-	);
+	profilePictureValue.value = await getImage(pic);
 
 	updateBuddies();
 };
@@ -131,9 +130,7 @@ onBeforeMount(async () => {
 		selectedTTSVoice.value = buddy.value.tts_voice;
 	}
 	if (buddy.value?.profile_pic) {
-		profilePictureValue.value = urls.buddy.getProfilePic(
-			`${buddy.value.id}/${buddy.value.profile_pic}`
-		);
+		profilePictureValue.value = await getImage(buddy.value.profile_pic);
 	}
 	if (buddy.value?.profile_pic_prompt) {
 		profilePicturePrompt.value = buddy.value.profile_pic_prompt;
@@ -261,9 +258,7 @@ const refreshProfilePicture = async () => {
 
 	buddy.value = await api.buddy.getOne(id);
 
-	profilePictureValue.value = urls.buddy.getProfilePic(
-		`${buddy.value?.id}/${res.output}`
-	);
+	profilePictureValue.value = await getImage(res.output);
 	updatingProfilePicture.value = false;
 
 	allProfilePics.value = await api.buddy.profilePic.getAll(id);
@@ -390,7 +385,7 @@ const acceptKeywords = () => {
 						@select-profile-pic="handleSelectProfilePic"
 					/>
 
-					<!-- <BuddyAppearanceOptions
+					<BuddyAppearanceOptions
 						v-if="buddy"
 						:buddy="buddy"
 						:profile-pic-prompt="profilePicturePrompt"
@@ -398,14 +393,14 @@ const acceptKeywords = () => {
 						@update-profile-pic-prompt="profilePicturePrompt = $event"
 						v-model:appearance-options="generatedAppearanceOptions"
 						v-model:selected-appearance-options="selectedAppearanceOptions"
-					/> -->
+					/>
 
-					<!-- <div class="flex flex-col items-center justify-center w-full">
+					<div class="flex flex-col items-center justify-center w-full">
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2">
 							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
 						</Button>
-					</div> -->
+					</div>
 
 					<!-- <Label class="mt-4 flex flex-col items-center">
 						<span class="text-xl">{{ buddy?.name }}'s Voice</span>

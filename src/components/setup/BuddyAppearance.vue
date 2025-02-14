@@ -9,6 +9,7 @@ import { genderFromName } from '@/src/lib/prompt/sd';
 import { complete } from '@/src/lib/ai/complete';
 import router from '@/src/lib/router';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import BuddyAppearanceOptions from '../BuddyAppearanceOptions.vue';
 import BuddyAvatar from '../BuddyAvatar.vue';
 

@@ -34,6 +34,34 @@ const Steps = {
 	high: 32,
 };
 
+export async function makePictureKobold(options: MakePictureOptions) {
+	const store = useAppStore();
+	const host = store.settings.koboldcpp_host;
+	if (!host) throw new Error('No host defined for koboldcpp');
+	const {
+		posPrompt,
+		negPrompt,
+		size = 512,
+		quality = 'medium',
+	} = options;
+	const height = size;
+	const width = size === 768 ? 512 : 768;
+	const res = await fetch(`${host}/sdapi/v1/txt2img`, {
+		method: 'POST',
+		body: JSON.stringify({
+			prompt: posPrompt,
+			negative_prompt: negPrompt,
+			width,
+			height,
+			step: Steps[quality],
+		}),
+	});
+	const data = await res.json();
+	const hasImages = Array.isArray(data.images) && data.images.length;
+	if (!hasImages) throw new Error('No images returned from koboldcpp');
+	return data.images[0] as string;
+}
+
 export async function makePicture(options: MakePictureOptions) {
 	const electron = useElectron();
 	if (!electron.getDataPath) throw new Error('Electron not found');

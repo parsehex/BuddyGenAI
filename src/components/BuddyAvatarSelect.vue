@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs, watch } from 'vue';
+import { onMounted, ref, toRefs, watch } from 'vue';
 import {
 	Collapsible,
 	CollapsibleTrigger,
@@ -10,12 +10,34 @@ import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '../lib/api/types-db';
+import { getImage } from '../lib/api/images';
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;
 	allProfilePics: string[];
 }>();
 const { buddy, allProfilePics } = toRefs(props);
+
+const images = ref([] as any[]);
+
+onMounted(async () => {
+	const imgs = allProfilePics.value.filter((p) => p);
+	const resolved: string[] = [];
+	for (const i of imgs) {
+		const data = await getImage(i);
+		if (data) resolved.push(i);
+	}
+	images.value = [...resolved];
+});
+watch(() => allProfilePics.value, async () => {
+	const imgs = allProfilePics.value.filter((p) => p);
+	const resolved: string[] = [];
+	for (const i of imgs) {
+		const data = await getImage(i);
+		if (data) resolved.push(i);
+	}
+	images.value = [...resolved];
+});
 
 const emit = defineEmits(['selectProfilePic']);
 
@@ -45,9 +67,9 @@ const allPicsOpen = ref(false);
 					class="flex flex-row flex-wrap items-center justify-center max-w-96 max-h-64"
 				>
 					<img
-						v-for="pic in allProfilePics"
+						v-for="pic in images"
 						:key="pic"
-						:src="urls.buddy.getProfilePic(`${buddy?.id}/${pic}`)"
+						:src="pic"
 						@click="emit('selectProfilePic', pic)"
 						class="cursor-pointer w-[64px] h-[64px] m-1 rounded-full hover:shadow-lg hover:scale-105 hover:opacity-90"
 					/>

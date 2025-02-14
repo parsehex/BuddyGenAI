@@ -11,6 +11,7 @@ import {
 import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import BuddyAvatar from './BuddyAvatar.vue';
+import { getImage } from '../lib/api/images';
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;
@@ -44,7 +45,7 @@ const updateBuddy = async () => {
 	created.value = p.created;
 	updated.value = p.updated;
 	if (p.profile_pic) {
-		profilePic.value = urls.buddy.getProfilePic(`${p.id}/${p.profile_pic}`);
+		profilePic.value = await getImage(p.profile_pic);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

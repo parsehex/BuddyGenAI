@@ -3,6 +3,7 @@ import { computed, ref, watch, onMounted, toRefs } from 'vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import urls from '@/lib/api/urls';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getImage } from '../lib/api/images';
 
 const props = defineProps<{
 	buddy: BuddyVersionMerged;
@@ -22,20 +23,16 @@ const initials = computed(() => {
 });
 
 const profilePicValue = ref('');
-onMounted(() => {
+onMounted(async () => {
 	if (buddy.value.profile_pic) {
-		profilePicValue.value = urls.buddy.getProfilePic(
-			`${buddy.value.id}/${buddy.value.profile_pic}`
-		);
+		profilePicValue.value = await getImage(buddy.value.profile_pic);
 	}
 });
 watch(
 	() => buddy.value.profile_pic,
-	() => {
+	async () => {
 		if (buddy.value.profile_pic) {
-			profilePicValue.value = urls.buddy.getProfilePic(
-				`${buddy.value.id}/${buddy.value.profile_pic}`
-			);
+			profilePicValue.value = await getImage(buddy.value.profile_pic);
 		} else {
 			profilePicValue.value = '';
 		}

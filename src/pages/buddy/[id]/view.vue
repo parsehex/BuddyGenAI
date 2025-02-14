@@ -17,6 +17,7 @@ import urls from '@/lib/api/urls';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import AllThreadsImages from '@/src/components/AllThreadsImages.vue';
 import { ScrollArea } from '@/src/components/ui/scroll-area';
+import { getImage } from '@/src/lib/api/images';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -46,7 +47,7 @@ onBeforeMount(async () => {
 	updated.value = p.updated;
 
 	if (p.profile_pic) {
-		profilePic.value = urls.buddy.getProfilePic(`${p.id}/${p.profile_pic}`);
+		profilePic.value = await getImage(p.profile_pic);
 	}
 	if (updated.value) {
 		time_label.value = 'Updated';

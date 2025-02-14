@@ -176,7 +176,7 @@ onMounted(() => {
 	let hasGeneratedOptions = false;
 	for (const key of categories) {
 		if (!appearanceOptions.value) continue;
-		if (appearanceOptions.value[key].length > 0) {
+		if (appearanceOptions.value[key]?.length > 0) {
 			hasGeneratedOptions = true;
 			break;
 		}

@@ -42,6 +42,7 @@ export default async function createOne({
 		profile_pic,
 		profile_pic_prompt,
 		profile_pic_use_prompt,
+		profile_pics: [],
 		appearance_options,
 		selected_appearance_options,
 	});

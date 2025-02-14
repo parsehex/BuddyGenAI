@@ -1,10 +1,11 @@
 import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
-import { select, update } from '@/lib/sql';
+import { insert, select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
 import useElectron from '@/composables/useElectron';
-import { makePicture } from '@/src/lib/ai/img';
+import { makePicture, makePictureKobold } from '@/src/lib/ai/img';
+import { v4 } from 'uuid';
 
 const { dbGet, dbRun, fsAccess, pathJoin } = useElectron();
 
@@ -35,23 +36,9 @@ export default async function createProfilePic(
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
-	const isExternal = AppSettings.get('selected_provider_image') === 'external';
-
-	const modelDir = AppSettings.get('local_model_directory') as string;
-	const selectedImageModel = AppSettings.get('selected_model_image') as string;
-	let modelPath = '';
-
-	if (!selectedImageModel) throw new Error('No image model selected');
-	if (!isExternal) {
-		if (!modelDir) throw new Error('Model directory not set');
-
-		modelPath = await pathJoin(modelDir, selectedImageModel);
-		try {
-			const exists = await fsAccess(modelPath);
-			if (!exists) throw new Error('Image model file not found');
-		} catch (e) {
-			throw new Error('Image model file not found');
-		}
+	const isExternal = AppSettings.get('selected_provider_chat') === 'cloud' && AppSettings.get('selected_provider_chat') !== 'local';
+	if (isExternal) {
+		throw new Error('External image generation not yet supported');
 	}
 
 	const sqlBuddy = select('persona', ['*'], { id });
@@ -78,13 +65,7 @@ export default async function createProfilePic(
 
 	let animated = false;
 
-	// does model name contain "illuminati"?
-	if (selectedImageModel.includes('illuminati')) {
-		animated = true;
-	}
-
 	const ranColor = colors[Math.floor(Math.random() * colors.length)];
-
 	const posPrompt = posPromptFromName(
 		currentVersion.name,
 		extraPrompt + `, (${ranColor} background)`,
@@ -93,17 +74,24 @@ export default async function createProfilePic(
 	);
 	const negPrompt = negPromptFromName(currentVersion.name, gender);
 
-	const filename = `${Date.now()}.png`;
-	await makePicture({
-		absModelPath: modelPath,
-		outputSubDir: buddy.id,
-		outputFilename: filename,
+	const imgId = v4();
+	const filename = imgId;
+	const imgData = await makePictureKobold({
+		absModelPath: '',
+		outputSubDir: '',
+		outputFilename: '',
 		posPrompt,
 		negPrompt,
 		size: 512, // TODO un-hardcode High quality
 	});
 
-	const sqlUpdate = update('persona', { profile_pic: filename }, { id });
+	const sqlImgAdd = insert('images', { id: filename, data: imgData });
+	await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
+
+	const currentPics = buddy.profile_pics || [];
+	currentPics.push(filename);
+
+	const sqlUpdate = update('persona', { profile_pic: filename, profile_pics: currentPics }, { id });
 	await dbRun(sqlUpdate[0], sqlUpdate[1]);
 
 	console.log('created pic', filename);

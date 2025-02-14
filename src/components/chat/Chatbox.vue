@@ -25,7 +25,7 @@ import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { genderFromName, negPromptFromName } from '@/lib/prompt/sd';
-import { makePicture } from '@/lib/ai/img';
+import { makePicture, makePictureKobold } from '@/lib/ai/img';
 import Message from './ChatMessage.vue';
 import {
 	imgDescriptionFromChat,
@@ -42,12 +42,14 @@ import useChat from '@/src/composables/useChat';
 import { MODEL_NAME } from '@/lib/constants';
 import { complete } from '@/src/lib/ai/complete';
 import useMobile from '@/src/composables/useMobile';
+import { v4 } from 'uuid';
+import { insert } from '@/src/lib/sql';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
-const { pathJoin } = useElectron();
+const { pathJoin, dbRun } = useElectron();
 
 // https://github.com/parsehex/BuddyGenAI/issues/2
 // there is a bug where if you unfocus the window while buddy is responding,
@@ -261,6 +263,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				}
 
 				if (cmdObj.description && cmdObj.do_send) {
+					// TODO update for kobold
 					// if (cmdObj.description && cmdObj.do_send && !explicit) {
 					const lastMessage = JSON.parse(
 						JSON.stringify(messages.value[messages.value.length - 1])
@@ -280,30 +283,23 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						p = attemptToFixJson(p);
 						p = JSON.parse(p);
 
-						let outputSubDir =
-							threadMode.value === 'persona'
-								? currentBuddy.value?.id || ''
-								: 'AI-Assistant';
-						// save to thread subdirectory
-						if (threadId.value) {
-							outputSubDir = await pathJoin(outputSubDir, threadId.value);
-						}
-						const filename = `${Date.now()}.png`;
-
+						const imgId = v4();
+						const filename = imgId;
 						const quality = store.settings.chat_image_quality;
 
-						await makePicture({
-							absModelPath: store.getImageModelPath(),
-							outputSubDir,
-							outputFilename: filename,
+						const imgData = await makePictureKobold({
+							absModelPath: '',
+							outputSubDir: '',
+							outputFilename: '',
 							posPrompt: p,
 							negPrompt: negPromptFromName(currentBuddy.value?.name || '', gender),
 							size: 768,
 							quality: quality as any,
 						});
 
-						const imgPath = urls.buddy.getProfilePic(outputSubDir + '/' + filename);
-						imgToSave = imgPath;
+						const sqlImgAdd = insert('images', { id: filename, data: imgData });
+						await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
+						imgToSave = filename;
 					}
 				}
 			}

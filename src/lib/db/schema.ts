@@ -5,10 +5,22 @@ interface Persona {
   profile_pic?: string;
   profile_pic_prompt?: string;
   profile_pic_use_prompt: boolean;
+  profile_pics?: string[];
   appearance_options?: string;
   selected_appearance_options?: string;
   tts_voice?: string;
   current_version_id?: string;
+}
+
+interface Image {
+  id: string;
+  data: string;
+  timestamp: Date;
+}
+interface Audio {
+  id: string;
+  data: string;
+  timestamp: Date;
 }
 
 interface ChatThread {
@@ -55,17 +67,21 @@ class AppDatabase extends Dexie {
   chat_message!: Dexie.Table<ChatMessage, string>;
   persona_version!: Dexie.Table<PersonaVersion, string>;
   app_settings!: Dexie.Table<AppSetting, string>;
+  images!: Dexie.Table<Image, string>;
+  audio!: Dexie.Table<Audio, string>;
 
   constructor() {
     super('BuddyGenAI-DB');
 
-    this.version(1).stores({
+    this.version(2).stores({
       persona: 'id, created, updated, current_version_id',
       chat_thread: 'id, created, persona_id, name, current_persona_version_id',
       chat_message: 'id, created, updated, thread_id, thread_index',
       persona_version: 'id, [persona_id+version], persona_id, name, version, created',
-      app_settings: 'name'
-  });
+      app_settings: 'name',
+      images: 'id, timestamp',
+      audio: 'id, timestamp',
+    });
 
     // @ts-ignore
     this.persona.hook('creating', (primKey: string, obj: Persona) => {
@@ -73,21 +89,32 @@ class AppDatabase extends Dexie {
       return obj;
     });
 
-		// @ts-ignore
+    // @ts-ignore
     this.chat_thread.hook('creating', (primKey: string, obj: ChatThread) => {
       obj.created = obj.created || new Date();
       return obj;
     });
 
-		// @ts-ignore
+    // @ts-ignore
     this.chat_message.hook('creating', (primKey: string, obj: ChatMessage) => {
       obj.created = obj.created || new Date();
       return obj;
     });
 
-		// @ts-ignore
+    // @ts-ignore
     this.persona_version.hook('creating', (primKey: string, obj: PersonaVersion) => {
       obj.created = obj.created || new Date();
+      return obj;
+    });
+
+    // @ts-ignore
+    this.images.hook('creating', (primKey: string, obj: Image) => {
+      obj.timestamp = obj.timestamp || new Date();
+      return obj;
+    });
+    // @ts-ignore
+    this.audio.hook('creating', (primKey: string, obj: Audio) => {
+      obj.timestamp = obj.timestamp || new Date();
       return obj;
     });
   }

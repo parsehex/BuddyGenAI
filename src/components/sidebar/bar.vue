@@ -115,8 +115,8 @@ const handleClickChat = () => {
 			</Tooltip>
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<!-- <TabsTrigger value="settings">Settings</TabsTrigger> -->
-			<RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink>
+			<TabsTrigger value="settings">Settings</TabsTrigger>
+			<!-- <RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink> -->
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">
@@ -139,9 +139,9 @@ const handleClickChat = () => {
 			<TabsContent value="buddy">
 				<BuddyList />
 			</TabsContent>
-			<!-- <TabsContent value="settings">
+			<TabsContent value="settings">
 				<SettingsPanel />
-			</TabsContent> -->
+			</TabsContent>
 		</div>
 	</Tabs>
 </template>
