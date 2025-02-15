@@ -36,10 +36,13 @@ import { makeTTS } from '@/src/lib/ai/tts';
 import urls from '@/src/lib/api/urls';
 import { useToast } from '../ui/toast';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
+import { insert } from '@/src/lib/sql';
+import { v4 } from 'uuid';
+import { getAudio } from '@/src/lib/api/audio';
 
 const { toast } = useToast();
 
-const { copyToClipboard } = useElectron();
+const { copyToClipboard, dbRun } = useElectron();
 const store = useAppStore();
 
 const props = defineProps<{
@@ -121,24 +124,26 @@ const msgInitials = computed(() => {
 	return firstName[0];
 });
 
-const ttsEnabled = computed(() => false);
+const ttsEnabled = computed(() => true);
 const hasTTS = computed(() => {
 	// @ts-ignore
 	if (!message.value.tts) return false;
 	// @ts-ignore
-	return message.value.tts;
+	return !!message.value.tts;
 });
-const tts = computed(() => {
+const tts = computed(async () => {
 	// @ts-ignore
-	return message.value.tts || '';
+	const id: string = message.value.tts || '';
+	if (!id) return '';
+	const ttsData = await getAudio(id);
+	if (!ttsData) return '';
+	return ttsData;
 });
 
 const doTTS = async () => {
 	if (isUser.value) return;
 
 	if (!hasTTS.value) {
-		const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-
 		if (!ttsEnabled.value) {
 			toast({
 				variant: 'destructive',
@@ -147,24 +152,29 @@ const doTTS = async () => {
 			});
 			return;
 		}
-		const filename = `${Date.now()}.wav`;
 		const text = cleanTextForTTS(message.value.content);
 
-		await makeTTS({
-			absModelPath: ttsModel,
-			outputFilename: filename,
+		const id = v4();
+		const ttsData = await makeTTS({
+			absModelPath: '',
+			outputFilename: '',
 			text,
 		});
 
-		const ttsUrl = urls.tts.get(filename);
-		playAudio(ttsUrl);
+		const response = await fetch(ttsData);
+		const audioBlob = await response.blob();
 
-		await api.message.updateOne(message.value.id, undefined, undefined, ttsUrl);
+		const sqlAudioAdd = insert('audio', { id, data: audioBlob });
+		await dbRun(sqlAudioAdd[0], sqlAudioAdd[1]);
+
+		playAudio(ttsData);
+
+		await api.message.updateOne(message.value.id, undefined, undefined, id);
 		emit('edit', message.value.id);
 		return;
 	}
 
-	playAudio(tts.value);
+	playAudio(await tts.value);
 };
 </script>
 

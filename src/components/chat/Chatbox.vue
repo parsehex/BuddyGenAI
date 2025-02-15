@@ -163,10 +163,13 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			}
 
 			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-			let ttsToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
-			if (ttsToSave) {
+			let ttsDataToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
+			if (ttsDataToSave) {
+				const id = v4();
+				const sqlAudioAdd = insert('audio', { id, data: ttsDataToSave });
+				await dbRun(sqlAudioAdd[0], sqlAudioAdd[1]);
 				// @ts-ignore
-				lastMessage.tts = ttsToSave;
+				lastMessage.tts = id;
 				const newMessages = [...messages.value].map((m) => m);
 				newMessages[messages.value.length - 1] = lastMessage;
 				setMessages(newMessages);
@@ -313,7 +316,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {
-				await handleReloading(ttsToSave, imgToSave);
+				await handleReloading(ttsDataToSave, imgToSave);
 				return;
 			}
 
@@ -322,7 +325,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					role: 'assistant',
 					content: lastMessage.content.trim(),
 					image: imgToSave,
-					tts: ttsToSave,
+					tts: ttsDataToSave,
 				};
 				msgsToSave.push(msg as any);
 			} else {

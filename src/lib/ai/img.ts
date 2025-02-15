@@ -59,7 +59,7 @@ export async function makePictureKobold(options: MakePictureOptions) {
 	const data = await res.json();
 	const hasImages = Array.isArray(data.images) && data.images.length;
 	if (!hasImages) throw new Error('No images returned from koboldcpp');
-	return data.images[0] as string;
+	return 'data:image/png;base64,' + data.images[0] as string;
 }
 
 export async function makePicture(options: MakePictureOptions) {

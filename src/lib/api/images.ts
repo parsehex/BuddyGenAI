@@ -11,6 +11,9 @@ export async function getImage(id: string) {
 		throw new Error('Image not found');
 	}
 
-	const str = 'data:image/png;base64,' + image.data;
+	let str = image.data as string;
+
+	if (!str.includes('data:') && !str.includes('base64')) str = 'data:image/png;base64,' + str;
+
 	return str;
 }

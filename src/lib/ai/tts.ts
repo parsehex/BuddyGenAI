@@ -14,32 +14,23 @@ interface MakeTTSOptions {
 }
 
 export async function makeTTS(options: MakeTTSOptions) {
-	const electron = useElectron();
-	if (!electron.getDataPath) throw new Error('Electron not found');
+	const { text } = options;
 
-	const { pathJoin, mkdir, fsUnlink, getDataPath } = electron;
-
-	const piper = usePiper();
-	if (!piper) throw new Error('usePiper not found');
-
-	const { absModelPath, text } = options;
-
-	const modelExists = await verifyFilePath(absModelPath);
-	if (!modelExists) throw new Error('Model not found');
-
-	const dataPath = await getDataPath('tts/');
-	await mkdir(dataPath);
-
-	const filename = options.outputFilename || `${Date.now()}.wav`;
-	const outputPath = await pathJoin(dataPath, filename);
-	const outputExists = await verifyFilePath(outputPath);
-	if (outputExists) await fsUnlink(outputPath);
-
-	await piper.runPiper({
-		model: absModelPath,
-		output: outputPath,
-		text,
+	const host = store.settings.koboldcpp_host;
+	if (!host) throw new Error('No host defined for koboldcpp');
+	const response = await fetch(`${host}/api/extra/tts`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ input: text }),
 	});
+
+	if (!response.ok) {
+		throw new Error('Failed to generate TTS');
+	}
+
+	const blob = await response.blob();
+	const audioUrl = URL.createObjectURL(blob);
+	return audioUrl;
 }
 
 /**
@@ -51,24 +42,19 @@ export async function makeAndReadTTS(text: string, ttsModel: string) {
 	// 0 is the value i that chose to signify disabling tts or stt
 	// values from the db are getting cast to strings + sqlite uses 0 or 1 for booleans
 	// @ts-ignore
-	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== 0;
-	const ttsEnabled = ttsModel && ttsModel !== '0';
+	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== '0' && autoRead !== 0;
 
-	if (!autoReadEnabled || !ttsEnabled) {
+	if (!autoReadEnabled) {
 		console.log('TTS not enabled');
 		return;
 	}
 
-	const filename = `${Date.now()}.wav`;
-	text = cleanTextForTTS(text);
-	await makeTTS({
-		absModelPath: ttsModel,
-		outputFilename: filename,
+	const data = await makeTTS({
+		absModelPath: '',
 		text,
 	});
 
-	const url = urls.tts.get(filename);
-	playAudio(url);
+	playAudio(data);
 
-	return url;
+	return data;
 }
