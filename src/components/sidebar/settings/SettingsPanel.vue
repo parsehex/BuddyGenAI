@@ -15,55 +15,11 @@ import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
 
-const { pickDirectory, verifyModelDirectory } = useElectron();
-
-const { updateModels } = useAppStore();
-const store = useAppStore();
-
-const { settings } = storeToRefs(store);
-
 const error = ref('');
-
-const refreshModels = async () => {
-	await updateModels();
-};
-
-if (settings.value.local_model_directory) {
-	await refreshModels();
-}
 
 const reloadPage = () => {
 	window.location.reload();
 };
-
-const pickModelDirectory = async () => {
-	if (!pickDirectory) return console.error('Electron not available');
-
-	if (settings.value.local_model_directory) {
-		console.log(
-			'Local model directory already set:',
-			settings.value.local_model_directory
-		);
-		return;
-	}
-
-	const directory = await verifyModelDirectory();
-	if (!directory) {
-		error.value =
-			'Cound not find a valid model directory. Please select a valid directory.';
-		return;
-	} else {
-		error.value = '';
-	}
-	settings.value.local_model_directory = directory;
-
-	await refreshModels();
-};
-onMounted(() => {
-	if (!settings.value.local_model_directory) {
-		pickModelDirectory();
-	}
-});
 </script>
 
 <template>
@@ -84,7 +40,7 @@ onMounted(() => {
 		</Alert>
 		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
-			<ChatAIOptions />
+			<!-- <ChatAIOptions /> -->
 			<ImageAIOptions />
 			<TTSOptions />
 			<STTOptions />
@@ -97,7 +53,7 @@ onMounted(() => {
 				variant="ghost"
 				>Reload Page</Button
 			>
-			<RouterLink to="/credits">App Credits</RouterLink>
+			<RouterLink to="/credits">BuddyGenAI Credits / Licenses</RouterLink>
 			<DevOnly>
 				<Button
 					type="button"

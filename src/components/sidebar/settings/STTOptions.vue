@@ -64,46 +64,6 @@ const updateUseGPU = async (boolVal: boolean) => {
 	<AccordionItem value="stt-options">
 		<AccordionTrigger>Speech-to-Text Options</AccordionTrigger>
 		<AccordionContent>
-			<OptionSection>
-				<Label class="flex items-center gap-2">
-					<Switch :checked="useGpu" @update:checked="updateUseGPU" />
-					Use GPU if available
-				</Label>
-			</OptionSection>
-
-			<OptionSection
-				label="STT / Whisper Model"
-				labelName="stt-model"
-				orientation="vertical"
-			>
-				<div class="flex">
-					<ImportModel type="stt" />
-					<Select
-						:default-value="store.settings.selected_model_whisper"
-						@update:model-value="updateWhisperModel"
-						id="stt-model"
-					>
-						<SelectTrigger :title="store.settings.selected_model_whisper">
-							<SelectValue placeholder="Select a model for STT" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>STT Models</SelectLabel>
-								<SelectItem value="0">Disabled</SelectItem>
-
-								<SelectItem
-									v-for="model in store.whisperModels"
-									:key="model"
-									:value="model"
-								>
-									{{ model }}
-								</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-			</OptionSection>
-
 			<OptionSection
 				label="Auto Send STT"
 				labelName="auto_send_stt"

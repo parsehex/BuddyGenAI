@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useAppStore } from '@/src/stores/main';
 import {
 	AccordionTrigger,
@@ -8,25 +8,9 @@ import {
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectGroup,
-	SelectLabel,
-	SelectItem,
-} from '@/components/ui/select';
 import OptionSection from './OptionSection.vue';
-import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
-
-const updateTTSModel = async (model: string) => {
-	if (store.settings.selected_model_tts === model) return;
-
-	store.settings.selected_model_tts = model;
-};
 
 const autoReadChat = computed({
 	get: () =>
@@ -48,39 +32,6 @@ const autoReadChat = computed({
 	<AccordionItem value="tts-options">
 		<AccordionTrigger>Text-to-Speech Options</AccordionTrigger>
 		<AccordionContent>
-			<OptionSection
-				label="Default Voice"
-				labelName="tts-model"
-				orientation="vertical"
-			>
-				<div class="flex">
-					<ImportModel type="tts" />
-					<Select
-						:default-value="store.settings.selected_model_tts"
-						@update:model-value="updateTTSModel"
-						id="tts-model"
-					>
-						<SelectTrigger :title="store.settings.selected_model_tts">
-							<SelectValue placeholder="Select a TTS model" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>TTS Models</SelectLabel>
-								<SelectItem value="0">Disabled</SelectItem>
-
-								<SelectItem
-									v-for="model in store.ttsModels"
-									:key="model"
-									:value="model"
-								>
-									{{ model }}
-								</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-			</OptionSection>
-
 			<OptionSection
 				label="Auto Read Chat"
 				labelName="auto_read_chat"
