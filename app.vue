@@ -54,7 +54,7 @@ const isSetup = computed(() => {
 	const hasBuddies = store.buddies.length > 0;
 	const skippedSetup = +store.settings.skip_setup;
 	if (skippedSetup) return true;
-	if (!hasBuddies && !isDefaultUserName) return false;
+	if (!hasBuddies && !isDefaultUserName && !hasThreads) return false;
 	return true;
 });
 
