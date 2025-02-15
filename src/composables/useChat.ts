@@ -57,6 +57,7 @@ export default function useChat(options: UseChatOptions) {
 		e.preventDefault();
 
 		isLoading.value = true;
+		const thread_index = messages.value.length;
 		// send new messages to server, create assistant message
 		let i = 0;
 		const msg = ref({
@@ -68,7 +69,7 @@ export default function useChat(options: UseChatOptions) {
 			image: null,
 			tts: null,
 			thread_id: '',
-			thread_index: 0,
+			thread_index,
 		} as ChatMessage);
 		messages.value.push(msg.value);
 		await axios({

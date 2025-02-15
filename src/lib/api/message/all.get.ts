@@ -8,6 +8,7 @@ import type {
 import { AppSettings } from '@/lib/api/AppSettings';
 import * as prompt from '@/src/lib/prompt/buddy';
 import { select } from '@/lib/sql';
+import { v4 } from 'uuid';
 
 const { dbGet, dbAll } = useElectron();
 
@@ -30,7 +31,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		sqlMessages[0],
 		sqlMessages[1]
 	)) as ChatMessage[];
-	const hasSystemMessage = messages[0]?.role === 'system';
+	messages.sort((a, b) => a.thread_index - b.thread_index);
 
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
@@ -50,37 +51,32 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 			throw new Error('Buddy version not found');
 		}
 
-		if (!hasSystemMessage) {
-			const userName = AppSettings.get('user_name') as string;
+		// update the system message on-the-fly
+		const userName = AppSettings.get('user_name') as string;
+		const systemMessage = prompt.fromPersonaDescription(
+			userName,
+			buddyVersion.name,
+			buddyVersion.description
+		);
+		if (messages[0]?.role !== 'system') {
 			messages.unshift({
-				id: '',
+				id: v4(),
 				created: new Date().getTime(),
 				updated: new Date().getTime(),
 				role: 'system',
-				content: prompt.fromPersonaDescription(
-					userName,
-					buddyVersion.name,
-					buddyVersion.description
-				),
+				content: systemMessage,
 				image: null,
 				tts: null,
 				thread_id: threadId,
 				thread_index: 0,
 			});
 		} else {
-			const userName = AppSettings.get('user_name') as string;
-			messages[0].content = prompt.fromPersonaDescription(
-				userName,
-				buddyVersion.name,
-				buddyVersion.description
-			);
+			messages[0].content = systemMessage;
 		}
 	}
 
 	// log whether last message has tts
 	// console.log(messages[messages.length - 1].tts);
-
-	messages.sort((a, b) => a.thread_index - b.thread_index);
 
 	return messages || [];
 }
