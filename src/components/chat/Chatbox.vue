@@ -583,23 +583,15 @@ const canSend = computed(() => {
 	if (!store.isExternalProvider && !store.chatServerRunning) {
 		return false;
 	}
-	// if (!store.settings.selected_model_chat) {
-	// 	return false;
-	// }
-	if (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo') return false;
+	if (store.isExternalProvider && (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo')) return false;
 	return input.value && !isLoading.value;
 });
 
 const canReload = computed(() => {
-	// if (!store.isExternalProvider) {
-	// 	if (!store.chatServerRunning) {
-	// 		return false;
-	// 	}
-	// }
-	// if (!store.settings.selected_model_chat) {
-	// 	return false;
-	// }
-	if (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo') return false;
+	if (!store.isExternalProvider && !store.chatServerRunning) {
+		return false;
+	}
+	if (store.isExternalProvider && (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo')) return false;
 	return messages.value.length >= 2 && !isLoading.value;
 });
 
