@@ -70,6 +70,9 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 				thread_id: threadId,
 				thread_index: 0,
 			});
+			for (let i = 0; i < messages.length; i++) {
+				messages[i].thread_index = i;
+			}
 		} else {
 			messages[0].content = systemMessage;
 		}
