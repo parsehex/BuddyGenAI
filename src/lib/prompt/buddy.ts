@@ -34,7 +34,7 @@ export function fromPersonaDescription(
 
 	const chatImages = AppSettings.get('chat_image_enabled') as string | number;
 	const chatImagesEnabled =
-		chatImages && chatImages !== '0.0' && chatImages !== 0;
+		chatImages && chatImages !== '0.0' && chatImages !== '0' && chatImages !== 0;
 	let imgPrompt = '';
 	if (chatImagesEnabled) {
 		imgPrompt = ` ${aiName} may send ${userName} images, one at a time, depending on the chat's context.`;
