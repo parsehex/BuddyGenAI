@@ -14,5 +14,5 @@ defineProps({
 			<span style="color: #111">AI</span>
 		</div>
 	</span>
-	(Early Release)
+	(Prototype)
 </template>

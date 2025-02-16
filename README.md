@@ -1,4 +1,4 @@
-# BuddyGenAI (early release, in-progress)
+# BuddyGenAI (in-progress Prototype)
 
 BuddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
 
