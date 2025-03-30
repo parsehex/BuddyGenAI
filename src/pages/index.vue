@@ -132,7 +132,7 @@ const sortedThreads = computed(() => {
 		<!-- replace this with logo + BuddyGen AI in left corner -->
 		<h1 class="text-xl font-bold mb-2">
 			{{ store.newHere ? 'Welcome to' : '' }}
-			<div class="underline inline dark:bg-gray-600 p-1 rounded">
+			<div class="underline inline dark:bg-gray-600 p-1 rounded cursor-default">
 				<span style="color: #61dafb">BuddyGen</span>
 				<span style="color: #111">AI</span>
 			</div>
