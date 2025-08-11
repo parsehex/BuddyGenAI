@@ -1,13 +1,9 @@
-import { useCompletion } from 'ai/vue';
 import { useToast } from '@/src/components/ui/toast';
-import urls from '../api/urls';
 import {
-	isDescriptionInvalidPrompt,
 	isDescriptionValidPrompt,
 	isNameValidPrompt,
 } from '../prompt/validation';
 import { attemptToFixJson } from '../utils';
-import type { RequestOptions } from 'ai';
 
 type CompleteFunc = (
 	prompt: string,
