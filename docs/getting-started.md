@@ -9,13 +9,12 @@ With BuddyGenAI, you have the ability to pick and choose which AI models you wan
 First, your machine should have the following requirements:
 
 - Windows 10 or later
-  - Linux support is on the way
 - Install [Microsoft Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 - NVIDIA GPU with 6GB+ of VRAM (10-12GB is recommended)
   - RTX 20XX or newer is recommended
-  - The more VRAM you have will allow for using better AI models
+  - More VRAM allows for using more / better AI models
   - Install the latest NVIDIA drivers and [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
-- Estimated 25GB of free disk space (rough estimate)
+- 25GB of disk space (rough estimate)
 
 ## Installation and Setup
 

@@ -62,9 +62,11 @@ binaries/
 
 ## Build BuddyGenAI
 
-```
+```bash
 git clone https://github.com/parsehex/BuddyGenAI
 cd BuddyGenAI
+# IMPORTANT! Get the main branch:
+git checkout main
 npm install
 npm run build:electron
 ```

@@ -1,9 +1,11 @@
-# Troubleshooting
+# How to setup for the first time
+
+> [!WARNING] This page isn't updated and is for an early version of BuddyGenAI. See [here](./getting-started.md) for current instructions and links.
+
+## Troubleshooting
 
 - Most of the time, closing the app and opening it again will fix any issues.
 - Chat can take a while to start up. If the sidebar says Chat Starting for more than 30s, try restarting the app.
-
-# How to setup for the first time
 
 You can use BuddyGenAI using OpenAI's models or you can bring-your-own-models and run them on your own PC.
 
