@@ -1,1 +1,0 @@
-import{d as o,o as r,c as t,w as n,aj as l,ak as p,al as c,e as i,aV as d}from"./index-DWhafArJ.js";const f=o({__name:"CollapsibleTrigger",props:{asChild:{type:Boolean},as:{}},setup(a){const e=a;return(s,u)=>(r(),t(i(d),p(c(e)),{default:n(()=>[l(s.$slots,"default")]),_:3},16))}});export{f as _};
