@@ -31,3 +31,7 @@ This project has the following in terms of files and directories, starting at th
 - `/build.js`: Pain JS script to build Electron version.
 - `/index.{html,ts}`: HTML & JS (compiled) entrypoints for the web app.
 - `/typed-router.d.ts`: File defining the file-based routes, generated and managed by [unplugin-vue-router](https://github.com/posva/unplugin-vue-router) during compilation, should be committed to the git repo.
+
+## Notes
+
+- This is a link to the latest commit before I started removing unused code: <https://github.com/parsehex/BuddyGenAI/tree/a35ce00bcb885b9cd026e55e85fad5b36976e4ef>
