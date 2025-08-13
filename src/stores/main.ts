@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref, computed, watch, onBeforeMount } from 'vue';
 import type {
 	ChatMessage,
-	ChatThread,
 	MergedChatThread,
 	BuddyVersionMerged,
 	SQLiteVal,
@@ -279,9 +278,7 @@ export const useAppStore = defineStore('app', () => {
 		if (proceed.value) return true;
 
 		if (isExternalProvider.value) {
-			return (
-				!!settings.value.openrouter_api_key
-			);
+			return !!settings.value.openrouter_api_key;
 		}
 		const hasModelDir = !!settings.value.local_model_directory;
 		const hasChatModel = !!settings.value.selected_model_chat;
