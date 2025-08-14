@@ -5,6 +5,7 @@ on:
   branches:
    - spa-version
   paths:
+   - '.github/workflows/deploy-docs.yml'
    - 'docs/**'
 
 jobs:
