@@ -44,6 +44,7 @@ import { complete } from '@/src/lib/ai/complete';
 import useMobile from '@/src/composables/useMobile';
 import { v4 } from 'uuid';
 import { insert } from '@/src/lib/sql';
+import { Buffer } from 'buffer';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -197,10 +198,10 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							.slice()
 							.map(
 								(m) =>
-									({
-										role: m.role === 'user' ? user : assistantName,
-										content: m.content,
-									} as ChatMessage)
+								({
+									role: m.role === 'user' ? user : assistantName,
+									content: m.content,
+								} as ChatMessage)
 							)
 							.slice(-6),
 					},
@@ -610,7 +611,7 @@ const startRecording = async () => {
 
 	const whisperModelPath = store.getWhisperModelPath();
 	const whisperEnabled = whisperModelPath && whisperModelPath !== '0';
-	if (!whisperEnabled) {
+	if (!whisperEnabled && !store.settings.koboldcpp_host) {
 		toast({
 			variant: 'destructive',
 			title: 'Speech-to-Text is disabled',
@@ -681,55 +682,24 @@ const device = useMobile();
 // disjointed note:
 // TODO should save the keywords (extraPrompt) that we generate desc with
 </script>
-
 <template>
-	<div
-		class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen"
-		v-if="threadId !== ''"
-	>
-		<div
-			v-if="!device.isMobile.value"
-			class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700"
-		>
-			<h2 class="text-2xl font-bold">
-				{{ threadTitle }}
-			</h2>
-			<ThreadImages
-				v-if="threadImages.length > 0"
-				:images="threadImages.map((m: any) => ({ url: m.image }))"
-			/>
-			<BuddyCard
-				v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
-				:buddy="currentBuddy"
-			/>
+	<div class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen" v-if="threadId !== ''">
+		<div v-if="!device.isMobile.value"
+			class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700">
+			<h2 class="text-2xl font-bold"> {{ threadTitle }} </h2>
+			<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.image }))" />
+			<BuddyCard v-if="threadMode === 'persona' && selectedBuddy && currentBuddy" :buddy="currentBuddy" />
 		</div>
 		<ScrollArea style="height: 100%" id="messages-scroll">
-			<div
-				v-if="device.isMobile.value"
-				class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700"
-			>
-				<h2 class="text-2xl font-bold">
-					{{ threadTitle }}
-				</h2>
-				<ThreadImages
-					v-if="threadImages.length > 0"
-					:images="threadImages.map((m: any) => ({ url: m.image }))"
-				/>
-				<BuddyCard
-					v-if="threadMode === 'persona' && selectedBuddy && currentBuddy"
-					:buddy="currentBuddy"
-				/>
+			<div v-if="device.isMobile.value"
+				class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700">
+				<h2 class="text-2xl font-bold"> {{ threadTitle }} </h2>
+				<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.image }))" />
+				<BuddyCard v-if="threadMode === 'persona' && selectedBuddy && currentBuddy" :buddy="currentBuddy" />
 			</div>
-			<Collapsible
-				v-if="threadMode === 'custom'"
-				class="my-2"
-				v-model:open="sysIsOpen"
-				:defaultOpen="false"
-			>
+			<Collapsible v-if="threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
 				<CollapsibleTrigger @click="handleSysMessageOpen">
-					<Button type="button" variant="ghost" size="sm">
-						Instructions {{ sysIsOpen ? '▲' : '▼' }}
-					</Button>
+					<Button type="button" variant="ghost" size="sm"> Instructions {{ sysIsOpen ? '▲' : '▼' }} </Button>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
 					<Card class="whitespace-pre-wrap">
@@ -743,68 +713,34 @@ const device = useMobile();
 				</CollapsibleContent>
 			</Collapsible>
 			<div class="flex flex-col gap-1 my-1" id="chatbox">
-				<Message
-					v-for="m in uiMessages"
-					:key="m.id"
-					:thread-id="threadId"
-					:thread-mode="threadMode"
-					:current-buddy="currentBuddy"
-					:message="m"
-					@edit="refreshMessages"
-					@delete="refreshMessages"
-					@clearThread="refreshMessages"
-				/>
+				<Message v-for="m in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
+					:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
+					@clearThread="refreshMessages" />
 			</div>
 		</ScrollArea>
-
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
-			<!-- <Button
-				type="button"
-				size="sm"
-				@click="startRecording"
-				title="Start recording audio"
-				:variant="recording ? 'destructive' : 'default'"
-				:class="loadingTranscript ? 'opacity-75 cursor-not-allowed' : ''"
-				:disaled="loadingTranscript"
-			>
+			<Button v-if="AppSettings.isFeatureAvailable('stt')" type="button" size="sm" @click="startRecording"
+				title="Start recording audio" :variant="recording ? 'destructive' : 'default'"
+				:class="loadingTranscript ? 'opacity-75 cursor-not-allowed' : ''" :disaled="loadingTranscript">
 				<Mic v-if="!recording" />
 				<MicOff v-else />
-			</Button> -->
-			<Textarea
-				class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700"
-				tabindex="1"
-				v-model="input"
-				placeholder="Say something..."
-				@keydown.enter="doSubmit"
-				autofocus
-			/>
+			</Button>
+			<Textarea class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700" tabindex="1"
+				v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" autofocus />
 			<div class="flex flex-col items-center gap-1">
 				<Button type="button" size="sm" @click="doSubmit" :disabled="!canSend">
 					<!-- TODO implement stop -->
-					<!-- TODO switch to send icon and stop icon -->
-					Send
-				</Button>
-				<Button
-					v-if="messages.length"
-					type="button"
-					class="w-full"
-					size="sm"
-					:disabled="!canReload"
-					@click="doReload"
-					title="Re-submit your last message to get a new response"
-				>
+					<!-- TODO switch to send icon and stop icon --> Send </Button>
+				<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload" @click="doReload"
+					title="Re-submit your last message to get a new response">
 					<RefreshCcwDot />
 				</Button>
 			</div>
 		</form>
-		<p
-			class="mt-4 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
+		<p class="mt-4 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
 			:class="[device.isMobile.value ? 'pr-14' : '']"
-			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)"
-		>
-			<u><i>Reminder</i></u>
-			Buddies in this app are AI -- they make mistakes sometimes and they're not
-			real people.
+			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)">
+			<u><i>Reminder</i></u> Buddies in this app are AI -- they make mistakes sometimes and they're not real people.
 		</p>
 	</div>
 </template>
