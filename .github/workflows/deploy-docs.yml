@@ -20,7 +20,8 @@ jobs:
    - name: Deploy to Pages
      uses: peaceiris/actions-gh-pages@v3
      with:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
-      publish_branch: docs-gh-pages
+      personal_token: ${{ secrets.GITHUB_TOKEN }}
+      external_repository: parsehex/buddygenai-docs
+      publish_branch: gh-pages
       publish_dir: ./docs/.vitepress/dist
       cname: docs.buddygenai.com
