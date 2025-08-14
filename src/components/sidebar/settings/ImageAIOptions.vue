@@ -23,62 +23,35 @@ const store = useAppStore();
 
 const updateChatImageQuality = async (quality: string) => {
 	if (store.settings.chat_image_quality === quality) return;
-
 	store.settings.chat_image_quality = quality;
 };
 
 const chatImageEnabled = computed(
-	() =>
-		// @ts-ignore
-		store.settings.chat_image_enabled === '1.0' ||
-		// @ts-ignore
-		store.settings.chat_image_enabled === '1' ||
-		store.settings.chat_image_enabled === 1
+	() => store.settings.chat_image_enabled
 );
 const updateChatImageEnabled = async (boolVal: boolean) => {
-	const numVal = boolVal ? 1 : 0;
-	if (store.settings.chat_image_enabled === numVal) return;
-
-	// @ts-ignore
-	store.settings.chat_image_enabled = numVal;
+	if (store.settings.chat_image_enabled === boolVal) return;
+	store.settings.chat_image_enabled = boolVal;
 };
 </script>
-
 <template>
 	<AccordionItem value="image-ai-options">
 		<AccordionTrigger>Image AI Options</AccordionTrigger>
 		<AccordionContent>
-			<OptionSection
-				label="Chat Images"
-				labelName="chat-images"
-				orientation="vertical"
-			>
+			<OptionSection label="Chat Images" labelName="chat-images" orientation="vertical">
 				<Label class="flex items-center gap-2">
-					<Switch
-						:checked="chatImageEnabled"
-						@update:checked="updateChatImageEnabled"
-					/>
-					Enable chat images
+					<Switch :checked="chatImageEnabled" @update:checked="updateChatImageEnabled" /> Enable chat images
 				</Label>
-				<Label class="text-sm flex items-center gap-2">
-					Quality
-					<Select
-						:default-value="store.settings.chat_image_quality"
-						@update:model-value="updateChatImageQuality"
-						id="chat-image-quality"
-					>
+				<Label class="text-sm flex items-center gap-2"> Quality <Select
+						:default-value="store.settings.chat_image_quality" @update:model-value="updateChatImageQuality"
+						id="chat-image-quality">
 						<SelectTrigger :title="store.settings.chat_image_quality">
 							<SelectValue placeholder="Select an image quality" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>Image Quality</SelectLabel>
-								<SelectItem
-									v-for="quality in ['low', 'medium', 'high']"
-									:key="quality"
-									:value="quality"
-								>
-									{{ quality }}
+								<SelectItem v-for="quality in ['low', 'medium', 'high']" :key="quality" :value="quality"> {{ quality }}
 								</SelectItem>
 							</SelectGroup>
 						</SelectContent>

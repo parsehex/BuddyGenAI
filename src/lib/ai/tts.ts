@@ -39,12 +39,7 @@ export async function makeTTS(options: MakeTTSOptions) {
 export async function makeAndReadTTS(text: string, ttsModel: string) {
 	const autoRead = store.settings.auto_read_chat;
 
-	// 0 is the value i that chose to signify disabling tts or stt
-	// values from the db are getting cast to strings + sqlite uses 0 or 1 for booleans
-	// @ts-ignore
-	const autoReadEnabled = autoRead && autoRead !== '0.0' && autoRead !== '0' && autoRead !== 0;
-
-	if (!autoReadEnabled) {
+	if (!autoRead) {
 		console.log('TTS not enabled');
 		return;
 	}

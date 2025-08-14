@@ -5,8 +5,8 @@ import type {
 	MergedChatThread,
 	BuddyVersionMerged,
 	SQLiteVal,
+	DBVal,
 } from '@/lib/api/types-db';
-
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import type { Settings } from '../lib/api/AppSettings';
@@ -156,7 +156,7 @@ export const useAppStore = defineStore('app', () => {
 		Object.assign(settings.value, res);
 		return res;
 	};
-	const saveSettings = async (newVal: Record<string, SQLiteVal>) => {
+	const saveSettings = async (newVal: Record<string, DBVal>) => {
 		await api.setting.update(newVal);
 	};
 	const updateThreads = async () => {
@@ -344,13 +344,13 @@ export const useAppStore = defineStore('app', () => {
 		updateImgProgress,
 
 		toggleAutoStartServer: () => {
-			settings.value.auto_start_server = settings.value.auto_start_server ? 0 : 1;
+			settings.value.auto_start_server = !settings.value.auto_start_server;
 		},
 		toggleAutoReadChat: () => {
-			settings.value.auto_read_chat = settings.value.auto_read_chat ? 0 : 1;
+			settings.value.auto_read_chat = !settings.value.auto_read_chat;
 		},
 		toggleAutoReadSTT: () => {
-			settings.value.auto_send_stt = settings.value.auto_send_stt ? 0 : 1;
+			settings.value.auto_send_stt = !settings.value.auto_send_stt;
 		},
 	};
 });

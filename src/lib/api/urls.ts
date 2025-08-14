@@ -25,6 +25,7 @@ const other = {
 		}
 		return p;
 	},
+	/** Returns different endpoints depending on settings. */
 	llamacppServerUrl: async () => {
 		const store = useAppStore();
 		switch (store.settings.selected_provider_chat) {

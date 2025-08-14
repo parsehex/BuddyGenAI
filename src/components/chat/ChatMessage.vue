@@ -2,7 +2,7 @@
 import { ref, computed, toRefs, watch } from 'vue';
 import type { Message } from 'ai/vue';
 import type { BuddyVersionMerged, ChatMessage } from '@/lib/api/types-db';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -32,6 +32,7 @@ import MessageImage from './MessageImage.vue';
 import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
 import { makeTTS } from '@/src/lib/ai/tts';
+import { AppSettings } from '@/lib/api/AppSettings';
 
 import urls from '@/src/lib/api/urls';
 import { useToast } from '../ui/toast';
@@ -177,73 +178,40 @@ const doTTS = async () => {
 	playAudio(await tts.value);
 };
 </script>
-
 <template>
 	<Dialog :modal="true" :open="modalOpen" @update:open="modalOpen = $event">
 		<ContextMenu>
 			<ContextMenuTrigger>
-				<Card
-					class="chat-message whitespace-pre-wrap"
-					:id="'message-' + message.id"
-				>
-					<CardHeader
-						v-if="threadMode === 'persona'"
-						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
-					>
+				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
+					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2">
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<!-- TODO button to Request Pic -->
-						<Avatar
-							v-if="isUser"
-							class="text-md mt-2 font-bold"
-							:style="{
-								backgroundColor: textToHslColor(userName, 60, 80),
-							}"
-						>
-							<AvatarFallback>{{ msgInitials }}</AvatarFallback>
+						<Avatar v-if="isUser" class="text-md mt-2 font-bold" :style="{
+							backgroundColor: textToHslColor(userName, 60, 80),
+						}">
+							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
+							<AvatarFallback v-else>{{ msgInitials }}</AvatarFallback>
 						</Avatar>
-						<span v-if="isUser">
-							{{ userName }}
-						</span>
+						<span v-if="isUser"> {{ userName }} </span>
 						<span v-else>
-							<RouterLink
-								:to="`/buddy/${currentBuddy?.id}/view`"
-								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg"
-							>
-								<BuddyAvatar v-if="!isUser && currentBuddy" :buddy="currentBuddy" />
-								{{ currentBuddy?.name }}
+							<RouterLink :to="`/buddy/${currentBuddy?.id}/view`"
+								class="flex items-center hover:bg-primary-foreground hover:text-primary-background p-1 rounded-lg">
+								<BuddyAvatar v-if="!isUser && currentBuddy" :buddy="currentBuddy" /> {{ currentBuddy?.name }}
 							</RouterLink>
 						</span>
-
-						<Button
-							v-if="!isUser && ttsEnabled"
-							@click="doTTS"
-							variant="secondary"
-							size="sm"
-							class="ml-2"
-						>
+						<Button v-if="!isUser && ttsEnabled" @click="doTTS" variant="secondary" size="sm" class="ml-2">
 							<Volume2 />
 						</Button>
 						<!-- add audio speed control -->
 					</CardHeader>
-					<CardHeader
-						v-else
-						class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"
-					>
-						{{ message.role === 'user' ? userName : 'AI' }}
-						<Button
-							v-if="!isUser && ttsEnabled"
-							@click="doTTS"
-							variant="secondary"
-							size="sm"
-							class="ml-2"
-						>
+					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"> {{ message.role === 'user' ?
+						userName : 'AI' }} <Button v-if="!isUser && ttsEnabled" @click="doTTS" variant="secondary" size="sm"
+							class="ml-2">
 							<Volume2 />
 						</Button>
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between gap-2">
-						<div class="grow">
-							{{ message.content }}
-						</div>
+						<div class="grow"> {{ message.content }} </div>
 						<MessageImage v-if="imgValue" :imgValue="imgValue" />
 					</CardContent>
 				</Card>
@@ -251,20 +219,12 @@ const doTTS = async () => {
 			<ContextMenuContent>
 				<ContextMenuItem @click="doCopyMessage">Copy</ContextMenuItem>
 				<DialogTrigger asChild>
-					<ContextMenuItem
-						@click="triggerEdit"
-						v-if="isUser || threadMode === 'custom'"
-					>
-						Edit
-					</ContextMenuItem>
+					<ContextMenuItem @click="triggerEdit" v-if="isUser || threadMode === 'custom'"> Edit </ContextMenuItem>
 				</DialogTrigger>
 				<ContextMenuItem @click="doDelete">Delete</ContextMenuItem>
-
 				<!-- TODO confirm (reuse same dialog) -->
 				<ContextMenuSeparator v-if="isDevMode()" />
-				<ContextMenuItem v-if="isDevMode()" @click="doClearThread">
-					Delete All Messages
-				</ContextMenuItem>
+				<ContextMenuItem v-if="isDevMode()" @click="doClearThread"> Delete All Messages </ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
 		<DialogContent>
@@ -272,18 +232,12 @@ const doTTS = async () => {
 				<DialogTitle>{{ editingMessageTitle }}</DialogTitle>
 			</DialogHeader>
 			<DialogDescription>
-				<Textarea
-					v-model="editingMessage"
-					@keydown.enter="handleEdit"
-					placeholder="Message content..."
-					class="w-full min-h-48"
-				/>
+				<Textarea v-model="editingMessage" @keydown.enter="handleEdit" placeholder="Message content..."
+					class="w-full min-h-48" />
 			</DialogDescription>
 			<DialogFooter>
 				<DialogClose as-child>
-					<Button @click="handleCancel" type="button" variant="outline"
-						>Cancel</Button
-					>
+					<Button @click="handleCancel" type="button" variant="outline">Cancel</Button>
 					<Button @click="handleEdit(null, true)" type="button">Confirm</Button>
 				</DialogClose>
 			</DialogFooter>

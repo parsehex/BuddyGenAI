@@ -1,44 +1,25 @@
 import { insert, select, update } from '@/lib/sql';
 import useElectron from '@/composables/useElectron';
-import type { SQLiteVal } from './types-db';
+import type { DBVal, SQLiteVal } from './types-db';
 import { delay } from '../utils';
 
 type FeatureType = 'chat' | 'image' | 'tts' | 'stt';
 
 interface FeatureRequirements {
-  requiredSettings: AppSettingsKeys[];
-  validateFn?: (settings: Record<string, SQLiteVal>) => boolean;
+	requiredSettings: AppSettingsKeys[];
+	validateFn?: (settings: Settings) => boolean;
 }
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
-type AppSettingsKeys =
-	| 'user_name'
-	| 'openrouter_api_key'
-	| 'koboldcpp_host'
-	| 'local_model_directory'
-	| 'selected_provider_chat'
-	| 'selected_provider_image'
-	| 'selected_model_chat'
-	| 'selected_model_image'
-	| 'selected_model_tts'
-	| 'selected_model_whisper'
-	| 'gpu_enabled_chat'
-	| 'gpu_enabled_image'
-	| 'gpu_enabled_whisper'
-	| 'chat_image_enabled'
-	| 'chat_image_quality'
-	| 'external_api_key'
-	| 'fresh_db'
-	| 'n_gpu_layers'
-	| 'auto_send_stt'
-	| 'auto_read_chat'
-	| 'auto_start_server'
-	| 'skip_start_dialog'
-	| 'skip_setup';
+type AppSettingsKeys = keyof Settings;
 
-export const AppSettingsDefaults: Record<string, SQLiteVal> = {
+export const AppSettingsDefaults: Settings = {
 	user_name: 'User',
+	user_image: '',
+	user_description: '',
+	user_description_assistant: true,
+	user_description_buddies: true,
 	openrouter_api_key: '',
 	koboldcpp_host: '',
 	local_model_directory: '',
@@ -46,26 +27,30 @@ export const AppSettingsDefaults: Record<string, SQLiteVal> = {
 	selected_provider_image: '',
 	selected_model_chat: '',
 	selected_model_image: '',
-	selected_model_tts: '0',
-	selected_model_whisper: '0',
-	gpu_enabled_chat: 1,
-	gpu_enabled_image: 1,
-	gpu_enabled_whisper: 1,
-	chat_image_enabled: 0,
+	selected_model_tts: '',
+	selected_model_whisper: '',
+	gpu_enabled_chat: true,
+	gpu_enabled_image: true,
+	gpu_enabled_whisper: true,
+	chat_image_enabled: false,
 	chat_image_quality: 'medium',
 	external_api_key: '',
-	fresh_db: 0,
+	fresh_db: false,
 	n_gpu_layers: 99,
-	auto_send_stt: 0,
-	auto_read_chat: 0,
-	auto_start_server: 0,
-	skip_start_dialog: 0,
-	skip_setup: 0,
+	auto_send_stt: false,
+	auto_read_chat: false,
+	auto_start_server: false,
+	skip_start_dialog: false,
+	skip_setup: false,
 };
 
 type Provider = 'cloud' | 'local' | '';
 export interface Settings {
 	user_name: string;
+	user_image: string;
+	user_description: string;
+	user_description_assistant: boolean;
+	user_description_buddies: boolean;
 	openrouter_api_key: string;
 	koboldcpp_host: string;
 	local_model_directory: string;
@@ -75,26 +60,29 @@ export interface Settings {
 	selected_model_image: string;
 	selected_model_tts: string;
 	selected_model_whisper: string;
-	gpu_enabled_chat: number;
-	gpu_enabled_image: number;
-	gpu_enabled_whisper: number;
-	chat_image_enabled: number;
+	gpu_enabled_chat: boolean;
+	gpu_enabled_image: boolean;
+	gpu_enabled_whisper: boolean;
+	chat_image_enabled: boolean;
 	chat_image_quality: string;
 	external_api_key: string;
-	fresh_db: number;
+	fresh_db: boolean;
 	n_gpu_layers: number;
-	auto_send_stt: number;
-	auto_read_chat: number;
-	auto_start_server: number;
-	skip_start_dialog: number;
-	skip_setup: number;
+	auto_send_stt: boolean;
+	auto_read_chat: boolean;
+	auto_start_server: boolean;
+	skip_start_dialog: boolean;
+	skip_setup: boolean;
+	[key: string]: DBVal;
 }
 
 class AppSettingsCls {
 	public isLoaded = false;
+	private settingsKeys: string[] = [];
 
 	constructor() {
 		this.loadSettings();
+		this.settingsKeys = Object.keys(this.settings);
 	}
 
 	public async waitForLoaded() {
@@ -104,11 +92,11 @@ class AppSettingsCls {
 		}
 	}
 
-	private settings: Record<string, SQLiteVal> = JSON.parse(
-		JSON.stringify(AppSettingsDefaults)
-	);
+	private settings: Settings = JSON.parse(JSON.stringify(AppSettingsDefaults));
 
-	public get(key: AppSettingsKeys): SQLiteVal {
+	public get(key: string): DBVal {
+		if (!this.settingsKeys.includes(key))
+			console.error('Did not find settings key', key);
 		return this.settings[key];
 	}
 	public set(key: AppSettingsKeys, value: any): void {
@@ -118,12 +106,12 @@ class AppSettingsCls {
 		this.settings[key] = value;
 	}
 
-	public getSettings(keys?: AppSettingsKeys[]): Record<string, SQLiteVal> {
+	public getSettings(keys?: AppSettingsKeys[]): Settings {
 		if (!keys?.length) return this.settings;
 		return keys.reduce((acc, key) => {
 			acc[key] = this.settings[key];
 			return acc;
-		}, {} as Record<string, SQLiteVal>);
+		}, {} as Settings);
 	}
 
 	private async loadSettings(): Promise<void> {
@@ -144,7 +132,7 @@ class AppSettingsCls {
 		let setDefaults = false;
 		settings.forEach((setting) => {
 			try {
-				this.settings[setting.name] = JSON.parse(`"${setting.value}"`);
+				this.settings[setting.name] = JSON.parse(setting.value);
 			} catch (e) {
 				this.settings[setting.name] = setting.value;
 			}
@@ -224,59 +212,57 @@ class AppSettingsCls {
 	}
 
 	private featureRequirements: Record<FeatureType, FeatureRequirements> = {
-    chat: {
-      requiredSettings: ['selected_model_chat', 'selected_provider_chat'],
-      validateFn: (settings) => {
-        if (settings.selected_provider_chat === 'local') {
-          return !!settings.koboldcpp_host;
-        }
-        return !!settings.openrouter_api_key;
-      }
-    },
-    image: {
-      requiredSettings: ['selected_model_image', 'selected_provider_image'],
-      validateFn: (settings) => {
-        if (settings.selected_provider_image === 'local') {
-          return !!settings.koboldcpp_host;
-        }
-        return false;
-      }
-    },
-    tts: {
-      requiredSettings: ['selected_model_tts'],
-      validateFn: (settings) => settings.selected_model_tts !== '0'
-    },
-    stt: {
-      requiredSettings: ['selected_model_whisper'],
-      validateFn: (settings) => settings.selected_model_whisper !== '0'
-    }
-  };
+		chat: {
+			requiredSettings: ['selected_model_chat', 'selected_provider_chat'],
+			validateFn: (settings) => {
+				if (settings.selected_provider_chat === 'local') {
+					return !!settings.koboldcpp_host;
+				}
+				return !!settings.openrouter_api_key;
+			},
+		},
+		image: {
+			requiredSettings: ['selected_model_image', 'selected_provider_image'],
+			validateFn: (settings) => {
+				if (settings.selected_provider_image === 'local') {
+					return !!settings.koboldcpp_host;
+				}
+				return false;
+			},
+		},
+		tts: {
+			requiredSettings: ['selected_model_tts'],
+			validateFn: (settings) => settings.selected_model_tts !== '0',
+		},
+		stt: {
+			requiredSettings: ['selected_model_whisper'],
+			validateFn: (settings) => settings.selected_model_whisper !== '0',
+		},
+	};
 
-  public isFeatureAvailable(feature: FeatureType): boolean {
-    const requirements = this.featureRequirements[feature];
-    if (!requirements) return false;
+	public isFeatureAvailable(feature: FeatureType): boolean {
+		const requirements = this.featureRequirements[feature];
+		if (!requirements) return false;
 
-    // Check if all required settings have non-empty values
-    const hasRequiredSettings = requirements.requiredSettings.every(
-      key => {
-        const value = this.settings[key];
-        return value !== undefined && value !== '' && value !== '0';
-      }
-    );
+		// Check if all required settings have non-empty values
+		const hasRequiredSettings = requirements.requiredSettings.every((key) => {
+			const value = this.settings[key];
+			return value !== undefined && value !== '' && value !== '0';
+		});
 
-    // If there's a custom validation function, use it
-    if (requirements.validateFn) {
-      return requirements.validateFn(this.settings);
-    }
+		// If there's a custom validation function, use it
+		if (requirements.validateFn) {
+			return requirements.validateFn(this.settings);
+		}
 
-    return hasRequiredSettings;
-  }
+		return hasRequiredSettings;
+	}
 
-  public getAvailableFeatures(): FeatureType[] {
-    return Object.keys(this.featureRequirements).filter(
-      feature => this.isFeatureAvailable(feature as FeatureType)
-    ) as FeatureType[];
-  }
+	public getAvailableFeatures(): FeatureType[] {
+		return Object.keys(this.featureRequirements).filter((feature) =>
+			this.isFeatureAvailable(feature as FeatureType)
+		) as FeatureType[];
+	}
 }
 
 export const AppSettings = new AppSettingsCls();

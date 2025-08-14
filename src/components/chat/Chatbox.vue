@@ -660,9 +660,7 @@ const startRecording = async () => {
 					if (typeof result === 'string') {
 						input.value = result.trim();
 
-						const autoSend = store.settings.auto_send_stt;
-						// @ts-ignore
-						if (autoSend === '1.0' || autoSend === 1) {
+						if (store.settings.auto_send_stt) {
 							doSubmit(new Event('submit'));
 						}
 					}

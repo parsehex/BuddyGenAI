@@ -1,4 +1,5 @@
 export type SQLiteVal = string | number | null;
+export type DBVal = SQLiteVal | boolean;
 
 export interface Buddy {
 	id: string;
