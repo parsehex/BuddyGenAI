@@ -1,8 +1,17 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useToast } from '../components/ui/toast';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
+}
+
+export function popError(msg: string) {
+	const { toast } = useToast();
+	toast({
+		variant: 'destructive',
+		description: msg,
+	});
 }
 
 export function getVideoCardInfo() {

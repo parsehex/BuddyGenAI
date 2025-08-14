@@ -3,6 +3,9 @@ import { ref, toRefs, watch } from 'vue';
 import { useAppStore } from '@/stores/main';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import Spinner from '../Spinner.vue';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { Progress } from '../ui/progress';
 import { useToast } from '../ui/toast';
 import { api } from '@/src/lib/api';
 import { genderFromName } from '@/src/lib/prompt/sd';
@@ -12,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BuddyAppearanceOptions from '../BuddyAppearanceOptions.vue';
 import BuddyAvatar from '../BuddyAvatar.vue';
+import { getImage } from '@/src/lib/api/images';
 
 const props = defineProps({
 	newBuddy: {
@@ -25,12 +29,22 @@ const store = useAppStore();
 const { toast } = useToast();
 const updatingProfilePicture = ref(false);
 const profilePicturePrompt = ref('');
-const imageLoading = ref(false);
 const buddyName = ref('');
 const picQuality = ref('2');
 
 const generatedAppearanceOptions = ref({} as Record<AppearanceCategory, string[]>);
 const selectedAppearanceOptions = ref({} as Record<AppearanceCategory, string>);
+
+// image generation progress
+const imageLoading = ref(false);
+const progress = ref(0);
+watch(
+	() => [store.imgGenerating, store.imgProgress],
+	() => {
+		imageLoading.value = store.imgGenerating;
+		progress.value = store.imgProgress;
+	}
+);
 
 const refreshProfilePicture = async () => {
 	if (updatingProfilePicture.value) {
@@ -64,14 +78,31 @@ const refreshProfilePicture = async () => {
 	}
 	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
-	const res = await api.buddy.profilePic.createOne(
+	const imgData = await api.buddy.profilePic.createOne(
 		id,
 		+picQuality.value,
 		gender
 	);
+	const res = await api.buddy.profilePic.addOne(id, imgData);
 
 	newBuddy.value.profile_pic = res.output;
 	updatingProfilePicture.value = false;
+};
+
+const handleProfilePicUpload = (event: Event) => {
+	const input = event.target as HTMLInputElement;
+	if (input.files && input.files[0]) {
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			const base64 = e.target?.result as string;
+			const res = await api.buddy.profilePic.addOne(newBuddy.value.id, base64);
+			newBuddy.value = await api.buddy.getOne(newBuddy.value.id);
+			newBuddy.value.profile_pic = await getImage(res.output);
+			updatingProfilePicture.value = false;
+		};
+
+		reader.readAsDataURL(input.files[0]);
+	}
 };
 
 const handleSave = async () => {
@@ -97,58 +128,36 @@ const handleSave = async () => {
 
 defineEmits(['complete']);
 </script>
-
 <template>
-  <Card class="mt-4 p-2 w-full">
+	<Card class="mt-4 p-2 w-full">
 		<CardContent>
-			<h2 v-if="store.newHere" class="text-lg mt-4 text-center">
-				{{ `Customize ${buddyName || 'your buddy'}'s appearance` }}
-			</h2>
+			<h2 v-if="store.newHere" class="text-lg mt-4 text-center"> {{ `Customize ${buddyName || 'your buddy'}'s
+				appearance` }} </h2>
 			<p class="my-2 text-center">
 				<span class="text-lg">{{ buddyName }}</span>
 			</p>
 			<div class="flex flex-col items-center">
-				<BuddyAvatar
-					v-if="newBuddy"
-					:buddy="newBuddy"
-					:no-default="true"
-					size="lg"
-					class="text-3xl"
-				/>
-				<p
-					class="text-sm text-gray-500 select-none"
-					v-if="newBuddy"
-				>
-					Images are created using AI and may have unexpected results.
-				</p>
-				<BuddyAppearanceOptions
-					v-if="newBuddy"
-					:buddy="newBuddy"
-					:profile-pic-prompt="profilePicturePrompt"
-					@update-profile-pic-prompt="profilePicturePrompt = $event"
-					@refresh-profile-picture="refreshProfilePicture"
+				<BuddyAvatar v-if="newBuddy" :buddy="newBuddy" :no-default="true" size="lg" class="text-3xl" />
+				<p class="text-sm text-gray-500 select-none" v-if="newBuddy"> Images are created using AI and may have
+					unexpected results. </p>
+				<div class="flex flex-col items-center my-2">
+					<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
+					<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
+						class="w-full max-w-xs" />
+				</div>
+				<BuddyAppearanceOptions v-if="newBuddy" :buddy="newBuddy" :profile-pic-prompt="profilePicturePrompt"
+					@update-profile-pic-prompt="profilePicturePrompt = $event" @refresh-profile-picture="refreshProfilePicture"
 					v-model:appearance-options="generatedAppearanceOptions"
-					v-model:selected-appearance-options="selectedAppearanceOptions"
-				/>
-
+					v-model:selected-appearance-options="selectedAppearanceOptions" />
 				<Spinner v-if="imageLoading" />
-				<Button
-					@click="refreshProfilePicture"
-					class="mt-4 p-2 bg-blue-500 text-white rounded"
-				>
-					New Profile Picture
+				<Progress v-if="imageLoading && progress > 0" :model-value="progress * 100" class="mt-2" />
+				<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded"> New Profile Picture
 				</Button>
 			</div>
-			<p v-if="newBuddy.description" class="mt-2">
-				Description:
-				<span class="text-lg ml-3">{{ newBuddy.description }}</span>
+			<p v-if="newBuddy.description" class="mt-2"> Description: <span class="text-lg ml-3">{{ newBuddy.description
+					}}</span>
 			</p>
-			<Button
-				@click="handleSave"
-				class="mt-4 p-2 success rounded"
-			>
-				Save
-			</Button>
+			<Button @click="handleSave" class="mt-4 p-2 success rounded"> Save </Button>
 		</CardContent>
 	</Card>
 </template>

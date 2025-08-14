@@ -18,18 +18,33 @@ App Info: BuddyGenAI is an app for PC and Mac that allows users to create and ta
 	return str;
 }
 
+/** Used to construct the system message for chat threads */
 export function fromPersonaDescription(
 	userName: string,
 	aiName: string,
 	description: string | null
 ) {
-	if (!description) {
-		return `The following is a chat between user named ${userName} and assistant enthusiastically playing the role of ${aiName}. ${aiName} doesn't refer to themselves as an AI or an Assistant.`;
+	const isBuddy = !!description;
+	let userDescPrompt = '';
+
+	const userDescription = AppSettings.get('user_description');
+	const userDescriptionBuddies = AppSettings.get('user_description_buddies');
+	const userDescriptionAssistant = AppSettings.get('user_description_assistant');
+	if (userDescription) {
+		if (isBuddy && userDescriptionBuddies) {
+			userDescPrompt = `\nDescription of ${userName} that they provided themselves:\n${userDescription}`;
+		} else if (!isBuddy && userDescriptionAssistant) {
+			userDescPrompt = `\nDescription of ${userName} that they provided themselves:\n${userDescription}`;
+		}
+	}
+
+	if (!isBuddy) {
+		return `The following is a chat between user named ${userName} and assistant enthusiastically playing the role of ${aiName}. ${aiName} doesn't refer to themselves as an AI or an Assistant.${userDescPrompt}`;
 	}
 	const firstLine = description.split('\n')[0];
 	if (firstLine.startsWith('type:sentient')) {
 		const isDev = firstLine.includes('-dev');
-		return SentientBuddy(userName, aiName, description, isDev);
+		return SentientBuddy(userName, aiName, description, isDev) + userDescPrompt;
 	}
 
 	const chatImages = AppSettings.get('chat_image_enabled') as string | number;
@@ -43,7 +58,7 @@ export function fromPersonaDescription(
 	return `user's name: ${userName}
 assistant's name: ${aiName} -- ${aiName} is unaware that they are an AI and believes they are a human.
 
-The following is a chat between ${userName} and ${aiName}.${imgPrompt} ${aiName} sometimes does their own activities which they may tell ${userName} about. Description of ${aiName} to be followed faithfully:\n${description}`;
+The following is a chat between ${userName} and ${aiName}.${imgPrompt} ${aiName} sometimes does their own activities which they may tell ${userName} about. Description of ${aiName} to be followed faithfully:\n${description}${userDescPrompt}`;
 }
 
 export function descriptionFromKeywords(

@@ -37,12 +37,7 @@ const { toggleDevTools, closeApp } = useElectron();
 // 2 - add a dialog if the user is on mobile, warning about the layout
 
 const skipDialog = computed(
-	() =>
-		// @ts-ignore
-		store.settings.skip_start_dialog === '1.0' ||
-		// @ts-ignore
-		store.settings.skip_start_dialog === '1' ||
-		store.settings.skip_start_dialog === 1
+	() => store.settings.skip_start_dialog
 );
 console.log('skipDialog', skipDialog.value);
 const enteredApp = ref(skipDialog.value ? 1 : 0);

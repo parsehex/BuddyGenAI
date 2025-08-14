@@ -1,38 +1,17 @@
 <script setup lang="ts">
-import { Sparkles, ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { ref, onBeforeMount, watch, computed } from 'vue';
 import { useRoute } from 'vue-router/auto';
 import router from '@/lib/router';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import type { Buddy, BuddyVersionMerged } from '@/lib/api/types-db';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useToast } from '@/components/ui/toast';
 import { api } from '@/lib/api';
-import urls from '@/lib/api/urls';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
@@ -44,7 +23,7 @@ import {
 } from '@/lib/prompt/sd';
 import BuddyAvatarSelect from '@/src/components/BuddyAvatarSelect.vue';
 import BuddyAppearanceOptions from '@/src/components/BuddyAppearanceOptions.vue';
-import { isDescriptionValid, isNameValid } from '@/src/lib/ai/general';
+import { isDescriptionValid } from '@/src/lib/ai/general';
 import DevOnly from '@/src/components/DevOnly.vue';
 import BuddyTagsInput from '@/src/components/BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/src/lib/ai/appearance-options';
@@ -58,7 +37,8 @@ const { updateBuddies, updateModels, ttsModels } = useAppStore();
 const store = useAppStore();
 
 const route = useRoute();
-const id = route.params.id as string;
+// @ts-ignore
+const id = (route.params as RouteParams).id as string;
 
 const buddy = ref(null as BuddyVersionMerged | null);
 
@@ -112,6 +92,25 @@ const handleSelectProfilePic = async (pic: string) => {
 	updateBuddies();
 };
 
+const handleProfilePicUpload = (event: Event) => {
+	const input = event.target as HTMLInputElement;
+	if (input.files && input.files[0]) {
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			const base64 = e.target?.result as string;
+			const res = await api.buddy.profilePic.addOne(id, base64);
+			buddy.value = await api.buddy.getOne(id);
+			profilePictureValue.value = await getImage(res.output);
+			updatingProfilePicture.value = false;
+
+			allProfilePics.value = await api.buddy.profilePic.getAll(id);
+			updateBuddies();
+		};
+
+		reader.readAsDataURL(input.files[0]);
+	}
+};
+
 // TODO overhaul refreshing profile picture
 // basically, allow the user to refresh the pic, but don't update until they save (+ do versioning on pics)
 // how it'll actually work:
@@ -119,6 +118,8 @@ const handleSelectProfilePic = async (pic: string) => {
 // show new elements showing the old avatar and the newly generated one which will get saved onSave
 // (possibly have a generation history viewer)
 // we can clean up pics that werent used
+//
+// i guess we need to decouple generating images from the api
 
 onBeforeMount(async () => {
 	buddy.value = await api.buddy.getOne(id);
@@ -254,7 +255,8 @@ const refreshProfilePicture = async () => {
 	if (completion) {
 		gender = completion;
 	}
-	const res = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
+	const imgData = await api.buddy.profilePic.createOne(id, picQuality.value, gender);
+	const res = await api.buddy.profilePic.addOne(id, imgData);
 
 	buddy.value = await api.buddy.getOne(id);
 
@@ -350,19 +352,14 @@ const acceptKeywords = () => {
 
 	refreshProfilePicture();
 };
-</script>
 
+const RefreshPicBtn = computed(() => profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture')
+</script>
 <template>
 	<ScrollArea class="h-screen flex flex-col items-center">
 		<h1 class="text-2xl font-bold text-center">Edit Buddy</h1>
 		<div class="flex items-center justify-center mb-2">
-			<Button
-				type="button"
-				@click="router.push(`/buddy/${id}/view`)"
-				variant="outline"
-			>
-				View
-			</Button>
+			<Button type="button" @click="router.push(`/buddy/${id}/view`)" variant="outline"> View </Button>
 			<!-- <RouterLink class="ml-4" :to="`/buddy/${id}/history`">
 				Version History
 			</RouterLink> -->
@@ -370,38 +367,23 @@ const acceptKeywords = () => {
 		<Card class="whitespace-pre-wrap w-full">
 			<CardContent>
 				<div class="flex flex-col items-center">
-					<Input
-						v-model="nameValue"
-						placeholder="Buddy name"
-						size="lg"
-						class="my-2 w-2/5"
-					/>
+					<Input v-model="nameValue" placeholder="Buddy name" size="lg" class="my-2 w-2/5" />
 					<BuddyAvatar v-if="buddy" :buddy="buddy" size="lg" class="text-3xl" />
-
-					<BuddyAvatarSelect
-						v-if="buddy"
-						:buddy="buddy"
-						:all-profile-pics="allProfilePics"
-						@select-profile-pic="handleSelectProfilePic"
-					/>
-
-					<BuddyAppearanceOptions
-						v-if="buddy"
-						:buddy="buddy"
-						:profile-pic-prompt="profilePicturePrompt"
-						@refresh-profile-pic="refreshProfilePicture"
-						@update-profile-pic-prompt="profilePicturePrompt = $event"
+					<BuddyAvatarSelect v-if="buddy" :buddy="buddy" :all-profile-pics="allProfilePics"
+						@select-profile-pic="handleSelectProfilePic" />
+					<div class="flex flex-col items-center my-2">
+						<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
+						<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
+							class="w-full max-w-xs" />
+					</div>
+					<BuddyAppearanceOptions v-if="buddy" :buddy="buddy" :profile-pic-prompt="profilePicturePrompt"
+						@refresh-profile-pic="refreshProfilePicture" @update-profile-pic-prompt="profilePicturePrompt = $event"
 						v-model:appearance-options="generatedAppearanceOptions"
-						v-model:selected-appearance-options="selectedAppearanceOptions"
-					/>
-
+						v-model:selected-appearance-options="selectedAppearanceOptions" />
 					<div class="flex flex-col items-center justify-center w-full">
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
-						<Button type="button" @click="refreshProfilePicture" class="mt-2">
-							{{ profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture' }}
-						</Button>
+						<Button type="button" @click="refreshProfilePicture" class="mt-2"> {{ RefreshPicBtn }} </Button>
 					</div>
-
 					<!-- <Label class="mt-4 flex flex-col items-center">
 						<span class="text-xl">{{ buddy?.name }}'s Voice</span>
 						<Select
@@ -426,24 +408,13 @@ const acceptKeywords = () => {
 				<div class="flex flex-col items-center mt-4">
 					<label class="text-xl w-full text-center"> Current Description </label>
 					<p class="mt-1">
-						<span class="text-lg">
-							{{ buddy?.description }}
-						</span>
+						<span class="text-lg"> {{ buddy?.description }} </span>
 					</p>
-
-					<BuddyTagsInput
-						type="edit"
-						:buddyName="buddy?.name || ''"
-						:buddyKeywords="descriptionValue"
-						:updateBuddyKeywords="
-							(keywords) => (descriptionValue = keywords.join(', '))
-						"
-					/>
+					<BuddyTagsInput type="edit" :buddyName="buddy?.name || ''" :buddyKeywords="descriptionValue"
+						:updateBuddyKeywords="(keywords) => (descriptionValue = keywords.join(', '))
+							" />
 					<DevOnly class="w-full">
-						<Textarea
-							v-model="descriptionValue"
-							class="min-h-24"
-						/>
+						<Textarea v-model="descriptionValue" class="min-h-24" />
 					</DevOnly>
 					<Button type="button" @click="handleSave" class="mt-4">Save</Button>
 					<Spinner v-if="isLoading" class="mt-2" />
@@ -452,7 +423,6 @@ const acceptKeywords = () => {
 		</Card>
 	</ScrollArea>
 </template>
-
 <style>
 /*  */
 </style>
