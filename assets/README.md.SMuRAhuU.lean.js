@@ -1,0 +1,1 @@
+import{_ as a,c as t,ae as i,o as n}from"./chunks/framework.Buicxtqr.js";const _=JSON.parse('{"title":"BuddyGenAI Docs","description":"","frontmatter":{},"headers":[],"relativePath":"README.md","filePath":"README.md"}'),o={name:"README.md"};function d(s,e,r,l,c,h){return n(),t("div",null,e[0]||(e[0]=[i("",4)]))}const m=a(o,[["render",d]]);export{_ as __pageData,m as default};
