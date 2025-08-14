@@ -1,6 +1,6 @@
 # BuddyGenAI Docs
 
-This is the documentation for BuddyGenAI, an app meant to turn AI into a companion that is accessible and private to the user.
+This is the documentation for BuddyGenAI, an app meant to turn AI into a companion that's accessible and private to the user.
 
 ## Pages
 

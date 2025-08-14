@@ -25,7 +25,10 @@
     "whispercpp:linux": "./scripts/linux/start_whispercpp_server.sh",
     "whispercpp:win": "scripts/windows/start_whispercpp_server.ps1",
     "rebuild": "npx electron-builder node-gyp-rebuild",
-    "test": ""
+    "test": "",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.10",
@@ -49,6 +52,7 @@
     "typescript": "^5.0.3",
     "unplugin-vue-router": "^0.8.7",
     "vite-tsconfig-paths": "^4.3.2",
+    "vitepress": "^1.6.4",
     "wait-on": "^7.0.1"
   },
   "dependencies": {
