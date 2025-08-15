@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import useElectron from '@/composables/useElectron';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,6 +14,11 @@ import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
+import AIProviderOptions from './AIProviderOptions/Main.vue';
+
+const store = useAppStore();
+
+const isCloud = computed(() => store.modelProvider === 'cloud');
 
 const error = ref('');
 
@@ -21,7 +26,6 @@ const reloadPage = () => {
 	window.location.reload();
 };
 </script>
-
 <template>
 	<!--
 		TODO
@@ -40,30 +44,19 @@ const reloadPage = () => {
 		</Alert>
 		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
-			<!-- <ChatAIOptions /> -->
-			<ImageAIOptions />
-			<TTSOptions />
-			<STTOptions />
+			<AIProviderOptions />
+			<ChatAIOptions v-if="isCloud" />
+			<ImageAIOptions v-if="!isCloud" />
+			<TTSOptions v-if="!isCloud" />
+			<STTOptions v-if="!isCloud" />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
-			<Button
-				type="button"
-				@click="reloadPage"
-				class="px-4 py-2 rounded-md"
-				variant="ghost"
-				>Reload Page</Button
-			>
+			<Button type="button" @click="reloadPage" class="px-4 py-2 rounded-md" variant="ghost">Reload Page</Button>
 			<RouterLink to="/credits">BuddyGenAI Credits / Licenses</RouterLink>
 			<DevOnly>
-				<Button
-					type="button"
-					class="px-4 py-2 mt-2 rounded-md"
-					variant="destructive"
-					>Reset & Close App</Button
-				>
+				<Button type="button" class="px-4 py-2 mt-2 rounded-md" variant="destructive">Reset & Close App</Button>
 			</DevOnly>
 		</div>
 	</ScrollArea>
 </template>
-
 <style lang="scss"></style>
