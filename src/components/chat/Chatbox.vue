@@ -53,15 +53,11 @@ const { buddies, threads } = storeToRefs(store);
 const { pathJoin, dbRun } = useElectron();
 
 // https://github.com/parsehex/BuddyGenAI/issues/2
-// there is a bug where if you unfocus the window while buddy is responding,
+// there is a bug where if you unfocus the window while ai is responding,
 // the message won't finish loading and it leads to the thread being in a broken state
 // TODO fix this
 // in the meantime, this is a workaround
 window.addEventListener('focus', async () => {
-	if (isDevMode() && messages.value.length === 0) {
-		window.location.reload();
-	}
-
 	if (isLoading.value) {
 		const lastMessage = messages.value[messages.value.length - 1];
 		if (lastMessage.role !== 'assistant') {
