@@ -226,9 +226,14 @@ const doTTS = async () => {
 						</Button>
 						<!-- add audio speed control -->
 					</CardHeader>
-					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2"> {{ message.role === 'user' ?
-						userName : 'AI' }} <Button v-if="!isUser && ttsEnabled" @click="doTTS" variant="secondary" size="sm"
-							class="ml-2">
+					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2">
+						<Avatar v-if="isUser" class="text-md mt-2 font-bold" :style="{
+							backgroundColor: textToHslColor(userName, 60, 80),
+						}">
+							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
+							<AvatarFallback v-else>{{ msgInitials }}</AvatarFallback>
+						</Avatar> {{ isUser ? userName : 'AI' }} <Button v-if="!isUser && ttsEnabled" @click="doTTS"
+							variant="secondary" size="sm" class="ml-2">
 							<Volume2 />
 						</Button>
 					</CardHeader>
