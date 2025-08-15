@@ -23,7 +23,7 @@ const store = useAppStore();
 
 const { toast } = useToast();
 
-const lastModel = ref<string | null>(null);
+const lastModel = computed(() => store.lastKoboldModelResult);
 
 const doStartServer = async () => {
 	const modelPath = getChatModelPath();
@@ -62,7 +62,7 @@ const doStopServer = async () => {
 	setTimeout(() => {
 		doRefreshServerStatus();
 	}, 500);
-	lastModel.value = null;
+	// lastModel.value = null;
 };
 
 const doRestartServer = async () => {
@@ -102,12 +102,14 @@ watch(
 		if (store.chatServerStarting && store.chatServerRunning) {
 			store.chatServerStarting = false;
 		}
-		lastModel.value = await getLastModel();
+		// lastModel.value = await getLastModel();
+		store.updateKoboldModel();
 	}
 );
 onBeforeMount(async () => {
-	lastModel.value = await getLastModel();
+	// lastModel.value = await getLastModel();
 	store.updateChatServerRunning();
+	store.updateKoboldModel();
 });
 
 const bgColor = computed(() => {
@@ -121,36 +123,22 @@ const bgColor = computed(() => {
 });
 const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 </script>
-
 <template>
 	<!-- TODO when server is off, change delay (+ figure out what delay to use) -->
 	<Popover>
 		<PopoverTrigger as-child>
-			<div
-				class="flex items-center bg-primary-foreground rounded-b-lg w-full justify-center cursor-pointer"
-			>
+			<div class="flex items-center bg-primary-foreground rounded-b-lg w-full justify-center cursor-pointer">
 				<Avatar :class="bgColor" size="xs" :color="color"></Avatar>
-				<span class="p-2"
-					>Chat
-					{{
-						store.chatServerRunning
-							? 'Online'
-							: store.chatServerStarting
-							? 'Starting'
-							: 'Offline'
-					}}</span
-				>
+				<span class="p-2">Chat {{ store.chatServerRunning ? 'Online' : store.chatServerStarting ? 'Starting' : 'Offline'
+				}}</span>
 			</div>
 		</PopoverTrigger>
 		<PopoverContent class="w-72" :hide-when-detached="true" side="right">
 			<div class="flex items-center space-x-4">
 				<div class="space-y-1">
-					<p
-						v-if="lastModel && store.chatServerRunning"
-						class="text-sm text-gray-500 mb-4"
-					>
-						<span class="font-semibold">Model:</span>
-						{{ lastModel }}
+					<p v-if="lastModel && store.chatServerRunning" class="text-sm text-gray-500 mb-4">
+						<span class="font-semibold">Current Model:</span>
+						<br /> {{ lastModel }}
 					</p>
 					<!-- <div class="flex items-center space-x-2">
 						<Button

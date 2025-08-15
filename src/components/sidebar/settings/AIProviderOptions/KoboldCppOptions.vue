@@ -9,5 +9,7 @@ const saveEnabled = ref(false);
 	<KoboldCppSetup @connected="saveEnabled = true" @offline="saveEnabled = false" />
 	<!-- Above component saves on connected -->
 	<Button type="button" :disabled="!saveEnabled" @click="saveEnabled = false">Save</Button>
-	<!-- TODO allow switching Cfg if feature enabled in koboldcpp -->
+	<!-- TODO allow switching Cfg if feature enabled in koboldcpp
+	 check with store.lastKoboldVersionResult (`admin` === 0 if disabled)
+	 -->
 </template>

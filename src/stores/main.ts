@@ -38,6 +38,8 @@ export const useAppStore = defineStore('app', () => {
 	const buddies = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
+	const lastKoboldVersionResult = ref({} as any);
+	const lastKoboldModelResult = ref('');
 
 	const isExternalProvider = computed(
 		() => settings.value.selected_provider_chat === 'cloud'
@@ -251,8 +253,18 @@ export const useAppStore = defineStore('app', () => {
 			const data = await res.json();
 			if (data.llm) chatServerRunning.value = true;
 			else chatServerRunning.value = false;
+			lastKoboldVersionResult.value = data;
 		} catch (err: any) {
 			chatServerRunning.value = false;
+		}
+	};
+	const updateKoboldModel = async () => {
+		try {
+			const res = await fetch(urls.other.koboldUrl('/api/v1/model'));
+			const data = await res.json();
+			lastKoboldModelResult.value = data.result.replace('koboldcpp/', '');
+		} catch (err: any) {
+			lastKoboldModelResult.value = 'N/A';
 		}
 	};
 
@@ -319,6 +331,8 @@ export const useAppStore = defineStore('app', () => {
 		threads,
 		newHere,
 		modelProvider,
+		lastKoboldVersionResult,
+		lastKoboldModelResult,
 
 		updateModels,
 		updateBuddies,
@@ -338,6 +352,7 @@ export const useAppStore = defineStore('app', () => {
 		chatServerRunning,
 		chatServerStarting,
 		updateChatServerRunning,
+		updateKoboldModel,
 
 		imgGenerating,
 		updateImgGenerating,
