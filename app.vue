@@ -43,10 +43,12 @@ console.log('skipDialog', skipDialog.value);
 const enteredApp = ref(skipDialog.value ? 1 : 0);
 
 const isSetup = computed(() => {
-	if (!AppSettings.isFeatureAvailable('chat')) return false; // TODO is not reactive
 	const isDefaultUserName = store.settings.user_name?.toLowerCase() === 'user';
 	const hasThreads = store.threads.length > 0;
 	const hasBuddies = store.buddies.length > 0;
+	if (!isDefaultUserName || hasBuddies || hasThreads) return true;
+
+	if (!AppSettings.isFeatureAvailable('chat')) return false; // TODO is not reactive
 	const skippedSetup = +store.settings.skip_setup;
 	if (skippedSetup) return true;
 	if (!hasBuddies && !isDefaultUserName && !hasThreads) return false;
