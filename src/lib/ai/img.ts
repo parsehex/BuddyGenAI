@@ -25,13 +25,14 @@ const Steps = {
 	high: 32,
 };
 
+/** Returns a base64 string of an image */
 export async function makePictureKobold(options: MakePictureOptions) {
 	const store = useAppStore();
 	const host = store.settings.koboldcpp_host;
 	if (!host) throw new Error('No host defined for koboldcpp');
 	const { posPrompt, negPrompt, size = 512, quality = 'medium' } = options;
 	const height = size;
-	const width = size === 768 ? 512 : 768;
+	const width = size;
 	const res = await fetch(`${host}/sdapi/v1/txt2img`, {
 		method: 'POST',
 		body: JSON.stringify({

@@ -302,6 +302,7 @@ export const useAppStore = defineStore('app', () => {
 		set: (value) => {
 			settings.value.selected_provider_chat = value;
 			settings.value.selected_provider_image = value;
+			saveSettings(settings.value);
 		},
 	});
 

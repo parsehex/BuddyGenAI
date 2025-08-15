@@ -4,9 +4,8 @@ import router from '@/lib/router';
 import { useToast } from '@/components/ui/toast';
 import AppTitle from './AppTitle.vue';
 import { useAppStore } from '@/stores/main';
-import urls from '@/lib/api/urls';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -16,18 +15,16 @@ import { Progress } from '@/components/ui/progress';
 import useElectron from '@/composables/useElectron';
 import Spinner from './Spinner.vue';
 import { genderFromName } from '@/lib/prompt/sd';
-import LocalModelSettingsCard from './LocalModelSettingsCard.vue';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
-import { isDescriptionValid, isNameValid } from '../lib/ai/general';
+import { isDescriptionValid } from '../lib/ai/general';
 import BuddyTagsInput from './BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
-import { useRoute } from 'vue-router/auto';
+import { getImage } from '../lib/api/images';
 
-// NOTE this component sort of doubles as the First Time Experience and the Buddy Creator
+// NOTE this component used to double as the First Time Experience and the Buddy Creator, but now is only used for the Create Buddy page
 
-const { openExternalLink } = useElectron();
 const { toast } = useToast();
 const { settings, updateModels, updateSettings, updateThreads } = useAppStore();
 const store = useAppStore();
@@ -155,12 +152,6 @@ const acceptBuddy = async () => {
 	handleSave();
 };
 
-const updateName = async () => {
-	if (!userNameValue.value) return;
-	if (userNameValue.value === settings.user_name) return;
-	settings.user_name = userNameValue.value;
-};
-
 const { pickDirectory, verifyModelDirectory, openModelsDirectory } =
 	useElectron();
 const openModelDirectory = () => {
@@ -266,18 +257,36 @@ const refreshProfilePicture = async () => {
 	}
 	const id = newBuddy.value.id;
 	updatingProfilePicture.value = true;
-	const res = await api.buddy.profilePic.createOne(
+	const imgData = await api.buddy.profilePic.createOne(
 		id,
 		+picQuality.value,
 		gender
 	);
+	const res = await api.buddy.profilePic.addOne(
+		id,
+		imgData
+	);
 
-	newBuddy.value.profile_pic = res.output;
+	newBuddy.value.profile_pic = await getImage(res.output);
 	updatingProfilePicture.value = false;
 };
 
-const route = useRoute();
-const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
+const handleProfilePicUpload = (event: Event) => {
+	const input = event.target as HTMLInputElement;
+	if (input.files && input.files[0]) {
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			if (!newBuddy.value) return;
+			const base64 = e.target?.result as string;
+			const res = await api.buddy.profilePic.addOne(newBuddy.value.id, base64);
+			newBuddy.value = await api.buddy.getOne(newBuddy.value.id);
+			newBuddy.value.profile_pic = await getImage(res.output);
+			updatingProfilePicture.value = false;
+		};
+
+		reader.readAsDataURL(input.files[0]);
+	}
+};
 </script>
 
 <template>
@@ -297,44 +306,19 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 				<AppTitle :new-here="store.newHere" />
 			</RouterLink>
 
-			<LocalModelSettingsCard
-				v-if="!store.settings.openrouter_api_key"
-				:first-time="store.newHere"
-				@open-model-directory="openModelDirectory"
-			/>
-
 			<Card
-				v-else
 				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
 			>
-			<CardHeader class="pt-0 pb-0">
-				<Label
-					v-if="!isCreatingCharacter"
-						class="mb-0 pb-3 text-center flex items-center justify-center text-lg"
-					>
-						Your Name
-						<Input
-							v-model="userNameValue"
-							@blur="updateName"
-							autofocus
-							class="p-2 border border-gray-300 dark:border-gray-700 rounded text-center w-1/2 ml-2"
-							@keyup.enter="handleSave"
-						/>
-					</Label>
-				</CardHeader>
 				<CardContent class="flex flex-col items-center">
+					<!-- initial Buddy setup (name, description) -->
 					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
 						<!-- TODO starters -->
-						<!-- require name first? to get buddy suggestions -->
+						<!-- require user name first? to get buddy suggestions -->
 						<!-- ${userName} would like to talk to a buddy.\n\nYour task is to list names of buddies which the user might want to talk to.\nRespond with a valid JSON array of strings. -->
 						<CardContent class="flex flex-col items-center">
 							<h2 class="text-2xl text-center font-bold">
 								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
 							</h2>
-							<!-- TODO untangle this rats nest of a file -->
-							<p class="text-sm text-gray-300">
-								Choose a name that feels friendly and relatable, like "Alex" or "Sam."
-							</p>
 							<!-- TODO button to randomize -->
 							<Input
 								v-model="buddyName"
@@ -344,7 +328,7 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
 								<!-- add tooltip with tips on good values -->
 								<Label class="block text-lg text-center font-bold" for="buddy-keywords">
-									Characteristics
+									Characteristics / Description
 								</Label>
 								<p class="text-sm text-gray-300 text-center mb-1">
 									These affect how {{ buddyName || 'your Buddy' }} talks with you.
@@ -367,6 +351,7 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 							</div>
 						</CardContent>
 					</Card>
+					<!-- Buddy image / appearance options -->
 					<Card v-else class="mt-4 p-2 w-full">
 						<CardContent>
 							<h2 v-if="store.newHere" class="text-lg mt-4 text-center">
@@ -383,13 +368,18 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 									size="lg"
 									class="text-3xl"
 								/>
-								<!-- <p
+								<p
 									class="text-sm text-gray-500 select-none"
 									v-if="acceptedBuddy && newBuddy"
 								>
 									Images are created using AI and may have unexpected results.
-								</p> -->
-								<!-- <BuddyAppearanceOptions
+								</p>
+								<div class="flex flex-col items-center my-2">
+									<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
+									<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
+										class="w-full max-w-xs" />
+								</div>
+								<BuddyAppearanceOptions
 									v-if="acceptedBuddy && newBuddy"
 									:buddy="newBuddy"
 									:profile-pic-prompt="profilePicturePrompt"
@@ -397,7 +387,7 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 									@refresh-profile-picture="refreshProfilePicture"
 									v-model:appearance-options="generatedAppearanceOptions"
 									v-model:selected-appearance-options="selectedAppearanceOptions"
-								/> -->
+								/>
 
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
 								<Button
@@ -407,10 +397,6 @@ const isCreatingCharacter = computed(() => route.path.includes('create-buddy'));
 									New Profile Picture
 								</Button>
 							</div>
-							<p class="mt-2">
-								Description:
-								<span class="text-lg ml-3">{{ acceptedBuddyDesc }}</span>
-							</p>
 						</CardContent>
 					</Card>
 

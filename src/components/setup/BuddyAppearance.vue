@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import BuddyAppearanceOptions from '../BuddyAppearanceOptions.vue';
 import BuddyAvatar from '../BuddyAvatar.vue';
 import { getImage } from '@/src/lib/api/images';
+import { AppSettings } from '@/src/lib/api/AppSettings';
 
 const props = defineProps({
 	newBuddy: {
@@ -85,7 +86,7 @@ const refreshProfilePicture = async () => {
 	);
 	const res = await api.buddy.profilePic.addOne(id, imgData);
 
-	newBuddy.value.profile_pic = res.output;
+	newBuddy.value.profile_pic = await getImage(res.output);
 	updatingProfilePicture.value = false;
 };
 
@@ -127,6 +128,8 @@ const handleSave = async () => {
 };
 
 defineEmits(['complete']);
+
+const imgGen = AppSettings.isFeatureAvailable('image');
 </script>
 <template>
 	<Card class="mt-4 p-2 w-full">
@@ -138,14 +141,14 @@ defineEmits(['complete']);
 			</p>
 			<div class="flex flex-col items-center">
 				<BuddyAvatar v-if="newBuddy" :buddy="newBuddy" :no-default="true" size="lg" class="text-3xl" />
-				<p class="text-sm text-gray-500 select-none" v-if="newBuddy"> Images are created using AI and may have
+				<p v-if="imgGen && newBuddy" class="text-sm text-gray-500 select-none"> Images are created using AI and may have
 					unexpected results. </p>
 				<div class="flex flex-col items-center my-2">
 					<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
 					<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
 						class="w-full max-w-xs" />
 				</div>
-				<BuddyAppearanceOptions v-if="newBuddy" :buddy="newBuddy" :profile-pic-prompt="profilePicturePrompt"
+				<BuddyAppearanceOptions v-if="imgGen && newBuddy" :buddy="newBuddy" :profile-pic-prompt="profilePicturePrompt"
 					@update-profile-pic-prompt="profilePicturePrompt = $event" @refresh-profile-picture="refreshProfilePicture"
 					v-model:appearance-options="generatedAppearanceOptions"
 					v-model:selected-appearance-options="selectedAppearanceOptions" />
@@ -154,9 +157,6 @@ defineEmits(['complete']);
 				<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded"> New Profile Picture
 				</Button>
 			</div>
-			<p v-if="newBuddy.description" class="mt-2"> Description: <span class="text-lg ml-3">{{ newBuddy.description
-					}}</span>
-			</p>
 			<Button @click="handleSave" class="mt-4 p-2 success rounded"> Save </Button>
 		</CardContent>
 	</Card>

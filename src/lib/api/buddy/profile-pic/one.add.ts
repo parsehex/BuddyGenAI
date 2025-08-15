@@ -12,11 +12,16 @@ TODO notes about profile pic versioning:
 - need to update naming to include the version id
 */
 
+interface AddImageResponse {
+	/** `id` of the image within the DB */
+	output: string;
+}
+
 /** `imgDataB64` should already be formatted and prefixed with "data:image..." */
 export default async function addProfilePic(
 	buddyId: string,
 	imgDataB64: string
-) {
+): Promise<AddImageResponse> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
 	const sqlBuddy = select('persona', ['*'], { id: buddyId });

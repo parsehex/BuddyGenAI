@@ -51,7 +51,7 @@ watch(
 	}
 );
 
-// these dont trigger a system message refresh so they take effect on next message/reload
+// NOTE these dont trigger a system message refresh so they take effect on next message/reload
 const updateDescription = async () => {
 	if (store.settings.user_description === userDescription.value) return;
 	store.settings.user_description = userDescription.value;

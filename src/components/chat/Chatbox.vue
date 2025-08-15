@@ -443,6 +443,14 @@ watch(
 	}
 );
 
+// sync system message when user description changes
+watch(
+	() => [store.settings.user_description, store.settings.user_description_assistant, store.settings.user_description_buddies],
+	() => {
+		refreshMessages();
+	}
+);
+
 const threadImages = computed(() =>
 	// @ts-ignore
 	messages.value.filter((m) => m.image && m.role === 'assistant')
