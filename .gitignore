@@ -29,3 +29,4 @@ llama.log
 /binaries*
 docs/.vitepress/dist
 docs/.vitepress/cache
+speaker_output*.json
