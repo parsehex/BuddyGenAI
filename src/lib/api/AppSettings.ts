@@ -32,6 +32,7 @@ export const AppSettingsDefaults: Settings = {
 	gpu_enabled_chat: true,
 	gpu_enabled_image: true,
 	gpu_enabled_whisper: true,
+	chat_streaming: true,
 	chat_image_enabled: false,
 	chat_image_quality: 'medium',
 	external_api_key: '',
@@ -63,6 +64,7 @@ export interface Settings {
 	gpu_enabled_chat: boolean;
 	gpu_enabled_image: boolean;
 	gpu_enabled_whisper: boolean;
+	chat_streaming: boolean;
 	chat_image_enabled: boolean;
 	chat_image_quality: string;
 	external_api_key: string;

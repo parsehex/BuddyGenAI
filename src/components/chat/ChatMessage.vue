@@ -45,6 +45,7 @@ const { toast } = useToast();
 
 const { copyToClipboard, dbRun } = useElectron();
 const store = useAppStore();
+const chatStreaming = computed(() => store.settings.chat_streaming);
 
 const props = defineProps<{
 	threadId: string;
@@ -61,6 +62,27 @@ const emit = defineEmits<{
 }>();
 
 const isUser = computed(() => message.value.role === 'user');
+
+const aiName = computed(() => {
+	if (props.threadMode === 'persona') return props.currentBuddy?.name || 'AI'
+	return 'AI';
+})
+
+const isTyping = ref(false);
+
+// Watch message changes to set typing state
+watch(
+	() => message.value,
+	(newVal) => {
+		if (!isUser.value && !chatStreaming.value) {
+			// Typing starts if no content yet
+			isTyping.value = !newVal.content?.trim();
+		} else {
+			isTyping.value = false;
+		}
+	},
+	{ immediate: true }
+);
 
 // @ts-ignore
 const imgValue = ref(message.value.image || '');
@@ -211,7 +233,11 @@ const doTTS = async () => {
 						</Button>
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between gap-2">
-						<div class="grow"> {{ message.content }} </div>
+						<div class="grow">
+							<span v-if="isTyping" class="typing-indicator"> {{ aiName }} is typing<span class="dots"></span>
+							</span>
+							<span v-else> {{ message.content }} </span>
+						</div>
 						<MessageImage v-if="imgValue" :imgValue="imgValue" />
 					</CardContent>
 				</Card>
@@ -244,3 +270,38 @@ const doTTS = async () => {
 		</DialogContent>
 	</Dialog>
 </template>
+<style>
+.typing-indicator {
+	font-style: italic;
+	opacity: 0.8;
+}
+
+.dots::after {
+	content: '';
+	display: inline-block;
+	width: 1em;
+	text-align: left;
+	animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+
+	0%,
+	20% {
+		content: '';
+	}
+
+	40% {
+		content: '.';
+	}
+
+	60% {
+		content: '..';
+	}
+
+	80%,
+	100% {
+		content: '...';
+	}
+}
+</style>

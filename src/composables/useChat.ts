@@ -70,6 +70,37 @@ export default function useChat(options: UseChatOptions) {
 			thread_index,
 		} as ChatMessage);
 		messages.value.push(msg.value);
+
+		if (!store.settings.chat_streaming) {
+			const res = await axios({
+				url: BaseUrl.value,
+				method: 'post',
+				headers: headers.value,
+				signal: controller.signal,
+				data: { ...options.body, messages: messages.value, stream: false },
+			})
+				.then((res) => {
+					return res.data;
+				})
+				.catch((err) => {
+					if (err.name === 'CanceledError' || err.name === 'AbortError') {
+						console.log('Request was cancelled.');
+						return;
+					}
+					console.error('Request failed:', err);
+					isLoading.value = false;
+					// TODO the partial message doesn't save
+				});
+			msg.value.content = res.choices[0].message.content;
+			isLoading.value = false;
+			if (options.onFinish) {
+				options.onFinish(messages.value);
+			}
+			return;
+		}
+
+		// stream:
+		console.log('streaming');
 		axios({
 			url: BaseUrl.value,
 			method: 'post',
@@ -116,7 +147,6 @@ export default function useChat(options: UseChatOptions) {
 			}
 			console.error('Request failed:', err);
 			isLoading.value = false;
-			// TODO the partial message doesn't save
 		});
 	}
 

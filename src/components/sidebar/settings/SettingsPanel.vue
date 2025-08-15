@@ -45,7 +45,7 @@ const reloadPage = () => {
 		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
 			<AIProviderOptions />
-			<ChatAIOptions v-if="isCloud" />
+			<ChatAIOptions />
 			<ImageAIOptions v-if="!isCloud" />
 			<TTSOptions v-if="!isCloud" />
 			<STTOptions v-if="!isCloud" />
