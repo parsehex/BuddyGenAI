@@ -1,7 +1,5 @@
 import { ref, computed } from 'vue';
-import type {
-	ChatMessage,
-} from '@/lib/api/types-db';
+import type { ChatMessage } from '@/lib/api/types-db';
 import axios from 'axios';
 import { v4 } from 'uuid';
 import urls from '@/lib/api/urls';
@@ -72,7 +70,7 @@ export default function useChat(options: UseChatOptions) {
 			thread_index,
 		} as ChatMessage);
 		messages.value.push(msg.value);
-		await axios({
+		axios({
 			url: BaseUrl.value,
 			method: 'post',
 			headers: headers.value,
@@ -111,6 +109,14 @@ export default function useChat(options: UseChatOptions) {
 
 				i++;
 			},
+		}).catch((err) => {
+			if (err.name === 'CanceledError' || err.name === 'AbortError') {
+				console.log('Request was cancelled.');
+				return;
+			}
+			console.error('Request failed:', err);
+			isLoading.value = false;
+			// TODO the partial message doesn't save
 		});
 	}
 
@@ -124,7 +130,6 @@ export default function useChat(options: UseChatOptions) {
 	}
 
 	function stop() {
-		// TODO need to test this
 		controller.abort();
 	}
 
@@ -138,7 +143,7 @@ export default function useChat(options: UseChatOptions) {
 		setMessages(options.initialMessages);
 	}
 	(async () => {
-		BaseUrl.value = (await urls.other.llamacppServerUrl());
+		BaseUrl.value = await urls.other.llamacppServerUrl();
 	})();
 
 	return {

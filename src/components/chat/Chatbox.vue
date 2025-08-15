@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
-import { RefreshCcwDot, Mic, MicOff } from 'lucide-vue-next';
+import { RefreshCcwDot, Mic, MicOff, Send, Square } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -482,14 +482,13 @@ async function refreshBuddies() {
 	return newBuddies || [];
 }
 
-const doSubmit = async (e: Event) => {
-	if ((e as KeyboardEvent).shiftKey) return;
-	if (!canSend || input.value === '' || isLoading.value) return;
-	if (isLoading.value) {
-		// won't happen yeah? Send is disabled if isLoading
+const doSubmitOrStop = async (e: Event) => {
+	const isKeyPressed = e instanceof KeyboardEvent;
+	if (isKeyPressed && e.shiftKey) return;
+	if (!canSend) return;
+	if (isLoading.value && !isKeyPressed) { // clicked stop button
 		e.preventDefault();
 		stop();
-		console.log('prevented submit & stopped');
 		return;
 	}
 	console.time('message');
@@ -596,7 +595,7 @@ const canSend = computed(() => {
 		return false;
 	}
 	if (store.isExternalProvider && (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo')) return false;
-	return input.value && !isLoading.value;
+	return !!input.value;
 });
 
 const canReload = computed(() => {
@@ -670,7 +669,7 @@ const startRecording = async () => {
 						input.value = result.trim();
 
 						if (store.settings.auto_send_stt) {
-							doSubmit(new Event('submit'));
+							doSubmitOrStop(new Event('submit'));
 						}
 					}
 				};
@@ -734,18 +733,20 @@ const device = useMobile();
 				<MicOff v-else />
 			</Button>
 			<Textarea class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700" tabindex="1"
-				v-model="input" placeholder="Say something..." @keydown.enter="doSubmit" autofocus />
+				v-model="input" placeholder="Say something..." @keydown.enter="doSubmitOrStop" autofocus />
 			<div class="flex flex-col items-center gap-1">
-				<Button type="button" size="sm" @click="doSubmit" :disabled="!canSend">
-					<!-- TODO implement stop -->
-					<!-- TODO switch to send icon and stop icon --> Send </Button>
+				<Button type="button" size="sm" @click="doSubmitOrStop" :disabled="!canSend && !isLoading"
+					:variant="isLoading ? 'destructive' : 'default'">
+					<Send v-if="!isLoading" />
+					<Square v-else />
+				</Button>
 				<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload" @click="doReload"
 					title="Re-submit your last message to get a new response">
 					<RefreshCcwDot />
 				</Button>
 			</div>
 		</form>
-		<p class="mt-4 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
+		<p class="mt-2 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
 			:class="[device.isMobile.value ? 'pr-14' : '']"
 			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)">
 			<u><i>Reminder</i></u> Buddies in this app are AI -- they make mistakes sometimes and they're not real people.
