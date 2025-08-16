@@ -115,7 +115,7 @@ const handleClickChat = () => {
 			</Tooltip>
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger value="settings">Settings</TabsTrigger>
+			<TabsTrigger value="settings">Options</TabsTrigger>
 			<!-- <RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink> -->
 			<ColorMode />
 		</TabsList>

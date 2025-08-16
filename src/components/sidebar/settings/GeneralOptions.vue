@@ -67,7 +67,7 @@ const updateDescriptionBuddies = async () => {
 </script>
 <template>
 	<AccordionItem value="general-options">
-		<AccordionTrigger>General Options</AccordionTrigger>
+		<AccordionTrigger>General</AccordionTrigger>
 		<AccordionContent>
 			<OptionSection label="Your Name" labelName="name" orientation="vertical">
 				<Input v-model="userName" @blur="updateName()" id="name"

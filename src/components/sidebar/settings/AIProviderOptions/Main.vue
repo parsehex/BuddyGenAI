@@ -26,7 +26,7 @@ const switchProvider = () => {
 </script>
 <template>
 	<AccordionItem value="ai-provider-options">
-		<AccordionTrigger>AI Provider Options ({{ currentProvider }})</AccordionTrigger>
+		<AccordionTrigger>AI Provider ({{ currentProvider }})</AccordionTrigger>
 		<AccordionContent class="text-center">
 			<Button type="button" @click="switchProvider" size="xs" variant="secondary">Switch to {{ otherProvider }}</Button>
 			<OpenRouterOptions v-if="isCloud" />

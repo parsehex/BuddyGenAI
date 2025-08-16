@@ -141,7 +141,7 @@ const canSkipSetup = computed(() => {
 })
 
 const handleSkipSetup = () => {
-	store.settings.skip_setup = 1;
+	store.settings.skip_setup = true;
 	store.saveSettings(store.settings);
 };
 const {skip_setup} = toRefs(store.settings);

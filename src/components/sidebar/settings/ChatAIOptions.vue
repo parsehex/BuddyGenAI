@@ -36,7 +36,7 @@ const updateStreaming = async (boolVal: boolean) => {
 </script>
 <template>
 	<AccordionItem value="chat-ai-options">
-		<AccordionTrigger>Chat AI Options</AccordionTrigger>
+		<AccordionTrigger>Chat</AccordionTrigger>
 		<AccordionContent>
 			<OptionSection v-if="isCloud" label="Chat Model" labelName="chat-model" orientation="vertical">
 				<div class="flex">

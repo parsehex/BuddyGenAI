@@ -36,7 +36,7 @@ const updateChatImageEnabled = async (boolVal: boolean) => {
 </script>
 <template>
 	<AccordionItem value="image-ai-options">
-		<AccordionTrigger>Image AI Options</AccordionTrigger>
+		<AccordionTrigger>Image</AccordionTrigger>
 		<AccordionContent>
 			<OptionSection label="Chat Images" labelName="chat-images" orientation="vertical">
 				<Label class="flex items-center gap-2">
