@@ -45,6 +45,7 @@ import useMobile from '@/src/composables/useMobile';
 import { v4 } from 'uuid';
 import { insert } from '@/src/lib/sql';
 import { Buffer } from 'buffer';
+import { isFeatureAvailable } from '@/lib/ai/support';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -123,7 +124,7 @@ const reloadingId = ref('');
 
 // console.log('initial messages', await initialMessages.value);
 
-const userName = AppSettings.get('user_name') as string;
+const userName = computed(() => store.settings.user_name)
 
 // what does useChat do (that we use it for)?
 // - handles messages array
@@ -177,7 +178,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				threadMode.value === 'persona'
 					? currentBuddy.value?.name || ''
 					: 'Assistant';
-			const user = userName;
+			const user = userName.value;
 
 			const chatImageEnabled = store.settings.chat_image_enabled;
 			const isChatImageEnabled =
@@ -186,7 +187,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			let cmdObj = {} as any;
 			let cmd = '';
 			if (isChatImageEnabled) {
-				cmd = (await complete(shouldSendImg(userName, assistantName), {
+				cmd = (await complete(shouldSendImg(user, assistantName), {
 					body: {
 						max_tokens: 512,
 						temperature: 0.01,
@@ -238,7 +239,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					buddyAppearance += currentBuddy.value.profile_pic_prompt;
 				}
 				const imgDescPrompt = imgDescriptionFromChat(
-					userName,
+					user,
 					currentBuddy.value?.name || 'AI Assistant',
 					buddyAppearance
 				);
@@ -722,7 +723,7 @@ const device = useMobile();
 			</div>
 		</ScrollArea>
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
-			<Button v-if="AppSettings.isFeatureAvailable('stt')" type="button" size="sm" @click="startRecording"
+			<Button v-if="isFeatureAvailable('stt')" type="button" size="sm" @click="startRecording"
 				title="Start recording audio" :variant="recording ? 'destructive' : 'default'"
 				:class="loadingTranscript ? 'opacity-75 cursor-not-allowed' : ''" :disaled="loadingTranscript">
 				<Mic v-if="!recording" />

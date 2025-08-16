@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import BuddyAppearanceOptions from '../BuddyAppearanceOptions.vue';
 import BuddyAvatar from '../BuddyAvatar.vue';
 import { getImage } from '@/src/lib/api/images';
-import { AppSettings } from '@/src/lib/api/AppSettings';
+import { isFeatureAvailable } from '@/lib/ai/support';
 
 const props = defineProps({
 	newBuddy: {
@@ -129,7 +129,7 @@ const handleSave = async () => {
 
 defineEmits(['complete']);
 
-const imgGen = AppSettings.isFeatureAvailable('image');
+const imgGen = isFeatureAvailable('image');
 </script>
 <template>
 	<Card class="mt-4 p-2 w-full">

@@ -9,6 +9,7 @@ import AppTitle from '../AppTitle.vue';
 import { AppSettings } from '@/src/lib/api/AppSettings';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
+import { isFeatureAvailable } from '@/src/lib/ai/support';
 
 const store = useAppStore();
 
@@ -18,8 +19,7 @@ const currentStep = ref('ai-provider' as SetupStep);
 const newBuddy = ref(null as any);
 
 onMounted(() => {
-  console.log(AppSettings.isFeatureAvailable('chat'));
-  if (AppSettings.isFeatureAvailable('chat')) {
+  if (isFeatureAvailable('chat')) {
     currentStep.value = 'user-setup'
   }
   const userName = AppSettings.get('user_name') as string;
@@ -46,7 +46,7 @@ const handleStepComplete = (step: SetupStep, data?: any) => {
 };
 
 const canSkipSetup = computed(() => {
-  if (!AppSettings.isFeatureAvailable('chat')) return false;
+  if (!isFeatureAvailable('chat')) return false;
   return true;
 });
 const handleSkipSetup = () => {

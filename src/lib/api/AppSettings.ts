@@ -3,16 +3,9 @@ import useElectron from '@/composables/useElectron';
 import type { DBVal, SQLiteVal } from './types-db';
 import { delay } from '../utils';
 
-type FeatureType = 'chat' | 'image' | 'tts' | 'stt';
-
-interface FeatureRequirements {
-	requiredSettings: AppSettingsKeys[];
-	validateFn?: (settings: Settings) => boolean;
-}
-
 const { dbGet, dbAll, dbRun } = useElectron();
 
-type AppSettingsKeys = keyof Settings;
+export type AppSettingsKeys = keyof Settings;
 
 export const AppSettingsDefaults: Settings = {
 	user_name: 'User',
@@ -25,6 +18,8 @@ export const AppSettingsDefaults: Settings = {
 	local_model_directory: '',
 	selected_provider_chat: '',
 	selected_provider_image: '',
+	selected_provider_tts: '',
+	selected_provider_stt: '',
 	selected_model_chat: '',
 	selected_model_image: '',
 	selected_model_tts: '',
@@ -45,6 +40,23 @@ export const AppSettingsDefaults: Settings = {
 	skip_setup: false,
 };
 
+enum LLMProvider {
+	openrouter,
+	koboldcpp,
+	DISABLED = '',
+}
+enum ImgProvider {
+	koboldcpp,
+	DISABLED = '',
+}
+enum TTSProvider {
+	koboldcpp,
+	DISABLED = '',
+}
+enum STTProvider {
+	koboldcpp,
+	DISABLED = '',
+}
 type Provider = 'cloud' | 'local' | '';
 export interface Settings {
 	user_name: string;
@@ -57,6 +69,8 @@ export interface Settings {
 	local_model_directory: string;
 	selected_provider_chat: Provider;
 	selected_provider_image: Provider;
+	selected_provider_tts: Provider;
+	selected_provider_stt: Provider;
 	selected_model_chat: string;
 	selected_model_image: string;
 	selected_model_tts: string;
@@ -155,6 +169,7 @@ class AppSettingsCls {
 
 	// TODO do something better
 	// expect consumers to call this after setting all
+	// note that the Main store watches store.settings and saves on change
 	public async saveSettings(): Promise<void> {
 		if (!dbRun) throw new Error('dbRun not available');
 
@@ -211,59 +226,6 @@ class AppSettingsCls {
 				await dbRun(sql[0], sql[1]);
 			}
 		}
-	}
-
-	private featureRequirements: Record<FeatureType, FeatureRequirements> = {
-		chat: {
-			requiredSettings: ['selected_model_chat', 'selected_provider_chat'],
-			validateFn: (settings) => {
-				if (settings.selected_provider_chat === 'local') {
-					return !!settings.koboldcpp_host;
-				}
-				return !!settings.openrouter_api_key;
-			},
-		},
-		image: {
-			requiredSettings: ['selected_model_image', 'selected_provider_image'],
-			validateFn: (settings) => {
-				if (settings.selected_provider_image === 'local') {
-					return !!settings.koboldcpp_host;
-				}
-				return false;
-			},
-		},
-		tts: {
-			requiredSettings: ['selected_model_tts'],
-			validateFn: (settings) => settings.selected_model_tts !== '0',
-		},
-		stt: {
-			requiredSettings: ['selected_model_whisper'],
-			validateFn: (settings) => settings.selected_model_whisper !== '0',
-		},
-	};
-
-	public isFeatureAvailable(feature: FeatureType): boolean {
-		const requirements = this.featureRequirements[feature];
-		if (!requirements) return false;
-
-		// Check if all required settings have non-empty values
-		const hasRequiredSettings = requirements.requiredSettings.every((key) => {
-			const value = this.settings[key];
-			return value !== undefined && value !== '' && value !== '0';
-		});
-
-		// If there's a custom validation function, use it
-		if (requirements.validateFn) {
-			return requirements.validateFn(this.settings);
-		}
-
-		return hasRequiredSettings;
-	}
-
-	public getAvailableFeatures(): FeatureType[] {
-		return Object.keys(this.featureRequirements).filter((feature) =>
-			this.isFeatureAvailable(feature as FeatureType)
-		) as FeatureType[];
 	}
 }
 
