@@ -1,4 +1,8 @@
-# Getting Started with BuddyGenAI
+# Getting Started with BuddyGenAI (Electron version)
+
+> [!CAUTION] Legacy Version
+>
+> This version is not actively updated -- it doesn't include new app features or recent model support. For now, this is the only downloadable/installable PC version.
 
 This guide should walk you through the process of to set up BuddyGenAI to be able to chat, generate images and speech, and be able to speak your messages using a microphone.
 

@@ -7,9 +7,9 @@ hero:
  text:
  tagline:
  actions:
-  - theme: brand
-    text: Getting Started
-    link: /getting-started
+  # - theme: brand
+  #   text: Getting Started
+  #   link: /getting-started
   # - theme: alt
   #   text: API Examples
   #   link: /api-examples
@@ -26,7 +26,7 @@ This is the documentation for BuddyGenAI, an app meant to turn AI into a compani
 
 ## Pages
 
-- [Getting Started](./getting-started.md)
+- [Installing Electron version](./getting-started.md) (**legacy, not updated**)
 - [Getting Models](./getting-models.md)
 - [Building on Windows for NVIDIA GPUs](./building_windows_nvidia.md)
 - [Developer Documentation](./dev/README.md)
