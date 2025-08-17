@@ -22,6 +22,7 @@ const { orientation } = toRefs(props);
 const flexLayoutClass = computed(() => {
 	return (
 		'flex ' + (orientation.value === 'horizontal' ? 'flex-row' : 'flex-col')
+		'flex ' + (orientation.value === 'horizontal' ? 'flex-row items-center' : 'flex-col')
 	);
 });
 </script>
