@@ -55,7 +55,7 @@ const providerFeatures = {
         'hover:border-primary/50': selectedProvider !== 'local'
       }" @click="selectedProvider = 'local'">
         <CardHeader class="flex items-center justify-center relative">
-          <h3 class="text-xl font-semibold">Local</h3>
+          <h3 class="text-xl font-semibold">Local <small class="opacity-70">(recommended)</small></h3>
         </CardHeader>
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 relative">
           <div class="flex items-center"> powered by <img src="/assets/kobolddiscordgear.png"
@@ -83,7 +83,7 @@ const providerFeatures = {
         'hover:border-primary/50': selectedProvider !== 'webllm'
       }" @click="selectedProvider = 'webllm'">
         <CardHeader class="flex items-center justify-center relative">
-          <h3 class="text-xl font-semibold">In-Browser (Chrome or Edge)</h3>
+          <h3 class="text-xl font-semibold">In-Browser <small class="opacity-80">(Chrome or Edge only)</small></h3>
         </CardHeader>
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 relative">
           <div class="flex items-center"> powered by <img src="/assets/mlc-logo.png"
@@ -114,7 +114,7 @@ const providerFeatures = {
           <h3 class="text-xl font-semibold">Cloud</h3>
         </CardHeader>
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 bg-card rounded">
-          <div class="flex items-center"> powered by <div class="bg-white dark:bg-gray-700 rounded-lg p-1 mx-2">
+          <div class="flex items-center"> powered by <div class="bg-white opacity-70 rounded-lg p-1 mx-2">
               <img src="/assets/openrouter-logo.svg" class="h-10" alt="OpenRouter" />
             </div>
           </div>
