@@ -64,7 +64,15 @@ async function testConnection() {
     };
     version.value = data.version;
 
-    store.settings.selected_provider_chat = 'koboldcpp';
+    if (data.llm)
+      store.settings.selected_provider_chat = 'koboldcpp';
+    if (data.txt2img)
+      store.settings.selected_provider_image = 'koboldcpp';
+    if (data.tts)
+      store.settings.selected_provider_tts = 'koboldcpp';
+    if (data.transcribe)
+      store.settings.selected_provider_stt = 'koboldcpp';
+
     store.settings.koboldcpp_host = hostInput.value;
     await AppSettings.saveSettings();
 
