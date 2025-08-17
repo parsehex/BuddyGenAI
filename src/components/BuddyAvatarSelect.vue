@@ -24,8 +24,9 @@ onMounted(async () => {
 	const imgs = allProfilePics.value.filter((p) => p);
 	const resolved: string[] = [];
 	for (const i of imgs) {
-		const data = await getImage(i);
-		if (data) resolved.push(i);
+		// @ts-ignore idk how this happened
+		const data = await getImage(i.id);
+		if (data) resolved.push(data);
 	}
 	images.value = [...resolved];
 });
@@ -33,8 +34,9 @@ watch(() => allProfilePics.value, async () => {
 	const imgs = allProfilePics.value.filter((p) => p);
 	const resolved: string[] = [];
 	for (const i of imgs) {
-		const data = await getImage(i);
-		if (data) resolved.push(i);
+		// @ts-ignore
+		const data = await getImage(i.id);
+		if (data) resolved.push(data);
 	}
 	images.value = [...resolved];
 });
