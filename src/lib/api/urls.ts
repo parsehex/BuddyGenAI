@@ -35,6 +35,7 @@ const other = {
 			case 'koboldcpp':
 				return store.settings.koboldcpp_host + '/v1/chat/completions';
 			case '0':
+			default:
 				return '';
 		}
 	},

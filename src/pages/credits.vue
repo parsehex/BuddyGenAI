@@ -114,6 +114,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'file-saver',
+		link: 'https://github.com/eligrey/FileSaver.js',
+		author: 'Eli Grey',
+		license: 'MIT',
+	},
+	{
 		name: 'fs-extra',
 		link: 'https://github.com/jprichardson/node-fs-extra',
 		author: 'JP Richardson',
@@ -123,6 +129,12 @@ const deps = [
 		name: 'identicon',
 		link: 'https://github.com/nkoepke/Identicon',
 		author: 'Nils Köpke',
+		license: 'MIT',
+	},
+	{
+		name: 'jszip',
+		link: 'https://github.com/Stuk/jszip',
+		author: 'Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso',
 		license: 'MIT',
 	},
 	{
@@ -137,6 +149,12 @@ const deps = [
 		link: 'https://lucide.dev',
 		author: 'Lucide Contributors, Cole Bemis',
 		license: 'ISC, MIT',
+	},
+	{
+		name: '@mlc-ai/web-llm',
+		link: 'https://github.com/mlc-ai/web-llm',
+		author: 'MLC-AI',
+		license: 'Apache-2.0',
 	},
 	{
 		name: 'nuxt',
@@ -343,81 +361,40 @@ const openLink = (link: string) => {
 	openExternalLink(link);
 };
 </script>
-
 <template>
 	<ScrollArea class="h-screen">
 		<div class="container flex flex-col items-center pt-2 pb-8">
 			<h1 class="text-2xl font-bold">BuddyGenAI Credits</h1>
-
 			<div class="mt-4">
 				<p class="text-lg mt-4">
-					<span
-						class="text-blue-500 cursor-pointer"
-						@click="openLink('https://github.com/parsehex/BuddyGenAI')"
-					>
-						BuddyGenAI
-					</span>
-					is a project by
-					<span class="font-bold underline cursor-pointer" @click="openLink('https://www.thomasmays.net')">Thomas Mays</span>
-					(
-					<span
-						class="text-blue-500 cursor-pointer"
-						@click="openLink('https://github.com/parsehex')"
-					>
-						parsehex
-					</span>
-					)
-					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800">
-						MIT license
-					</span>
+					<span class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex/BuddyGenAI')">
+						BuddyGenAI </span> is a project by <span class="font-bold underline cursor-pointer"
+						@click="openLink('https://www.thomasmays.net')">Thomas Mays</span> ( <span
+						class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex')"> parsehex </span> )
+					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800"> MIT license </span>
 				</p>
-				<p class="text-md mt-2">
-					This app was made possible using the following software projects and AI models:
-				</p>
+				<p class="text-md mt-2"> This app was made possible using the following software projects and AI models: </p>
 				<ul class="list-disc list-inside mt-2">
 					<li v-for="dep in deps" :key="dep.name">
-						<span @click="openLink(dep.link)" class="text-blue-500 cursor-pointer">
-							{{ dep.name }}
-						</span>
-						by
-						<b>{{ dep.author }}</b>
-						<span
-							v-for="license in dep.license.split(',')"
-							@click="dep.licenseLink && openLink(dep.licenseLink)"
-							:key="license"
-							:class="
-								'text-sm px-2 rounded-full ml-2 bg-gray-200 dark:bg-gray-800' +
+						<span @click="openLink(dep.link)" class="text-blue-500 cursor-pointer"> {{ dep.name }} </span> by <b>{{
+							dep.author }}</b>
+						<span v-for="license in dep.license.split(',')" @click="dep.licenseLink && openLink(dep.licenseLink)"
+							:key="license" :class="'text-sm px-2 rounded-full ml-2 bg-gray-200 dark:bg-gray-800' +
 								(dep.licenseLink ? ' cursor-pointer' : '')
-							"
-						>
-							{{ license }}&nbsp;license</span
-						>
-						<span v-if="dep.note">
-							{{ ' - ' + dep.note }}
-						</span>
+								"> {{ license }}&nbsp;license</span>
+						<span v-if="dep.note"> {{ ' - ' + dep.note }} </span>
 					</li>
 				</ul>
-
-				<p class="text-lg mt-2">
-					If you have enjoyed this app, I'd appreciate your feedback or support!
-					<span
+				<p class="text-lg mt-2"> If you have enjoyed this app, I'd appreciate your feedback or support! <span
 						class="text-blue-500 underline cursor-pointer inline-block"
-						@click="openLink('https://buymeacoffee.com/parsehex')"
-					>
-						Buy Me A Coffee
-					</span>
+						@click="openLink('https://buymeacoffee.com/parsehex')"> Buy Me A Coffee </span>
 				</p>
 				<p class="text-lg mt-2">
-					<span
-						class="text-blue-500 underline cursor-pointer"
-						@click="openLink('https://buddygenai.com')"
-					>
-						BuddyGenAI.com
-					</span>
+					<span class="text-blue-500 underline cursor-pointer" @click="openLink('https://buddygenai.com')">
+						BuddyGenAI.com </span>
 				</p>
 			</div>
 		</div>
 	</ScrollArea>
 </template>
-
 <style lang="scss"></style>

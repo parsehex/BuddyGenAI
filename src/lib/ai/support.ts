@@ -20,6 +20,9 @@ const featureRequirements: Record<FeatureType, FeatureRequirements> = {
 				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
 				return !!settings.koboldcpp_host && lastKoboldVersion.llm !== false;
 			}
+			if (settings.selected_provider_chat === 'webllm') {
+				return !!settings.selected_model_chat;
+			}
 			return !!settings.openrouter_api_key;
 		},
 	},

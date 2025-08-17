@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 import urls from '@/lib/api/urls';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useAppStore } from '../stores/main';
+import { chat } from '../lib/ai/webllm';
 
 interface UseChatOptions {
 	initialMessages?: ChatMessage[];
@@ -73,6 +74,37 @@ export default function useChat(options: UseChatOptions) {
 			thread_index,
 		} as ChatMessage);
 		messages.value.push(msg.value);
+
+		const isWebLLM = AppSettings.get('selected_provider_chat') === 'webllm';
+		if (isWebLLM) {
+			if (!store.settings.chat_streaming) {
+				const response = await chat({
+					...options.body,
+					messages: messages.value,
+					stream: false,
+				});
+				msg.value.content = response;
+				isLoading.value = false;
+				if (options.onFinish) {
+					options.onFinish(messages.value);
+				}
+			} else {
+				const response = await chat({
+					// ...options.body,
+					messages: messages.value,
+					stream: true,
+					stream_callback: (s: string) => {
+						msg.value.content += s;
+					},
+				});
+				msg.value.content = response;
+				isLoading.value = false;
+				if (options.onFinish) {
+					options.onFinish(messages.value);
+				}
+			}
+			return;
+		}
 
 		if (!store.settings.chat_streaming) {
 			const res = await axios({

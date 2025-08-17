@@ -40,7 +40,7 @@ const { openExternalLink } = useElectron();
 		<li>Set Speech Recognition models in <b>Audio</b> -&gt; <b>Whisper Model</b></li>
 	</ul>
 	<p class="mt-2">
-		<span class="step">4.</span> Once you've completed this, can click <b>Launch</b> at the bottom of the Kobold window.
+		<span class="step">4.</span> Once you've completed this, click <b>Launch</b> at the bottom of the Kobold window.
 		Then, come back here and click below to test your connection.
 	</p>
 </template>

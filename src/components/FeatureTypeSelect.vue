@@ -41,6 +41,7 @@ function getProviderLabel(provider: AnyPossibleProvider) {
 	switch (provider) {
 		case 'koboldcpp': return 'KoboldCpp';
 		case 'openrouter': return 'OpenRouter';
+		case 'webllm': return 'WebLLM';
 		case '0': return 'Disabled';
 		default: return '';
 	}
@@ -50,7 +51,6 @@ const updateValue = (val: string) => {
 	if (store.settings[key.value] === val) return;
 	store.settings[key.value] = val;
 }
-console.log(store.settings);
 </script>
 <template>
 	<Select :default-value="store.settings[key] + ''" @update:model-value="updateValue" :id="`${type}-provider`">

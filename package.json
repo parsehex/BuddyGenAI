@@ -57,6 +57,7 @@
     "wait-on": "^7.0.1"
   },
   "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.79",
     "@vueuse/core": "^10.9.0",
     "ai": "^3.0.19",
     "axios": "^1.6.8",

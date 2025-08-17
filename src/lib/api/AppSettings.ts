@@ -40,9 +40,14 @@ export const AppSettingsDefaults: Settings = {
 	skip_setup: false,
 };
 
-export type AnyPossibleProvider = 'koboldcpp' | 'openrouter' | '0';
-export type LLMProvider = 'koboldcpp' | 'openrouter' | '0';
-export const LLMProviders: LLMProvider[] = ['koboldcpp', 'openrouter', '0'];
+export type AnyPossibleProvider = 'koboldcpp' | 'openrouter' | 'webllm' | '0';
+export type LLMProvider = 'koboldcpp' | 'openrouter' | 'webllm' | '0';
+export const LLMProviders: LLMProvider[] = [
+	'koboldcpp',
+	'openrouter',
+	'webllm',
+	'0',
+];
 export type ImgProvider = 'koboldcpp' | '0';
 export const ImgProviders: ImgProvider[] = ['koboldcpp', '0'];
 export type TTSProvider = 'koboldcpp' | '0';

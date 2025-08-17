@@ -52,7 +52,8 @@ Keywords should be visually descriptive of an individual and be comma-separated.
 
 /** Returns prompt for LLM to generate gender from name and optional appearance keywords. */
 export function genderFromName(name: string, extraPrompt = '') {
-	let prompt = `What gender is ${name}? Answer with a single word (e.g. female, male, etc.)`;
+	// image model doesn't do much with e.g. "Non-Binary"
+	let prompt = `What gender is ${name}? Answer with a single word (female or male)`;
 	if (extraPrompt) {
 		prompt += `\n\nAppearance: ${extraPrompt}`;
 	}
