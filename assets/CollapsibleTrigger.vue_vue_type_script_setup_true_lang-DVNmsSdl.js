@@ -1,1 +1,0 @@
-import{d as o,o as r,c as t,w as n,aU as p,aV as l,aW as c,e as i,aX as d}from"./index-CPZ2OBS0.js";const f=o({__name:"CollapsibleTrigger",props:{asChild:{type:Boolean},as:{}},setup(a){const e=a;return(s,u)=>(r(),t(i(d),l(c(e)),{default:n(()=>[p(s.$slots,"default")]),_:3},16))}});export{f as _};
