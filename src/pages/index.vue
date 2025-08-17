@@ -149,11 +149,11 @@ const { skip_setup } = toRefs(store.settings);
 						<RouterLink :to="`/chat/${thread.id}`" class="w-full h-full flex items-center justify-start p-4">
 							<!-- TODO this is a good idea: show buddy info in thread list -->
 							<div>
-								<BuddyAvatar v-if="thread.selected_buddy" :style="{
+								<BuddyAvatar v-if="thread.mode === 'persona' && thread.selected_buddy" :style="{
 									visibility:
 										thread.latest_message?.role !== 'user' ? 'visible' : 'hidden',
 								}" :buddy="thread.selected_buddy" size="base" />
-								<Avatar v-else size="base">
+								<Avatar v-else class="mr-1 text-md font-bold" size="base">
 									<AvatarFallback>AI</AvatarFallback>
 								</Avatar>
 								<Avatar v-if="thread.latest_message?.role === 'user'">

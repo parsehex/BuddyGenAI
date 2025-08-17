@@ -17,7 +17,8 @@ const other = {
 	},
 	koboldUrl: (subPath?: string) => {
 		const store = useAppStore();
-		let p = store.settings.koboldcpp_host;
+		let p = store.settings.koboldcpp_host || '';
+		if (!p) return '';
 		if (subPath) {
 			subPath = subPath.trim();
 			if (subPath[0] !== '/') subPath = '/' + subPath;
