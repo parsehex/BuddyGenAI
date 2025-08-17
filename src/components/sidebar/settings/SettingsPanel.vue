@@ -15,6 +15,9 @@ import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
 import AIProviderOptions from './AIProviderOptions/Main.vue';
+import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
+import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
+import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 
 const store = useAppStore();
 
@@ -25,6 +28,11 @@ const error = ref('');
 const reloadPage = () => {
 	window.location.reload();
 };
+
+const resetApp = async () => {
+	await clearDatabase();
+	window.location.reload();
+}
 </script>
 <template>
 	<!--
@@ -51,10 +59,15 @@ const reloadPage = () => {
 			<STTOptions v-if="!isCloud" />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
-			<Button type="button" @click="reloadPage" class="px-4 py-2 rounded-md" variant="ghost">Reload Page</Button>
+			<div class="flex items-center">
+				<Button type="button" @click="reloadPage" class="px-4 py-2 rounded-md" variant="ghost">Reload Page</Button>
+				<ExportDatabaseButton />
+				<ImportDatabaseButton />
+			</div>
 			<RouterLink to="/credits">BuddyGenAI Credits / Licenses</RouterLink>
 			<DevOnly>
-				<Button type="button" class="px-4 py-2 mt-2 rounded-md" variant="destructive">Reset & Close App</Button>
+				<Button @click="resetApp" type="button" class="px-4 py-2 mt-2 rounded-md" variant="destructive">Reset & Close
+					App</Button>
 			</DevOnly>
 		</div>
 	</ScrollArea>

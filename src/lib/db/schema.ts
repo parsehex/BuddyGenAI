@@ -61,6 +61,16 @@ interface AppSetting {
 
 import Dexie from 'dexie';
 
+export const tableNames = [
+	'persona',
+	'chat_thread',
+	'chat_message',
+	'persona_version',
+	'app_settings',
+	'images',
+	'audio',
+];
+
 class AppDatabase extends Dexie {
   persona!: Dexie.Table<Persona, string>;
   chat_thread!: Dexie.Table<ChatThread, string>;
@@ -121,3 +131,19 @@ class AppDatabase extends Dexie {
 }
 
 export const db = new AppDatabase();
+
+export async function clearDatabase() {
+	await db.transaction('rw', db.tables, async () => {
+		for (const tableName of tableNames) {
+			const table = (db as any)[tableName];
+			if (table) {
+				await table.clear();
+				console.log(`Cleared table: ${tableName}`);
+			} else {
+				console.warn(
+					`Table '${tableName}' not found in database schema during clear.`
+				);
+			}
+		}
+	});
+}
