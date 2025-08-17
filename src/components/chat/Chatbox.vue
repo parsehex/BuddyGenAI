@@ -608,6 +608,12 @@ let audioChunks: BlobPart[] = [];
 const recording = ref(false);
 const loadingTranscript = ref(false);
 const startRecording = async () => {
+	toast({
+		variant: 'destructive',
+		title: 'Speech-to-Text is disabled',
+		description: 'Feature not working currently',
+	});
+	return;
 	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
 		console.log('getUserMedia not supported on your browser!');
 		return;
