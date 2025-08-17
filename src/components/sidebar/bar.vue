@@ -16,9 +16,9 @@ import { api } from '@/lib/api';
 import ChatServerStatus from './ChatServerStatus.vue';
 import BuddySelect from '../BuddySelect.vue';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger
 } from '@/components/ui/tooltip'
 import useMobile from '@/src/composables/useMobile';
 
@@ -101,17 +101,15 @@ const handleClickChat = () => {
 	window.location.href = '/';
 }
 </script>
-
 <template>
 	<Tabs v-model:model-value="modelValue">
 		<TabsList class="w-full dark:bg-gray-800 rounded-none">
 			<Tooltip>
 				<TooltipTrigger>
-					<img src="/assets/logo.png" class="hidden lg:block w-6 h-6 m-1 mx-2 cursor-pointer select-none" @click="handleClickChat" />
+					<img src="/assets/logo.png" class="hidden lg:block w-6 h-6 m-1 mx-2 cursor-pointer select-none"
+						@click="handleClickChat" />
 				</TooltipTrigger>
-				<TooltipContent>
-					Go to home page
-				</TooltipContent>
+				<TooltipContent> Go to home page </TooltipContent>
 			</Tooltip>
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
@@ -123,13 +121,11 @@ const handleClickChat = () => {
 			<TabsContent value="chat">
 				<div class="bg-background mb-1">
 					<ChatServerStatus v-if="store.settings.selected_provider_chat === 'koboldcpp'" />
-					<div class="flex w-full px-2 my-1 items-end">
-						<BuddySelect
-							@select="(id: any) => {
+					<div v-if="store.settings.selected_provider_chat" class="flex w-full px-2 my-1 items-end">
+						<BuddySelect @select="(id: any) => {
 							selectedBuddy = id;
 							doCreateThread();
-						}"
-						/>
+						}" />
 					</div>
 				</div>
 				<ScrollArea :class="[device.isMobile.value ? 'h-[30vh]' : 'h-screen']">
@@ -145,5 +141,4 @@ const handleClickChat = () => {
 		</div>
 	</Tabs>
 </template>
-
 <style></style>

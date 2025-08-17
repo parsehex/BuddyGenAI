@@ -18,7 +18,9 @@ import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import AllThreadsImages from '@/src/components/AllThreadsImages.vue';
 import { ScrollArea } from '@/src/components/ui/scroll-area';
 import { getImage } from '@/src/lib/api/images';
+import { useAppStore } from '@/src/stores/main';
 
+const store = useAppStore();
 const route = useRoute();
 const id = route.params.id as string;
 
@@ -137,7 +139,7 @@ const createThread = async () => {
 		<h2 class="text-xl font-bold mt-4 flex items-center justify-center">
 			Chats with {{ name }}
 			<Button
-				v-if="threads.length > 0"
+				v-if="threads.length > 0 && store.settings.selected_provider_chat"
 				type="button"
 				size="sm"
 				class="ml-4"
@@ -152,7 +154,7 @@ const createThread = async () => {
 		>
 			No chats with {{ name ? name : 'this buddy' }} yet.
 			<br />
-			<Button type="button" class="mt-2" @click="createThread">
+			<Button v-if="store.settings.selected_provider_chat" type="button" class="mt-2" @click="createThread">
 				Create Thread
 			</Button>
 		</div>

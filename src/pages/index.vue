@@ -178,7 +178,8 @@ const { skip_setup } = toRefs(store.settings);
 	</div>
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
 	<p v-if="buddies.length && !threads.length" class="text-center mt-4"> You have no chats yet. </p>
-	<div v-if="(buddies.length && !threads.length) || +skip_setup" class="mt-4 flex items-center justify-center">
+	<div v-if="store.settings.selected_provider_chat && (buddies.length && !threads.length) || +skip_setup"
+		class="mt-4 flex items-center justify-center">
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
 		<Select v-if="store.buddies.length > 0" class="my-2" @update:modelValue="
 			(id) => {
@@ -198,7 +199,7 @@ const { skip_setup } = toRefs(store.settings);
 		</Select>
 		<Button v-else type="button" @click="$router.push('/create-buddy')"> Create a Buddy </Button>
 	</div>
-	<FirstTimeSetup v-else-if="!buddies.length && !threads.length" />
+	<FirstTimeSetup v-else-if="(!buddies.length && !threads.length) || !store.settings.selected_provider_chat" />
 </template>
 <style lang="scss" scoped>
 //
