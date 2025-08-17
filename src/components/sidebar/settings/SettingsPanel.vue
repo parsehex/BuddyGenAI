@@ -57,7 +57,7 @@ const resetApp = async () => {
 			<STTOptions v-if="sttProvider && sttProvider !== '0'" />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
-			<div class="flex items-center">
+			<div class="mb-2 flex items-center">
 				<Button type="button" @click="reloadPage" class="px-4 py-2 rounded-md" variant="ghost">Reload Page</Button>
 				<ExportDatabaseButton />
 				<ImportDatabaseButton />

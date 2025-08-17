@@ -4,7 +4,7 @@ BuddyGenAI is an app made to create and interact with virtual buddies, with opti
 
 In the app, you name your buddies as well as give them a description to influence how they chat with you. When you're connected to image AI,, you can generate profile pictures for your buddies which display in chat.
 
-This is a passion project of mine to create an experience that emulates having friends to talk to and hang out with. The above projects and several others have helped make this possible and I couldn't have made this without their work.
+This is a passion project of mine to create an experience that emulates having friends to talk to and hang out with. There are many projects and their work that have made this possible, so I encourage checking out the [licenses folder](./licenses/) as well as in-app, Settings tab -> **BuddyGenAI Credits / Licenses**.
 
 I hope others find this project interesting and/or enjoyable as well.
 
