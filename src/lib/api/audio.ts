@@ -11,7 +11,5 @@ export async function getAudio(id: string) {
 		throw new Error('Audio not found');
 	}
 
-	let str = audio.data as string;
-	console.log(str);
-	return str;
+	return blobToBase64(audio.data);
 }

@@ -4,6 +4,8 @@ import { select } from '../sql';
 const { dbGet } = useElectron();
 
 export async function getImage(id: string) {
+	if (id.includes('data:')) return id;
+
 	const sqlImage = select('images', ['*'], { id });
 	const image = (await dbGet(sqlImage[0], sqlImage[1]));
 

@@ -53,7 +53,7 @@ export function isDevMode() {
 
 export function playAudio(url: string) {
 	const audio = new Audio(url);
-	audio.playbackRate = 1.15;
+	audio.playbackRate = 1.05;
 	audio.play();
 }
 
@@ -62,13 +62,31 @@ export function blobToArrayBuffer(blob: Blob): Promise<Buffer> {
 		const reader = new FileReader();
 		reader.onloadend = () => {
 			if (reader.result) {
-				resolve(reader.result as Buffer);
+				// @ts-ignore
+				resolve(reader.result);
 			} else {
 				reject(new Error('Failed to read blob as array buffer'));
 			}
 		};
 		reader.onerror = reject;
 		reader.readAsArrayBuffer(blob);
+	});
+}
+
+export function blobToBase64(blob: Blob): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		reader.onloadend = () => {
+			// @ts-ignore
+			resolve(reader.result);
+		};
+
+		reader.onerror = (error) => {
+			reject(error);
+		};
+
+		reader.readAsDataURL(blob);
 	});
 }
 
