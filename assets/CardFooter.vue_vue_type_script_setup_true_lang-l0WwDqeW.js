@@ -1,1 +1,0 @@
-import{d as o,o as r,z as t,aU as n,Y as c,e as l,ah as p}from"./index-i-lymLpW.js";const f=o({__name:"CardFooter",props:{class:{}},setup(e){const s=e;return(a,m)=>(r(),t("div",{class:c(l(p)("flex items-center p-6 pt-0",s.class))},[n(a.$slots,"default")],2))}});export{f as _};
