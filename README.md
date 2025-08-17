@@ -1,4 +1,4 @@
-# BuddyGenAI (in-progress Prototype)
+# BuddyGenAI (prototype)
 
 BuddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
 
@@ -8,57 +8,29 @@ This is a passion project of mine to create an experience that emulates having f
 
 I hope others find this project interesting and/or enjoyable as well.
 
-## Online Version
+[Go to the app here](https://app.buddygenai.com/)
 
-This is a new version which runs as a frontend-only app, supporting OpenRouter for chat-only and KoboldCpp for chat/image/TTS/STT.
-
-## Electron Version
-
-The original version embeds the following local projects within the app (mostly only CUDA support):
-
-- [llama.cpp](https://github.com/ggerganov/llama.cpp)
-- [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
-- [Piper](https://github.com/rhasspy/piper)
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+> ![NOTE] The original iteration of this app used Electron with embedded AI engines but I'm not updating it for now. The branch with that version in tact is [available here](https://github.com/parsehex/BuddyGenAI/tree/main).
 
 ## ✅ Features
 
 - Create, manage and chat with buddies 🤖
-- Generate profile pictures for your buddies
-- Hear buddies with text-to-speech
-- Speak messages to buddies with speech-to-text
-- Buddies can send images in chat 🖼️
-- Completely offline and private
-
-## ⚙️ Setup
-
-[Getting Started Instructions](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-started.md)
-
-BuddyGenAI is in pre-release stage and so the experience will be unstable at times. If you encounter any issues, please report them on the [issues page](https://github.com/parsehex/BuddyGenAI/issues).
-
-You may [check the releases page](https://github.com/parsehex/BuddyGenAI/releases) to get a pre-built version of the app, or follow the section below to build it yourself.
-
-**Note**: You'll need AI model files in order to use the app. These are not included in the app itself. You can find models that I recommend on [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md).
-
-## Troubleshooting
-
-**Chat keeps starting forever**
-
-This happens occasionally and I think it's a frontend issue. First, try pressing Ctrl+R to refresh the app. If that doesn't work, restarting the app should fix the issue.
+- [KoboldCpp](https://github.com/LostRuins/koboldcpp) integration
+  - Generate profile pictures for your buddies (or set them manually)
+  - Hear buddies with text-to-speech 🔊
+  - Speak messages to buddies with speech-to-text
+  - Buddies can send images in chat 🖼️ (experimental, off by default)
+- Can also use [OpenRouter](https://openrouter.ai/) or [WebLLM](https://webllm.mlc.ai/) (Chrome/Edge only) for chat
+- Completely offline and private: besides your AI provider, app data isn't sent anywhere
+  - PWA support is planned
 
 ## ❓ Support / Help
 
-If you find an issue with the app, please report it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help setting up the app or anything else, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
-
-## Build Guides
-
-- [Building on Windows for NVIDIA GPU](https://github.com/parsehex/BuddyGenAI/blob/main/docs/building_windows_nvidia.md)
-- Linux, Mac
-  - Instead of using the `cuda12` folder for the `*.cpp` projects, simply place a `koboldcpp` binary in the `binaries-{linux | darwin}` folder.
+If you find an issue with the app, please open an issue about it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help using or setting up the app, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
 
 ## Future Plans
 
-My overall goal with this is ease and simplicity for the user. While I am interested in LLMs and imagegen models, I wanted to make an app that is more about creating an interesting experience that's jargon-free and approachable to those with novice computer skills.
+My overall goal with this is ease and simplicity for the user. While I'm interested in LLMs and imagegen models, I wanted to make an app that's more about creating an interesting experience that's jargon-free (or -minimal) and approachable to those with novice computer skills. Of course there are better and more polished options as far as easy: [Jan](https://jan.ai/) or [LM Studio](https://lmstudio.ai/) are popular & easy interfaces to use chat models, but I wanted the full chat experience, plus making it myself so that I know how it works.
 
 Aside from overall cleaning up the project and improving the look of it, I have some ideas for larger features to improve quality or increase immersion:
 
@@ -74,16 +46,9 @@ Aside from overall cleaning up the project and improving the look of it, I have 
   - Or there could be an in-app notification about a message from a potential new Buddy (complete with a generated appearance if supported). Plenty of options to control the behavior.
 - Group Chats: Chat with multiple buddies at once.
 
-### Delayed Responses (Elaborated)
-
-This is something that I've thought would be a cool idea for a while, or something like it. The idea is that you/the user just sends message(s) to 1+ buddies without any of them responding until sometime later. Additionally, you'd have other Buddies messaging you back randomly.
-
-This feels like a good use for having the app generate Buddy Encounters. I feel like there's also room for cool ideas like generating "schedules" for Buddies each day which helps distate when they respond.
-
 ## Developer Notes
 
-- There are 2 `AppSettings.ts` files. One in `electron/` and one in `lib/api/`. The electron one is to get settings when running LlamaFile/SDCPP and so it doesn't do any saving of settings. The one in `lib/api/` is for the app UI and does save settings.
-  - Additionally, `stores/main.ts` includes a copy of the Settings interface and thus also needs updated when changes are made to `AppSettings.ts`.
+- I haven't fully deleted `electron/` and refactored away from
 - Apologies for the lack of testing and the overall messiness of the project.
   - Several refactors are needed.
     - Lots of duplicated code (AppSettings, anything else shared between electron/client)
@@ -99,6 +64,6 @@ If you'd like to contribute or otherwise help make this app, I look forward to h
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-Copyright (C) 2024 Thomas Mays
+Copyright (C) 2024-2025 Thomas Mays
 
 All AI Models are licensed under their respective licenses. See the [Licenses](./licenses/) folder for more details.
