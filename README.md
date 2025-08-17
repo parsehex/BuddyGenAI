@@ -30,6 +30,8 @@ I hope others find this project interesting and/or enjoyable as well.
 
 If you find an issue with the app, please open an issue about it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help using or setting up the app, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
 
+You're also welcome to join the [Discord server](https://discord.gg/wJ52aASf5b). As of now there isn't anything to it, but I'm happy to talk or offer support for the app.
+
 ## Future Plans
 
 My overall goal with this is ease and simplicity for the user. While I'm interested in LLMs and imagegen models, I wanted to make an app that's more about creating an interesting experience that's jargon-free (or -minimal) and approachable to those with novice computer skills. Of course there are better and more polished options as far as easy: [Jan](https://jan.ai/) or [LM Studio](https://lmstudio.ai/) are popular & easy interfaces to use chat models, but I wanted the full chat experience, plus making it myself so that I know how it works.
