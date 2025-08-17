@@ -9,7 +9,7 @@ import type {
 } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
-import type { Settings } from '../lib/api/AppSettings';
+import { AppSettings, type Settings } from '../lib/api/AppSettings';
 
 const lastFetchMap: Record<string, number> = {};
 function shouldGet(name: string, interval: number) {
@@ -20,6 +20,23 @@ function shouldGet(name: string, interval: number) {
 		return true;
 	}
 	return false;
+}
+
+interface KoboldVersionResult {
+	result: 'KoboldCpp';
+	version: string;
+	protected: boolean;
+	llm: boolean;
+	txt2img: boolean;
+	vision: boolean;
+	transcribe: boolean;
+	multiplayer: boolean;
+	websearch: boolean;
+	tts: boolean;
+	embeddings: boolean;
+	savedata: boolean;
+	admin: 0;
+	guidance: boolean;
 }
 
 let firstRun = true;
@@ -38,12 +55,8 @@ export const useAppStore = defineStore('app', () => {
 	const buddies = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
-	const lastKoboldVersionResult = ref({} as any);
+	const lastKoboldVersionResult = ref({} as KoboldVersionResult);
 	const lastKoboldModelResult = ref('');
-
-	const isExternalProvider = computed(
-		() => settings.value.selected_provider_chat === 'cloud'
-	);
 
 	onBeforeMount(async () => {
 		const [cM, iM, tM, wM, p, s, t] = await Promise.all([
@@ -253,8 +266,9 @@ export const useAppStore = defineStore('app', () => {
 			const data = await res.json();
 			if (data.llm) chatServerRunning.value = true;
 			else chatServerRunning.value = false;
-			lastKoboldVersionResult.value = data;
+			lastKoboldVersionResult.value = { ...data };
 		} catch (err: any) {
+			lastKoboldVersionResult.value = {} as any;
 			chatServerRunning.value = false;
 		}
 	};
@@ -267,6 +281,45 @@ export const useAppStore = defineStore('app', () => {
 			lastKoboldModelResult.value = 'N/A';
 		}
 	};
+
+	watch(
+		() => chatServerRunning.value,
+		async () => {
+			if (chatServerStarting.value && chatServerRunning.value) {
+				chatServerStarting.value = false;
+			}
+			updateKoboldModel();
+		}
+	);
+	onBeforeMount(async () => {
+		updateChatServerRunning();
+		updateKoboldModel();
+	});
+
+	const intervalIdKey = 'refreshServerStatusIntervalId';
+	const doRefreshServerStatus = async () => {
+		try {
+			await AppSettings.waitForLoaded();
+			if (chatServerStarting.value) {
+				return;
+			}
+			await updateChatServerRunning();
+		} catch (error) {
+			console.error('Error refreshing server status:', error);
+			if ((window as any)[intervalIdKey]) {
+				clearInterval((window as any)[intervalIdKey]);
+				(window as any)[intervalIdKey] = null;
+			}
+		}
+	};
+
+	if ((window as any)[intervalIdKey]) {
+		clearInterval((window as any)[intervalIdKey]);
+		(window as any)[intervalIdKey] = null;
+	}
+
+	doRefreshServerStatus();
+	(window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 5000);
 
 	const imgGenerating = ref(false);
 	const updateImgGenerating = (val: boolean) => {
@@ -286,38 +339,6 @@ export const useAppStore = defineStore('app', () => {
 
 	const proceed = ref(false);
 
-	const isModelsSetup = computed(() => {
-		if (proceed.value) return true;
-
-		if (isExternalProvider.value) {
-			return !!settings.value.openrouter_api_key;
-		}
-		const hasModelDir = !!settings.value.local_model_directory;
-		const hasChatModel = !!settings.value.selected_model_chat;
-		const hasImageModel = !!settings.value.selected_model_image;
-		const hasTTSModel = !!settings.value.selected_model_tts;
-		const hasWhisperModel = !!settings.value.selected_model_whisper;
-		return (
-			hasModelDir &&
-			hasChatModel &&
-			hasImageModel &&
-			hasTTSModel &&
-			hasWhisperModel
-		);
-	});
-
-	const modelProvider = computed({
-		get: () => {
-			// should be the same for both
-			return settings.value.selected_provider_chat;
-		},
-		set: (value) => {
-			settings.value.selected_provider_chat = value;
-			settings.value.selected_provider_image = value;
-			saveSettings(settings.value);
-		},
-	});
-
 	return {
 		selectedBuddyId,
 		threadMessages,
@@ -330,7 +351,6 @@ export const useAppStore = defineStore('app', () => {
 		settings,
 		threads,
 		newHere,
-		modelProvider,
 		lastKoboldVersionResult,
 		lastKoboldModelResult,
 
@@ -345,9 +365,7 @@ export const useAppStore = defineStore('app', () => {
 		getTTSModelPath,
 		getWhisperModelPath,
 
-		isExternalProvider,
 		proceed,
-		isModelsSetup,
 
 		chatServerRunning,
 		chatServerStarting,

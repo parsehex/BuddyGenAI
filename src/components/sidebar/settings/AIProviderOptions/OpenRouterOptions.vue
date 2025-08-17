@@ -14,7 +14,7 @@ const updateKey = async () => {
 };
 </script>
 <template>
-	<OptionSection label="API Key" labelName="api-key" orientation="vertical">
+	<OptionSection label="OpenRouter API Key" labelName="api-key" orientation="vertical">
 		<Input v-model="apiKey" @blur="updateKey()" id="api-key"
 			class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
 		<ConnectOpenRouterBtn v-if="!apiKey" />

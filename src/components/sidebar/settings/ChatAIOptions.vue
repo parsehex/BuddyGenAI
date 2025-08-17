@@ -21,7 +21,7 @@ import ImportModel from '../../ImportModel.vue';
 
 const store = useAppStore();
 
-const isCloud = computed(() => store.settings.selected_provider_chat === 'cloud')
+const isOpenRouter = computed(() => store.settings.selected_provider_chat === 'openrouter')
 
 const updateChatModel = async (model: string) => {
 	if (store.settings.selected_model_chat === model) return;
@@ -38,7 +38,7 @@ const updateStreaming = async (boolVal: boolean) => {
 	<AccordionItem value="chat-ai-options">
 		<AccordionTrigger>Chat</AccordionTrigger>
 		<AccordionContent>
-			<OptionSection v-if="isCloud" label="Chat Model" labelName="chat-model" orientation="vertical">
+			<OptionSection v-if="isOpenRouter" label="Chat Model" labelName="chat-model" orientation="vertical">
 				<div class="flex">
 					<ImportModel type="chat" />
 					<Select :default-value="store.settings.selected_model_chat" @update:model-value="updateChatModel"

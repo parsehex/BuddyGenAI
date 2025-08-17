@@ -34,7 +34,7 @@ import {
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
 import { attemptToFixJson, delay, isDevMode } from '@/src/lib/utils';
-import { makeAndReadTTS } from '@/src/lib/ai/tts';
+import { getSelectedVoice, makeAndReadTTS } from '@/src/lib/ai/tts';
 import useWhisper from '@/src/composables/useWhisper';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
@@ -160,8 +160,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				lastMessage.content = lastMessage.content.replace(noteRegex, '').trim();
 			}
 
-			const ttsModel = store.getTTSModelPath(currentBuddy.value?.id || '');
-			let ttsDataToSave = (await makeAndReadTTS(lastMessage.content, ttsModel)) || '';
+			const ttsVoice = getSelectedVoice(currentBuddy.value?.id || '');
+			let ttsDataToSave = (await makeAndReadTTS(lastMessage.content, ttsVoice)) || '';
 			if (ttsDataToSave) {
 				const id = v4();
 				const sqlAudioAdd = insert('audio', { id, data: ttsDataToSave });
@@ -588,18 +588,12 @@ onBeforeMount(async () => {
 });
 
 const canSend = computed(() => {
-	if (!store.isExternalProvider && !store.chatServerRunning) {
-		return false;
-	}
-	if (store.isExternalProvider && (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo')) return false;
+	if (!isFeatureAvailable('chat')) return false;
 	return !!input.value;
 });
 
 const canReload = computed(() => {
-	if (!store.isExternalProvider && !store.chatServerRunning) {
-		return false;
-	}
-	if (store.isExternalProvider && (!store.settings.openrouter_api_key || store.settings.openrouter_api_key === 'demo')) return false;
+	if (!isFeatureAvailable('chat')) return false;
 	return messages.value.length >= 2 && !isLoading.value;
 });
 
@@ -723,10 +717,8 @@ const device = useMobile();
 				</CollapsibleContent>
 			</Collapsible>
 			<div class="flex flex-col gap-1 my-1" id="chatbox">
-				<Message v-for="m in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
 				<Message v-for="(m, i) in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
 					:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
-					@clearThread="refreshMessages" />
 					@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1" />
 			</div>
 		</ScrollArea>

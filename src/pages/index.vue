@@ -36,8 +36,6 @@ const {
 	updateBuddies,
 	updateSettings,
 	updateThreads,
-	getChatModelPath,
-	getNGpuLayers,
 } = useAppStore();
 const { buddies, settings, threads } = storeToRefs(store);
 
@@ -133,20 +131,8 @@ const startChat = async (id: string) => {
 	router.push(`/chat/${newThread.id}`);
 };
 
-const canSkipSetup = computed(() => {
-	if (!store.settings.selected_provider_chat) return false;
-	if (store.settings.selected_provider_chat === 'cloud' && !store.settings.openrouter_api_key) return false;
-	if (!store.settings.user_name) return false;
-	return true;
-})
-
-const handleSkipSetup = () => {
-	store.settings.skip_setup = true;
-	store.saveSettings(store.settings);
-};
-const {skip_setup} = toRefs(store.settings);
+const { skip_setup } = toRefs(store.settings);
 </script>
-
 <template>
 	<div v-if="threads.length" class="flex flex-col items-center px-4">
 		<!-- replace this with logo + BuddyGen AI in left corner -->
@@ -157,27 +143,16 @@ const {skip_setup} = toRefs(store.settings);
 			<h2 class="text-lg">Your Chats</h2>
 			<div class="flex flex-col items-center gap-1">
 				<ScrollArea class="h-screen pb-20">
-					<Card
-						v-for="thread in sortedThreads"
-						:key="thread.id"
-						class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-1"
-					>
+					<Card v-for="thread in sortedThreads" :key="thread.id"
+						class="w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-1">
 						<!-- sort by latest first -->
-						<RouterLink
-							:to="`/chat/${thread.id}`"
-							class="w-full h-full flex items-center justify-start p-4"
-						>
+						<RouterLink :to="`/chat/${thread.id}`" class="w-full h-full flex items-center justify-start p-4">
 							<!-- TODO this is a good idea: show buddy info in thread list -->
 							<div>
-								<BuddyAvatar
-									v-if="thread.selected_buddy"
-									:style="{
-										visibility:
-											thread.latest_message?.role !== 'user' ? 'visible' : 'hidden',
-									}"
-									:buddy="thread.selected_buddy"
-									size="base"
-								/>
+								<BuddyAvatar v-if="thread.selected_buddy" :style="{
+									visibility:
+										thread.latest_message?.role !== 'user' ? 'visible' : 'hidden',
+								}" :buddy="thread.selected_buddy" size="base" />
 								<Avatar v-else size="base">
 									<AvatarFallback>AI</AvatarFallback>
 								</Avatar>
@@ -187,23 +162,13 @@ const {skip_setup} = toRefs(store.settings);
 							</div>
 							<div class="ml-2">
 								<p class="flex items-baseline">
-									<span>
-										{{ thread.name }}
-									</span>
-									<span class="text-xs text-gray-500 italic ml-2">
-										{{ getMessageTime(thread) }}
-									</span>
+									<span> {{ thread.name }} </span>
+									<span class="text-xs text-gray-500 italic ml-2"> {{ getMessageTime(thread) }} </span>
 								</p>
-								<p
-									v-if="thread.latest_message"
-									class="text-sm mt-2"
-									:style="{
-										visibility:
-											thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
-									}"
-								>
-									{{ getMessageContent(thread) }}
-								</p>
+								<p v-if="thread.latest_message" class="text-sm mt-2" :style="{
+									visibility:
+										thread.latest_message.role !== 'system' ? 'visible' : 'hidden',
+								}"> {{ getMessageContent(thread) }} </p>
 							</div>
 						</RouterLink>
 					</Card>
@@ -211,46 +176,30 @@ const {skip_setup} = toRefs(store.settings);
 			</div>
 		</div>
 	</div>
-
 	<!-- TODO if there are no threads or buddies, offer to chat with AI Assistant or create a buddy -->
-	<p v-if="buddies.length && !threads.length" class="text-center mt-4">
-		You have no chats yet.
-	</p>
+	<p v-if="buddies.length && !threads.length" class="text-center mt-4"> You have no chats yet. </p>
 	<div v-if="(buddies.length && !threads.length) || +skip_setup" class="mt-4 flex items-center justify-center">
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
-		<Select
-			v-if="store.buddies.length > 0"
-			class="my-2"
-			@update:modelValue="
-				(id) => {
-					startChat(id);
-				}
-			"
-		>
+		<Select v-if="store.buddies.length > 0" class="my-2" @update:modelValue="
+			(id) => {
+				startChat(id);
+			}
+		">
 			<SelectTrigger class="max-w-[10vw]">
 				<SelectValue placeholder="Chat with..." />
 			</SelectTrigger>
 			<SelectContent>
 				<SelectLabel>Buddy</SelectLabel>
 				<SelectGroup>
-					<SelectItem
-						v-for="buddy in store.buddies"
-						:key="buddy.id"
-						:value="buddy.id"
-						@click="startChat(buddy.id)"
-					>
-						{{ buddy.name }}
-					</SelectItem>
+					<SelectItem v-for="buddy in store.buddies" :key="buddy.id" :value="buddy.id" @click="startChat(buddy.id)"> {{
+						buddy.name }} </SelectItem>
 				</SelectGroup>
 			</SelectContent>
 		</Select>
-		<Button v-else type="button" @click="$router.push('/create-buddy')">
-			Create a Buddy
-		</Button>
+		<Button v-else type="button" @click="$router.push('/create-buddy')"> Create a Buddy </Button>
 	</div>
 	<FirstTimeSetup v-else-if="!buddies.length && !threads.length" />
 </template>
-
 <style lang="scss" scoped>
 //
 </style>

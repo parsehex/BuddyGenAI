@@ -15,13 +15,16 @@ import ImageAIOptions from './ImageAIOptions.vue';
 import TTSOptions from './TTSOptions.vue';
 import STTOptions from './STTOptions.vue';
 import AIProviderOptions from './AIProviderOptions/Main.vue';
+import { isFeatureAvailable } from '@/src/lib/ai/support';
 import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
 import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 
 const store = useAppStore();
-
-const isCloud = computed(() => store.modelProvider === 'cloud');
+const chatProvider = computed(() => store.settings.selected_provider_chat);
+const imageProvider = computed(() => store.settings.selected_provider_image);
+const ttsProvider = computed(() => store.settings.selected_provider_tts);
+const sttProvider = computed(() => store.settings.selected_provider_stt);
 
 const error = ref('');
 
@@ -53,10 +56,11 @@ const resetApp = async () => {
 		<Accordion class="px-2" type="multiple" collapsible>
 			<GeneralOptions />
 			<AIProviderOptions />
-			<ChatAIOptions />
-			<ImageAIOptions v-if="!isCloud" />
-			<TTSOptions v-if="!isCloud" />
-			<STTOptions v-if="!isCloud" />
+			<!-- TODO conditional based on isFeatureAvailable -->
+			<ChatAIOptions v-if="chatProvider && chatProvider !== '0'" />
+			<ImageAIOptions v-if="imageProvider && imageProvider !== '0'" />
+			<TTSOptions v-if="ttsProvider && ttsProvider !== '0'" />
+			<STTOptions v-if="sttProvider && sttProvider !== '0'" />
 		</Accordion>
 		<div class="mt-4 flex flex-col items-center">
 			<div class="flex items-center">

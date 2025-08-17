@@ -1,7 +1,10 @@
 import { useAppStore } from '@/src/stores/main';
-import type { AppSettingsKeys, Settings } from '../api/AppSettings';
-
-type FeatureType = 'chat' | 'image' | 'tts' | 'stt';
+import {
+	AppSettings,
+	type AppSettingsKeys,
+	type Settings,
+} from '../api/AppSettings';
+import type { FeatureType } from '../api/types-api';
 
 interface FeatureRequirements {
 	requiredSettings: AppSettingsKeys[];
@@ -13,8 +16,9 @@ const featureRequirements: Record<FeatureType, FeatureRequirements> = {
 		requiredSettings: ['selected_model_chat', 'selected_provider_chat'],
 		validateFn: (settings) => {
 			if (!settings.selected_provider_chat) return false;
-			if (settings.selected_provider_chat === 'local') {
-				return !!settings.koboldcpp_host;
+			if (settings.selected_provider_chat === 'koboldcpp') {
+				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
+				return !!settings.koboldcpp_host && lastKoboldVersion.llm !== false;
 			}
 			return !!settings.openrouter_api_key;
 		},
@@ -23,42 +27,46 @@ const featureRequirements: Record<FeatureType, FeatureRequirements> = {
 		requiredSettings: ['selected_model_image', 'selected_provider_image'],
 		validateFn: (settings) => {
 			if (!settings.selected_provider_image) return false;
-			if (settings.selected_provider_image === 'local') {
-				return !!settings.koboldcpp_host;
+			if (settings.selected_provider_image === 'koboldcpp') {
+				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
+				return !!settings.koboldcpp_host && lastKoboldVersion.txt2img !== false;
 			}
-			return false;
+			return false; // koboldcpp only
 		},
 	},
 	tts: {
-		requiredSettings: ['selected_model_tts', 'selected_provider_tts'],
+		requiredSettings: ['selected_provider_tts'],
 		validateFn: (settings) => {
 			if (!settings.selected_provider_tts) return false;
-			if (settings.selected_provider_image === 'local') {
-				return !!settings.koboldcpp_host;
+			if (settings.selected_provider_image === 'koboldcpp') {
+				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
+				return !!settings.koboldcpp_host && lastKoboldVersion.tts !== false;
 			}
-			return !!settings.selected_model_tts;
+			return false; // koboldcpp only
 		},
 	},
 	stt: {
-		requiredSettings: ['selected_model_whisper', 'selected_provider_stt'],
+		requiredSettings: ['selected_provider_stt'],
 		validateFn: (settings) => {
 			if (!settings.selected_provider_stt) return false;
-			if (settings.selected_provider_image === 'local') {
-				return !!settings.koboldcpp_host;
+			if (settings.selected_provider_image === 'koboldcpp') {
+				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
+				return !!settings.koboldcpp_host && lastKoboldVersion.transcribe !== false;
 			}
-			return !!settings.selected_model_whisper;
+			return false; // koboldcpp only
 		},
 	},
 };
-const store = useAppStore();
 
 export function isFeatureAvailable(feature: FeatureType): boolean {
 	const requirements = featureRequirements[feature];
 	if (!requirements) return false;
 
+	const store = useAppStore();
+
 	// Check if all required settings have non-empty values
 	const hasRequiredSettings = requirements.requiredSettings.every((key) => {
-		const value = store.settings[key];
+		const value = AppSettings.get(key as string);
 		return value !== undefined && value !== '' && value !== '0';
 	});
 

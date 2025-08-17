@@ -22,6 +22,16 @@ import BuddyTagsInput from './BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
 import { getImage } from '../lib/api/images';
+import { getVoices } from '../lib/ai/tts';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
+} from '@/components/ui/select';
 
 // NOTE this component used to double as the First Time Experience and the Buddy Creator, but now is only used for the Create Buddy page
 
@@ -147,33 +157,7 @@ const acceptBuddy = async () => {
 	acceptedBuddyDesc.value = buddyDescription;
 	keywordsPopover.value = false;
 	isSaving.value = false;
-
-	// TODO temporary
-	handleSave();
 };
-
-const { pickDirectory, verifyModelDirectory, openModelsDirectory } =
-	useElectron();
-const openModelDirectory = () => {
-	if (!openModelsDirectory) return console.error('Electron not available');
-	openModelsDirectory();
-};
-const pickModelDirectory = async () => {
-	if (!pickDirectory) return console.error('Electron not available');
-
-	const dir = await verifyModelDirectory();
-	if (!dir) {
-		throw new Error('Invalid model directory');
-	}
-	settings.local_model_directory = dir;
-
-	await updateModels();
-};
-onMounted(() => {
-	if (!settings.local_model_directory) {
-		pickModelDirectory();
-	}
-});
 
 const handleSave = async () => {
 	if (
@@ -287,65 +271,55 @@ const handleProfilePicUpload = (event: Event) => {
 		reader.readAsDataURL(input.files[0]);
 	}
 };
-</script>
 
+const createBtnLabel = computed(() => buddies.length ? 'Create a Buddy' : 'Create your first Buddy')
+const imgProvider = computed(() => store.settings.selected_provider_image === '0' ? '' : store.settings.selected_provider_image);
+
+const buddyVoice = ref('');
+const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
+const availVoices = ref(['']);
+onMounted(() => {
+	availVoices.value = [...getVoices()];
+});
+</script>
 <template>
 	<ScrollArea class="h-screen">
 		<div class="flex flex-col items-center w-full md:w-5/6 mx-auto">
 			<!-- idea: pre-generate roster of buddy profile pics and swap their avatar pics -->
-			<img
-				v-if="store.newHere"
-				class="w-[50px]"
-				src="/assets/logo.png"
-				alt="BuddyGen Logo"
-			/>
-			<RouterLink
-				class="text-xl font-bold"
-				to="/"
-			>
+			<img v-if="store.newHere" class="w-[50px]" src="/assets/logo.png" alt="BuddyGen Logo" />
+			<RouterLink class="text-xl font-bold" to="/">
 				<AppTitle :new-here="store.newHere" />
 			</RouterLink>
-
-			<Card
-				class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4"
-			>
+			<Card class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-4">
 				<CardContent class="flex flex-col items-center">
 					<!-- initial Buddy setup (name, description) -->
 					<Card v-if="!acceptedBuddy" class="mt-2 p-2 w-full">
-						<!-- TODO starters -->
-						<!-- require user name first? to get buddy suggestions -->
-						<!-- ${userName} would like to talk to a buddy.\n\nYour task is to list names of buddies which the user might want to talk to.\nRespond with a valid JSON array of strings. -->
 						<CardContent class="flex flex-col items-center">
-							<h2 class="text-2xl text-center font-bold">
-								{{ buddies.length ? 'Create a Buddy' : 'Create your first Buddy' }}
-							</h2>
-							<!-- TODO button to randomize -->
-							<Input
-								v-model="buddyName"
-								class="my-4 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
-								placeholder="Name"
-							/>
+							<h2 class="text-2xl text-center font-bold"> {{ createBtnLabel }} </h2>
+							<Input v-model="buddyName" class="my-4 p-2 border border-gray-300 dark:border-gray-700 rounded w-1/2"
+								placeholder="Name" />
 							<div class="flex flex-col items-center space-x-2 w-full mt-4">
 								<!-- add tooltip with tips on good values -->
-								<Label class="block text-lg text-center font-bold" for="buddy-keywords">
-									Characteristics / Description
+								<Label class="block text-lg text-center font-bold" for="buddy-keywords"> Characteristics / Description
 								</Label>
-								<p class="text-sm text-gray-300 text-center mb-1">
-									These affect how {{ buddyName || 'your Buddy' }} talks with you.
-								</p>
-								<BuddyTagsInput
-									type="create"
-									:buddyName="buddyName"
-									:buddyKeywords="buddyKeywords"
-									:updateBuddyKeywords="
-										(keywords) => (buddyKeywords = keywords.join(', '))
-									"
-								/>
-
+								<p class="text-sm text-gray-300 text-center mb-1"> These affect how {{ buddyName || 'your Buddy' }}
+									talks with you. </p>
+								<BuddyTagsInput type="create" :buddyName="buddyName" :buddyKeywords="buddyKeywords"
+									:updateBuddyKeywords="(keywords) => (buddyKeywords = keywords.join(', '))
+										" />
+								<Select v-if="ttsEnabled" v-model="buddyVoice" id="buddy-voice">
+									<SelectTrigger :title="buddyVoice">
+										<SelectValue :placeholder="`Select a TTS voice for ${buddyName}`" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Voices</SelectLabel>
+											<SelectItem v-for="voice in availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
 								<div>
-									<Button @click="acceptBuddy()" class="mt-4 p-2 rounded">
-										Create Buddy
-									</Button>
+									<Button @click="acceptBuddy()" class="mt-4 p-2 rounded"> Create Buddy </Button>
 									<Spinner v-if="isSaving" />
 								</div>
 							</div>
@@ -354,59 +328,34 @@ const handleProfilePicUpload = (event: Event) => {
 					<!-- Buddy image / appearance options -->
 					<Card v-else class="mt-4 p-2 w-full">
 						<CardContent>
-							<h2 v-if="store.newHere" class="text-lg mt-4 text-center">
-								{{ `Customize ${buddyName || 'your buddy'}'s appearance` }}
-							</h2>
+							<h2 v-if="store.newHere" class="text-lg mt-4 text-center"> {{ `Customize ${buddyName || 'your buddy'}'s
+								appearance` }} </h2>
 							<p class="my-2 text-center">
 								<span class="text-lg">{{ buddyName }}</span>
 							</p>
 							<div class="flex flex-col items-center">
-								<BuddyAvatar
-									v-if="acceptedBuddy && newBuddy"
-									:buddy="newBuddy"
-									:no-default="true"
-									size="lg"
-									class="text-3xl"
-								/>
-								<p
-									class="text-sm text-gray-500 select-none"
-									v-if="acceptedBuddy && newBuddy"
-								>
-									Images are created using AI and may have unexpected results.
-								</p>
+								<BuddyAvatar v-if="acceptedBuddy && newBuddy" :buddy="newBuddy" :no-default="true" size="lg"
+									class="text-3xl" />
+								<p class="text-sm text-gray-500 select-none" v-if="acceptedBuddy && newBuddy && imgProvider"> Images are
+									created using AI and may have unexpected results. </p>
 								<div class="flex flex-col items-center my-2">
 									<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
 									<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
 										class="w-full max-w-xs" />
 								</div>
-								<BuddyAppearanceOptions
-									v-if="acceptedBuddy && newBuddy"
-									:buddy="newBuddy"
-									:profile-pic-prompt="profilePicturePrompt"
-									@update-profile-pic-prompt="profilePicturePrompt = $event"
+								<BuddyAppearanceOptions v-if="acceptedBuddy && newBuddy && imgProvider" :buddy="newBuddy"
+									:profile-pic-prompt="profilePicturePrompt" @update-profile-pic-prompt="profilePicturePrompt = $event"
 									@refresh-profile-picture="refreshProfilePicture"
 									v-model:appearance-options="generatedAppearanceOptions"
-									v-model:selected-appearance-options="selectedAppearanceOptions"
-								/>
-
+									v-model:selected-appearance-options="selectedAppearanceOptions" />
+								<Spinner v-if="updatingProfilePicture" />
 								<Progress v-if="gen" :model-value="prog * 100" class="mt-2" />
-								<Button
-									@click="refreshProfilePicture"
-									class="mt-4 p-2 bg-blue-500 text-white rounded"
-								>
-									New Profile Picture
-								</Button>
+								<Button v-if="imgProvider" @click="refreshProfilePicture"
+									class="mt-4 p-2 bg-blue-500 text-white rounded"> New Profile Picture </Button>
 							</div>
 						</CardContent>
 					</Card>
-
-					<Button
-						v-if="acceptedBuddy"
-						@click="handleSave"
-						class="mt-4 p-2 success rounded"
-					>
-						Save
-					</Button>
+					<Button v-if="acceptedBuddy" @click="handleSave" class="mt-4 p-2 success rounded"> Save </Button>
 				</CardContent>
 			</Card>
 		</div>

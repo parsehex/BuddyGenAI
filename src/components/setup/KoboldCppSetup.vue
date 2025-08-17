@@ -64,7 +64,7 @@ async function testConnection() {
     };
     version.value = data.version;
 
-    store.settings.selected_provider_chat = 'local';
+    store.settings.selected_provider_chat = 'koboldcpp';
     store.settings.koboldcpp_host = hostInput.value;
     await AppSettings.saveSettings();
 

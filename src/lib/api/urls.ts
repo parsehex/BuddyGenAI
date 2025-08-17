@@ -29,11 +29,11 @@ const other = {
 	llamacppServerUrl: async () => {
 		const store = useAppStore();
 		switch (store.settings.selected_provider_chat) {
-			case 'cloud':
+			case 'openrouter':
 				return 'https://openrouter.ai/api/v1/chat/completions';
-			case 'local':
+			case 'koboldcpp':
 				return store.settings.koboldcpp_host + '/v1/chat/completions';
-			case '':
+			case '0':
 				return '';
 		}
 	},

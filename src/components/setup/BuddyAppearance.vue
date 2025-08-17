@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { useAppStore } from '@/stores/main';
 import type { AppearanceCategory } from '@/lib/ai/appearance-options';
 import Spinner from '../Spinner.vue';
@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import BuddyAppearanceOptions from '../BuddyAppearanceOptions.vue';
 import BuddyAvatar from '../BuddyAvatar.vue';
 import { getImage } from '@/src/lib/api/images';
-import { isFeatureAvailable } from '@/lib/ai/support';
 
 const props = defineProps({
 	newBuddy: {
@@ -129,7 +128,7 @@ const handleSave = async () => {
 
 defineEmits(['complete']);
 
-const imgGen = isFeatureAvailable('image');
+const imgProvider = computed(() => store.settings.selected_provider_image === '0' ? '' : store.settings.selected_provider_image);
 </script>
 <template>
 	<Card class="mt-4 p-2 w-full">
@@ -141,18 +140,18 @@ const imgGen = isFeatureAvailable('image');
 			</p>
 			<div class="flex flex-col items-center">
 				<BuddyAvatar v-if="newBuddy" :buddy="newBuddy" :no-default="true" size="lg" class="text-3xl" />
-				<p v-if="imgGen && newBuddy" class="text-sm text-gray-500 select-none"> Images are created using AI and may have
-					unexpected results. </p>
+				<p v-if="newBuddy && imgProvider" class="text-sm text-gray-500 select-none"> Images are created using AI and may
+					have unexpected results. </p>
 				<div class="flex flex-col items-center my-2">
 					<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
 					<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
 						class="w-full max-w-xs" />
 				</div>
-				<BuddyAppearanceOptions v-if="imgGen && newBuddy" :buddy="newBuddy" :profile-pic-prompt="profilePicturePrompt"
-					@update-profile-pic-prompt="profilePicturePrompt = $event" @refresh-profile-picture="refreshProfilePicture"
-					v-model:appearance-options="generatedAppearanceOptions"
+				<BuddyAppearanceOptions v-if="newBuddy && imgProvider" :buddy="newBuddy"
+					:profile-pic-prompt="profilePicturePrompt" @update-profile-pic-prompt="profilePicturePrompt = $event"
+					@refresh-profile-picture="refreshProfilePicture" v-model:appearance-options="generatedAppearanceOptions"
 					v-model:selected-appearance-options="selectedAppearanceOptions" />
-				<Spinner v-if="imageLoading" />
+				<Spinner v-if="updatingProfilePicture" />
 				<Progress v-if="imageLoading && progress > 0" :model-value="progress * 100" class="mt-2" />
 				<Button @click="refreshProfilePicture" class="mt-4 p-2 bg-blue-500 text-white rounded"> New Profile Picture
 				</Button>

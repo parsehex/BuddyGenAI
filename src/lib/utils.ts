@@ -48,6 +48,7 @@ export function textToHslColor(t: string, s: number, l: number) {
 }
 
 export function isDevMode() {
+	// @ts-ignore
 	return process.env.NODE_ENV === 'development' || import.meta.env.DEV;
 }
 
@@ -111,7 +112,6 @@ export function attemptToFixJson(
 	const hasClosingBracket = json.includes(closeBracket);
 	const hasBothBrackets = hasOpeningBracket && hasClosingBracket;
 	const firstIsOpeningBracket = json[0] === openBracket;
-	const lastIsClosingBracket = json[json.length - 1] === closeBracket;
 
 	if (!hasBothBrackets) {
 		// hail mary

@@ -1,116 +1,17 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { ref, onBeforeMount, watch, computed } from 'vue';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import Spinner from '@/components/Spinner.vue';
+import { Avatar } from '@/components/ui/avatar';
 import { useAppStore } from '@/stores/main';
-import useLlamaCpp from '@/composables/useLlamaCpp';
-import urls from '@/lib/api/urls';
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import { useToast } from '@/components/ui/toast';
-import { delay } from '@/lib/utils';
 
-// @ts-ignore
-const { startServer, stopServer, getLastModel } = useLlamaCpp();
-const { getNGpuLayers, getChatModelPath, updateChatServerRunning } =
-	useAppStore();
 const store = useAppStore();
-
-const { toast } = useToast();
-
 const lastModel = computed(() => store.lastKoboldModelResult);
 
-const doStartServer = async () => {
-	const modelPath = getChatModelPath();
-	const nGpuLayers = getNGpuLayers();
-	console.log('Starting server with model:', modelPath, nGpuLayers);
-	if (!modelPath) {
-		toast({
-			variant: 'destructive',
-			title: 'No chat model selected',
-			description: 'Please select a chat model in the settings panel',
-		});
-		return;
-	}
 
-	store.chatServerStarting = true;
-	const result = await startServer(modelPath, nGpuLayers);
-	console.log('Server start result:', result);
-	store.chatServerRunning = !result.error;
-	store.chatServerStarting = false;
-
-	if (result.error) {
-		toast({
-			variant: 'destructive',
-			title: 'Error starting chat server',
-			description: result.error,
-		});
-	}
-
-	// isStarting.value = false;
-	// lastModel.value = modelPath;
-};
-
-const doStopServer = async () => {
-	await stopServer();
-
-	setTimeout(() => {
-		doRefreshServerStatus();
-	}, 500);
-	// lastModel.value = null;
-};
-
-const doRestartServer = async () => {
-	await doStopServer();
-	await delay(1500);
-	await doStartServer();
-};
-
-const intervalIdKey = 'refreshServerStatusIntervalId';
-
-const doRefreshServerStatus = async () => {
-	try {
-		if (store.chatServerStarting) {
-			return;
-		}
-		await updateChatServerRunning();
-	} catch (error) {
-		console.error('Error refreshing server status:', error);
-		if ((window as any)[intervalIdKey]) {
-			clearInterval((window as any)[intervalIdKey]);
-			(window as any)[intervalIdKey] = null;
-		}
-	}
-};
-
-if ((window as any)[intervalIdKey]) {
-	clearInterval((window as any)[intervalIdKey]);
-	(window as any)[intervalIdKey] = null;
-}
-
-doRefreshServerStatus();
-(window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 5000);
-
-watch(
-	() => store.chatServerRunning,
-	async () => {
-		if (store.chatServerStarting && store.chatServerRunning) {
-			store.chatServerStarting = false;
-		}
-		// lastModel.value = await getLastModel();
-		store.updateKoboldModel();
-	}
-);
-onBeforeMount(async () => {
-	// lastModel.value = await getLastModel();
-	store.updateChatServerRunning();
-	store.updateKoboldModel();
-});
 
 const bgColor = computed(() => {
 	if (store.chatServerRunning) {
@@ -140,25 +41,6 @@ const color = computed(() => (store.chatServerRunning ? 'green' : 'red'));
 						<span class="font-semibold">Current Model:</span>
 						<br /> {{ lastModel }}
 					</p>
-					<!-- <div class="flex items-center space-x-2">
-						<Button
-							v-if="!store.chatServerRunning"
-							class="success"
-							@click="doStartServer"
-							:disabled="store.chatServerStarting"
-						>
-							Start
-						</Button>
-						<Button v-else variant="destructive" @click="doStopServer">Stop</Button>
-						<Button
-							class="warning"
-							@click="doRestartServer"
-							:disabled="store.chatServerStarting || !store.chatServerRunning"
-						>
-							Restart
-						</Button>
-						<Spinner v-if="store.chatServerStarting" />
-					</div> -->
 				</div>
 			</div>
 		</PopoverContent>

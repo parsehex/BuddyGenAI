@@ -16,10 +16,10 @@ export const AppSettingsDefaults: Settings = {
 	openrouter_api_key: '',
 	koboldcpp_host: '',
 	local_model_directory: '',
-	selected_provider_chat: '',
-	selected_provider_image: '',
-	selected_provider_tts: '',
-	selected_provider_stt: '',
+	selected_provider_chat: '0',
+	selected_provider_image: '0',
+	selected_provider_tts: '0',
+	selected_provider_stt: '0',
 	selected_model_chat: '',
 	selected_model_image: '',
 	selected_model_tts: '',
@@ -40,24 +40,21 @@ export const AppSettingsDefaults: Settings = {
 	skip_setup: false,
 };
 
-enum LLMProvider {
-	openrouter,
-	koboldcpp,
-	DISABLED = '',
-}
-enum ImgProvider {
-	koboldcpp,
-	DISABLED = '',
-}
-enum TTSProvider {
-	koboldcpp,
-	DISABLED = '',
-}
-enum STTProvider {
-	koboldcpp,
-	DISABLED = '',
-}
-type Provider = 'cloud' | 'local' | '';
+export type AnyPossibleProvider = 'koboldcpp' | 'openrouter' | '0';
+export type LLMProvider = 'koboldcpp' | 'openrouter' | '0';
+export const LLMProviders: LLMProvider[] = ['koboldcpp', 'openrouter', '0'];
+export type ImgProvider = 'koboldcpp' | '0';
+export const ImgProviders: ImgProvider[] = ['koboldcpp', '0'];
+export type TTSProvider = 'koboldcpp' | '0';
+export const TTSProviders: TTSProvider[] = ['koboldcpp', '0'];
+export type STTProvider = 'koboldcpp' | '0';
+export const STTProviders: STTProvider[] = ['koboldcpp', '0'];
+export type ProviderType =
+	| LLMProvider
+	| ImgProvider
+	| TTSProvider
+	| STTProvider;
+
 export interface Settings {
 	user_name: string;
 	user_image: string;
@@ -67,10 +64,10 @@ export interface Settings {
 	openrouter_api_key: string;
 	koboldcpp_host: string;
 	local_model_directory: string;
-	selected_provider_chat: Provider;
-	selected_provider_image: Provider;
-	selected_provider_tts: Provider;
-	selected_provider_stt: Provider;
+	selected_provider_chat: LLMProvider;
+	selected_provider_image: ImgProvider;
+	selected_provider_tts: TTSProvider;
+	selected_provider_stt: STTProvider;
 	selected_model_chat: string;
 	selected_model_image: string;
 	selected_model_tts: string;

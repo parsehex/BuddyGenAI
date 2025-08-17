@@ -4,7 +4,6 @@
 		<p v-if="error">{{ error }}</p>
 	</div>
 </template>
-
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -46,7 +45,7 @@ onMounted(async () => {
 
 		const data = await response.json();
 
-		AppSettings.set('selected_provider_chat', 'cloud');
+		AppSettings.set('selected_provider_chat', 'openrouter');
 		AppSettings.set('openrouter_api_key', data.key);
 		await AppSettings.saveSettings();
 

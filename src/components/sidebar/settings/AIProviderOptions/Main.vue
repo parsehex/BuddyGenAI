@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import {
-	Button
-} from '@/components/ui/button';
+import OptionSection from '../OptionSection.vue';
 import {
 	AccordionTrigger,
 	AccordionItem,
@@ -11,26 +9,26 @@ import {
 import { useAppStore } from '@/src/stores/main';
 import OpenRouterOptions from './OpenRouterOptions.vue';
 import KoboldCppOptions from './KoboldCppOptions.vue';
-
-const store = useAppStore();
-
-const isCloud = computed(() => store.settings.selected_provider_chat === 'cloud');
-const currentProvider = computed(() => (store.settings.selected_provider_chat === 'cloud' ? 'OpenRouter' : 'KoboldCpp'));
-const otherProvider = computed(() => (store.settings.selected_provider_chat === 'cloud' ? 'KoboldCpp' : 'OpenRouter'));
-
-const switchProvider = () => {
-	const newProvider = store.settings.selected_provider_chat === 'cloud' ? 'local' : 'cloud';
-	store.settings.selected_provider_chat = newProvider;
-	store.settings.selected_provider_image = newProvider;
-};
+import FeatureTypeSelect from '@/src/components/FeatureTypeSelect.vue';
 </script>
 <template>
 	<AccordionItem value="ai-provider-options">
-		<AccordionTrigger>AI Provider ({{ currentProvider }})</AccordionTrigger>
+		<AccordionTrigger>AI Provider</AccordionTrigger>
 		<AccordionContent class="text-center">
-			<Button type="button" @click="switchProvider" size="xs" variant="secondary">Switch to {{ otherProvider }}</Button>
-			<OpenRouterOptions v-if="isCloud" />
-			<KoboldCppOptions v-else />
+			<OptionSection label="Chat" labelName="chat-provider">
+				<FeatureTypeSelect type="chat" />
+			</OptionSection>
+			<OptionSection label="Image" labelName="image-provider">
+				<FeatureTypeSelect type="image" />
+			</OptionSection>
+			<OptionSection label="TTS" labelName="tts-provider">
+				<FeatureTypeSelect type="tts" />
+			</OptionSection>
+			<OptionSection label="Transcription" labelName="stt-provider">
+				<FeatureTypeSelect type="stt" />
+			</OptionSection>
+			<OpenRouterOptions />
+			<KoboldCppOptions />
 		</AccordionContent>
 	</AccordionItem>
 </template>

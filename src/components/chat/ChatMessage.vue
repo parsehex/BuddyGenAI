@@ -31,10 +31,7 @@ import { textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
 import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
-import { makeTTS } from '@/src/lib/ai/tts';
-import { AppSettings } from '@/lib/api/AppSettings';
-
-import urls from '@/src/lib/api/urls';
+import { getSelectedVoice, makeTTS } from '@/src/lib/ai/tts';
 import { useToast } from '../ui/toast';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { insert } from '@/src/lib/sql';
@@ -69,7 +66,6 @@ const aiName = computed(() => {
 	return 'AI';
 })
 
-const isTyping = ref(false);
 const isTypingIndicator = ref(false);
 
 // Watch message changes to set typing state
@@ -149,7 +145,11 @@ const msgInitials = computed(() => {
 	return firstName[0];
 });
 
-const ttsEnabled = computed(() => true);
+const ttsEnabled = computed(() => {
+	if (props.isLoading) return false;
+	if (store.settings.selected_provider_tts !== 'koboldcpp') return false;
+	return !!store.lastKoboldVersionResult.tts;
+});
 const hasTTS = computed(() => {
 	// @ts-ignore
 	if (!message.value.tts) return false;
@@ -165,9 +165,12 @@ const tts = computed(async () => {
 	return ttsData;
 });
 
+const ttsLoading = ref(false);
 const doTTS = async () => {
 	if (isUser.value) return;
+	if (ttsLoading.value) return;
 
+	ttsLoading.value = true;
 	if (!hasTTS.value) {
 		if (!ttsEnabled.value) {
 			toast({
@@ -180,10 +183,12 @@ const doTTS = async () => {
 		const text = cleanTextForTTS(message.value.content);
 
 		const id = v4();
+		const speakerName = getSelectedVoice(currentBuddy.value?.id || '')
 		const ttsData = await makeTTS({
 			absModelPath: '',
 			outputFilename: '',
 			text,
+			speakerName,
 		});
 
 		const response = await fetch(ttsData);
@@ -195,11 +200,13 @@ const doTTS = async () => {
 		playAudio(ttsData);
 
 		await api.message.updateOne(message.value.id, undefined, undefined, id);
+		ttsLoading.value = false;
 		emit('edit', message.value.id);
 		return;
 	}
 
 	playAudio(await tts.value);
+	ttsLoading.value = false;
 };
 </script>
 <template>
@@ -223,7 +230,8 @@ const doTTS = async () => {
 								<BuddyAvatar v-if="!isUser && currentBuddy" :buddy="currentBuddy" /> {{ currentBuddy?.name }}
 							</RouterLink>
 						</span>
-						<Button v-if="!isUser && ttsEnabled" @click="doTTS" variant="secondary" size="sm" class="ml-2">
+						<Button v-if="(!isUser && ttsEnabled) || hasTTS" @click="doTTS" :variant="hasTTS ? 'secondary' : 'ghost'"
+							size="sm" class="ml-2" :disabled="ttsLoading">
 							<Volume2 />
 						</Button>
 						<!-- add audio speed control -->
@@ -234,8 +242,8 @@ const doTTS = async () => {
 						}">
 							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
 							<AvatarFallback v-else>{{ msgInitials }}</AvatarFallback>
-						</Avatar> {{ isUser ? userName : 'AI' }} <Button v-if="!isUser && ttsEnabled" @click="doTTS"
-							variant="secondary" size="sm" class="ml-2">
+						</Avatar> {{ isUser ? userName : 'AI' }} <Button v-if="(!isUser && ttsEnabled) || hasTTS" @click="doTTS"
+							:variant="hasTTS ? 'secondary' : 'ghost'" size="sm" class="ml-2" :disabled="ttsLoading">
 							<Volume2 />
 						</Button>
 					</CardHeader>

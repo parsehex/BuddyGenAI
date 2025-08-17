@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, watch, computed } from 'vue';
+import { ref, onBeforeMount, watch, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router/auto';
 import router from '@/lib/router';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,6 +29,16 @@ import BuddyTagsInput from '@/src/components/BuddyTagsInput.vue';
 import type { AppearanceCategory } from '@/src/lib/ai/appearance-options';
 import { complete } from '@/lib/ai/complete';
 import { getImage } from '@/src/lib/api/images';
+import { getVoices } from '@/src/lib/ai/tts';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
+} from '@/components/ui/select';
 
 // TODO idea: when remixing, if theres already a description then revise instead of write anew
 
@@ -353,7 +363,14 @@ const acceptKeywords = () => {
 	refreshProfilePicture();
 };
 
-const RefreshPicBtn = computed(() => profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture')
+const RefreshPicBtn = computed(() => profilePictureValue ? 'Refresh Picture' : 'Create Profile Picture');
+const imgProvider = computed(() => store.settings.selected_provider_image === '0' ? '' : store.settings.selected_provider_image);
+
+const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
+const availVoices = ref(['']);
+onMounted(() => {
+	availVoices.value = [...getVoices()];
+});
 </script>
 <template>
 	<ScrollArea class="h-screen flex flex-col items-center">
@@ -371,16 +388,28 @@ const RefreshPicBtn = computed(() => profilePictureValue ? 'Refresh Picture' : '
 					<BuddyAvatar v-if="buddy" :buddy="buddy" size="lg" class="text-3xl" />
 					<BuddyAvatarSelect v-if="buddy" :buddy="buddy" :all-profile-pics="allProfilePics"
 						@select-profile-pic="handleSelectProfilePic" />
+					<Select v-if="ttsEnabled" v-model="selectedTTSVoice" id="buddy-voice">
+						<SelectTrigger :title="selectedTTSVoice">
+							<SelectValue :placeholder="`Select a TTS voice for ${buddy?.name}`" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Voices</SelectLabel>
+								<SelectItem v-for="voice in availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
 					<div class="flex flex-col items-center my-2">
 						<Label for="profile-pic-upload" class="text-md mb-2">Upload Profile Picture</Label>
 						<Input id="profile-pic-upload" type="file" accept="image/*" @change="handleProfilePicUpload"
 							class="w-full max-w-xs" />
 					</div>
-					<BuddyAppearanceOptions v-if="buddy" :buddy="buddy" :profile-pic-prompt="profilePicturePrompt"
+					<BuddyAppearanceOptions v-if="buddy && imgProvider" :buddy="buddy" :profile-pic-prompt="profilePicturePrompt"
 						@refresh-profile-pic="refreshProfilePicture" @update-profile-pic-prompt="profilePicturePrompt = $event"
 						v-model:appearance-options="generatedAppearanceOptions"
 						v-model:selected-appearance-options="selectedAppearanceOptions" />
 					<div class="flex flex-col items-center justify-center w-full">
+						<Spinner v-if="gen" />
 						<Progress v-if="gen" :model-value="prog * 100" class="my-2" />
 						<Button type="button" @click="refreshProfilePicture" class="mt-2"> {{ RefreshPicBtn }} </Button>
 					</div>
@@ -417,7 +446,7 @@ const RefreshPicBtn = computed(() => profilePictureValue ? 'Refresh Picture' : '
 						<Textarea v-model="descriptionValue" class="min-h-24" />
 					</DevOnly>
 					<Button type="button" @click="handleSave" class="mt-4">Save</Button>
-					<Spinner v-if="isLoading" class="mt-2" />
+					<Spinner v-if="updatingProfilePicture" class="mt-2" />
 				</div>
 			</CardContent>
 		</Card>

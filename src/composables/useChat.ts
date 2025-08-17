@@ -36,7 +36,10 @@ export default function useChat(options: UseChatOptions) {
 
 	async function handleSubmit(e: Event, skipUserMsg = false) {
 		setAPIKeyHeader();
-		if (store.isExternalProvider && !headers.value['Authorization']) {
+		if (
+			store.settings.selected_provider_chat === 'openrouter' &&
+			!headers.value['Authorization']
+		) {
 			throw new Error('Must connect OpenRouter account');
 		}
 

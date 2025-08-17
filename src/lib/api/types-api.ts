@@ -1,3 +1,5 @@
+export type FeatureType = 'chat' | 'image' | 'tts' | 'stt';
+
 export interface DeleteResponse {
 	success: boolean;
 }

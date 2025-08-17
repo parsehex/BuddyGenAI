@@ -6,6 +6,7 @@ import { ProfilePicQuality } from '@/lib/api/types-api';
 import useElectron from '@/composables/useElectron';
 import { makePicture, makePictureKobold } from '@/src/lib/ai/img';
 import { popError } from '@/src/lib/utils';
+import { isFeatureAvailable } from '@/src/lib/ai/support';
 
 const { dbGet, dbRun } = useElectron();
 
@@ -24,11 +25,8 @@ export default async function createProfilePic(
 ) {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
-	const isExternal =
-		AppSettings.get('selected_provider_chat') === 'cloud' &&
-		AppSettings.get('selected_provider_chat') !== 'local';
-	if (isExternal) {
-		popError('External image generation not yet supported');
+	if (!isFeatureAvailable('image')) {
+		popError('External image generation not yet supported, please use KoboldCpp');
 		throw new Error();
 	}
 
