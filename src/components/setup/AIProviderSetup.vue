@@ -7,6 +7,8 @@ import { ref } from 'vue';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
+// TODO update to work with setting multiple providers
+
 type ProviderToSelect = '' | 'cloud' | 'local';
 
 const { openExternalLink } = useElectron();
@@ -41,9 +43,6 @@ const providerFeatures = {
   local: ['chat', 'image', 'tts', 'stt'] as const
 };
 </script>
-<!-- What I want: -->
-<!-- Introduce that you must connect the app to AI provider(s) to enable its features. -->
-<!-- Offer two choices, presented as buttons in two columns (or stacked for mobile) -->
 <template>
   <div class="max-w-4xl mx-auto p-4">
     <p class="text-center text-lg mb-6"> To use BuddyGenAI, you have to connect the app to an AI provider. </p>

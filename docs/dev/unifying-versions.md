@@ -32,4 +32,8 @@ There are a number of differences and issues between these to-be 3 "form factors
   - As mentioned in [Database Info][1], I think I want to use Dexie for all the app's versions, which should fix these issues.
 - Finally, a point that I would explicitly mention is that overall, the app isn't well-designed to handle conditional features (e.g. if you don't hook up image generation, it still presents the option to generate a profile image when creating a Buddy). This would apply to using KoboldCpp with the SPA but also the Electron version since the user still needs to provide a model.
 
+## Future
+
+Eventually I want to explore having the electron version be its own repo, just for the electron-specific parts.
+
 [1]: ./database-info.md

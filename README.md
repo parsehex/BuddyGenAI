@@ -71,7 +71,14 @@ Aside from overall cleaning up the project and improving the look of it, I have 
   - Buddies go Idle: Sometimes, a buddy might "go away" and not respond to messages for a while.
 - Random Buddy Encounters: The app creates a new buddy in the background and the user has the option to add them to their buddy list.
   - Current buddies might even be the ones to introduce the new buddy to the user.
+  - Or there could be an in-app notification about a message from a potential new Buddy (complete with a generated appearance if supported). Plenty of options to control the behavior.
 - Group Chats: Chat with multiple buddies at once.
+
+### Delayed Responses (Elaborated)
+
+This is something that I've thought would be a cool idea for a while, or something like it. The idea is that you/the user just sends message(s) to 1+ buddies without any of them responding until sometime later. Additionally, you'd have other Buddies messaging you back randomly.
+
+This feels like a good use for having the app generate Buddy Encounters. I feel like there's also room for cool ideas like generating "schedules" for Buddies each day which helps distate when they respond.
 
 ## Developer Notes
 
