@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, toRefs, watch } from 'vue';
-import type { Message } from 'ai/vue';
 import type { BuddyVersionMerged, ChatMessage } from '@/lib/api/types-db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ const chatStreaming = computed(() => store.settings.chat_streaming);
 
 const props = defineProps<{
 	threadId: string;
-	message: Message | ChatMessage;
+	message: ChatMessage;
 	threadMode: 'persona' | 'custom';
 	currentBuddy?: BuddyVersionMerged;
 	isLoading: boolean;
