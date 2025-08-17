@@ -8,6 +8,9 @@ This is the first installment of me documenting how this project is structured a
 
 - [Database Info](./database-info.md)
 - [Unifying BuddyGenAI Versions](./unifying-versions.md)
+- Feature Notes
+  - [Delayed Messages from Buddies](./features/delayed-messages.md)
+  - [Proper JSON Mode](./features/json-mode.md)
 
 ## Source Code / File Structure
 
