@@ -37,27 +37,25 @@ const { toggleDevTools, closeApp } = useElectron();
 // 1 - maybe remove the current dialog
 // 2 - add a dialog if the user is on mobile, warning about the layout
 
-const skipDialog = computed(
-	() => store.settings.skip_start_dialog
-);
-console.log('skipDialog', skipDialog.value);
+const skipDialog = computed(() => store.settings.skip_start_dialog);
 const enteredApp = ref(skipDialog.value ? 1 : 0);
 
 const isSetup = computed(() => {
-	const isDefaultUserName = store.settings.user_name?.toLowerCase() === 'user';
-	const hasThreads = store.threads.length > 0;
-	const hasBuddies = store.buddies.length > 0;
-	if (!isDefaultUserName || hasBuddies || hasThreads) return true;
+	// const isDefaultUserName = store.settings.user_name?.toLowerCase() === 'user';
+	// const hasThreads = store.threads.length > 0;
+	// const hasBuddies = store.buddies.length > 0;
+	// if (!isDefaultUserName || hasBuddies || hasThreads) return true;
 
-	if (!isFeatureAvailable('chat')) return false; // TODO is not reactive
-	const skippedSetup = +store.settings.skip_setup;
-	if (skippedSetup) return true;
-	if (!hasBuddies && !isDefaultUserName && !hasThreads) return false;
+	// if (!isFeatureAvailable('chat')) return false; // TODO is not reactive
+	// const skippedSetup = +store.settings.skip_setup;
+	// if (skippedSetup) return true;
+	// if (!hasBuddies && !isDefaultUserName && !hasThreads) return false;
 	return true;
 });
 
 onMounted(async () => {
 	await AppSettings.waitForLoaded();
+	await delay(15);
 	if (store.settings.skip_start_dialog) enteredApp.value = 1;
 });
 
@@ -86,9 +84,8 @@ const doCloseApp = () => {
 	if (closeApp) closeApp();
 };
 
-const updateSkipDialog = async () => {
+const updateSkipDialog = () => {
 	store.settings.skip_start_dialog = true;
-	AppSettings.saveSettings();
 };
 
 const container = ref<HTMLElement | null>(null);
