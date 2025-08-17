@@ -72,6 +72,10 @@ const isTypingIndicator = ref(false);
 watch(
 	() => message.value,
 	(newVal) => {
+		if (chatStreaming.value) {
+			isTypingIndicator.value = false;
+			return;
+		}
 		if (!isUser.value && !chatStreaming.value) {
 			// Typing starts if no content yet
 			isTypingIndicator.value = !newVal.content?.trim();
