@@ -10,7 +10,8 @@ I hope others find this project interesting and/or enjoyable as well.
 
 [Go to the app here](https://app.buddygenai.com/)
 
-> ![NOTE]
+> [!NOTE]
+>
 > The original iteration of this app used Electron with embedded AI engines but I'm not updating it for now. The branch with that version in tact is [available here](https://github.com/parsehex/BuddyGenAI/tree/main).
 
 ## ✅ Features

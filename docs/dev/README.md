@@ -2,7 +2,9 @@
 
 This is the first installment of me documenting how this project is structured and works so that other developers can work on it.
 
-> [!NOTE] I haven't actively worked with this codebase in a while, so I'm partially writing this to strengthen my own understanding of things.
+> [!NOTE]
+>
+> I haven't actively worked with this codebase in a while, so I'm partially writing this to strengthen my own understanding of things.
 
 ## Other Pages
 
