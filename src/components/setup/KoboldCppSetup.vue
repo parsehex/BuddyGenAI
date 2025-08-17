@@ -64,13 +64,14 @@ async function testConnection() {
     };
     version.value = data.version;
 
-    if (data.llm)
+    // auto-enable disabled features which koboldcpp has available
+    if (data.llm && !store.settings.selected_provider_chat)
       store.settings.selected_provider_chat = 'koboldcpp';
-    if (data.txt2img)
+    if (data.txt2img && !store.settings.selected_provider_image)
       store.settings.selected_provider_image = 'koboldcpp';
-    if (data.tts)
+    if (data.tts && !store.settings.selected_provider_tts)
       store.settings.selected_provider_tts = 'koboldcpp';
-    if (data.transcribe)
+    if (data.transcribe && ~store.settings.selected_provider_stt)
       store.settings.selected_provider_stt = 'koboldcpp';
 
     store.settings.koboldcpp_host = hostInput.value;
