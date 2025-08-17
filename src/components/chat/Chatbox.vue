@@ -718,8 +718,10 @@ const device = useMobile();
 			</Collapsible>
 			<div class="flex flex-col gap-1 my-1" id="chatbox">
 				<Message v-for="m in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
+				<Message v-for="(m, i) in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
 					:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
 					@clearThread="refreshMessages" />
+					@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1" />
 			</div>
 		</ScrollArea>
 		<form class="w-full flex gap-1.5 items-center justify-center mt-1">

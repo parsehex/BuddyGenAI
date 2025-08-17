@@ -52,6 +52,7 @@ const props = defineProps<{
 	message: Message | ChatMessage;
 	threadMode: 'persona' | 'custom';
 	currentBuddy?: BuddyVersionMerged;
+	isLoading: boolean;
 }>();
 const { threadId, message, threadMode, currentBuddy } = toRefs(props);
 
@@ -69,6 +70,7 @@ const aiName = computed(() => {
 })
 
 const isTyping = ref(false);
+const isTypingIndicator = ref(false);
 
 // Watch message changes to set typing state
 watch(
@@ -76,9 +78,9 @@ watch(
 	(newVal) => {
 		if (!isUser.value && !chatStreaming.value) {
 			// Typing starts if no content yet
-			isTyping.value = !newVal.content?.trim();
+			isTypingIndicator.value = !newVal.content?.trim();
 		} else {
-			isTyping.value = false;
+			isTypingIndicator.value = props.isLoading;
 		}
 	},
 	{ immediate: true }
@@ -239,7 +241,7 @@ const doTTS = async () => {
 					</CardHeader>
 					<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between gap-2">
 						<div class="grow">
-							<span v-if="isTyping" class="typing-indicator"> {{ aiName }} is typing<span class="dots"></span>
+							<span v-if="isTypingIndicator" class="typing-indicator"> {{ aiName }} is typing<span class="dots"></span>
 							</span>
 							<span v-else> {{ message.content }} </span>
 						</div>
