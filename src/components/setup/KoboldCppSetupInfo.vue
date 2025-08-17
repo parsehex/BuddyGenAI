@@ -31,6 +31,7 @@ const { openExternalLink } = useElectron();
 	<p class="mt-2">
 		<span class="step">3.</span> After the downloads are finished, open the file you first downloaded (KoboldCpp) and
 		pick each of the files you downloaded:
+	</p>
 	<ul class="list-disc">
 		<li>Set Text Generation model in <b>Model Files</b> -&gt; <b>Text Model</b></li>
 		<li>Set Image Generation model in <b>Image Gen</b> -&gt; <b>Stable Diffusion Model</b></li>
@@ -38,7 +39,6 @@ const { openExternalLink } = useElectron();
 			you downloaded</li>
 		<li>Set Speech Recognition models in <b>Audio</b> -&gt; <b>Whisper Model</b></li>
 	</ul>
-	</p>
 	<p class="mt-2">
 		<span class="step">4.</span> Once you've completed this, can click <b>Launch</b> at the bottom of the Kobold window.
 		Then, come back here and click below to test your connection.
