@@ -81,6 +81,7 @@ const loadingAppearanceOptions = ref({
 	'clothing style': false,
 } as AppearanceOptionsLoading);
 
+const isLoading = ref(false)
 const newAppearanceOptions = async (category?: AppearanceCategory) => {
 	if (!store.chatServerRunning) {
 		toast({
@@ -90,6 +91,7 @@ const newAppearanceOptions = async (category?: AppearanceCategory) => {
 		});
 		return;
 	}
+	isLoading.value = true;
 	const toLoad: AppearanceCategory[] = category ? [category] : categories;
 
 	console.log(appearanceOptions.value?.['body type']);
@@ -147,6 +149,7 @@ const newAppearanceOptions = async (category?: AppearanceCategory) => {
 
 		loadingAppearanceOptions.value[key] = false;
 	}
+	isLoading.value = false;
 };
 
 // (disjointed) TODO option(s) to change composition of profile pic (e.g. close up, full body, etc.)
@@ -172,33 +175,52 @@ const setAppearanceOption = (key: AppearanceCategory, value: string) => {
 	emit('updateProfilePicPrompt', newPrompt);
 };
 
-onMounted(() => {
-	let hasGeneratedOptions = false;
-	for (const key of categories) {
-		if (!appearanceOptions.value) continue;
-		if (appearanceOptions.value[key]?.length > 0) {
-			hasGeneratedOptions = true;
-			break;
+const randomizeOptions = () => {
+	if (!selectedAppearanceOptions.value || !appearanceOptions.value) return;
+
+	for (const category of categories) {
+		const options = appearanceOptions.value[category];
+		if (options && options.length > 0) {
+			const randomIndex = Math.floor(Math.random() * options.length);
+			selectedAppearanceOptions.value[category] = options[randomIndex];
 		}
 	}
-	if (hasGeneratedOptions) return;
 
+	const newPrompt = appearanceToPrompt(selectedAppearanceOptions.value);
+	if (newPrompt) {
+		emit('updateProfilePicPrompt', newPrompt);
+	}
+};
+
+onMounted(() => {
+	let hasGeneratedOptions = false;
+
+	if (buddy.value.appearance_options) {
+		const obj = JSON.parse(buddy.value.appearance_options) as ExpectedAppearanceOptions;
+		appearanceOptions.value = { ...obj };
+		hasGeneratedOptions = true;
+	}
+	if (buddy.value.selected_appearance_options) {
+		const obj = JSON.parse(buddy.value.selected_appearance_options) as SelectedAppearanceOptions;
+		selectedAppearanceOptions.value = { ...obj };
+		hasGeneratedOptions = true;
+	}
+
+	if (hasGeneratedOptions) return;
 	newAppearanceOptions();
 });
 </script>
-
 <template>
 	<div class="flex flex-col items-center justify-center w-full">
 		<div class="flex flex-col items-center justify-center w-full">
 			<Label class="text-lg">Appearance Options</Label>
 			<div class="flex flex-col items-center justify-center w-full">
-				<Button type="button" @click="newAppearanceOptions()" variant="outline">
-					Refresh All Options
-				</Button>
-				<p>
-					Please select each option below to describe
-					{{ buddy?.name || 'your buddy' }}'s appearance.
-				</p>
+				<div class="flex items-center gap-2">
+					<Button type="button" @click="newAppearanceOptions()" variant="outline"> Refresh All Options </Button>
+					<Spinner v-if="isLoading" />
+					<Button type="button" @click="randomizeOptions()" variant="outline"> Randomize Options </Button>
+				</div>
+				<p> Select each option below to describe {{ buddy?.name || 'your buddy' }}'s appearance. </p>
 			</div>
 			<div class="flex flex-row items-center justify-center w-full">
 				<!--
@@ -212,59 +234,38 @@ onMounted(() => {
 					- "blue eyes" leads to clothing likely being blue. "blue-colored eyes" may help a little. Also, specifiying some kind of clothing helps a little (even "casual clothing")
 					- checkbox options (e.g. glasses, hat, etc.)
 				-->
-				<div
-					v-for="(options, key) in appearanceOptions"
-					:key="key"
-					class="flex flex-col flex-wrap items-center justify-center w-full my-2"
-				>
-					<Label class="text-lg mr-1">
-						{{ key }}
-					</Label>
+				<div v-for="(options, key) in appearanceOptions" :key="key"
+					class="flex flex-col flex-wrap items-center justify-center w-full my-2">
+					<Label class="text-lg mr-1"> {{ key }} </Label>
 					<div>
 						<!-- @vue-ignore -->
-						<Select
-							class="my-2"
-							:default-value="selectedAppearanceOptions[key as AppearanceCategory] || ''"
-							@update:model-value="setAppearanceOption(key, $event)"
-						>
+						<Select class="my-2" :model-value="selectedAppearanceOptions[key as AppearanceCategory] || ''"
+							@update:model-value="setAppearanceOption(key, $event)">
 							<SelectTrigger>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectLabel>
-									<div class="flex gap-2">
-										{{ key }}
-										<Button
-											type="button"
-											size="xs"
-											variant="secondary"
-											@click="newAppearanceOptions(key as AppearanceCategory)"
-											title="Refresh options"
-										>
+									<div class="flex gap-2"> {{ key }} <Button type="button" size="xs" variant="secondary"
+											@click="newAppearanceOptions(key as AppearanceCategory)" title="Refresh options">
 											<RefreshCw />
 										</Button>
 									</div>
 									<Spinner v-if="loadingAppearanceOptions[key as AppearanceCategory]" />
 								</SelectLabel>
 								<SelectGroup>
-									<SelectItem v-for="option in options" :key="option" :value="option">
-										{{ option }}
-									</SelectItem>
+									<SelectItem v-for="option in options" :key="option" :value="option"> {{ option }} </SelectItem>
 								</SelectGroup>
 							</SelectContent>
 						</Select>
 					</div>
 				</div>
 			</div>
-
 			<DevOnly class="w-full">
-				<Input
-					id="profile-picture"
-					v-model="profilePicPrompt"
+				<Input id="profile-picture" v-model="profilePicPrompt"
 					@blur="emit('updateProfilePicPrompt', $event.target.value)"
 					class="p-2 border border-gray-300 dark:border-gray-700 rounded mt-2"
-					@keydown.enter="emit('refreshProfilePic')"
-				/>
+					@keydown.enter="emit('refreshProfilePic')" />
 			</DevOnly>
 		</div>
 	</div>
