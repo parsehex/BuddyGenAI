@@ -19,9 +19,9 @@ export default async function updateOne(
 	const data = {
 		updated: new Date().getTime(),
 	} as Partial<ChatMessage>;
-	if (content) data.content = content;
-	if (image) data.image = image;
-	if (tts) data.tts = tts;
+	if (typeof content === 'string') data.content = content;
+	if (typeof image === 'string') data.image = image;
+	if (typeof tts === 'string') data.tts = tts;
 
 	if (Object.keys(data).length === 1) throw new Error('No data to update');
 

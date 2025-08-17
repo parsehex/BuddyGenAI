@@ -58,6 +58,7 @@ export default function useChat(options: UseChatOptions) {
 		input.value = '';
 		e.preventDefault();
 
+		const messagesToSend = JSON.parse(JSON.stringify(messages.value));
 		isLoading.value = true;
 		const thread_index = messages.value.length;
 		// send new messages to server, create assistant message
@@ -80,7 +81,7 @@ export default function useChat(options: UseChatOptions) {
 			if (!store.settings.chat_streaming) {
 				const response = await chat({
 					...options.body,
-					messages: messages.value,
+					messages: messagesToSend,
 					stream: false,
 				});
 				msg.value.content = response;
@@ -90,8 +91,8 @@ export default function useChat(options: UseChatOptions) {
 				}
 			} else {
 				const response = await chat({
-					// ...options.body,
-					messages: messages.value,
+					...options.body,
+					messages: messagesToSend,
 					stream: true,
 					stream_callback: (s: string) => {
 						msg.value.content += s;
@@ -112,7 +113,7 @@ export default function useChat(options: UseChatOptions) {
 				method: 'post',
 				headers: headers.value,
 				signal: controller.signal,
-				data: { ...options.body, messages: messages.value, stream: false },
+				data: { ...options.body, messages: messagesToSend, stream: false },
 			})
 				.then((res) => {
 					return res.data;
@@ -141,7 +142,7 @@ export default function useChat(options: UseChatOptions) {
 			method: 'post',
 			headers: headers.value,
 			signal: controller.signal,
-			data: { ...options.body, messages: messages.value, stream: true },
+			data: { ...options.body, messages: messagesToSend, stream: true },
 			onDownloadProgress: (progressEvent) => {
 				const xhr = progressEvent.event.target;
 				const { responseText } = xhr;

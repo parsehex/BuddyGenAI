@@ -151,8 +151,7 @@ const msgInitials = computed(() => {
 
 const ttsEnabled = computed(() => {
 	if (props.isLoading) return false;
-	if (store.settings.selected_provider_tts !== 'koboldcpp') return false;
-	return !!store.lastKoboldVersionResult.tts;
+	return store.settings.selected_provider_tts === 'koboldcpp';
 });
 const hasTTS = computed(() => {
 	// @ts-ignore
