@@ -88,7 +88,7 @@ const providerFeatures = {
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 relative">
           <div class="flex items-center"> powered by <img src="/assets/mlc-logo.png"
               class="w-12 h-12 opacity-70 mx-2 rounded-lg" alt="WebLLM" /> MLC WebLLM </div>
-          <p class="text-sm text-center">Run AI models directly in your browser</p>
+          <p class="text-sm text-center">Run chat AI directly in your browser</p>
           <div class="flex gap-1">
             <template v-for="featureKey in providerFeatures.webllm" :key="featureKey">
               <Tooltip>
@@ -118,7 +118,7 @@ const providerFeatures = {
               <img src="/assets/openrouter-logo.svg" class="h-10" alt="OpenRouter" />
             </div>
           </div>
-          <p class="text-sm text-center">Use powerful AI models hosted in the cloud</p>
+          <p class="text-sm text-center">Use powerful chat AI models hosted in the cloud</p>
           <div class="flex gap-1">
             <template v-for="featureKey in providerFeatures.cloud" :key="featureKey">
               <Tooltip>
