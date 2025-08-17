@@ -1,0 +1,1 @@
+.typing-indicator{font-style:italic;opacity:.8}.dots:after{content:"";display:inline-block;width:1em;text-align:left;animation:dots 1.2s steps(4,end) infinite}@keyframes dots{0%,20%{content:""}40%{content:"."}60%{content:".."}80%,to{content:"..."}}
