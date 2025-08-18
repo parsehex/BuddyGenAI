@@ -34,6 +34,7 @@ export interface BuddyVersionMerged {
 	profile_pic: string | null;
 	profile_pic_prompt: string | null;
 	profile_pic_use_prompt: boolean;
+	profile_pics: string[];
 	appearance_options: string | null;
 	selected_appearance_options: string | null;
 	current_version_id: string;
