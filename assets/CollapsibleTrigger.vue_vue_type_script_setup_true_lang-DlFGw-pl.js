@@ -1,0 +1,1 @@
+import{d as o,o as r,c as t,w as n,b0 as p,b1 as l,b2 as c,e as i,b3 as d}from"./index-DYoLyOUE.js";const f=o({__name:"CollapsibleTrigger",props:{asChild:{type:Boolean},as:{}},setup(e){const a=e;return(s,u)=>(r(),t(i(d),l(c(a)),{default:n(()=>[p(s.$slots,"default")]),_:3},16))}});export{f as _};
