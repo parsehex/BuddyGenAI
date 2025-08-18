@@ -13,6 +13,7 @@ This is the first installment of me documenting how this project is structured a
 - Feature Notes
   - [Delayed Messages from Buddies](./features/delayed-messages.md)
   - [Proper JSON Mode](./features/json-mode.md)
+  - [Reminders](./features/reminders.md)
 
 ## Source Code / File Structure
 
