@@ -369,7 +369,7 @@ const openLink = (link: string) => {
 				<p class="text-lg mt-4">
 					<span class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex/BuddyGenAI')">
 						BuddyGenAI </span> is a project by <span class="font-bold underline cursor-pointer"
-						@click="openLink('https://www.thomasmays.net')">Thomas Mays</span> ( <span
+						@click="openLink('https://www.mindofthomas.com')">Thomas Mays</span> ( <span
 						class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex')"> parsehex </span> )
 					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800"> MIT license </span>
 				</p>

@@ -26,24 +26,21 @@ const usingKoboldCpp = computed(() => (
 ));
 </script>
 <template>
-	<AccordionItem value="ai-provider-options">
-		<AccordionTrigger>AI Provider</AccordionTrigger>
-		<AccordionContent class="text-center">
-			<OptionSection label="Chat" labelName="chat-provider">
-				<FeatureTypeSelect type="chat" />
-			</OptionSection>
-			<OptionSection label="Image" labelName="image-provider">
-				<FeatureTypeSelect type="image" />
-			</OptionSection>
-			<OptionSection label="TTS" labelName="tts-provider">
-				<FeatureTypeSelect type="tts" />
-			</OptionSection>
-			<OptionSection label="Transcription" labelName="stt-provider">
-				<FeatureTypeSelect type="stt" />
-			</OptionSection>
-			<OpenRouterOptions v-if="usingOpenRouter" />
-			<KoboldCppOptions v-if="usingKoboldCpp" />
-			<WebLLMModelCard v-if="store.settings.selected_provider_chat === 'webllm'" />
-		</AccordionContent>
-	</AccordionItem>
+	<div class="text-center">
+		<OptionSection label="Chat" labelName="chat-provider">
+			<FeatureTypeSelect type="chat" />
+		</OptionSection>
+		<OptionSection label="Image" labelName="image-provider">
+			<FeatureTypeSelect type="image" />
+		</OptionSection>
+		<OptionSection label="TTS" labelName="tts-provider">
+			<FeatureTypeSelect type="tts" />
+		</OptionSection>
+		<OptionSection label="Transcription" labelName="stt-provider">
+			<FeatureTypeSelect type="stt" />
+		</OptionSection>
+		<OpenRouterOptions v-if="usingOpenRouter" />
+		<KoboldCppOptions v-if="usingKoboldCpp" />
+		<WebLLMModelCard v-if="store.settings.selected_provider_chat === 'webllm'" />
+	</div>
 </template>

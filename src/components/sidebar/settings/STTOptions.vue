@@ -23,21 +23,18 @@ const autoSendSTT = computed({
 });
 </script>
 <template>
-	<AccordionItem value="stt-options">
-		<AccordionTrigger>Speech-to-Text</AccordionTrigger>
-		<AccordionContent>
-			<OptionSection label="Auto Send STT" labelName="auto_send_stt" orientation="vertical">
-				<RadioGroup :default-value="autoSendSTT" v-model="autoSendSTT" id="auto_send_stt" class="flex flex-row">
-					<div class="flex items-center space-x-2">
-						<RadioGroupItem id="auto-stt-yes" value="true">Yes</RadioGroupItem>
-						<Label for="auto-stt-yes" class="block">Yes</Label>
-					</div>
-					<div class="flex items-center space-x-2">
-						<RadioGroupItem id="auto-stt-no" value="false">No</RadioGroupItem>
-						<Label for="auto-stt-no" class="block">No</Label>
-					</div>
-				</RadioGroup>
-			</OptionSection>
-		</AccordionContent>
-	</AccordionItem>
+	<div>
+		<OptionSection label="Auto Send STT" labelName="auto_send_stt" orientation="vertical">
+			<RadioGroup :default-value="autoSendSTT" v-model="autoSendSTT" id="auto_send_stt" class="flex flex-row">
+				<div class="flex items-center space-x-2">
+					<RadioGroupItem id="auto-stt-yes" value="true">Yes</RadioGroupItem>
+					<Label for="auto-stt-yes" class="block">Yes</Label>
+				</div>
+				<div class="flex items-center space-x-2">
+					<RadioGroupItem id="auto-stt-no" value="false">No</RadioGroupItem>
+					<Label for="auto-stt-no" class="block">No</Label>
+				</div>
+			</RadioGroup>
+		</OptionSection>
+	</div>
 </template>

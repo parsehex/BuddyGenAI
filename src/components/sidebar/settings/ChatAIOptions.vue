@@ -35,30 +35,27 @@ const updateStreaming = async (boolVal: boolean) => {
 };
 </script>
 <template>
-	<AccordionItem value="chat-ai-options">
-		<AccordionTrigger>Chat</AccordionTrigger>
-		<AccordionContent>
-			<OptionSection v-if="isOpenRouter" label="Chat Model" labelName="chat-model" orientation="vertical">
-				<div class="flex">
-					<ImportModel type="chat" />
-					<Select :default-value="store.settings.selected_model_chat" @update:model-value="updateChatModel"
-						id="chat-model">
-						<SelectTrigger :title="store.settings.selected_model_chat">
-							<SelectValue placeholder="Select a chat model" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Chat Models</SelectLabel>
-								<SelectItem v-for="model in store.chatModels" :key="model" :value="model"> {{ model }} </SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-			</OptionSection>
-			<OptionSection>
-				<Switch :checked="streaming" @update:checked="updateStreaming" /> Stream AI Resposes
-			</OptionSection>
-			<!-- TODO could add option for smooth typing -->
-		</AccordionContent>
-	</AccordionItem>
+	<div>
+		<OptionSection v-if="isOpenRouter" label="Chat Model" labelName="chat-model" orientation="vertical">
+			<div class="flex">
+				<ImportModel type="chat" />
+				<Select :default-value="store.settings.selected_model_chat" @update:model-value="updateChatModel"
+					id="chat-model">
+					<SelectTrigger :title="store.settings.selected_model_chat">
+						<SelectValue placeholder="Select a chat model" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Chat Models</SelectLabel>
+							<SelectItem v-for="model in store.chatModels" :key="model" :value="model"> {{ model }} </SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+			</div>
+		</OptionSection>
+		<OptionSection>
+			<Switch :checked="streaming" @update:checked="updateStreaming" /> Stream AI Resposes
+		</OptionSection>
+		<!-- TODO could add option for smooth typing -->
+	</div>
 </template>

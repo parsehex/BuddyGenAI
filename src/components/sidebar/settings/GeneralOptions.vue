@@ -66,39 +66,36 @@ const updateDescriptionBuddies = async () => {
 };
 </script>
 <template>
-	<AccordionItem value="general-options">
-		<AccordionTrigger>General</AccordionTrigger>
-		<AccordionContent>
-			<OptionSection label="Your Name" labelName="name" orientation="vertical">
-				<Input v-model="userName" @blur="updateName()" id="name"
-					class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
-			</OptionSection>
-			<OptionSection label="Profile Image" labelName="profile-image" orientation="vertical">
-				<div class="flex items-center space-x-2">
-					<Input v-model="userImage" @blur="updateImage()" id="profile-image"
-						class="border border-gray-300 dark:border-gray-700 rounded-md p-2 flex-grow" type="text"
-						placeholder="Enter image URL or upload" />
-					<label for="file-upload"
-						class="custom-file-upload bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-						Upload Image </label>
-					<input id="file-upload" type="file" accept="image/*" @change="handleImageUpload" class="hidden" />
-				</div>
-				<div v-if="userImage" class="mt-4">
-					<img :src="userImage" alt="User Profile Image" class="w-32 h-32 object-cover rounded-full" />
-				</div>
-			</OptionSection>
-			<OptionSection label="Your Description" labelName="user-description" orientation="vertical">
-				<Textarea v-model="userDescription" @blur="updateDescription()" id="user-description"
-					class="border border-gray-300 dark:border-gray-700 rounded-md p-2" />
-			</OptionSection>
-			<OptionSection label="Show description to Assistant" labelName="show-desc-assistant" orientation="horizontal">
-				<Switch v-model:checked="userDescriptionAssistant" @update:checked="updateDescriptionAssistant()"
-					id="show-desc-assistant" />
-			</OptionSection>
-			<OptionSection label="Show description to Buddies" labelName="show-desc-buddies" orientation="horizontal">
-				<Switch v-model:checked="userDescriptionBuddies" @update:checked="updateDescriptionBuddies()"
-					id="show-desc-buddies" />
-			</OptionSection>
-		</AccordionContent>
-	</AccordionItem>
+	<div>
+		<OptionSection label="Your Name" labelName="name" orientation="vertical">
+			<Input v-model="userName" @blur="updateName()" id="name"
+				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
+		</OptionSection>
+		<OptionSection label="Profile Image" labelName="profile-image" orientation="vertical">
+			<div class="flex items-center space-x-2">
+				<Input v-model="userImage" @blur="updateImage()" id="profile-image"
+					class="border border-gray-300 dark:border-gray-700 rounded-md p-2 flex-grow" type="text"
+					placeholder="Enter image URL or upload" />
+				<label for="file-upload"
+					class="custom-file-upload bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+					Upload Image </label>
+				<input id="file-upload" type="file" accept="image/*" @change="handleImageUpload" class="hidden" />
+			</div>
+			<div v-if="userImage" class="mt-4">
+				<img :src="userImage" alt="User Profile Image" class="w-32 h-32 object-cover rounded-full" />
+			</div>
+		</OptionSection>
+		<OptionSection label="Your Description" labelName="user-description" orientation="vertical">
+			<Textarea v-model="userDescription" @blur="updateDescription()" id="user-description"
+				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" />
+		</OptionSection>
+		<OptionSection label="Show description to Assistant" labelName="show-desc-assistant" orientation="horizontal">
+			<Switch v-model:checked="userDescriptionAssistant" @update:checked="updateDescriptionAssistant()"
+				id="show-desc-assistant" />
+		</OptionSection>
+		<OptionSection label="Show description to Buddies" labelName="show-desc-buddies" orientation="horizontal">
+			<Switch v-model:checked="userDescriptionBuddies" @update:checked="updateDescriptionBuddies()"
+				id="show-desc-buddies" />
+		</OptionSection>
+	</div>
 </template>
