@@ -4,14 +4,13 @@ import {
   type DropdownMenuSubEmits,
   type DropdownMenuSubProps,
   useForwardPropsEmits,
-} from 'radix-vue'
+} from 'reka-ui'
 
 const props = defineProps<DropdownMenuSubProps>()
 const emits = defineEmits<DropdownMenuSubEmits>()
 
 const forwarded = useForwardPropsEmits(props, emits)
 </script>
-
 <template>
   <DropdownMenuSub v-bind="forwarded">
     <slot />

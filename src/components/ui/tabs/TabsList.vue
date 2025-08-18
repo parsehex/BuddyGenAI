@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue';
-import { TabsList, type TabsListProps } from 'radix-vue';
+import { TabsList, type TabsListProps } from 'reka-ui';
 import { cn } from '@/lib/utils';
 
 const props = defineProps<
@@ -13,17 +13,12 @@ const delegatedProps = computed(() => {
 	return delegated;
 });
 </script>
-
 <template>
-	<TabsList
-		v-bind="delegatedProps"
-		:class="
-			cn(
-				'inline-flex h-10 items-center justify-center rounded-md bg-gray-200 p-1 text-muted-foreground',
-				props.class
-			)
-		"
-	>
+	<TabsList v-bind="delegatedProps" :class="cn(
+		'inline-flex h-10 items-center justify-center rounded-md bg-gray-200 p-1 text-muted-foreground',
+		props.class
+	)
+		">
 		<slot />
 	</TabsList>
 </template>

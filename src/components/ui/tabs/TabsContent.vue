@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue';
-import { TabsContent, type TabsContentProps } from 'radix-vue';
+import { TabsContent, type TabsContentProps } from 'reka-ui';
 import { cn } from '@/lib/utils';
 
 const props = defineProps<
@@ -13,17 +13,12 @@ const delegatedProps = computed(() => {
 	return delegated;
 });
 </script>
-
 <template>
-	<TabsContent
-		:class="
-			cn(
-				'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-				props.class
-			)
-		"
-		v-bind="delegatedProps"
-	>
+	<TabsContent :class="cn(
+		'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+		props.class
+	)
+		" v-bind="delegatedProps">
 		<slot />
 	</TabsContent>
 </template>

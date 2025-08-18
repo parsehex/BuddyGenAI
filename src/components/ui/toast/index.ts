@@ -1,4 +1,4 @@
-import type { ToastRootProps } from 'radix-vue';
+import type { ToastRootProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 
 export { default as Toaster } from './Toaster.vue';
@@ -19,7 +19,8 @@ export const toastVariants = cva(
 		variants: {
 			variant: {
 				default: 'border bg-background text-foreground',
-				destructive: 'destructive group border-destructive bg-destructive text-destructive-foreground',
+				destructive:
+					'destructive group border-destructive bg-destructive text-destructive-foreground',
 				info: 'info group border-info bg-info text-info-foreground',
 				success: 'success group border-success bg-success text-success-foreground',
 			},

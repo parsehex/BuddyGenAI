@@ -47,6 +47,12 @@ const deps = [
 		license: 'MIT',
 	},
 	{
+		name: 'dart-sass',
+		link: 'https://github.com/sass/dart-sass',
+		author: 'Google Inc.',
+		license: 'MIT',
+	},
+	{
 		name: 'date-fns',
 		link: 'https://github.com/date-fns/date-fns#readme',
 		author: 'Sasha Koss and Lesha Koss',
@@ -213,15 +219,9 @@ const deps = [
 		license: 'MIT',
 	},
 	{
-		name: 'radix-vue',
-		link: 'https://github.com/radix-vue/radix-vue',
-		author: 'radix-vue',
-		license: 'MIT',
-	},
-	{
-		name: 'dart-sass',
-		link: 'https://github.com/sass/dart-sass',
-		author: 'Google Inc.',
+		name: 'reka-ui',
+		link: 'https://github.com/unovue/reka-ui',
+		author: 'UnoVue',
 		license: 'MIT',
 	},
 	{
@@ -233,13 +233,13 @@ const deps = [
 	{
 		name: 'shadcn-nuxt',
 		link: 'https://github.com/radix-vue/shadcn-vue#readme',
-		author: 'radix-vue',
+		author: 'reka-ui',
 		license: 'MIT',
 	},
 	{
 		name: 'shadcn-vue',
 		link: 'https://github.com/radix-vue/shadcn-vue#readme',
-		author: 'radix-vue',
+		author: 'reka-ui',
 		license: 'MIT',
 	},
 	{

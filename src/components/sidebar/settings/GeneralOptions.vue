@@ -2,10 +2,8 @@
 import { ref, watch } from 'vue';
 import { v4 } from 'uuid';
 import {
-	AccordionTrigger,
-	AccordionItem,
-	AccordionContent,
-} from '@/components/ui/accordion';
+	Button
+} from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -76,9 +74,9 @@ const updateDescriptionBuddies = async () => {
 				<Input v-model="userImage" @blur="updateImage()" id="profile-image"
 					class="border border-gray-300 dark:border-gray-700 rounded-md p-2 flex-grow" type="text"
 					placeholder="Enter image URL or upload" />
-				<label for="file-upload"
-					class="custom-file-upload bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-					Upload Image </label>
+				<label for="file-upload">
+					<Button> Upload Image </Button>
+				</label>
 				<input id="file-upload" type="file" accept="image/*" @change="handleImageUpload" class="hidden" />
 			</div>
 			<div v-if="userImage" class="mt-4">

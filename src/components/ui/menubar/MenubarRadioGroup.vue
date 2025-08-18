@@ -4,7 +4,7 @@ import {
   type MenubarRadioGroupEmits,
   type MenubarRadioGroupProps,
   useForwardPropsEmits,
-} from 'radix-vue'
+} from 'reka-ui'
 
 const props = defineProps<MenubarRadioGroupProps>()
 
@@ -12,7 +12,6 @@ const emits = defineEmits<MenubarRadioGroupEmits>()
 
 const forwarded = useForwardPropsEmits(props, emits)
 </script>
-
 <template>
   <MenubarRadioGroup v-bind="forwarded">
     <slot />

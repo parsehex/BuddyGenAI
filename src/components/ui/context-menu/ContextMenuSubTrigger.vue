@@ -4,7 +4,7 @@ import {
   ContextMenuSubTrigger,
   type ContextMenuSubTriggerProps,
   useForwardProps,
-} from 'radix-vue'
+} from 'reka-ui'
 import { ChevronRight } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 
@@ -18,16 +18,12 @@ const delegatedProps = computed(() => {
 
 const forwardedProps = useForwardProps(delegatedProps)
 </script>
-
 <template>
-  <ContextMenuSubTrigger
-    v-bind="forwardedProps"
-    :class="cn(
-      'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-      inset && 'pl-8',
-      props.class,
-    )"
-  >
+  <ContextMenuSubTrigger v-bind="forwardedProps" :class="cn(
+    'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+    inset && 'pl-8',
+    props.class,
+  )">
     <slot />
     <ChevronRight class="ml-auto h-4 w-4" />
   </ContextMenuSubTrigger>

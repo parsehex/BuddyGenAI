@@ -23,6 +23,7 @@ import { isFeatureAvailable } from '@/src/lib/ai/support';
 import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
 import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
+import { Separator } from '../../ui/separator';
 
 const store = useAppStore();
 const chatProvider = computed(() => store.settings.selected_provider_chat);
@@ -153,6 +154,7 @@ const resetApp = async () => {
 						<STTOptions />
 					</TabsContent>
 				</div>
+				<Separator />
 				<div class="mt-4 flex flex-col items-center">
 					<div class="mb-2 flex items-center">
 						<Button type="button" @click="reloadPage" class="px-4 py-2 rounded-md" variant="ghost">Reload Page</Button>
