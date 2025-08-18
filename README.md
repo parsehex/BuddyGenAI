@@ -31,10 +31,14 @@ These aren't necessarily confirmed, and completed lines aren't necessarily stabl
 
 - [ ] KoboldCpp support
   - [x] Chat
-  - [x] Generate images
+  - [x] Generate profile, chat images
   - [x] Read messages with TTS
   - [ ] Transcribe from your microphone for hands-free messaging
-- [x] In-browser chat/LLM
+- [ ] Fully in-browser AI
+  - [x] Chat / LLM (via [WebLLM](https://webllm.mlc.ai/))
+  - [ ] Images
+  - [ ] TTS
+  - [ ] Transcription
 - [ ] Install the app as a PWA
 - [ ] Buddy/AI memory
   - Primitive version of this with Options -> General -> Your Description
