@@ -32,7 +32,8 @@ export async function makePictureKobold(options: MakePictureOptions) {
 	if (!host) throw new Error('No host defined for koboldcpp');
 	const { posPrompt, negPrompt, size = 512, quality = 'medium' } = options;
 	const height = size;
-	const width = size;
+	let width = size;
+	if (size === 768) width = 512;
 	const res = await fetch(`${host}/sdapi/v1/txt2img`, {
 		method: 'POST',
 		body: JSON.stringify({

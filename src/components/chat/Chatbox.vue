@@ -181,12 +181,10 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			const user = userName.value;
 
 			const chatImageEnabled = store.settings.chat_image_enabled;
-			const isChatImageEnabled =
-				// @ts-ignore
-				chatImageEnabled === '1.0' || chatImageEnabled === 1;
 			let cmdObj = {} as any;
 			let cmd = '';
-			if (isChatImageEnabled) {
+			// if chat images are enabled, decided whether to send one
+			if (chatImageEnabled) {
 				cmd = (await complete(shouldSendImg(user, assistantName), {
 					body: {
 						max_tokens: 512,
@@ -222,7 +220,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			let imgToSave = '';
 			// let explicit = !isValidJSON && cmd?.includes('explicit');
 
-			if (isChatImageEnabled && cmdObj.do_send) {
+			if (chatImageEnabled && cmdObj.do_send) {
 				let buddyAppearance = '';
 				let gender = '';
 				const genderPrompt = genderFromName(
