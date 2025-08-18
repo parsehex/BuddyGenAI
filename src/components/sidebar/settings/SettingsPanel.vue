@@ -46,11 +46,11 @@ const resetApp = async () => {
 <template>
 	<div class="flex h-screen">
 		<Tabs default-value="general" orientation="vertical" class="flex flex-row w-full">
-			<TabsList class="flex flex-col h-full dark:bg-gray-800 justify-start py-2 border-r">
+			<TabsList class="flex flex-col h-full dark:bg-gray-800 justify-start border-r">
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<Button variant="ghost" @click="showLabels = !showLabels"
-							:class="['flex flex-col items-center justify-center p-2 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							:class="['flex flex-col items-center justify-center p-2 h-auto w-auto py-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
 							<Menu class="h-6 w-6" />
 						</Button>
 					</TooltipTrigger>
@@ -59,8 +59,8 @@ const resetApp = async () => {
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<TabsTrigger value="general" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<Settings class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">General</div>
 							</Button>
@@ -71,8 +71,8 @@ const resetApp = async () => {
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<TabsTrigger value="ai-providers" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<Cloud class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">Providers</div>
 							</Button>
@@ -83,8 +83,8 @@ const resetApp = async () => {
 				<Tooltip v-if="chatProvider && chatProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="chat-ai" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<MessageSquare class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">Chat</div>
 							</Button>
@@ -95,8 +95,8 @@ const resetApp = async () => {
 				<Tooltip v-if="imageProvider && imageProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="image-ai" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<Image class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">Image</div>
 							</Button>
@@ -107,8 +107,8 @@ const resetApp = async () => {
 				<Tooltip v-if="ttsProvider && ttsProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="tts" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<Volume2 class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">TTS</div>
 							</Button>
@@ -119,8 +119,8 @@ const resetApp = async () => {
 				<Tooltip v-if="sttProvider && sttProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="stt" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto mb-2', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost">
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
 								<Mic class="h-6 w-6" />
 								<div v-if="showLabels" class="text-xs mt-1">STT</div>
 							</Button>
