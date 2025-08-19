@@ -4,6 +4,7 @@ import VueRouter from 'unplugin-vue-router/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwind from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -20,6 +21,7 @@ export default defineConfig({
 		// ⚠️ Vue must be placed after VueRouter()
 		Vue(),
 		tsconfigPaths(),
+		nodePolyfills(),
 	],
 	// https://stackoverflow.com/a/72095753
 	resolve: {
