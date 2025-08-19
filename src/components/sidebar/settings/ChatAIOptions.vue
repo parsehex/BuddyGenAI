@@ -2,11 +2,6 @@
 import { computed, ref } from 'vue';
 import { useAppStore } from '@/src/stores/main';
 import {
-	AccordionTrigger,
-	AccordionItem,
-	AccordionContent,
-} from '@/components/ui/accordion';
-import {
 	Select,
 	SelectTrigger,
 	SelectValue,
@@ -15,7 +10,7 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import OptionSection from './OptionSection.vue';
 import ImportModel from '../../ImportModel.vue';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';

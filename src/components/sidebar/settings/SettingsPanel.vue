@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import useElectron from '@/composables/useElectron';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAppStore } from '@/stores/main';
 import { Button } from '@/components/ui/button';
@@ -16,14 +14,13 @@ import { Settings, Cloud, MessageSquare, Image, Volume2, Mic, Menu } from 'lucid
 import GeneralOptions from './GeneralOptions.vue';
 import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
-import TTSOptions from './TTSOptions.vue';
-import STTOptions from './STTOptions.vue';
 import AIProviderOptions from './AIProviderOptions/Main.vue';
 import { isFeatureAvailable } from '@/src/lib/ai/support';
 import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
 import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 import { Separator } from '../../ui/separator';
+import VoiceOptions from './VoiceOptions.vue';
 
 const store = useAppStore();
 const chatProvider = computed(() => store.settings.selected_provider_chat);
@@ -46,7 +43,7 @@ const resetApp = async () => {
 <template>
 	<div class="flex h-screen">
 		<Tabs default-value="general" orientation="vertical" class="flex flex-row w-full">
-			<TabsList class="flex flex-col h-full dark:bg-gray-800 justify-start border-r">
+			<TabsList class="flex flex-col h-full dark:bg-gray-700 justify-start border-r">
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<Button variant="ghost" @click="showLabels = !showLabels"
@@ -106,27 +103,15 @@ const resetApp = async () => {
 				</Tooltip>
 				<Tooltip v-if="ttsProvider && ttsProvider !== '0'">
 					<TooltipTrigger as-child>
-						<TabsTrigger value="tts" as-child
+						<TabsTrigger value="voice" as-child
 							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
 							<Button variant="ghost" class="py-2">
 								<Volume2 class="h-6 w-6" />
-								<div v-if="showLabels" class="text-xs mt-1">TTS</div>
+								<div v-if="showLabels" class="text-xs mt-1">Voice</div>
 							</Button>
 						</TabsTrigger>
 					</TooltipTrigger>
-					<TooltipContent side="right">Text-to-Speech Settings</TooltipContent>
-				</Tooltip>
-				<Tooltip v-if="sttProvider && sttProvider !== '0'">
-					<TooltipTrigger as-child>
-						<TabsTrigger value="stt" as-child
-							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
-							<Button variant="ghost" class="py-2">
-								<Mic class="h-6 w-6" />
-								<div v-if="showLabels" class="text-xs mt-1">STT</div>
-							</Button>
-						</TabsTrigger>
-					</TooltipTrigger>
-					<TooltipContent side="right">Speech-to-Text Settings</TooltipContent>
+					<TooltipContent side="right">Voice Settings</TooltipContent>
 				</Tooltip>
 			</TabsList>
 			<ScrollArea class="h-screen pb-12 flex-grow">
@@ -147,11 +132,9 @@ const resetApp = async () => {
 					<TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
 						<ImageAIOptions />
 					</TabsContent>
-					<TabsContent v-if="ttsProvider && ttsProvider !== '0'" value="tts">
-						<TTSOptions />
-					</TabsContent>
-					<TabsContent v-if="sttProvider && sttProvider !== '0'" value="stt">
-						<STTOptions />
+					<TabsContent v-if="(ttsProvider && ttsProvider !== '0') || (sttProvider && sttProvider !== '0')"
+						value="voice">
+						<VoiceOptions />
 					</TabsContent>
 				</div>
 				<Separator />

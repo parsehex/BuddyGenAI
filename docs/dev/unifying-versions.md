@@ -36,4 +36,6 @@ There are a number of differences and issues between these to-be 3 "form factors
 
 Eventually I want to explore having the electron version be its own repo, just for the electron-specific parts.
 
+I'm recently thinking of having a separate repo for the electron / tauri version, providing just the wrapper while using the main repo to pull in the app's code.
+
 [1]: ./database-info.md
