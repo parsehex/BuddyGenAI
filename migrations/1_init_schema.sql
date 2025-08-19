@@ -1,3 +1,5 @@
+-- files in migrations/ are for the old and not updated electron version
+
 CREATE TABLE persona (
 	id TEXT PRIMARY KEY,
 	created TIMESTAMP NOT NULL,
