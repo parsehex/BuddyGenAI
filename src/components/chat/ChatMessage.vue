@@ -61,8 +61,8 @@ const emit = defineEmits<{
 const isUser = computed(() => message.value.role === 'user');
 
 const aiName = computed(() => {
-	if (props.threadMode === 'persona') return props.currentBuddy?.name || 'AI'
-	return 'AI';
+	if (props.threadMode === 'persona') return props.currentBuddy?.name || 'Assistant'
+	return 'Assistant';
 })
 
 const isTypingIndicator = ref(false);
@@ -216,10 +216,10 @@ const doTTS = async () => {
 		<ContextMenu>
 			<ContextMenuTrigger>
 				<Card class="chat-message whitespace-pre-wrap" :id="'message-' + message.id">
-					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2">
+					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2 py-2">
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<!-- TODO button to Request Pic -->
-						<Avatar v-if="isUser" class="text-md mt-2 font-bold" :style="{
+						<Avatar v-if="isUser" class="text-md font-bold" :style="{
 							backgroundColor: textToHslColor(userName, 60, 80),
 						}">
 							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
@@ -238,14 +238,15 @@ const doTTS = async () => {
 						</Button>
 						<!-- add audio speed control -->
 					</CardHeader>
-					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 pt-1 pb-2">
-						<Avatar v-if="isUser" class="text-md mt-2 font-bold" :style="{
-							backgroundColor: textToHslColor(userName, 60, 80),
+					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 py-2">
+						<Avatar class="text-md font-bold" :style="{
+							backgroundColor: isUser ? textToHslColor(userName, 60, 80) : '',
 						}">
-							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
+							<AvatarImage v-if="isUser && store.settings.user_image" :src="store.settings.user_image" />
+							<AvatarImage v-if="!isUser" src="/assets/logo.png" />
 							<AvatarFallback v-else>{{ msgInitials }}</AvatarFallback>
-						</Avatar> {{ isUser ? userName : 'AI' }} <Button v-if="(!isUser && ttsEnabled) || hasTTS" @click="doTTS"
-							:variant="hasTTS ? 'secondary' : 'ghost'" size="sm" class="ml-2" :disabled="ttsLoading">
+						</Avatar> {{ isUser ? userName : 'Assistant' }} <Button v-if="(!isUser && ttsEnabled) || hasTTS"
+							@click="doTTS" :variant="hasTTS ? 'secondary' : 'ghost'" size="sm" class="ml-2" :disabled="ttsLoading">
 							<Volume2 />
 						</Button>
 					</CardHeader>
