@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@vueuse/core';
 
-import { Settings, Cloud, MessageSquare, Image, Volume2, Mic, Menu } from 'lucide-vue-next';
+import { Settings, Cloud, MessageSquare, Image, Volume2, Menu, CircleHelp } from 'lucide-vue-next';
 
 import GeneralOptions from './GeneralOptions.vue';
 import ChatAIOptions from './ChatAIOptions.vue';
@@ -21,7 +21,9 @@ import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 import { Separator } from '../../ui/separator';
 import VoiceOptions from './VoiceOptions.vue';
+import useElectron from '@/src/composables/useElectron';
 
+const { openExternalLink } = useElectron();
 const store = useAppStore();
 const chatProvider = computed(() => store.settings.selected_provider_chat);
 const imageProvider = computed(() => store.settings.selected_provider_image);
@@ -112,6 +114,16 @@ const resetApp = async () => {
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Voice Settings</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
+						<Button variant="ghost" :class="`py-4 flex flex-col min-h-[50px]`"
+							@click="openExternalLink('https://docs.buddygenai.com')">
+							<CircleHelp class="h-6 w-6" />
+							<div v-if="showLabels" class="text-xs mt-1">Help</div>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right">Go to documentation site</TooltipContent>
 				</Tooltip>
 			</TabsList>
 			<ScrollArea class="h-screen pb-12 flex-grow">
