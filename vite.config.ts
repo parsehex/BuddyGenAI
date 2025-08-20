@@ -31,5 +31,4 @@ export default defineConfig({
 		sourcemap: isDev,
 		outDir: './.output/public',
 	},
-	},
 });
