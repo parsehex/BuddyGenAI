@@ -29,5 +29,7 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: isDev,
+		outDir: './.output/public',
+	},
 	},
 });
