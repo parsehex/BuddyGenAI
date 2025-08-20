@@ -39,6 +39,18 @@ const other = {
 				return '';
 		}
 	},
+	chatModelsOpenaiUrl: async () => {
+		const store = useAppStore();
+		switch (store.settings.selected_provider_chat) {
+			case 'openrouter':
+				return 'https://openrouter.ai/api/v1/models';
+			case 'koboldcpp':
+				return store.settings.koboldcpp_host + '/v1/models';
+			case '0':
+			default:
+				return '';
+		}
+	},
 };
 
 const message = {

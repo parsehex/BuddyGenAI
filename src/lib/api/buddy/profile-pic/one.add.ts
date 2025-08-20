@@ -20,7 +20,8 @@ interface AddImageResponse {
 /** `imgDataB64` should already be formatted and prefixed with "data:image..." */
 export default async function addProfilePic(
 	buddyId: string,
-	imgDataB64: string
+	imgDataB64: string,
+	isManual = false
 ): Promise<AddImageResponse> {
 	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 
@@ -50,11 +51,9 @@ export default async function addProfilePic(
 	const currentPics = buddy.profile_pics || [];
 	currentPics.push(filename);
 
-	const sqlUpdate = update(
-		'persona',
-		{ profile_pic: filename, profile_pics: currentPics },
-		{ id: buddyId }
-	);
+	const data = { profile_pic: filename, profile_pics: currentPics } as any;
+	if (isManual) data.profile_pic_prompt = '';
+	const sqlUpdate = update('persona', data, { id: buddyId });
 	await dbRun(sqlUpdate[0], sqlUpdate[1]);
 
 	console.log('added pic', filename);

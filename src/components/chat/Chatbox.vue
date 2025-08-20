@@ -150,7 +150,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			const lastMessage = messages.value[messages.value.length - 1];
 
-			// TODO idea here is to allow the user to specify a note that is extracted + added as a new
+			// TODO (half-baked) idea here is to allow the user to specify a note that is extracted + added as a new
 			//   system message that further instructs the ai buddy
 			let addedInstruction = '';
 			const noteRegex = /^\[Note: (.*)\]/;
@@ -194,31 +194,22 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 							.map(
 								(m) =>
 								({
-									role: m.role === 'user' ? user : assistantName,
+									role: m.role,
 									content: m.content,
 								} as ChatMessage)
 							)
 							.slice(-6),
 					},
-				})) as string;
+				}, true)) as string;
 
-				console.log('cmd', cmd.length, cmd);
-				cmd = attemptToFixJson(cmd);
-
-				let isValidJSON = false;
 				try {
-					JSON.parse(cmd);
-					isValidJSON = true;
-				} catch (e) {
-					isValidJSON = false;
-				}
-				if (isValidJSON) {
 					cmdObj = JSON.parse(cmd);
-				}
+					if (Array.isArray(cmdObj)) cmdObj = cmdObj[0];
+				} catch (e) { }
+				console.log('cmd', cmdObj);
 			}
 
 			let imgToSave = '';
-			// let explicit = !isValidJSON && cmd?.includes('explicit');
 
 			if (chatImageEnabled && cmdObj.do_send) {
 				let buddyAppearance = '';
@@ -248,12 +239,12 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						temperature: 0.1,
 						messages: messages.value.slice(-6),
 					},
-				});
+				}, true);
 				console.log('img description', img);
 				if (img) {
-					// explicit = img?.includes('explicit');
 					try {
-						const o = JSON.parse(img);
+						let o = JSON.parse(img);
+						if (Array.isArray(o)) o = o[0];
 						cmdObj.description = o.description;
 					} catch (e) {
 						console.log('error parsing img description', e);
@@ -262,8 +253,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				}
 
 				if (cmdObj.description && cmdObj.do_send) {
-					// TODO update for kobold
-					// if (cmdObj.description && cmdObj.do_send && !explicit) {
 					const lastMessage = JSON.parse(
 						JSON.stringify(messages.value[messages.value.length - 1])
 					);
@@ -276,12 +265,11 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 					let p = (await complete(imgPromptFromDescription(cmdObj.description), {
 						body: { max_tokens: 125, temperature: 0.1 },
-					})) as string;
+					}, true)) as string;
 					console.log('img prompt', p);
 					if (p) {
-						p = attemptToFixJson(p);
 						p = JSON.parse(p);
-
+						if (Array.isArray(p)) p = p[0];
 						const imgId = v4();
 						const filename = imgId;
 						const quality = store.settings.chat_image_quality;
@@ -302,13 +290,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					}
 				}
 			}
-			// if (explicit) {
-			// 	toast({
-			// 		variant: 'destructive',
-			// 		description:
-			// 			'The requested image was considered explicit. Please try again.',
-			// 	});
-			// }
 
 			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {

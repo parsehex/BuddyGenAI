@@ -213,9 +213,8 @@ onMounted(() => {
 <template>
 	<div class="flex flex-col items-center justify-center w-full">
 		<div class="flex flex-col items-center justify-center w-full">
-			<Label class="text-lg">Appearance Options</Label>
 			<div class="flex flex-col items-center justify-center w-full">
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 mb-2">
 					<Button type="button" @click="newAppearanceOptions()" variant="outline"> Refresh All Options </Button>
 					<Spinner v-if="isLoading" />
 					<Button type="button" @click="randomizeOptions()" variant="outline"> Randomize Options </Button>

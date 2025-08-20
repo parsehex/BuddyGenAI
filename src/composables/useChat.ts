@@ -1,11 +1,10 @@
 import { ref, computed } from 'vue';
 import type { ChatMessage } from '@/lib/api/types-db';
-import axios from 'axios';
 import { v4 } from 'uuid';
-import urls from '@/lib/api/urls';
 import { AppSettings } from '@/lib/api/AppSettings';
 import { useAppStore } from '../stores/main';
-import { chat } from '../lib/ai/webllm';
+import { useChatAI, type ChatRequest } from './ai/useChatAI';
+import { popError } from '../lib/utils';
 
 interface UseChatOptions {
 	initialMessages?: ChatMessage[];
@@ -15,7 +14,6 @@ interface UseChatOptions {
 }
 
 export default function useChat(options: UseChatOptions) {
-	const BaseUrl = ref('');
 	const headers = ref({
 		'Content-Type': 'application/json',
 		'HTTP-Referer': 'https://buddygenai.com/',
@@ -23,11 +21,10 @@ export default function useChat(options: UseChatOptions) {
 	} as Record<string, any>);
 
 	const store = useAppStore();
+	const chatAI = useChatAI();
 	const messages = ref([] as ChatMessage[]);
 	const input = ref('');
 	const isLoading = ref(false);
-
-	const controller = new AbortController();
 
 	function setAPIKeyHeader() {
 		const key = AppSettings.get('openrouter_api_key') as string;
@@ -41,7 +38,9 @@ export default function useChat(options: UseChatOptions) {
 			store.settings.selected_provider_chat === 'openrouter' &&
 			!headers.value['Authorization']
 		) {
-			throw new Error('Must connect OpenRouter account');
+			// TODO
+			popError('Must connect OpenRouter account');
+			return;
 		}
 
 		// construct message obj, add to messages
@@ -62,7 +61,6 @@ export default function useChat(options: UseChatOptions) {
 		isLoading.value = true;
 		const thread_index = messages.value.length;
 		// send new messages to server, create assistant message
-		let i = 0;
 		const msg = ref({
 			created: Date.now(),
 			updated: null,
@@ -76,114 +74,29 @@ export default function useChat(options: UseChatOptions) {
 		} as ChatMessage);
 		messages.value.push(msg.value);
 
-		const isWebLLM = AppSettings.get('selected_provider_chat') === 'webllm';
-		if (isWebLLM) {
-			if (!store.settings.chat_streaming) {
-				const response = await chat({
-					...options.body,
-					messages: messagesToSend,
-					stream: false,
-				});
-				msg.value.content = response;
-				isLoading.value = false;
-				if (options.onFinish) {
-					options.onFinish(messages.value);
-				}
-			} else {
-				const response = await chat({
-					...options.body,
-					messages: messagesToSend,
-					stream: true,
-					stream_callback: (s: string) => {
-						msg.value.content += s;
-					},
-				});
-				msg.value.content = response;
-				isLoading.value = false;
-				if (options.onFinish) {
-					options.onFinish(messages.value);
-				}
-			}
-			return;
-		}
-
-		if (!store.settings.chat_streaming) {
-			const res = await axios({
-				url: BaseUrl.value,
-				method: 'post',
-				headers: headers.value,
-				signal: controller.signal,
-				data: { ...options.body, messages: messagesToSend, stream: false },
-			})
-				.then((res) => {
-					return res.data;
-				})
-				.catch((err) => {
-					if (err.name === 'CanceledError' || err.name === 'AbortError') {
-						console.log('Request was cancelled.');
-						return;
-					}
-					console.error('Request failed:', err);
-					isLoading.value = false;
-					// TODO the partial message doesn't save
-				});
-			msg.value.content = res.choices[0].message.content;
-			isLoading.value = false;
-			if (options.onFinish) {
-				options.onFinish(messages.value);
-			}
-			return;
-		}
-
-		// stream:
-		console.log('streaming');
-		axios({
-			url: BaseUrl.value,
-			method: 'post',
-			headers: headers.value,
-			signal: controller.signal,
-			data: { ...options.body, messages: messagesToSend, stream: true },
-			onDownloadProgress: (progressEvent) => {
-				const xhr = progressEvent.event.target;
-				const { responseText } = xhr;
-				// responseText contains all chunks so far
-				const chunks = responseText.split('data:').map((c: string) => c.trim());
-				let content = '';
-				let isLast = false;
-				for (const chunkStr of chunks) {
-					if (!chunkStr || chunkStr[0] === ':') continue;
-					if (chunkStr.trim() === '[DONE]') {
-						isLast = true;
-						break;
-					}
-
-					const chunk = JSON.parse(chunkStr);
-					content += chunk.choices[0].delta.content || '';
-
-					// does chunk have `usage` object?
-					if (chunk.usage) {
-						isLast = true;
-					}
-				}
-				msg.value.content = content;
-
-				if (isLast) {
-					isLoading.value = false;
-					if (options.onFinish) {
-						options.onFinish(messages.value);
-					}
-				}
-
-				i++;
+		const stream = store.settings.chat_streaming;
+		const req: ChatRequest = {
+			...options.body,
+			messages: messagesToSend,
+			stream,
+			stream_callback: (s: string) => {
+				msg.value.content = s;
 			},
-		}).catch((err) => {
+		};
+		try {
+			const response = await chatAI.chat(req);
+			msg.value.content = response || '';
+		} catch (err: any) {
 			if (err.name === 'CanceledError' || err.name === 'AbortError') {
 				console.log('Request was cancelled.');
 				return;
 			}
 			console.error('Request failed:', err);
-			isLoading.value = false;
-		});
+		}
+		if (options.onFinish) {
+			options.onFinish(messages.value);
+		}
+		isLoading.value = false;
 	}
 
 	function setMessages(newMessages: ChatMessage[]) {
@@ -195,10 +108,6 @@ export default function useChat(options: UseChatOptions) {
 		await handleSubmit(new Event('reload'), true);
 	}
 
-	function stop() {
-		controller.abort();
-	}
-
 	function append(message: ChatMessage) {
 		// add message and submit
 		messages.value.push(message);
@@ -208,9 +117,6 @@ export default function useChat(options: UseChatOptions) {
 	if (options.initialMessages) {
 		setMessages(options.initialMessages);
 	}
-	(async () => {
-		BaseUrl.value = await urls.other.llamacppServerUrl();
-	})();
 
 	return {
 		messages: computed(() => messages.value),
@@ -219,7 +125,7 @@ export default function useChat(options: UseChatOptions) {
 		setMessages,
 		reload,
 		isLoading,
-		stop,
+		stop: chatAI.stop,
 		append,
 	};
 }

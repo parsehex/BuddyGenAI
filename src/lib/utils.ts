@@ -176,3 +176,10 @@ export function attemptToFixJson(
 
 	return json;
 }
+
+export function isAsyncIterable(input: any) {
+	if (input == null) {
+		return false; // Null or undefined values cannot be async iterable
+	}
+	return typeof input[Symbol.asyncIterator] === 'function';
+}

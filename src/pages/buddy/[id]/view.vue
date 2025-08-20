@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount } from 'vue';
+import { ref, onBeforeMount, computed } from 'vue';
 import { useRoute } from 'vue-router/auto';
 import { Plus } from 'lucide-vue-next';
 import { formatDistanceToNow } from 'date-fns';
@@ -93,86 +93,50 @@ const createThread = async () => {
 	});
 	router.push(`/chat/${newThread.id}`);
 };
-</script>
 
+const buddyNameLabel = computed(() => name ? name : 'this	buddy')
+</script>
 <template>
-	<ScrollArea
-		class="flex flex-col items-center text-center justify-center h-screen mb-12"
-	>
+	<ScrollArea class="flex flex-col items-center text-center justify-center h-screen mb-12">
 		<h1 class="text-2xl font-bold">
 			<span class="text-blue-500">{{ name }}</span>
 		</h1>
-		<Button
-			type="button"
-			@click="router.push(`/buddy/${id}/edit`)"
-			variant="outline"
-		>
-			Edit
-		</Button>
+		<Button type="button" class="my-2" @click="router.push(`/buddy/${id}/edit`)" variant="outline"> Edit </Button>
 		<!-- <RouterLink class="ml-4" :to="`/buddy/${id}/history`">
 			Version History
 		</RouterLink> -->
 		<Card class="w-full md:w-2/3 mx-auto text-left">
 			<CardHeader class="text-lg flex flex-col justify-center items-center">
-				<BuddyAvatar
-					v-if="buddy"
-					:buddy="buddy"
-					size="lg"
-					class="hover:scale-150 text-3xl mr-0"
-				/>
+				<BuddyAvatar v-if="buddy" :buddy="buddy" size="lg" class="hover:scale-150 text-3xl mr-0" />
 			</CardHeader>
-			<CardContent class="whitespace-pre-wrap">
-				{{ description }}
-				<span v-if="description.length === 0" class="text-gray-400 italic">
-					No description &nbsp;&mdash;&nbsp;
-					<RouterLink class="text-blue-500 underline" :to="`/buddy/${id}/edit`">
-						Add description
-					</RouterLink>
+			<CardContent class="whitespace-pre-wrap"> {{ description }} <span v-if="description.length === 0"
+					class="text-gray-400 italic"> No description &nbsp;&mdash;&nbsp; <RouterLink class="text-blue-500 underline"
+						:to="`/buddy/${id}/edit`"> Add description </RouterLink>
 				</span>
 				<br />
 				<br />
-				<span class="text-xs text-muted-foreground italic">
-					{{ time_label }} {{ time_at }}
-				</span>
+				<span class="text-xs text-muted-foreground italic"> {{ time_label }} {{ time_at }} </span>
 			</CardContent>
 		</Card>
-		<h2 class="text-xl font-bold mt-4 flex items-center justify-center">
-			Chats with {{ name }}
-			<Button
-				v-if="threads.length > 0 && store.settings.selected_provider_chat"
-				type="button"
-				size="sm"
-				class="ml-4"
-				@click="createThread"
-			>
+		<h2 class="text-xl font-bold mt-4 flex items-center justify-center"> Chats with {{ name }} <Button
+				v-if="threads.length > 0 && store.settings.selected_provider_chat" type="button" size="sm" class="ml-4"
+				@click="createThread">
 				<Plus />
 			</Button>
 		</h2>
-		<div
-			v-if="threads.length === 0"
-			class="text-gray-400 italic text-center mt-1"
-		>
-			No chats with {{ name ? name : 'this buddy' }} yet.
-			<br />
-			<Button v-if="store.settings.selected_provider_chat" type="button" class="mt-2" @click="createThread">
-				Create Thread
-			</Button>
+		<div v-if="threads.length === 0" class="text-gray-400 italic text-center mt-1"> No chats with {{ buddyNameLabel }}
+			yet. <br />
+			<Button v-if="store.settings.selected_provider_chat" type="button" class="mt-2" @click="createThread"> Create
+				Thread </Button>
 		</div>
 		<div v-else>
 			<div v-for="thread in threads" :key="thread.id" class="mt-2">
-				<RouterLink :to="`/chat/${thread.id}`" class="text-blue-500 underline">
-					{{ thread.name }}
-				</RouterLink>
+				<RouterLink :to="`/chat/${thread.id}`" class="text-blue-500 underline"> {{ thread.name }} </RouterLink>
 			</div>
 		</div>
-
-		<AllThreadsImages
-			v-if="threadsNameImages.length"
-			:threads="threadsNameImages"
-		/>
+		<AllThreadsImages v-if="threadsNameImages.length" :threads="threadsNameImages" />
 	</ScrollArea>
 </template>
-
 <style>
 /*  */
 </style>

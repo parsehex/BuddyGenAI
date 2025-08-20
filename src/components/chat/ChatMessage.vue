@@ -219,7 +219,7 @@ const doTTS = async () => {
 					<CardHeader v-if="threadMode === 'persona'" class="p-3 flex flex-row items-center space-x-2 py-2">
 						<!-- would be good ux to have an option or a link to option to update user name -->
 						<!-- TODO button to Request Pic -->
-						<Avatar v-if="isUser" class="text-md font-bold" :style="{
+						<Avatar v-if="isUser" class="text-md font-bold mr-2" :style="{
 							backgroundColor: textToHslColor(userName, 60, 80),
 						}">
 							<AvatarImage v-if="store.settings.user_image" :src="store.settings.user_image" />
@@ -239,7 +239,7 @@ const doTTS = async () => {
 						<!-- add audio speed control -->
 					</CardHeader>
 					<CardHeader v-else class="p-3 flex flex-row items-center space-x-2 py-2">
-						<Avatar class="text-md font-bold" :style="{
+						<Avatar class="text-md font-bold mr-2" :style="{
 							backgroundColor: isUser ? textToHslColor(userName, 60, 80) : '',
 						}">
 							<AvatarImage v-if="isUser && store.settings.user_image" :src="store.settings.user_image" />

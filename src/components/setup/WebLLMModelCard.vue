@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as webllm from "@mlc-ai/web-llm";
 import { useAppStore } from '@/src/stores/main';
-import { getModels, loadModel } from '@/src/lib/ai/webllm';
+import { getModels, loadModel } from '@/src/lib/ai/chat/webllm';
 import { AppSettings } from '@/src/lib/api/AppSettings';
 
 const emits = defineEmits(['completed']);
@@ -18,7 +18,7 @@ const initProgress = ref('Initializing...');
 
 onMounted(async () => {
 	try {
-		models.value = getModels();
+		models.value = await getModels();
 		loading.value = false;
 		const model = AppSettings.get('selected_model_chat') as string;
 		if (model) selectedModel.value = model;
@@ -46,7 +46,7 @@ async function load() {
 		store.settings.selected_provider_chat = 'webllm';
 		store.settings.selected_model_chat = selectedModel.value;
 		emits('completed');
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Failed to initialize WebLLM engine:", error);
 		initProgress.value = `Failed to load model: ${error.message}`;
 	}

@@ -1,14 +1,16 @@
+import { useChatAI } from '@/src/composables/ai/useChatAI';
 import { AppSettings } from '../api/AppSettings';
 import type { ChatMessage } from '../api/types-db';
 import urls from '../api/urls';
 import { MODEL_NAME } from '../constants';
-import { chat } from './webllm';
+import { chat } from './chat/webllm';
 
 export async function complete(
 	prompt: string,
 	options: {
 		body: { temperature?: number; max_tokens?: number; messages?: ChatMessage[] };
-	} = { body: {} }
+	} = { body: {} },
+	json = false
 ) {
 	// if there is a prompt and messages, set first message to prompt
 	if (prompt && options.body.messages) {
@@ -23,28 +25,35 @@ export async function complete(
 	if (!prompt && !options.body.messages)
 		throw new Error('Tried to complete nothing');
 
-	const isWebLLM = AppSettings.get('selected_provider_chat') === 'webllm';
-	if (isWebLLM) {
-		const response = await chat(options.body);
-		return response;
-	}
-
-	const key = AppSettings.get('openrouter_api_key') as string;
-	const response = await fetch(await urls.other.llamacppServerUrl(), {
-		method: 'POST',
-		headers: {
-			Authorization: 'Bearer ' + key,
-			'Content-Type': 'application/json',
-			'HTTP-Referer': 'https://buddygenai.com/',
-			'X-TITLE': 'BuddyGenAI',
-		},
-		body: JSON.stringify({
-			...options.body,
-			model: MODEL_NAME,
-		}),
+	const res = await useChatAI().chat({
+		...options.body,
+		messages: options.body.messages as ChatMessage[],
+		json,
 	});
-	// return await response.text();
-	const res = await response.json();
-	// console.log(res);
-	return res.choices[0].message.content;
+	return res as string;
+
+	// const isWebLLM = AppSettings.get('selected_provider_chat') === 'webllm';
+	// if (isWebLLM) {
+	// 	const response = await chat(options.body as any);
+	// 	return response;
+	// }
+
+	// const key = AppSettings.get('openrouter_api_key') as string; // doesn't matter when using kobold
+	// const response = await fetch(await urls.other.llamacppServerUrl(), {
+	// 	method: 'POST',
+	// 	headers: {
+	// 		Authorization: 'Bearer ' + key,
+	// 		'Content-Type': 'application/json',
+	// 		'HTTP-Referer': 'https://buddygenai.com/',
+	// 		'X-TITLE': 'BuddyGenAI',
+	// 	},
+	// 	body: JSON.stringify({
+	// 		...options.body,
+	// 		model: MODEL_NAME,
+	// 	}),
+	// });
+	// // return await response.text();
+	// const res = await response.json();
+	// // console.log(res);
+	// return res.choices[0].message.content;
 }
