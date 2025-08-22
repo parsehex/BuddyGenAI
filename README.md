@@ -72,13 +72,8 @@ Aside from overall cleaning up the project and improving the look of it, I have 
 
 ## Developer Notes
 
-- I haven't fully deleted `electron/` and refactored away from electron-related terms (e.g. `useElectron` is full of no-ops)
 - Apologies for the lack of testing and the overall messiness of the project.
-  - Several refactors are needed.
-    - Lots of duplicated code (AppSettings, anything else shared between electron/client)
-    - Project minimally uses Vercel's AI SDK (really just for message streaming), I want to re-implement to avoid the need for a server (just llama.cpp server then) and reduce dependencies.
-    - Accessing data from db is a mess, want to use [tRPC](https://trpc.io/) with electron's IPC to reduce complexity.
-  - Planning to use [Vitest](https://vitest.dev/) for testing before undergoing major refactors.
+  - Planning to use [Vitest](https://vitest.dev/) for testing one day.
 
 ## Collaborators Welcome!
 
@@ -87,7 +82,5 @@ If you'd like to contribute or otherwise help make this app, I look forward to h
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
-
-Copyright (C) 2024-2025 Thomas Mays
 
 All AI Models are licensed under their respective licenses. See the [Licenses](./licenses/) folder for more details.
