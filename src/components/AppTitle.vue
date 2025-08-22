@@ -5,14 +5,9 @@ defineProps({
 	newHere: Boolean
 })
 </script>
-
-<template>
-	{{ newHere ? 'Welcome to' : '' }}
-	<span class=" dark:bg-gray-600 rounded-b px-1 mb-2">
+<template> {{ newHere ? 'Welcome to' : '' }} <span class=" dark:bg-gray-600 rounded-b px-1 mb-2">
 		<div class="underline inline">
-			<span style="color: #61dafb">BuddyGen</span>
+			<span style="color: #61dafb">buddyGen</span>
 			<span style="color: #111">AI</span>
 		</div>
-	</span>
-	(Prototype)
-</template>
+	</span> (Prototype) </template>
