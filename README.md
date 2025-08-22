@@ -1,10 +1,10 @@
-# BuddyGenAI (prototype)
+# buddyGenAI (prototype)
 
-BuddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
+buddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
 
 In the app, you name your buddies as well as give them a description to influence how they chat with you. When you're connected to image AI,, you can generate profile pictures for your buddies which display in chat.
 
-This is a passion project of mine to create an experience that emulates having friends to talk to and hang out with. There are many projects and their work that have made this possible, so I encourage checking out the [licenses folder](./licenses/) as well as in-app, Settings tab -> **BuddyGenAI Credits / Licenses**.
+This is a passion project of mine to create an experience that emulates having friends to talk to and hang out with. There are many projects and their work that have made this possible, so I encourage checking out the [licenses folder](./licenses/) as well as in-app, Settings tab -> **buddyGenAI Credits / Licenses**.
 
 I hope others find this project interesting and/or enjoyable as well.
 
@@ -12,7 +12,7 @@ I hope others find this project interesting and/or enjoyable as well.
 
 > [!NOTE]
 >
-> The original iteration of this app used Electron with embedded AI engines but I'm not updating it for now. The branch with that version in tact is [available here](https://github.com/parsehex/BuddyGenAI/tree/main).
+> The original iteration of this app used Electron with embedded AI engines but I'm not updating it for now. The branch with that version in tact is [available here](https://github.com/parsehex/buddyGenAI/tree/main).
 
 ## ✅ Features
 
@@ -48,7 +48,7 @@ These aren't necessarily confirmed, and completed lines aren't necessarily stabl
 
 ## ❓ Support / Help
 
-If you find an issue with the app, please open an issue about it on the [issues page](https://github.com/parsehex/BuddyGenAI/issues). If you need help using or setting up the app, feel free to ask on the [discussions page](https://github.com/parsehex/BuddyGenAI/discussions).
+If you find an issue with the app, please open an issue about it on the [issues page](https://github.com/parsehex/buddyGenAI/issues). If you need help using or setting up the app, feel free to ask on the [discussions page](https://github.com/parsehex/buddyGenAI/discussions).
 
 You're also welcome to join the [Discord server](https://discord.gg/wJ52aASf5b). As of now there isn't anything to it, but I'm happy to talk or offer support for the app.
 

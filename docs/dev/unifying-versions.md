@@ -1,12 +1,12 @@
-# Unifying BuddyGenAI Versions
+# Unifying buddyGenAI Versions
 
 ## Background
 
-One of the intentions behind BuddyGenAI was to have an application that could introduce people to using AI which they have control and ownership of. I'm often impressed by the kinds of models that I can run on my PC at home + I appreciate interfaces which are purpose-built but still manage to be versatile, so a pillar of my direction with this app has been to support using it in various ways. I'd rather the app meet the user where they are rather than the user needing to meet the app.
+One of the intentions behind buddyGenAI was to have an application that could introduce people to using AI which they have control and ownership of. I'm often impressed by the kinds of models that I can run on my PC at home + I appreciate interfaces which are purpose-built but still manage to be versatile, so a pillar of my direction with this app has been to support using it in various ways. I'd rather the app meet the user where they are rather than the user needing to meet the app.
 
 For the first iteration, I used embedded software (llama.cpp and others) with an Electron wrapper, which means that you need to run the app and the AI on a single machine. Sometime after that, my setup changed and I wanted to be able to access the app from my laptop, so I threw together a single-page web app (accessible at <https://app.buddygenai.com/>).
 
-As of more recently, my desire is to be able to install BuddyGenAI as a standalone server on my desktop and connect it to AI API(s) running on the same machine. Essentially, I want to use BGAI as my own self-hosted AI frontend.
+As of more recently, my desire is to be able to install buddyGenAI as a standalone server on my desktop and connect it to AI API(s) running on the same machine. Essentially, I want to use BGAI as my own self-hosted AI frontend.
 
 ## The Problem(s)
 

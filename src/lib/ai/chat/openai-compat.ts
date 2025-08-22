@@ -42,7 +42,7 @@ export async function chat(req: ChatRequest): Promise<string> {
 				Authorization: 'Bearer ' + key,
 				'Content-Type': 'application/json',
 				'HTTP-Referer': 'https://buddygenai.com/',
-				'X-Title': 'BuddyGenAI',
+				'X-Title': 'buddyGenAI',
 			},
 			data: JSON.stringify(data),
 			onDownloadProgress: stream
@@ -93,7 +93,7 @@ export async function getModels() {
 			Authorization: 'Bearer ' + key,
 			'Content-Type': 'application/json',
 			'HTTP-Referer': 'https://buddygenai.com/',
-			'X-TITLE': 'BuddyGenAI',
+			'X-TITLE': 'buddyGenAI',
 		},
 	});
 	return response.data.data.map((v: any) => ({

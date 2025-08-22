@@ -3,7 +3,7 @@
 layout: home
 
 hero:
- name: 'BuddyGenAI Docs'
+ name: 'buddyGenAI Docs'
  text:
  tagline:
  actions:
@@ -22,7 +22,7 @@ hero:
 #     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
 
-This is the documentation for BuddyGenAI, an app meant to turn AI into a companion that's accessible and private to the user.
+This is the documentation for buddyGenAI, an app meant to turn AI into a companion that's accessible and private to the user.
 
 ## Pages
 

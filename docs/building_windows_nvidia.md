@@ -1,6 +1,6 @@
-# Building BuddyGenAI on Windows for NVIDIA GPUs
+# Building buddyGenAI on Windows for NVIDIA GPUs
 
-This guide will walk you through the process of building BuddyGenAI on Windows for NVIDIA GPUs with CUDA acceleration.
+This guide will walk you through the process of building buddyGenAI on Windows for NVIDIA GPUs with CUDA acceleration.
 
 This is the setup that I have been using so I would expect it to work for you as well. If you have any issues or need help with any details, please let me know so that I can update this guide.
 
@@ -15,7 +15,7 @@ This is the setup that I have been using so I would expect it to work for you as
 
 ## Acquire Binaries
 
-First, you'll need to download or build binary files that BuddyGenAI relies on. The latest versions _should_ work, although you may need to check the date of BuddyGenAI's latest release to find the right version of any binaries that are not working.
+First, you'll need to download or build binary files that buddyGenAI relies on. The latest versions _should_ work, although you may need to check the date of buddyGenAI's latest release to find the right version of any binaries that are not working.
 
 You'll need the following project's binaries:
 
@@ -60,11 +60,11 @@ binaries/
 ├─ piper_phonemize.dll
 ```
 
-## Build BuddyGenAI
+## Build buddyGenAI
 
 ```bash
-git clone https://github.com/parsehex/BuddyGenAI
-cd BuddyGenAI
+git clone https://github.com/parsehex/buddyGenAI
+cd buddyGenAI
 # IMPORTANT! Get the main branch:
 git checkout main
 npm install

@@ -1,12 +1,12 @@
-# Getting Started with BuddyGenAI (Electron version)
+# Getting Started with buddyGenAI (Electron version)
 
 > [!CAUTION] Legacy Version
 >
 > This version is not actively updated -- it doesn't include new app features or recent model support. For now, this is the only downloadable/installable PC version.
 
-This guide should walk you through the process of to set up BuddyGenAI to be able to chat, generate images and speech, and be able to speak your messages using a microphone.
+This guide should walk you through the process of to set up buddyGenAI to be able to chat, generate images and speech, and be able to speak your messages using a microphone.
 
-With BuddyGenAI, you have the ability to pick and choose which AI models you want to use which will affect the performance and quality of the application.
+With buddyGenAI, you have the ability to pick and choose which AI models you want to use which will affect the performance and quality of the application.
 
 ## Compatibility
 
@@ -22,11 +22,11 @@ First, your machine should have the following requirements:
 
 ## Installation and Setup
 
-1. Download and install the latest version of BuddyGenAI from the [releases page](https://github.com/parsehex/BuddyGenAI/releases).
+1. Download and install the latest version of buddyGenAI from the [releases page](https://github.com/parsehex/buddyGenAI/releases).
 
-2. Choose and download the AI models you want to use -- you can use [this page](https://github.com/parsehex/BuddyGenAI/blob/main/docs/getting-models.md) for model recommendations and download links.
+2. Choose and download the AI models you want to use -- you can use [this page](https://github.com/parsehex/buddyGenAI/blob/main/docs/getting-models.md) for model recommendations and download links.
 
-3. Open BuddyGenAI and click the button to Import Models and select the model files you downloaded. Once done, click Continue and wait for the chat model to load before you see the next page.
+3. Open buddyGenAI and click the button to Import Models and select the model files you downloaded. Once done, click Continue and wait for the chat model to load before you see the next page.
 
    - If the model keeps loading, restarting the app may help. If that doesn't work, you may be missing Microsoft Visual C++ Redistributable x64 or CUDA Toolkit (see Compatibility section above).
 

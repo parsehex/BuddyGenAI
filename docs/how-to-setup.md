@@ -1,13 +1,13 @@
 # How to setup for the first time
 
-> [!WARNING] This page isn't updated and is for an early version of BuddyGenAI. See [here](./getting-started.md) for current instructions and links.
+> [!WARNING] This page isn't updated and is for an early version of buddyGenAI. See [here](./getting-started.md) for current instructions and links.
 
 ## Troubleshooting
 
 - Most of the time, closing the app and opening it again will fix any issues.
 - Chat can take a while to start up. If the sidebar says Chat Starting for more than 30s, try restarting the app.
 
-You can use BuddyGenAI using OpenAI's models or you can bring-your-own-models and run them on your own PC.
+You can use buddyGenAI using OpenAI's models or you can bring-your-own-models and run them on your own PC.
 
 Open the app if you haven't already. You'll see the setup screen:
 
@@ -25,7 +25,7 @@ Now go to the [API Keys](https://platform.openai.com/account/api-keys) page and 
 
 ## Local Models Setup
 
-(**Experimental**) -- This feature is still in active development. If you run into any issues or have suggestions to improve anything, please [create a new issue](https://github.com/parsehex/BuddyGenAI/issues).
+(**Experimental**) -- This feature is still in active development. If you run into any issues or have suggestions to improve anything, please [create a new issue](https://github.com/parsehex/buddyGenAI/issues).
 
 ### Requirements
 
@@ -43,7 +43,7 @@ The following are the models that I've mainly used while making the app. Support
 
 The following are the models that I've been using while making the app (other may work as well), I've included links to download them from Hugging Face and Civitai for convenience.
 
-Depending on how powerful your PC is, you can choose a model with a higher number (e.g. >=Q4_K) and you'll get better results. I don't have a good way to pick a good size at the moment, feel free to [reach out](https://github.com/parsehex/BuddyGenAI/discussions) if you need help.
+Depending on how powerful your PC is, you can choose a model with a higher number (e.g. >=Q4_K) and you'll get better results. I don't have a good way to pick a good size at the moment, feel free to [reach out](https://github.com/parsehex/buddyGenAI/discussions) if you need help.
 
 You'll need to download a chat model (e.g. 1 of the Llama 3 links below) and an SD 1.5 image model (e.g. Toonify SD 1.5 below).
 
@@ -58,9 +58,9 @@ You'll need to download a chat model (e.g. 1 of the Llama 3 links below) and an 
 
 Now that you have the models downloaded, you'll need to move them to the correct location.
 
-Open BuddyGenAI and click "Local Models" on the setup screen, then follow this gif:
+Open buddyGenAI and click "Local Models" on the setup screen, then follow this gif:
 
-![BuddyGen AI setup 1](./img/v2/BuddyGenAI%20-%20Local%20Model%20Setup.gif)
+![BuddyGen AI setup 1](./img/v2/buddyGenAI%20-%20Local%20Model%20Setup.gif)
 
 - Click on Open Folder
 - Go to Downloads (or wherever you saved the models)

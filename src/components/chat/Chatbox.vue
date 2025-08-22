@@ -53,7 +53,7 @@ const store = useAppStore();
 const { buddies, threads } = storeToRefs(store);
 const { pathJoin, dbRun } = useElectron();
 
-// https://github.com/parsehex/BuddyGenAI/issues/2
+// https://github.com/parsehex/buddyGenAI/issues/2
 // there is a bug where if you unfocus the window while ai is responding,
 // the message won't finish loading and it leads to the thread being in a broken state
 // TODO fix this
@@ -331,7 +331,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	});
 
 const handleReloading = async (ttsToSave: string, imgToSave: string) => {
-	// TODO NOTE Begin part of workaround https://github.com/parsehex/BuddyGenAI/issues/2
+	// TODO NOTE Begin part of workaround https://github.com/parsehex/buddyGenAI/issues/2
 	const reloadingMsg = messages.value.find((m) => m.id === reloadingId.value);
 	if (reloadingMsg?.role === 'user') {
 		// shouldn't normally happen but add the assistant's response to the thread

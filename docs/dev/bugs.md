@@ -1,4 +1,4 @@
-# BuddyGenAI Bugs & Issues
+# buddyGenAI Bugs & Issues
 
 - Got UI toast error that chat server is offline during first character setup, wouldn't generate appearance options even though chat was working.
   - I think this is because of typing in a host address for KoboldCpp trigering multiple requests. Eventually you'll type a working address which flags the server as running, but the prior requests will fail after this which triggers the catch block, setting the server as not running. I think we need to set an abort controller on the connection checks, cancel it when we get a successful check.

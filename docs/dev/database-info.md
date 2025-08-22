@@ -1,4 +1,4 @@
-# BuddyGenAI Database Info
+# buddyGenAI Database Info
 
 This is meant to explain how BGAI uses and handles a database across its versions.
 

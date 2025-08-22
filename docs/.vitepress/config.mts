@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-	title: 'BuddyGenAI Docs',
+	title: 'buddyGenAI Docs',
 	description: '',
 	themeConfig: {
 		// https://vitepress.dev/reference/default-theme-config
@@ -18,7 +18,7 @@ export default defineConfig({
 		// ],
 
 		socialLinks: [
-			{ icon: 'github', link: 'https://github.com/parsehex/BuddyGenAI' },
+			{ icon: 'github', link: 'https://github.com/parsehex/buddyGenAI' },
 		],
 	},
 });

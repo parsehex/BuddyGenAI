@@ -47,7 +47,7 @@ const providerFeatures = {
 </script>
 <template>
   <div class="max-w-4xl mx-auto p-4">
-    <p class="text-center text-lg mb-6"> To use BuddyGenAI, you have to connect the app to an AI provider. </p>
+    <p class="text-center text-lg mb-6"> To use buddyGenAI, you have to connect the app to an AI provider. </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Local AI Card -->
       <Card class="cursor-pointer transition-all duration-200 hover:shadow-lg" :class="{

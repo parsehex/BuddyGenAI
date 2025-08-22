@@ -1,4 +1,4 @@
-# BuddyGenAI Dev Docs
+# buddyGenAI Dev Docs
 
 This is the first installment of me documenting how this project is structured and works so that other developers can work on it.
 
@@ -9,7 +9,7 @@ This is the first installment of me documenting how this project is structured a
 ## Other Pages
 
 - [Database Info](./database-info.md)
-- [Unifying BuddyGenAI Versions](./unifying-versions.md)
+- [Unifying buddyGenAI Versions](./unifying-versions.md)
 - Feature Notes
   - [Delayed Messages from Buddies](./features/delayed-messages.md)
   - [Proper JSON Mode](./features/json-mode.md)
@@ -40,4 +40,4 @@ This project has the following in terms of files and directories, starting at th
 
 ## Notes
 
-- This is a link to the latest commit before I started removing unused code: <https://github.com/parsehex/BuddyGenAI/tree/a35ce00bcb885b9cd026e55e85fad5b36976e4ef>
+- This is a link to the latest commit before I started removing unused code: <https://github.com/parsehex/buddyGenAI/tree/a35ce00bcb885b9cd026e55e85fad5b36976e4ef>

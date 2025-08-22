@@ -87,7 +87,7 @@ const deps = [
 		link: 'https://github.com/EternalC0der/electron-nuxt3',
 		author: 'EternalC0der',
 		license: 'Unknown',
-		note: 'BuddyGenAI is a fork of electron-nuxt3',
+		note: 'buddyGenAI is a fork of electron-nuxt3',
 	},
 	{
 		name: 'electron-updater',
@@ -364,11 +364,11 @@ const openLink = (link: string) => {
 <template>
 	<ScrollArea class="h-screen">
 		<div class="container flex flex-col items-center pt-2 pb-8">
-			<h1 class="text-2xl font-bold">BuddyGenAI Credits</h1>
+			<h1 class="text-2xl font-bold">buddyGenAI Credits</h1>
 			<div class="mt-4">
 				<p class="text-lg mt-4">
-					<span class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex/BuddyGenAI')">
-						BuddyGenAI </span> is a project by <span class="font-bold underline cursor-pointer"
+					<span class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex/buddyGenAI')">
+						buddyGenAI </span> is a project by <span class="font-bold underline cursor-pointer"
 						@click="openLink('https://www.mindofthomas.com')">Thomas Mays</span> ( <span
 						class="text-blue-500 cursor-pointer" @click="openLink('https://github.com/parsehex')"> parsehex </span> )
 					<span class="text-sm px-2 rounded-full ml-1 bg-gray-200 dark:bg-gray-800"> MIT license </span>
@@ -391,7 +391,7 @@ const openLink = (link: string) => {
 				</p>
 				<p class="text-lg mt-2">
 					<span class="text-blue-500 underline cursor-pointer" @click="openLink('https://buddygenai.com')">
-						BuddyGenAI.com </span>
+						buddyGenAI.com </span>
 				</p>
 			</div>
 		</div>

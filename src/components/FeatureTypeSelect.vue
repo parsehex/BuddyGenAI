@@ -8,13 +8,16 @@ import {
 	SelectGroup,
 	SelectLabel,
 	SelectItem,
+	SelectSeparator,
 } from '@/components/ui/select';
 import { type AnyPossibleProvider, LLMProviders, ImgProviders, STTProviders, TTSProviders } from '../lib/api/AppSettings';
 import { type FeatureType } from '../lib/api/types-api';
 import { useAppStore } from '../stores/main';
+import OptionSection from './sidebar/settings/OptionSection.vue';
 
 const props = defineProps<{
 	type: FeatureType;
+	label?: boolean;
 }>();
 const { type } = toRefs(props);
 const key = computed(() => `selected_provider_${type.value}`);
@@ -47,22 +50,61 @@ function getProviderLabel(provider: AnyPossibleProvider) {
 	}
 }
 
+const groupedProviders = computed(() => {
+	const groups: Record<string, AnyPossibleProvider[]> = {
+		Local: [],
+		'In-Browser': [],
+		Cloud: [],
+		Other: [],
+	};
+
+	for (const p of providers.value ?? []) {
+		switch (p) {
+			case 'koboldcpp':
+				groups.Local.push(p);
+				break;
+			case 'webllm':
+				groups['In-Browser'].push(p);
+				break;
+			case 'openrouter':
+				groups.Cloud.push(p);
+				break;
+			case '0':
+				groups.Other.push(p);
+				break;
+			default:
+				groups.Other.push(p);
+				break;
+		}
+	}
+	return groups;
+});
+
 const updateValue = (val: string) => {
 	if (store.settings[key.value] === val) return;
 	store.settings[key.value] = val;
 }
 </script>
 <template>
-	<Select :default-value="store.settings[key] + ''" @update:model-value="updateValue" :id="`${type}-provider`">
-		<SelectTrigger :title="store.settings[key]">
-			<SelectValue :placeholder="`Select a provider for ${typeLabel}`" />
-		</SelectTrigger>
-		<SelectContent>
-			<SelectGroup>
-				<SelectLabel>Providers</SelectLabel>
-				<SelectItem v-for="provider in providers" :key="provider" :value="provider"> {{ getProviderLabel(provider) }}
-				</SelectItem>
-			</SelectGroup>
-		</SelectContent>
-	</Select>
+	<OptionSection :label="label ? typeLabel : ''" :labelName="`${type}-provider`" orientation="vertical"
+		class="inline-flex" style="flex-basis: 120px;">
+		<Select :default-value="store.settings[key] + ''" @update:model-value="updateValue" :id="`${type}-provider`"
+			class="">
+			<SelectTrigger :title="store.settings[key]">
+				<SelectValue :placeholder="`Select a provider for ${typeLabel}`" />
+			</SelectTrigger>
+			<SelectContent>
+				<template v-for="(group, label) in groupedProviders" :key="label">
+					<SelectGroup v-if="label !== 'Other' && group.length > 0">
+						<SelectLabel>{{ label }}</SelectLabel>
+						<SelectItem v-for="provider in group" :key="provider" :value="provider"> {{ getProviderLabel(provider) }}
+						</SelectItem>
+					</SelectGroup>
+					<SelectSeparator v-if="label === 'Other'" />
+					<SelectItem v-if="label === 'Other'" v-for="provider in group" :key="provider" :value="provider" class="pl-9">
+						{{ getProviderLabel(provider) }} </SelectItem>
+				</template>
+			</SelectContent>
+		</Select>
+	</OptionSection>
 </template>

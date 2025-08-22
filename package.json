@@ -1,14 +1,14 @@
 {
-  "name": "BuddyGenAI",
+  "name": "buddygenai",
   "author": "parsehex",
   "email": "",
-  "description": "Everyone needs a buddy -- make one and chat with them using BuddyGenAI",
+  "description": "Everyone needs a buddy -- make one and chat with them using buddyGenAI",
   "version": "0.2.5",
   "private": true,
   "main": "electron/background.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/parsehex/BuddyGenAI"
+    "url": "https://github.com/parsehex/buddyGenAI"
   },
   "scripts": {
     "dev": "vite --port 3000",
