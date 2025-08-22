@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import OptionSection from './OptionSection.vue';
-import ImportModel from '../../ImportModel.vue';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const store = useAppStore();
@@ -38,7 +37,6 @@ const streaming = computed({
 	<div>
 		<OptionSection v-if="isOpenRouter" label="Chat Model" labelName="chat-model" orientation="vertical">
 			<div class="flex">
-				<ImportModel type="chat" />
 				<Select :default-value="store.settings.selected_model_chat" @update:model-value="updateChatModel"
 					id="chat-model">
 					<SelectTrigger :title="store.settings.selected_model_chat">
