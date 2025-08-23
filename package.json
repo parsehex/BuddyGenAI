@@ -48,6 +48,8 @@
     "date-fns": "^4.1.0",
     "dexie": "^4.2.0",
     "dotenv": "^16.4.5",
+    "extendable-media-recorder": "^9.2.29",
+    "extendable-media-recorder-wav-encoder": "^7.0.131",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "lucide-vue-next": "^0.365.0",
