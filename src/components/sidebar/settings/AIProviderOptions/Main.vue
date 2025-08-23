@@ -11,6 +11,7 @@ import OpenRouterOptions from './OpenRouterOptions.vue';
 import KoboldCppOptions from './KoboldCppOptions.vue';
 import FeatureTypeSelect from '@/src/components/FeatureTypeSelect.vue';
 import WebLLMModelCard from '@/src/components/setup/WebLLMModelCard.vue';
+import { Separator } from '@/src/components/ui/separator';
 
 const store = useAppStore();
 
@@ -26,21 +27,14 @@ const usingKoboldCpp = computed(() => (
 ));
 </script>
 <template>
-	<div class="text-center">
-		<OptionSection label="Chat" labelName="chat-provider">
-			<FeatureTypeSelect type="chat" />
-		</OptionSection>
-		<OptionSection label="Image" labelName="image-provider">
-			<FeatureTypeSelect type="image" />
-		</OptionSection>
-		<OptionSection label="TTS" labelName="tts-provider">
-			<FeatureTypeSelect type="tts" />
-		</OptionSection>
-		<OptionSection label="Transcription" labelName="stt-provider">
-			<FeatureTypeSelect type="stt" />
-		</OptionSection>
-		<OpenRouterOptions v-if="usingOpenRouter" />
-		<KoboldCppOptions v-if="usingKoboldCpp" />
-		<WebLLMModelCard v-if="store.settings.selected_provider_chat === 'webllm'" />
+	<div class="text-center flex flex-wrap max-w-[100%] justify-center">
+		<FeatureTypeSelect type="chat" class="mr-2" label />
+		<FeatureTypeSelect type="image" class="mr-2" label />
+		<FeatureTypeSelect type="tts" class="mr-2" label />
+		<FeatureTypeSelect type="stt" class="mr-2" label />
 	</div>
+	<Separator class="my-2" />
+	<OpenRouterOptions v-if="usingOpenRouter" />
+	<KoboldCppOptions v-if="usingKoboldCpp" />
+	<WebLLMModelCard v-if="store.settings.selected_provider_chat === 'webllm'" />
 </template>

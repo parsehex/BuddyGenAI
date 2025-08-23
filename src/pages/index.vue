@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FirstTimeSetup from '@/components/setup/Main.vue';
-import useLlamaCpp from '@/composables/useLlamaCpp';
 import type { MergedChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { formatDistanceToNow } from 'date-fns';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
-import { AppSettings } from '@/lib/api/AppSettings';
 import { useToast } from '@/components/ui/toast';
-import { delay } from '@/lib/utils';
 import {
 	Select,
 	SelectContent,

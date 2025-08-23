@@ -9,7 +9,6 @@ import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import { api } from '@/lib/api';
 import BuddyTagsInput from '../BuddyTagsInput.vue';
-import { getVoices } from '@/src/lib/ai/tts';
 import {
 	Select,
 	SelectTrigger,
@@ -19,8 +18,10 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 
 const store = useAppStore();
+const ttsAI = useTTSAI();
 const { toast } = useToast();
 
 const buddyName = ref('');
@@ -30,10 +31,6 @@ const isSaving = ref(false);
 
 const buddyVoice = ref('');
 const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
-const availVoices = ref(['']);
-onMounted(() => {
-	availVoices.value = [...getVoices()];
-});
 
 const buddyKeywordsArr = computed({
 	get: () => buddyKeywords.value.split(',').map((s) => s.trim()),
@@ -89,7 +86,8 @@ const createBuddy = async () => {
 					<SelectContent>
 						<SelectGroup>
 							<SelectLabel>Voices</SelectLabel>
-							<SelectItem v-for="voice in availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
+							<SelectItem v-for="voice in ttsAI.availVoices.value" :key="voice" :value="voice"> {{ voice }}
+							</SelectItem>
 						</SelectGroup>
 					</SelectContent>
 				</Select>

@@ -6,10 +6,11 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function popError(msg: string) {
+export function popError(msg: string, title?: string) {
 	const { toast } = useToast();
 	toast({
 		variant: 'destructive',
+		title,
 		description: msg,
 	});
 }
@@ -75,6 +76,7 @@ export function blobToArrayBuffer(blob: Blob): Promise<Buffer> {
 }
 
 export function blobToBase64(blob: Blob): Promise<string> {
+	if (!(blob instanceof Blob)) throw new Error(`Passed non-blob as blob`);
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
 

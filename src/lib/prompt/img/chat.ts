@@ -1,5 +1,5 @@
 export function shouldSendImg(userName: string, aiName: string) {
-	const prompt = `The following is a chat between ${userName} and ${aiName}. Based on the context of the chat, Assistant's task is to determine whether or not ${aiName} sent or intended to send an image to ${userName}.
+	const prompt = `The following is a chat between ${userName} and ${aiName} -- user is ${userName} & ${aiName}. Based on the context of the chat, Assistant's task is to determine whether or not ${aiName} sent or intended to send an image to ${userName}.
 
 Respond with a valid JSON object containing the keys "reasoning" with brief contextual reasoning, a "description" with the description of the image, and "do_send" with a boolean answering whether or not to send the image.\nRespond immediately without further prose.`;
 	return prompt;
@@ -10,7 +10,7 @@ export function imgDescriptionFromChat(
 	aiName: string,
 	appearance?: string
 ) {
-	let prompt = `The following is a chat between ${userName} and ${aiName}. Given the most recent message and the surrounding context, the assistant's task is to write the description of a single image involving ${aiName} to send to ${userName}.`;
+	let prompt = `The following is a chat between ${userName} and ${aiName} -- user is ${userName} & ${aiName}. Given the most recent message and the surrounding context, the assistant's task is to write the description of a single image involving ${aiName} to send to ${userName}.`;
 	if (appearance) {
 		prompt += `\nDescription of ${aiName} (retain these details):\n${appearance}`;
 	}

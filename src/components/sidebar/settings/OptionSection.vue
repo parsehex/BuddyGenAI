@@ -26,7 +26,7 @@ const flexLayoutClass = computed(() => {
 });
 </script>
 <template>
-	<div :class="flexLayoutClass + ' mb-4 w-full justify-between gap-1 my-2'">
+	<div :class="flexLayoutClass + ' w-full justify-between gap-1 my-2'">
 		<Label v-if="label" :for="labelName" class="text-lg block font-bold text-gray-700 dark:text-gray-300"> {{ label }}
 		</Label>
 		<slot></slot>

@@ -11,7 +11,7 @@ import {
 const store = useAppStore();
 const lastModel = computed(() => store.lastKoboldModelResult);
 
-
+// TODO update to work for webllm too
 
 const bgColor = computed(() => {
 	if (store.chatServerRunning) {

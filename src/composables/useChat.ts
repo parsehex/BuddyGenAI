@@ -17,7 +17,7 @@ export default function useChat(options: UseChatOptions) {
 	const headers = ref({
 		'Content-Type': 'application/json',
 		'HTTP-Referer': 'https://buddygenai.com/',
-		'X-Title': 'BuddyGenAI',
+		'X-Title': 'buddyGenAI',
 	} as Record<string, any>);
 
 	const store = useAppStore();
@@ -32,7 +32,7 @@ export default function useChat(options: UseChatOptions) {
 		headers.value['Authorization'] = 'Bearer ' + key;
 	}
 
-	async function handleSubmit(e: Event, skipUserMsg = false) {
+	async function handleSubmit(e?: Event, skipUserMsg = false) {
 		setAPIKeyHeader();
 		if (
 			store.settings.selected_provider_chat === 'openrouter' &&
@@ -55,7 +55,7 @@ export default function useChat(options: UseChatOptions) {
 
 		// clear input
 		input.value = '';
-		e.preventDefault();
+		if (e) e.preventDefault();
 
 		const messagesToSend = JSON.parse(JSON.stringify(messages.value));
 		isLoading.value = true;

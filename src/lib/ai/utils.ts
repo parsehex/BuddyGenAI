@@ -15,7 +15,7 @@ export async function verifyFilePath(p: string) {
 }
 
 export function cleanTextForTTS(text: string) {
-	// Remove phrases enclosed in asterisks
+	// remove phrases enclosed in asterisks
 	let cleanedText = text.replace(/\*[^*]*\*/g, '');
 
 	// replace ... with . . .
@@ -23,6 +23,8 @@ export function cleanTextForTTS(text: string) {
 
 	// remove urls
 	cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/g, '');
+
+	// TODO remove phrases enclosed in [ brackets ]
 
 	return cleanedText;
 }

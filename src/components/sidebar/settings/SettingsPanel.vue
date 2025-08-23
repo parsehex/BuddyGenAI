@@ -45,7 +45,7 @@ const resetApp = async () => {
 <template>
 	<div class="flex h-screen">
 		<Tabs default-value="general" orientation="vertical" class="flex flex-row w-full">
-			<TabsList class="flex flex-col h-full dark:bg-gray-700 justify-start border-r">
+			<TabsList class="flex flex-col h-full bg-gray-300 dark:bg-gray-700 justify-start border-r">
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<Button variant="ghost" @click="showLabels = !showLabels"
@@ -117,7 +117,7 @@ const resetApp = async () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger as-child>
-						<Button variant="ghost" :class="`py-4 flex flex-col min-h-[50px]`"
+						<Button variant="ghost" :class="`mt-2 py-4 flex flex-col min-h-[50px]`"
 							@click="openExternalLink('https://docs.buddygenai.com')">
 							<CircleHelp class="h-6 w-6" />
 							<div v-if="showLabels" class="text-xs mt-1">Help</div>
@@ -156,7 +156,7 @@ const resetApp = async () => {
 						<ExportDatabaseButton />
 						<ImportDatabaseButton />
 					</div>
-					<RouterLink to="/credits">BuddyGenAI Credits / Licenses</RouterLink>
+					<RouterLink to="/credits">buddyGenAI Credits / Licenses</RouterLink>
 					<DevOnly>
 						<Button @click="resetApp" type="button" class="px-4 py-2 mt-2 rounded-md" variant="destructive">Reset &
 							Close App</Button>

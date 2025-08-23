@@ -4,12 +4,6 @@ import { insert, select } from '@/lib/sql';
 
 const { dbGet, dbAll, dbRun } = useElectron();
 
-// TODO need to serve this from express
-// https://sdk.vercel.ai/docs/guides/frameworks/solidjs#on-the-server
-
-// TODO rewrite
-// dont handle openai stuff here but only saving to db
-
 interface Message {
 	role: 'user' | 'assistant';
 	content: string;
@@ -46,5 +40,5 @@ export default async function createMessage(
 		thread_id: threadId,
 		thread_index: threadIndex,
 	});
-	const res = await dbRun(sqlInsert[0], sqlInsert[1]);
+	return await dbRun(sqlInsert[0], sqlInsert[1]);
 }

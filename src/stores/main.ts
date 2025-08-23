@@ -4,7 +4,6 @@ import type {
 	ChatMessage,
 	MergedChatThread,
 	BuddyVersionMerged,
-	SQLiteVal,
 	DBVal,
 } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
@@ -186,49 +185,6 @@ export const useAppStore = defineStore('app', () => {
 		return settings.value.n_gpu_layers;
 	};
 
-	const getChatModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_chat) return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_chat}`;
-	};
-	const getImageModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_image) return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_image}`;
-	};
-	const getTTSModelPath = (buddyId?: string) => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_tts) return '';
-		if (settings.value.selected_model_tts === '0') return '';
-
-		let modelToUse = settings.value.selected_model_tts;
-		if (buddyId) {
-			const buddy = buddies.value.find((b) => b.id === buddyId);
-			if (buddy && buddy.tts_voice) {
-				modelToUse = buddy.tts_voice;
-			}
-		}
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${modelToUse}`;
-	};
-	const getWhisperModelPath = () => {
-		if (!settings.value.local_model_directory) return '';
-		if (!settings.value.selected_model_whisper) return '';
-		if (settings.value.selected_model_whisper === '0') return '';
-		const slash = settings.value.local_model_directory.includes('\\')
-			? '\\'
-			: '/';
-		return `${settings.value.local_model_directory}${slash}${settings.value.selected_model_whisper}`;
-	};
-
 	// watch(
 	// 	() => route,
 	// 	async (newVal) => {
@@ -360,10 +316,6 @@ export const useAppStore = defineStore('app', () => {
 		saveSettings,
 		updateThreads,
 		getNGpuLayers,
-		getChatModelPath,
-		getImageModelPath,
-		getTTSModelPath,
-		getWhisperModelPath,
 
 		proceed,
 

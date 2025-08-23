@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAppStore } from '@/src/stores/main';
-import {
-	AccordionTrigger,
-	AccordionItem,
-	AccordionContent,
-} from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import {
 	Select,
@@ -16,7 +11,6 @@ import {
 	SelectLabel,
 	SelectItem,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import OptionSection from './OptionSection.vue';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 

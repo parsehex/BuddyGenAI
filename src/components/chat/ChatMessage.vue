@@ -26,21 +26,22 @@ import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/stores/main';
-import { textToHslColor } from '@/src/lib/utils';
+import { popError, textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
 import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
-import { getSelectedVoice, makeTTS } from '@/src/lib/ai/tts';
 import { useToast } from '../ui/toast';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { insert } from '@/src/lib/sql';
 import { v4 } from 'uuid';
 import { getAudio } from '@/src/lib/api/audio';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 
 const { toast } = useToast();
 
 const { copyToClipboard, dbRun } = useElectron();
 const store = useAppStore();
+const ttsAI = useTTSAI();
 const chatStreaming = computed(() => store.settings.chat_streaming);
 
 const props = defineProps<{
@@ -175,23 +176,17 @@ const doTTS = async () => {
 	ttsLoading.value = true;
 	if (!hasTTS.value) {
 		if (!ttsEnabled.value) {
-			toast({
-				variant: 'destructive',
-				title: 'TTS is disabled',
-				description: 'Please set a Text-to-Speech voice in the settings',
-			});
-			return;
+			return popError('Please set a Text-to-Speech voice in the settings', 'TTS is disabled');
 		}
 		const text = cleanTextForTTS(message.value.content);
 
 		const id = v4();
-		const speakerName = getSelectedVoice(currentBuddy.value?.id || '')
-		const ttsData = await makeTTS({
-			absModelPath: '',
-			outputFilename: '',
+		const voice = ttsAI.getSelectedVoice(currentBuddy.value?.id || '')
+		const ttsData = await ttsAI.makeTTS({
 			text,
-			speakerName,
+			voice,
 		});
+		if (!ttsData) return popError('TTS failed to generate');
 
 		const response = await fetch(ttsData);
 		const audioBlob = await response.blob();
@@ -283,6 +278,7 @@ const doTTS = async () => {
 				<DialogClose as-child>
 					<Button @click="handleCancel" type="button" variant="outline">Cancel</Button>
 					<Button @click="handleEdit(null, true)" type="button">Confirm</Button>
+					<!-- TODO rework buttons - Save / Re-Send? (disabled if not last message, probably with alert explaining + maybe override link btn) -->
 				</DialogClose>
 			</DialogFooter>
 		</DialogContent>

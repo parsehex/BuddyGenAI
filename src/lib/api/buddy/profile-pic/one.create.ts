@@ -1,12 +1,11 @@
-import { AppSettings } from '@/lib/api/AppSettings';
 import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
 import { select } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
 import useElectron from '@/composables/useElectron';
-import { makePicture, makePictureKobold } from '@/src/lib/ai/img';
 import { popError } from '@/src/lib/utils';
 import { isFeatureAvailable } from '@/src/lib/ai/support';
+import { useImgAI } from '@/src/composables/ai/useImgAI';
 
 const { dbGet, dbRun } = useElectron();
 
@@ -63,14 +62,10 @@ export default async function createProfilePic(
 	);
 	const negPrompt = negPromptFromName(currentVersion.name, gender);
 
-	const imgData = await makePictureKobold({
-		absModelPath: '',
-		outputSubDir: '',
-		outputFilename: '',
+	return await useImgAI().makeImage({
 		posPrompt,
 		negPrompt,
-		size: 512, // TODO un-hardcode High quality
+		size: 512,
+		steps: 16,
 	});
-
-	return imgData;
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, toRefs, computed, watch, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
-import { RefreshCcwDot, Mic, MicOff, Send, Square } from 'lucide-vue-next';
+import { RefreshCcwDot, Send, Square } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -18,14 +18,11 @@ import {
 } from '@/components/ui/collapsible';
 import { useToast } from '@/components/ui/toast';
 import BuddyCard from '@/components/BuddyCard.vue';
-import type { ChatThread, ChatMessage } from '@/lib/api/types-db';
+import type { ChatThread, ChatMessage, BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
-import urls from '@/lib/api/urls';
 import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
-import { AppSettings } from '@/lib/api/AppSettings';
 import { genderFromName, negPromptFromName } from '@/lib/prompt/sd';
-import { makePicture, makePictureKobold } from '@/lib/ai/img';
 import Message from './ChatMessage.vue';
 import {
 	imgDescriptionFromChat,
@@ -33,9 +30,7 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { attemptToFixJson, delay, isDevMode } from '@/src/lib/utils';
-import { getSelectedVoice, makeAndReadTTS } from '@/src/lib/ai/tts';
-import useWhisper from '@/src/composables/useWhisper';
+import { delay } from '@/src/lib/utils';
 import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
@@ -44,12 +39,25 @@ import { complete } from '@/src/lib/ai/complete';
 import useMobile from '@/src/composables/useMobile';
 import { v4 } from 'uuid';
 import { insert } from '@/src/lib/sql';
-import { Buffer } from 'buffer';
 import { isFeatureAvailable } from '@/lib/ai/support';
+import { useImgAI } from '@/src/composables/ai/useImgAI';
+import { useSTTAI } from '@/src/composables/ai/useSTTAI';
+import RecordAudio from './RecordAudio.vue';
+import ChatDisclaimer from './ChatDisclaimer.vue';
+import ChatHeader from './ChatHeader.vue';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from '@/components/ui/resizable';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
+const imgAI = useImgAI();
+const ttsAI = useTTSAI();
+const device = useMobile();
 const { buddies, threads } = storeToRefs(store);
 const { pathJoin, dbRun } = useElectron();
 
@@ -108,6 +116,11 @@ const scrollToBottom = () => {
 
 	document.body.scrollTop = 0;
 };
+onBeforeMount(async () => {
+	setTimeout(() => {
+		scrollToBottom();
+	}, 250);
+});
 
 interface Message {
 	role: 'user' | 'assistant';
@@ -116,6 +129,7 @@ interface Message {
 const msgsToSave = [] as Message[];
 
 const reloadingId = ref('');
+const isRecording = ref(false);
 
 // TODO if first time, generate first message to user
 // TODO figure out solution to stream completion response
@@ -124,7 +138,7 @@ const reloadingId = ref('');
 
 // console.log('initial messages', await initialMessages.value);
 
-const userName = computed(() => store.settings.user_name)
+const userName = computed(() => store.settings.user_name);
 
 // what does useChat do (that we use it for)?
 // - handles messages array
@@ -160,8 +174,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				lastMessage.content = lastMessage.content.replace(noteRegex, '').trim();
 			}
 
-			const ttsVoice = getSelectedVoice(currentBuddy.value?.id || '');
-			let ttsDataToSave = (await makeAndReadTTS(lastMessage.content, ttsVoice)) || '';
+			const ttsVoice = ttsAI.getSelectedVoice(currentBuddy.value?.id || '');
+			let ttsDataToSave = (await ttsAI.makeAndReadTTS(lastMessage.content, ttsVoice)) || '';
 			if (ttsDataToSave) {
 				const id = v4();
 				const sqlAudioAdd = insert('audio', { id, data: ttsDataToSave });
@@ -272,16 +286,16 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 						if (Array.isArray(p)) p = p[0];
 						const imgId = v4();
 						const filename = imgId;
-						const quality = store.settings.chat_image_quality;
+						const chosen_quality = store.settings.chat_image_quality;
+						let steps = 16;
+						if (chosen_quality === 'medium') steps = 24;
+						else if (chosen_quality === 'high') steps = 32;
 
-						const imgData = await makePictureKobold({
-							absModelPath: '',
-							outputSubDir: '',
-							outputFilename: '',
+						const imgData = await imgAI.makeImage({
 							posPrompt: p,
 							negPrompt: negPromptFromName(currentBuddy.value?.name || '', gender),
 							size: 768,
-							quality: quality as any,
+							steps
 						});
 
 						const sqlImgAdd = insert('images', { id: filename, data: imgData });
@@ -400,7 +414,7 @@ watch(
 		const thread = await api.thread.getOne(threadId.value);
 		threadMode.value = thread.mode;
 		if (thread.mode === 'persona' && thread.persona_id) {
-			selectedBuddy.value = thread.persona_id;
+			selectedBuddyId.value = thread.persona_id;
 		}
 
 		const initMsgs = await initialMessages.value;
@@ -450,23 +464,24 @@ async function refreshBuddies() {
 	const newBuddies = await updateBuddies();
 	if (
 		threadMode.value === 'persona' &&
-		!selectedBuddy.value &&
+		!selectedBuddyId.value &&
 		newBuddies?.length === 1
 	) {
-		selectedBuddy.value = newBuddies[0].id;
+		selectedBuddyId.value = newBuddies[0].id;
 	}
 	return newBuddies || [];
 }
 
-const doSubmitOrStop = async (e: Event) => {
+const doSubmitOrStop = async (e?: Event) => {
 	const isKeyPressed = e instanceof KeyboardEvent;
-	if (isKeyPressed && e.shiftKey) return;
+	if (isKeyPressed && e?.shiftKey) return;
 	if (!canSend) return;
-	if (isLoading.value && !isKeyPressed) { // clicked stop button
+	if (isLoading.value && e && !isKeyPressed) { // clicked stop button
 		e.preventDefault();
 		stop();
 		return;
 	}
+	if (!e && !store.settings.auto_send_stt) return; // transcription auto-send
 	console.time('message');
 
 	const msg = {
@@ -486,17 +501,20 @@ const doReload = async () => {
 };
 
 const handleSysMessageOpen = async () => {
-	console.log(
-		'sysIsOpen',
-		sysIsOpen.value,
-		hasSysMessage.value,
-		sysMessage.value
-	);
-	if (!sysMessage.value) return;
+	if (!hasSysMessage.value) {
+		await api.message.createOne(threadId.value, {
+			// @ts-ignore
+			role: 'system',
+			content: newSysMessage.value,
+			thred_index: 0,
+		});
+		await refreshMessages();
+		return;
+	}
 	newSysMessage.value = sysMessage.value.content;
 };
 const updateSysMessage = async () => {
-	if (!sysMessage.value) {
+	if (!hasSysMessage.value) {
 		await api.message.createOne(threadId.value, {
 			// @ts-ignore
 			role: 'system',
@@ -518,7 +536,7 @@ const threadMode = ref('custom' as 'custom' | 'persona');
 
 const buddyModeUseCurrent = ref(false);
 
-const selectedBuddy = ref(thread.value?.persona_id || '');
+const selectedBuddyId = ref(thread.value?.persona_id || '');
 const handleBuddyChange = async () => {
 	// TODO add a confirmation dialog if there are messages already
 	if (!threadId) return;
@@ -530,16 +548,16 @@ const handleBuddyChange = async () => {
 	}
 
 	await api.thread.updateOne(threadId.value, {
-		persona_id: selectedBuddy.value,
+		persona_id: selectedBuddyId.value,
 	});
 
 	await refreshMessages();
 	await refreshBuddies();
 };
 const currentBuddy = computed(() =>
-	buddies.value.find((p) => p.id === selectedBuddy.value)
+	buddies.value.find((p) => p.id === selectedBuddyId.value) as BuddyVersionMerged
 );
-watch(selectedBuddy, handleBuddyChange);
+watch(selectedBuddyId, handleBuddyChange);
 
 await refreshBuddies();
 
@@ -558,174 +576,82 @@ if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
 }
 
 refreshed.value = true;
-selectedBuddy.value = t?.persona_id || '';
+selectedBuddyId.value = t?.persona_id || '';
 await refreshMessages();
-onBeforeMount(async () => {
-	setTimeout(() => {
-		scrollToBottom();
-	}, 250);
-});
 
 const canSend = computed(() => {
 	if (!isFeatureAvailable('chat')) return false;
-	return !!input.value;
+	return !!input.value && !!isRecording.value;
 });
 
 const canReload = computed(() => {
 	if (!isFeatureAvailable('chat')) return false;
-	return messages.value.length >= 2 && !isLoading.value;
+	return messages.value.length >= 2 && !isLoading.value && !isRecording.value;
 });
 
-let mediaRecorder: MediaRecorder | null = null;
-let audioChunks: BlobPart[] = [];
-const recording = ref(false);
-const loadingTranscript = ref(false);
-const startRecording = async () => {
-	toast({
-		variant: 'destructive',
-		title: 'Speech-to-Text is disabled',
-		description: 'Feature not working currently',
-	});
-	return;
-	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-		console.log('getUserMedia not supported on your browser!');
-		return;
-	}
-
-	const whisperModelPath = store.getWhisperModelPath();
-	const whisperEnabled = whisperModelPath && whisperModelPath !== '0';
-	if (!whisperEnabled && !store.settings.koboldcpp_host) {
-		toast({
-			variant: 'destructive',
-			title: 'Speech-to-Text is disabled',
-			description: 'Please set a Speech-to-Text model in the settings',
-		});
-		return;
-	}
-
-	if (recording.value) {
-		console.log('already recording');
-		recording.value = false;
-		mediaRecorder?.stop();
-
-		return;
-	}
-
-	try {
-		const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-		mediaRecorder = new MediaRecorder(stream);
-		audioChunks = [];
-
-		mediaRecorder.addEventListener('dataavailable', (event) => {
-			console.log('dataavailable', event.data);
-			audioChunks.push(event.data);
-
-			if (!recording.value) {
-				const audioBlob = new Blob(audioChunks);
-
-				const reader = new FileReader();
-				reader.onloadend = async function () {
-					// @ts-ignore
-					const buf = Buffer.from(reader.result);
-
-					const whisper = useWhisper();
-
-					if (!whisper?.runWhisper) {
-						throw new Error('Whisper not available');
-					}
-					loadingTranscript.value = true;
-					const result = await whisper.runWhisper({
-						model: whisperModelPath,
-						input: buf,
-					});
-					console.log('whisper result', result);
-
-					loadingTranscript.value = false;
-					if (typeof result === 'string') {
-						input.value = result.trim();
-
-						if (store.settings.auto_send_stt) {
-							doSubmitOrStop(new Event('submit'));
-						}
-					}
-				};
-				reader.readAsArrayBuffer(audioBlob);
-			}
-		});
-
-		mediaRecorder.start();
-		recording.value = true;
-	} catch (err) {
-		console.log('The following error occurred: ' + err);
-	}
-};
-
-const device = useMobile();
-
-// disjointed note:
-// TODO should save the keywords (extraPrompt) that we generate desc with
+// note/idea:
+// for Assistant threads, have option for the AI to be like an assistant for this app
+//   - can contextually link to areas in the app
+//   - allow updating settings
+//     would it be lazy? sure, but i think it would be cool & possibly helpful
+//     maybe we could figure out nice UI to just pull this out as a component (called something like AppAssistantChat)
+//   this idea is akin to the Setup Chat idea i started on before
 </script>
 <template>
-	<div class="flex flex-col px-4 pb-4 mx-auto stretch w-full h-screen" v-if="threadId !== ''">
-		<div v-if="!device.isMobile.value"
-			class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700">
-			<h2 class="text-2xl font-bold"> {{ threadTitle }} </h2>
-			<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.image }))" />
-			<BuddyCard v-if="threadMode === 'persona' && selectedBuddy && currentBuddy" :buddy="currentBuddy" />
-		</div>
-		<ScrollArea style="height: 100%" id="messages-scroll">
-			<div v-if="device.isMobile.value"
-				class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700">
-				<h2 class="text-2xl font-bold"> {{ threadTitle }} </h2>
-				<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.image }))" />
-				<BuddyCard v-if="threadMode === 'persona' && selectedBuddy && currentBuddy" :buddy="currentBuddy" />
-			</div>
-			<Collapsible v-if="threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
-				<CollapsibleTrigger @click="handleSysMessageOpen">
-					<Button type="button" variant="ghost" size="sm"> Instructions {{ sysIsOpen ? '▲' : '▼' }} </Button>
-				</CollapsibleTrigger>
-				<CollapsibleContent>
-					<Card class="whitespace-pre-wrap">
-						<CardHeader>Custom Instructions</CardHeader>
-						<CardContent><Textarea v-model="newSysMessage" /></CardContent>
-						<!-- TODO add system presets-->
-						<CardFooter>
-							<Button type="button" @click="updateSysMessage">Update</Button>
-						</CardFooter>
-					</Card>
-				</CollapsibleContent>
-			</Collapsible>
-			<div class="flex flex-col gap-1 my-1" id="chatbox">
-				<Message v-for="(m, i) in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
-					:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
-					@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1" />
-			</div>
-		</ScrollArea>
-		<form class="w-full flex gap-1.5 items-center justify-center mt-1">
-			<Button v-if="isFeatureAvailable('stt')" type="button" size="sm" @click="startRecording"
-				title="Start recording audio" :variant="recording ? 'destructive' : 'default'"
-				:class="loadingTranscript ? 'opacity-75 cursor-not-allowed' : ''" :disaled="loadingTranscript">
-				<Mic v-if="!recording" />
-				<MicOff v-else />
-			</Button>
-			<Textarea class="p-2 rounded shadow-sm text-lg max-h-52 border border-gray-300 dark:border-gray-700" tabindex="1"
-				v-model="input" placeholder="Say something..." @keydown.enter="doSubmitOrStop" autofocus />
-			<div class="flex flex-col items-center gap-1">
-				<Button type="button" size="sm" @click="doSubmitOrStop" :disabled="!canSend && !isLoading"
-					:variant="isLoading ? 'destructive' : 'default'">
-					<Send v-if="!isLoading" />
-					<Square v-else />
-				</Button>
-				<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload" @click="doReload"
-					title="Re-submit your last message to get a new response">
-					<RefreshCcwDot />
-				</Button>
-			</div>
-		</form>
-		<p class="mt-2 text-sm font-semibold text-gray-400 dark:text-gray-600 select-none"
-			:class="[device.isMobile.value ? 'pr-14' : '']"
-			v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)">
-			<u><i>Reminder</i></u> Buddies in this app are AI -- they make mistakes sometimes and they're not real people.
-		</p>
+	<div class="flex flex-col px-4 mx-auto stretch w-full h-screen" v-if="threadId !== ''">
+		<ChatHeader v-if="!device.isMobile.value" :thread-title="threadTitle" :thread-mode="threadMode"
+			:thread-buddy="currentBuddy" :thread-images="threadImages.map((m: any) => ({ url: m.image }))" />
+		<ResizablePanelGroup direction="vertical" auto-save-id="chat">
+			<ResizablePanel>
+				<ScrollArea style="height: 100%" id="messages-scroll">
+					<ChatHeader v-if="device.isMobile.value" :thread-title="threadTitle" :thread-mode="threadMode"
+						:thread-buddy="currentBuddy" :thread-images="threadImages.map((m: any) => ({ url: m.image }))" />
+					<Collapsible v-if="threadMode === 'custom'" class="my-2" v-model:open="sysIsOpen" :defaultOpen="false">
+						<CollapsibleTrigger @click="handleSysMessageOpen">
+							<Button type="button" variant="ghost" size="sm"> Instructions {{ sysIsOpen ? '▲' : '▼' }} </Button>
+						</CollapsibleTrigger>
+						<CollapsibleContent>
+							<Card class="whitespace-pre-wrap">
+								<CardHeader class="p-4">Custom Instructions</CardHeader>
+								<CardContent class="p-4 py-0"><Textarea v-model="newSysMessage" /></CardContent>
+								<!-- TODO add system presets-->
+								<CardFooter class="p-4">
+									<Button type="button" @click="updateSysMessage">Update</Button>
+								</CardFooter>
+							</Card>
+						</CollapsibleContent>
+					</Collapsible>
+					<div class="flex flex-col gap-1 my-1" id="chatbox">
+						<Message v-for="(m, i) in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
+							:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
+							@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1" />
+					</div>
+				</ScrollArea>
+			</ResizablePanel>
+			<ResizableHandle />
+			<ResizablePanel :min-size="25" :max-size="60" class="min-h-[120px]">
+				<form class="w-full h-[75%] flex gap-1.5 items-center justify-center mt-1">
+					<RecordAudio @start="isRecording = true" @stop="(text: string) => {
+						if (text) input = text;
+						doSubmitOrStop();
+					}" @error="isRecording = false" />
+					<Textarea
+						class="p-2 rounded shadow-sm text-lg resize-none flex-1 h-full min-h-0 border border-gray-300 dark:border-gray-700"
+						tabindex="1" v-model="input" placeholder="Say something..." @keydown.enter="doSubmitOrStop" autofocus />
+					<div class="flex flex-col items-center gap-1">
+						<Button type="button" size="sm" @click="doSubmitOrStop" :disabled="!canSend && !isLoading"
+							:variant="isLoading ? 'destructive' : 'default'">
+							<Send v-if="!isLoading" />
+							<Square v-else />
+						</Button>
+						<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload"
+							@click="doReload" title="Re-submit your last message to get a new response">
+							<RefreshCcwDot />
+						</Button>
+					</div>
+				</form>
+				<ChatDisclaimer v-if="uiMessages.length > 2 || (uiMessages.length > 1 && !isLoading)" />
+			</ResizablePanel>
+		</ResizablePanelGroup>
 	</div>
 </template>

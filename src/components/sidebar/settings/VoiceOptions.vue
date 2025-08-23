@@ -13,13 +13,14 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import OptionSection from './OptionSection.vue';
-import { getVoices } from '@/src/lib/ai/tts';
 import { Separator } from '../../ui/separator';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 
 const store = useAppStore();
+const ttsAI = useTTSAI();
 const ttsProvider = computed(() => store.settings.selected_provider_tts);
 const sttProvider = computed(() => store.settings.selected_provider_stt);
-const voices = ref(getVoices());
+const voices = ref(ttsAI.availVoices.value);
 
 const autoReadChat = computed({
 	get: () => store.settings.auto_read_chat ? 'true' : 'false',
@@ -52,7 +53,7 @@ const autoSendSTT = computed({
 			<div class="flex gap-4">
 				<Label for="default_voice"> Default Voice </Label>
 				<Select :default-value="store.settings.selected_model_tts" @update:model-value="updateTTSVoice"
-					@update:open="voices = getVoices()" id="default_voice">
+					@update:open="voices = ttsAI.availVoices.value" id="default_voice">
 					<SelectTrigger :title="store.settings.selected_model_tts">
 						<SelectValue placeholder="Select a TTS voice" />
 					</SelectTrigger>
@@ -64,7 +65,7 @@ const autoSendSTT = computed({
 					</SelectContent>
 				</Select>
 			</div>
-			<div class="flex gap-4">
+			<div class="mt-2 flex gap-4">
 				<Label for="auto_read_chat"> Auto-Read Chat </Label>
 				<RadioGroup :default-value="autoReadChat" v-model="autoReadChat" id="auto_read_chat" class="flex flex-row">
 					<div class="flex items-center space-x-2">

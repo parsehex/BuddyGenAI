@@ -9,7 +9,6 @@ import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import { api } from '@/lib/api';
 import BuddyTagsInput from './BuddyTagsInput.vue';
-import { getVoices } from '@/src/lib/ai/tts';
 import {
 	Select,
 	SelectTrigger,
@@ -32,6 +31,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Separator } from './ui/separator';
+import { useTTSAI } from '../composables/ai/useTTSAI';
 
 const props = defineProps({
 	initialBuddy: {
@@ -47,6 +47,7 @@ const props = defineProps({
 const emit = defineEmits(['save', 'update:buddy']);
 
 const store = useAppStore();
+const ttsAI = useTTSAI();
 const { toast } = useToast();
 
 const buddyName = ref(props.initialBuddy?.name || '');
@@ -94,7 +95,7 @@ const buddyKeywordsArr = computed({
 const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
 const availVoices = ref(['']);
 onMounted(async () => {
-	availVoices.value = [...getVoices()];
+	availVoices.value = [...ttsAI.availVoices.value];
 	if (!props.initialBuddy?.id) return;
 	allProfilePics.value = await api.buddy.profilePic.getAll(props.initialBuddy?.id);
 });
@@ -190,6 +191,7 @@ const refreshProfilePicture = async () => {
 		2, // Default quality for now, can be made configurable
 		gender
 	);
+	if (!imgData) throw new Error();
 	const res = await api.buddy.profilePic.addOne(
 		id,
 		imgData
@@ -264,8 +266,6 @@ watch(
 
 const basicInfoTitle = computed(() => props.isNewBuddy ? (store.buddies.length ? 'Create a Buddy' : 'Create your first Buddy') : `Edit ${buddyName.value || 'Buddy'}`);
 const appearanceTitle = computed(() => `Customize ${buddyName.value || 'your buddy'}'s appearance`);
-
-
 </script>
 <template>
 	<ScrollArea class="h-screen pb-6">
@@ -284,6 +284,7 @@ const appearanceTitle = computed(() => `Customize ${buddyName.value || 'your bud
 								with you. </p>
 							<BuddyTagsInput type="create" :buddyName="buddyName" :buddyKeywords="buddyKeywords"
 								:updateBuddyKeywords="(keywords: any) => (buddyKeywords = keywords.join(', '))" />
+							<!-- TODO voice selector component with preview -->
 							<Select v-if="ttsEnabled" v-model="buddyVoice" id="buddy-voice">
 								<SelectTrigger :title="buddyVoice">
 									<SelectValue :placeholder="`Select a TTS voice for ${buddyName}`" />

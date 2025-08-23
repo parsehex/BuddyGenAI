@@ -20,7 +20,7 @@ export default async function getAll(
 
 	const directory = AppSettings.get('local_model_directory') as string;
 	if (!directory) {
-		console.log('No directory');
+		// console.log('No directory');
 		return [];
 	}
 

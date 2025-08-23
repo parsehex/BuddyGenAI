@@ -1,0 +1,86 @@
+import { useToast } from '@/src/components/ui/toast';
+import { useAppStore } from '@/src/stores/main';
+import { computed, onMounted, ref, watch } from 'vue';
+import { type TTSRequest, koboldcpp } from '@/lib/ai/tts';
+import { playAudio } from '@/src/lib/utils';
+
+export function useTTSAI() {
+	const store = useAppStore();
+	const { toast } = useToast();
+
+	const provider = computed(() => store.settings.selected_provider_tts);
+	const providerType = computed(() => {
+		if (store.settings.selected_provider_tts === 'koboldcpp') return 'koboldcpp';
+		return '';
+	});
+	const availVoices = ref([] as string[]);
+	const isAvailable = computed(() => !!providerType.value);
+
+	async function updateVoices() {
+		let voices = [] as string[];
+		if (provider.value === 'koboldcpp') voices = await koboldcpp.getVoices();
+		availVoices.value.length = 0;
+		availVoices.value = [...voices];
+	}
+
+	watch(() => provider.value, updateVoices);
+	onMounted(updateVoices);
+
+	async function makeTTS(req: TTSRequest): Promise<string | undefined> {
+		if (provider.value === 'koboldcpp') return koboldcpp.makeTTS(req);
+
+		toast({
+			variant: 'destructive',
+			description:
+				'TTS is currently disabled. Enable it in Options -> AI Providers',
+		});
+	}
+
+	async function makeAndReadTTS(text: string, voice: string) {
+		const store = useAppStore();
+		const autoRead = store.settings.auto_read_chat;
+
+		const audio = await makeTTS({ text, voice });
+
+		if (!audio) {
+			console.error('Did not receive any TTS audio');
+			return;
+		}
+
+		if (!autoRead) {
+			console.log('Auto-read TTS not enabled');
+			return;
+		}
+
+		playAudio(audio);
+		return audio;
+	}
+
+	function stop() {
+		if (provider.value === 'koboldcpp') return koboldcpp.stop();
+		return false;
+	}
+
+	function getSelectedVoice(buddyId?: string) {
+		if (!providerType.value) return '';
+		if (buddyId) {
+			const buddy = store.buddies.find((b) => b.id === buddyId);
+			if (buddy && buddy.tts_voice) {
+				return buddy.tts_voice;
+			}
+		}
+		return store.settings.selected_model_tts;
+	}
+
+	return {
+		provider,
+		availVoices,
+		isAvailable,
+		getSelectedVoice,
+
+		makeTTS,
+		makeAndReadTTS,
+		updateVoices,
+		stop,
+	};
+}

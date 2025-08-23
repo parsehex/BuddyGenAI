@@ -83,6 +83,7 @@ const refreshProfilePicture = async () => {
 		+picQuality.value,
 		gender
 	);
+	if (!imgData) throw new Error();
 	const res = await api.buddy.profilePic.addOne(id, imgData);
 
 	newBuddy.value.profile_pic = await getImage(res.output);
