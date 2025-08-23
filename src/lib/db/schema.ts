@@ -81,7 +81,8 @@ class AppDatabase extends Dexie {
 	audio!: Dexie.Table<Audio, string>;
 
 	constructor() {
-		super('buddyGenAI-DB');
+		// NOTE don't change name casing here, will clear DB
+		super('BuddyGenAI-DB');
 
 		this.version(2).stores({
 			persona: 'id, created, updated, current_version_id',
