@@ -55,7 +55,8 @@ const providerFeatures = {
         'hover:border-primary/50': selectedProvider !== 'local'
       }" @click="selectedProvider = 'local'">
         <CardHeader class="flex items-center justify-center relative">
-          <h3 class="text-xl font-semibold">Local <small class="opacity-70">(recommended)</small></h3>
+          <h3 class="text-xl font-semibold flex items-baseline gap-2">Local <small
+              class="opacity-70 text-sm">(recommended)</small></h3>
         </CardHeader>
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 relative">
           <div class="flex items-center"> powered by <img src="/assets/kobolddiscordgear.png"
@@ -83,7 +84,8 @@ const providerFeatures = {
         'hover:border-primary/50': selectedProvider !== 'webllm'
       }" @click="selectedProvider = 'webllm'">
         <CardHeader class="flex items-center justify-center relative">
-          <h3 class="text-xl font-semibold">In-Browser <small class="opacity-80">(Chrome or Edge only)</small></h3>
+          <h3 class="text-xl font-semibold flex items-baseline gap-2">In-Browser <small
+              class="opacity-70 text-sm">(Chrome or Edge only)</small></h3>
         </CardHeader>
         <CardContent class="text-muted-foreground flex flex-col items-center gap-2 relative">
           <div class="flex items-center"> powered by <img src="/assets/mlc-logo.png"
