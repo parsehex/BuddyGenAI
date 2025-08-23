@@ -6,6 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export function valueUpdate(updaterOrValue: any, ref: any) {
+	ref.value =
+		typeof updaterOrValue === 'function'
+			? updaterOrValue(ref.value)
+			: updaterOrValue;
+}
+
 export function popError(msg: string, title?: string) {
 	const { toast } = useToast();
 	toast({
