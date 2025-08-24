@@ -13,6 +13,15 @@ export function useImgAI() {
 		return '';
 	});
 
+	const isEnabled = computed(() => provider.value && provider.value !== '0');
+	const isAvailable = computed(() => {
+		if (!isEnabled.value) return false;
+		const lastPing = store.lastKoboldVersionResult;
+		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.txt2img))
+			return false;
+		return true;
+	});
+
 	async function makeImage(req: ImageRequest): Promise<string | undefined> {
 		if (providerType.value === 'a1111') return a1111.makeImage(req);
 
@@ -30,6 +39,8 @@ export function useImgAI() {
 
 	return {
 		provider,
+		isEnabled,
+		isAvailable,
 
 		makeImage,
 		stop,

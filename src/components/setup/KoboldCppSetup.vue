@@ -136,15 +136,16 @@ onUnmounted(() => {
     <div v-if="connectionStatus !== 'none'" class="text-sm">
       <div v-if="connectionStatus === 'testing'" class="text-blue-500"> Testing connection... </div>
       <div v-if="connectionStatus === 'success'" class="text-green-400">
-        <div class="font-medium inline-block">Connected successfully!</div>
-        <div class="mt-1 text-gray-600 inline-block ml-2">KoboldCpp Version: {{ version }}</div>
+        <div class="font-medium inline-block"> Connected successfully! <span class="text-gray-600 ml-2">KoboldCpp v{{
+          version }}</span>
+        </div>
         <div class="mt-2">
           <div class="font-medium inline-block">Available features:</div>
           <ul class="inline-flex gap-2 ml-2 text-green-600 underline">
             <li v-if="features.llm">Chat</li>
             <li v-if="features.txt2img">Image Generation</li>
             <li v-if="features.tts">Text to Speech</li>
-            <li v-if="features.transcribe">Speech to Text</li>
+            <li v-if="features.transcribe">Transcription</li>
           </ul>
         </div>
       </div>

@@ -22,6 +22,19 @@ export function useChatAI() {
 	});
 	const availModels = ref([] as ModelObject[]);
 
+	const isEnabled = computed(() => provider.value && provider.value !== '0');
+	const isAvailable = computed(() => {
+		if (!isEnabled.value) return false;
+		const lastPing = store.lastKoboldVersionResult;
+		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.llm))
+			return false;
+		if (provider.value === 'openrouter' && !store.settings.openrouter_api_key)
+			return false;
+		if (provider.value === 'webllm' && !store.settings.selected_model_chat)
+			return false;
+		return true;
+	});
+
 	async function updateModels() {
 		if (providerType.value === 'openai')
 			availModels.value = [...(await openaiCompat.getModels())];
@@ -55,8 +68,11 @@ export function useChatAI() {
 	return {
 		provider,
 		availModels,
+		isEnabled,
+		isAvailable,
 
 		chat,
 		stop,
+		// TODO tokens(text)
 	};
 }

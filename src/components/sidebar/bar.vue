@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router/auto';
 import router from '@/lib/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,7 +13,7 @@ import { useToast } from '../ui/toast';
 import Button from '../ui/button/Button.vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
-import ChatServerStatus from './ChatServerStatus.vue';
+import AIProviderStatus from './AIProviderStatus.vue';
 import BuddySelect from '../BuddySelect.vue';
 import {
 	Tooltip,
@@ -21,6 +21,7 @@ import {
 	TooltipTrigger
 } from '@/components/ui/tooltip'
 import useMobile from '@/src/composables/useMobile';
+import { useAIStatus } from '@/src/composables/ai/useAIStatus';
 
 const device = useMobile();
 const { toast } = useToast();
@@ -28,13 +29,27 @@ const { toast } = useToast();
 const store = useAppStore();
 const route = useRoute();
 
-const modelValue = ref(route.path.includes('/buddy') ? 'buddy' : 'chat');
+const aiStatus = useAIStatus();
+const glowColor = computed(() => {
+	if (aiStatus.overallStatus.value === 'green') {
+		return '0 0 10px #22c55e';
+	} else if (aiStatus.overallStatus.value === 'yellow') {
+		return '0 0 10px #eab308';
+	} else if (aiStatus.overallStatus.value === 'red') {
+		return '0 0 10px #ef4444';
+	}
+	return 'none';
+});
+
+const modelValue = ref(route.path.includes('/buddy') ? 'buddy' : route.path.includes('/game') ? 'game' : 'chat');
 
 watch(
 	() => route.path,
 	(path) => {
 		if (path.includes('/buddy')) {
 			modelValue.value = 'buddy';
+		} else if (path.includes('/game')) {
+			modelValue.value = 'game';
 		} else {
 			modelValue.value = 'chat';
 		}
@@ -96,18 +111,15 @@ watch(
 		}
 	}
 );
-
-const handleClickChat = () => {
-	window.location.href = '/';
-}
 </script>
 <template>
 	<Tabs v-model:model-value="modelValue">
 		<TabsList class="w-full dark:bg-gray-800 rounded-none">
 			<Tooltip>
 				<TooltipTrigger>
-					<img src="/assets/logo.png" class="hidden lg:block w-6 h-6 m-1 mx-2 cursor-pointer select-none"
-						@click="handleClickChat" />
+					<div class="relative">
+						<AIProviderStatus ref="aiStatusRef" :glow-color="glowColor" :handle-click-chat="() => router.push('/')" />
+					</div>
 				</TooltipTrigger>
 				<TooltipContent> Go to home page </TooltipContent>
 			</Tooltip>
@@ -120,7 +132,6 @@ const handleClickChat = () => {
 		<div class="h-screen">
 			<TabsContent value="chat">
 				<div class="bg-background mb-1">
-					<ChatServerStatus v-if="store.settings.selected_provider_chat === 'koboldcpp'" />
 					<div v-if="store.settings.selected_provider_chat" class="flex w-full px-2 my-1 items-end">
 						<BuddySelect @select="(id: any) => {
 							selectedBuddy = id;
@@ -141,4 +152,3 @@ const handleClickChat = () => {
 		</div>
 	</Tabs>
 </template>
-<style></style>

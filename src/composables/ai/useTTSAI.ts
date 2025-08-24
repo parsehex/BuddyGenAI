@@ -14,7 +14,15 @@ export function useTTSAI() {
 		return '';
 	});
 	const availVoices = ref([] as string[]);
-	const isAvailable = computed(() => !!providerType.value);
+
+	const isEnabled = computed(() => provider.value && provider.value !== '0');
+	const isAvailable = computed(() => {
+		if (!isEnabled.value) return false;
+		const lastPing = store.lastKoboldVersionResult;
+		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.tts))
+			return false;
+		return true;
+	});
 
 	async function updateVoices() {
 		let voices = [] as string[];
@@ -55,6 +63,8 @@ export function useTTSAI() {
 		playAudio(audio);
 		return audio;
 	}
+	// TODO need a function we can call or modify to use in conjunction with chat's stream_callback
+	//   that way we can start generating and optionally play TTS after we receive the first sentence from the LLM
 
 	function stop() {
 		if (provider.value === 'koboldcpp') return koboldcpp.stop();
@@ -75,6 +85,7 @@ export function useTTSAI() {
 	return {
 		provider,
 		availVoices,
+		isEnabled,
 		isAvailable,
 		getSelectedVoice,
 

@@ -9,10 +9,18 @@ export function useSTTAI() {
 
 	const provider = computed(() => store.settings.selected_provider_stt);
 	const providerType = computed(() => {
-		if (store.settings.selected_provider_tts === 'koboldcpp') return 'koboldcpp';
+		if (store.settings.selected_provider_stt === 'koboldcpp') return 'koboldcpp';
 		return '';
 	});
-	const isAvailable = computed(() => !!providerType.value);
+
+	const isEnabled = computed(() => provider.value && provider.value !== '0');
+	const isAvailable = computed(() => {
+		if (!isEnabled.value) return false;
+		const lastPing = store.lastKoboldVersionResult;
+		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.transcribe))
+			return false;
+		return true;
+	});
 
 	async function transcribe(req: STTRequest): Promise<string | undefined> {
 		if (provider.value === 'koboldcpp') return koboldcpp.transcribe(req);
@@ -31,6 +39,7 @@ export function useSTTAI() {
 
 	return {
 		provider,
+		isEnabled,
 		isAvailable,
 
 		transcribe,

@@ -19,11 +19,11 @@ const usingOpenRouter = computed(() => (
 	store.settings.selected_provider_chat === 'openrouter' || !!store.settings.openrouter_api_key
 ));
 const usingKoboldCpp = computed(() => (
-	!!store.settings.koboldcpp_host &&
 	(store.settings.selected_provider_chat === 'koboldcpp' ||
 		store.settings.selected_provider_image === 'koboldcpp' ||
 		store.settings.selected_provider_tts === 'koboldcpp' ||
-		store.settings.selected_provider_stt === 'koboldcpp')
+		store.settings.selected_provider_stt === 'koboldcpp') ||
+	!!store.settings.koboldcpp_host
 ));
 </script>
 <template>

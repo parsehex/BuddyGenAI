@@ -56,10 +56,12 @@ const updateDescription = async () => {
 };
 
 const updateDescriptionAssistant = async () => {
+	userDescriptionAssistant.value = !userDescriptionAssistant.value;
 	store.settings.user_description_assistant = userDescriptionAssistant.value;
 };
 
 const updateDescriptionBuddies = async () => {
+	userDescriptionBuddies.value = !userDescriptionBuddies.value;
 	store.settings.user_description_buddies = userDescriptionBuddies.value;
 };
 </script>
@@ -88,11 +90,11 @@ const updateDescriptionBuddies = async () => {
 				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" />
 		</OptionSection>
 		<OptionSection label="Show description to Assistant" labelName="show-desc-assistant" orientation="horizontal">
-			<Switch v-model:checked="userDescriptionAssistant" @update:checked="updateDescriptionAssistant()"
+			<Switch v-model:checked="userDescriptionAssistant" @update:checked="updateDescriptionAssistant"
 				id="show-desc-assistant" />
 		</OptionSection>
 		<OptionSection label="Show description to Buddies" labelName="show-desc-buddies" orientation="horizontal">
-			<Switch v-model:checked="userDescriptionBuddies" @update:checked="updateDescriptionBuddies()"
+			<Switch v-model:checked="userDescriptionBuddies" @update:checked="updateDescriptionBuddies"
 				id="show-desc-buddies" />
 		</OptionSection>
 	</div>
