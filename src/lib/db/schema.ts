@@ -59,6 +59,15 @@ interface AppSetting {
 	value: string;
 }
 
+export interface LogEntry {
+	id: string;
+	timestamp: Date;
+	level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+	module: string;
+	message: string;
+	metadata?: string; // Storing JSON string
+}
+
 import Dexie from 'dexie';
 
 export const tableNames = [
@@ -69,6 +78,7 @@ export const tableNames = [
 	'app_settings',
 	'images',
 	'audio',
+	'logs',
 ];
 
 class AppDatabase extends Dexie {
@@ -79,6 +89,7 @@ class AppDatabase extends Dexie {
 	app_settings!: Dexie.Table<AppSetting, string>;
 	images!: Dexie.Table<Image, string>;
 	audio!: Dexie.Table<Audio, string>;
+	logs!: Dexie.Table<LogEntry, string>;
 
 	constructor() {
 		// NOTE don't change name casing here, will clear DB
@@ -93,6 +104,7 @@ class AppDatabase extends Dexie {
 			app_settings: 'name',
 			images: 'id, timestamp',
 			audio: 'id, timestamp',
+			logs: 'id, timestamp, level, module',
 		});
 
 		// @ts-ignore
@@ -113,8 +125,8 @@ class AppDatabase extends Dexie {
 			return obj;
 		});
 
-		// @ts-ignore
 		this.persona_version.hook(
+			// @ts-ignore
 			'creating',
 			(primKey: string, obj: PersonaVersion) => {
 				obj.created = obj.created || new Date();
@@ -129,6 +141,12 @@ class AppDatabase extends Dexie {
 		});
 		// @ts-ignore
 		this.audio.hook('creating', (primKey: string, obj: Audio) => {
+			obj.timestamp = obj.timestamp || new Date();
+			return obj;
+		});
+
+		// @ts-ignore
+		this.logs.hook('creating', (primKey: string, obj: LogEntry) => {
 			obj.timestamp = obj.timestamp || new Date();
 			return obj;
 		});

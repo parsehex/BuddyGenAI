@@ -25,6 +25,17 @@ import { AppSettings } from '@/lib/api/AppSettings';
 import DesktopLayout from './src/layout/desktop.vue';
 import MobileLayout from './src/layout/mobile.vue';
 import { isFeatureAvailable } from './src/lib/ai/support';
+import LogDashboard from '@/components/LogDashboard.vue';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Bug } from 'lucide-vue-next';
+import { VisuallyHidden } from 'reka-ui';
 
 const store = useAppStore();
 const device = useMobile();
@@ -119,6 +130,20 @@ const container = ref<HTMLElement | null>(null);
 				</AlertDialogContent>
 			</AlertDialog>
 			<Toaster />
+			<Dialog v-if="isDevMode()">
+				<DialogTrigger as-child>
+					<Button variant="warning" class="px-4 py-6 fixed bottom-4 right-16 z-50 opacity-95">
+						<Bug class="h-g w-6" />
+					</Button>
+				</DialogTrigger>
+				<DialogContent class="sm:max-w-[800px] h-[90vh] p-0">
+					<VisuallyHidden>
+						<DialogTitle>Application Logs</DialogTitle>
+						<DialogDescription>Logs that this app has generated. For debugging purposes.</DialogDescription>
+					</VisuallyHidden>
+					<LogDashboard />
+				</DialogContent>
+			</Dialog>
 		</TooltipProvider>
 	</div>
 </template>

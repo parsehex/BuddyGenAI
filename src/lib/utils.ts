@@ -57,7 +57,11 @@ export function textToHslColor(t: string, s: number, l: number) {
 
 export function isDevMode() {
 	// @ts-ignore
-	return process.env.NODE_ENV === 'development' || import.meta.env.DEV;
+	return (
+		process.env.NODE_ENV === 'development' ||
+		(import.meta as any).env.DEV ||
+		localStorage.getItem('dev_mode') === 'true'
+	);
 }
 
 export function playAudio(url: string) {
