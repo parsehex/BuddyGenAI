@@ -96,7 +96,9 @@ export async function getModels() {
 			'X-TITLE': 'buddyGenAI',
 		},
 	});
-	return response.data.data.map((v: any) => ({
+	const { data } = response;
+	if (!Array.isArray(data)) return [];
+	return data.map((v: any) => ({
 		model_id: v.id,
 		model_url: v.id,
 	})) as ModelObject[];

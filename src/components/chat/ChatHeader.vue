@@ -6,7 +6,7 @@ import type { BuddyVersionMerged } from '@/src/lib/api/types-db';
 defineProps<{
 	threadTitle: string;
 	threadMode: 'persona' | 'custom';
-	threadBuddy: BuddyVersionMerged;
+	threadBuddy?: BuddyVersionMerged;
 	threadImages: { url: string }[];
 }>();
 </script>

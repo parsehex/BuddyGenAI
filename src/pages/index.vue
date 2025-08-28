@@ -48,10 +48,6 @@ if (settings.value.user_name && settings.value.user_name !== 'User') {
 	userNameValue.value = settings.value.user_name;
 }
 
-if (settings.value.local_model_directory) {
-	await updateModels();
-}
-
 const MaxMessageLength = 150;
 const getMessageContent = (thread: MergedChatThread) => {
 	if (thread.latest_message?.content.length > MaxMessageLength) {
@@ -178,11 +174,9 @@ const { skip_setup } = toRefs(store.settings);
 	<div v-if="store.settings.selected_provider_chat && (buddies.length && !threads.length) || +skip_setup"
 		class="mt-4 flex items-center justify-center">
 		<Button class="mx-3" @click="startChat('ai')"> Chat with AI Assistant </Button>
-		<Select v-if="store.buddies.length > 0" class="my-2" @update:modelValue="
-			(id) => {
-				startChat(id);
-			}
-		">
+		<Select v-if="store.buddies.length > 0" class="my-2" @update:modelValue="(id) => {
+			startChat(id as string);
+		}">
 			<SelectTrigger class="max-w-[10vw]">
 				<SelectValue placeholder="Chat with..." />
 			</SelectTrigger>
