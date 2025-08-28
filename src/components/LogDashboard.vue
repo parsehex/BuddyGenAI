@@ -190,7 +190,8 @@ const getLogLevelClass = (level: LogEntry['level']) => {
 										<DialogTitle>Metadata for Log Entry</DialogTitle>
 									</DialogHeader>
 									<ScrollArea class="h-[400px] w-full rounded-md border p-4 bg-gray-800 text-white font-mono text-sm">
-										<pre>{{ selectedLogEntry?.metadata ? JSON.parse(selectedLogEntry.metadata) : '{}' }}</pre>
+										<pre
+											class="whitespace-break-spaces">{{ selectedLogEntry?.metadata ? JSON.parse(selectedLogEntry.metadata) : '{}' }}</pre>
 									</ScrollArea>
 								</DialogContent>
 							</Dialog>
