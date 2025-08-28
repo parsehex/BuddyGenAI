@@ -2,12 +2,6 @@
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
 	Select,
 	SelectContent,
 	SelectGroup,
@@ -21,20 +15,21 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { ChevronDown } from 'lucide-vue-next';
-import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useAppStore } from '@/stores/main';
 import { Label } from './ui/label';
 import BuddyAvatar from './BuddyAvatar.vue';
 
-const selectedBuddy = ref('');
-
 const store = useAppStore();
+const selectedBuddy = ref('');
 
 const emit = defineEmits(['select']);
 
 const props = defineProps({
 	includeAi: {
+		type: Boolean,
+		default: true,
+	},
+	label: {
 		type: Boolean,
 		default: true,
 	},
@@ -53,7 +48,7 @@ const truncateDescription = (description: string, maxLength: number) => {
 </script>
 <template>
 	<div class="flex items-center space-x-2 justify-around w-full">
-		<Label>Chat with:</Label>
+		<Label v-if="label">Chat with:</Label>
 		<Button v-if="includeAi" @click="startChat('ai')"> AI Assistant </Button>
 		<Select v-if="store.buddies.length > 0" class="my-2" @update:modelValue="
 			(id) => {
