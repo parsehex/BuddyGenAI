@@ -1,9 +1,10 @@
 import { useToast } from '@/src/components/ui/toast';
 import { a1111, type ImageRequest } from '@/src/lib/ai/image';
 import { useAppStore } from '@/src/stores/main';
+import { defineStore } from 'pinia';
 import { computed } from 'vue';
 
-export function useImgAI() {
+export const useImgAI = defineStore('ai/img', () => {
 	const store = useAppStore();
 	const { toast } = useToast();
 
@@ -45,4 +46,4 @@ export function useImgAI() {
 		makeImage,
 		stop,
 	};
-}
+});

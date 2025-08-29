@@ -31,7 +31,6 @@ import {
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
 import { delay } from '@/src/lib/utils';
-import ThreadImages from './ThreadImages.vue';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
 import { MODEL_NAME } from '@/lib/constants';
@@ -41,7 +40,6 @@ import { v4 } from 'uuid';
 import { insert } from '@/src/lib/sql';
 import { isFeatureAvailable } from '@/lib/ai/support';
 import { useImgAI } from '@/src/composables/ai/useImgAI';
-import { useSTTAI } from '@/src/composables/ai/useSTTAI';
 import RecordAudio from './RecordAudio.vue';
 import ChatDisclaimer from './ChatDisclaimer.vue';
 import ChatHeader from './ChatHeader.vue';

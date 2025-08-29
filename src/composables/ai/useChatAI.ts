@@ -6,10 +6,11 @@ import {
 	type ModelObject,
 } from '@/src/lib/ai/chat';
 import { useAppStore } from '@/src/stores/main';
+import { defineStore } from 'pinia';
 import { computed, onMounted, ref, watch } from 'vue';
 
 export type ChatRequest = TChatRequest;
-export function useChatAI() {
+export const useChatAI = defineStore('ai/chat', () => {
 	const store = useAppStore();
 	const { toast } = useToast();
 
@@ -75,4 +76,4 @@ export function useChatAI() {
 		stop,
 		// TODO tokens(text)
 	};
-}
+});

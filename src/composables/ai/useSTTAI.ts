@@ -1,15 +1,16 @@
 import { useToast } from '@/src/components/ui/toast';
 import { koboldcpp, type STTRequest } from '@/src/lib/ai/stt';
 import { useAppStore } from '@/src/stores/main';
+import { defineStore } from 'pinia';
 import { computed } from 'vue';
 
-export function useSTTAI() {
+export const useSTTAI = defineStore('ai/stt', () => {
 	const store = useAppStore();
 	const { toast } = useToast();
 
 	const provider = computed(() => store.settings.selected_provider_stt);
 	const providerType = computed(() => {
-		if (store.settings.selected_provider_stt === 'koboldcpp') return 'koboldcpp';
+		if (provider.value === 'koboldcpp') return 'koboldcpp';
 		return '';
 	});
 
@@ -17,13 +18,21 @@ export function useSTTAI() {
 	const isAvailable = computed(() => {
 		if (!isEnabled.value) return false;
 		const lastPing = store.lastKoboldVersionResult;
-		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.transcribe))
-			return false;
+		if (provider.value === 'koboldcpp') {
+			if (!lastPing || !lastPing.transcribe) return false;
+
+			// audio recording won't work otherwise:
+			const hostIsHttps =
+				window.location.href.includes('localhost') ||
+				store.settings.koboldcpp_host.includes('https:') ||
+				store.settings.koboldcpp_host.includes('localhost');
+			if (!store.settings.koboldcpp_host || !hostIsHttps) return false;
+		}
 		return true;
 	});
 
 	async function transcribe(req: STTRequest): Promise<string | undefined> {
-		if (provider.value === 'koboldcpp') return koboldcpp.transcribe(req);
+		if (providerType.value === 'koboldcpp') return koboldcpp.transcribe(req);
 
 		toast({
 			variant: 'destructive',
@@ -33,7 +42,7 @@ export function useSTTAI() {
 	}
 
 	function stop() {
-		if (provider.value === 'koboldcpp') return koboldcpp.stop();
+		if (providerType.value === 'koboldcpp') return koboldcpp.stop();
 		return false;
 	}
 
@@ -45,4 +54,4 @@ export function useSTTAI() {
 		transcribe,
 		stop,
 	};
-}
+});

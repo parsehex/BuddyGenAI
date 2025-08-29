@@ -4,8 +4,9 @@ import { useChatAI } from './useChatAI';
 import { useImgAI } from './useImgAI';
 import { useTTSAI } from './useTTSAI';
 import { useSTTAI } from './useSTTAI';
+import { defineStore } from 'pinia';
 
-export function useAIStatus() {
+export const useAIStatus = defineStore('ai/status', () => {
 	const store = useAppStore();
 	const chatAI = useChatAI();
 	const imgAI = useImgAI();
@@ -20,23 +21,23 @@ export function useAIStatus() {
 		const features = [
 			{
 				name: 'Chat',
-				enabled: chatAI.isEnabled.value,
-				available: chatAI.isAvailable.value,
+				enabled: chatAI.isEnabled,
+				available: chatAI.isAvailable,
 			},
 			{
 				name: 'Image Generation',
-				enabled: imgAI.isEnabled.value,
-				available: imgAI.isAvailable.value,
+				enabled: imgAI.isEnabled,
+				available: imgAI.isAvailable,
 			},
 			{
 				name: 'Text-to-Speech',
-				enabled: ttsAI.isEnabled.value,
-				available: ttsAI.isAvailable.value,
+				enabled: ttsAI.isEnabled,
+				available: ttsAI.isAvailable,
 			},
 			{
 				name: 'Speech-to-Text',
-				enabled: sttAI.isEnabled.value,
-				available: sttAI.isAvailable.value,
+				enabled: sttAI.isEnabled,
+				available: sttAI.isAvailable,
 			},
 		];
 
@@ -53,7 +54,7 @@ export function useAIStatus() {
 
 		if (allEnabledAndAvailable && anyEnabledAndAvailable) {
 			return 'green'; // All enabled features are responsive/ready to use
-		} else if (chatAI.isAvailable.value && anyEnabledAndUnavailable) {
+		} else if (chatAI.isAvailable && anyEnabledAndUnavailable) {
 			return 'yellow'; // Chat is available but some enabled feature(s) aren't available
 		} else {
 			return 'red'; // All providers are unavailable or no features are enabled and available
@@ -62,21 +63,18 @@ export function useAIStatus() {
 
 	const activeFeatures = computed(() => {
 		const features = [];
-		if (chatAI.isEnabled.value && chatAI.isAvailable.value) features.push('Chat');
-		if (imgAI.isEnabled.value && imgAI.isAvailable.value)
-			features.push('Image Generation');
-		if (ttsAI.isEnabled.value && ttsAI.isAvailable.value)
-			features.push('Text-to-Speech');
-		if (sttAI.isEnabled.value && sttAI.isAvailable.value)
-			features.push('Speech-to-Text');
+		if (chatAI.isEnabled && chatAI.isAvailable) features.push('Chat');
+		if (imgAI.isEnabled && imgAI.isAvailable) features.push('Image Generation');
+		if (ttsAI.isEnabled && ttsAI.isAvailable) features.push('Text-to-Speech');
+		if (sttAI.isEnabled && sttAI.isAvailable) features.push('Speech-to-Text');
 		return features;
 	});
 
 	const availableModels = computed(() => {
 		const models = [];
 		if (
-			chatAI.isEnabled.value &&
-			chatAI.isAvailable.value &&
+			chatAI.isEnabled &&
+			chatAI.isAvailable &&
 			store.settings.selected_model_chat
 		) {
 			models.push(`Chat: ${store.settings.selected_model_chat}`);
@@ -84,22 +82,22 @@ export function useAIStatus() {
 		// For other AI types, we might need to get the specific model names if they are stored in settings
 		// For now, just indicate if the feature is active.
 		if (
-			imgAI.isEnabled.value &&
-			imgAI.isAvailable.value &&
+			imgAI.isEnabled &&
+			imgAI.isAvailable &&
 			store.settings.selected_provider_image
 		) {
 			models.push(`Image: ${store.settings.selected_provider_image}`);
 		}
 		if (
-			ttsAI.isEnabled.value &&
-			ttsAI.isAvailable.value &&
+			ttsAI.isEnabled &&
+			ttsAI.isAvailable &&
 			store.settings.selected_model_tts
 		) {
 			models.push(`TTS: ${store.settings.selected_model_tts}`);
 		}
 		if (
-			sttAI.isEnabled.value &&
-			sttAI.isAvailable.value &&
+			sttAI.isEnabled &&
+			sttAI.isAvailable &&
 			store.settings.selected_provider_stt
 		) {
 			models.push(`STT: ${store.settings.selected_provider_stt}`);
@@ -112,4 +110,4 @@ export function useAIStatus() {
 		activeFeatures,
 		availableModels,
 	};
-}
+});

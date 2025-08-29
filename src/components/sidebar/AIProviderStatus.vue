@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import {
 	HoverCard,
 	HoverCardContent,
@@ -28,12 +27,12 @@ const props = defineProps({
 		</HoverCardTrigger>
 		<HoverCardContent class="w-72" side="right">
 			<div class="space-y-2">
-				<p class="text-sm font-semibold">Overall AI Status: <span :class="`text-${aiStatus.overallStatus.value}-500`">{{
-					aiStatus.overallStatus.value.charAt(0).toUpperCase() + aiStatus.overallStatus.value.slice(1) }}</span></p>
-				<div v-if="aiStatus.activeFeatures.value.length > 0">
+				<p class="text-sm font-semibold">Overall AI Status: <span :class="`text-${aiStatus.overallStatus}-500`">{{
+					aiStatus.overallStatus.charAt(0).toUpperCase() + aiStatus.overallStatus.slice(1) }}</span></p>
+				<div v-if="aiStatus.activeFeatures.length > 0">
 					<p class="text-sm font-semibold">Active Features:</p>
 					<ul class="list-disc list-inside text-sm text-gray-500">
-						<li v-for="feature in aiStatus.activeFeatures.value" :key="feature">{{ feature }}</li>
+						<li v-for="feature in aiStatus.activeFeatures" :key="feature">{{ feature }}</li>
 					</ul>
 				</div>
 				<p v-else class="text-sm text-gray-500">All AI features are disabled or unavailable.</p>

@@ -3,8 +3,9 @@ import { useAppStore } from '@/src/stores/main';
 import { computed, onMounted, ref, watch } from 'vue';
 import { type TTSRequest, koboldcpp } from '@/lib/ai/tts';
 import { playAudio } from '@/src/lib/utils';
+import { defineStore } from 'pinia';
 
-export function useTTSAI() {
+export const useTTSAI = defineStore('ai/tts', () => {
 	const store = useAppStore();
 	const { toast } = useToast();
 
@@ -94,4 +95,4 @@ export function useTTSAI() {
 		updateVoices,
 		stop,
 	};
-}
+});
