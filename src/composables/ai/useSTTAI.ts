@@ -22,6 +22,10 @@ export const useSTTAI = defineStore('ai/stt', () => {
 			if (!lastPing || !lastPing.transcribe) return false;
 
 			// audio recording won't work otherwise:
+			// p.s. actually it does work (assuming recording on the app's https url),
+			//   but for privacy reasons sending audio over http doesn't feel good besides to localhost
+			// TODO maybe tighten security a bit: only allow http hosts on LAN, with an undocumented option to allow all
+			//   this would apply for other ai types as well
 			const hostIsHttps =
 				window.location.href.includes('localhost') ||
 				store.settings.koboldcpp_host.includes('https:') ||
