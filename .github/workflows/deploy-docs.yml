@@ -8,6 +8,8 @@ on:
    - '.github/workflows/deploy-docs.yml'
    - 'docs/**'
 
+permissions:
+  contents: read
 jobs:
  build-deploy:
   runs-on: ubuntu-latest

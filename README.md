@@ -20,7 +20,7 @@ I hope others find this project interesting and/or enjoyable as well.
 - [KoboldCpp](https://github.com/LostRuins/koboldcpp) integration
   - Generate profile pictures for your buddies (or set them manually)
   - Hear buddies with text-to-speech 🔊
-  <!-- - Speak messages to buddies with speech-to-text -->
+  - Speak messages to buddies with speech-to-text
   - Buddies can send images in chat 🖼️ (experimental, off by default)
 - Can also use [OpenRouter](https://openrouter.ai/) or [WebLLM](https://webllm.mlc.ai/) (Chrome/Edge only) for chat
 - Completely offline and private: besides your AI provider, app data isn't sent anywhere
@@ -29,20 +29,21 @@ I hope others find this project interesting and/or enjoyable as well.
 
 These aren't necessarily confirmed, and completed lines aren't necessarily stable or working.
 
-- [ ] KoboldCpp support
+- [x] KoboldCpp support
   - [x] Chat
   - [x] Generate profile, chat images
   - [x] Read messages with TTS
-  - [ ] Transcribe from your microphone for hands-free messaging
+  - [x] Transcribe from your microphone for hands-free messaging
 - [ ] Fully in-browser AI
   - [x] Chat / LLM (via [WebLLM](https://webllm.mlc.ai/))
   - [ ] Images
   - [ ] TTS
+    - [ ] Planned: [kokoro-js](https://www.npmjs.com/package/kokoro-js)
   - [ ] Transcription
 - [ ] Install the app as a PWA
 - [ ] Buddy/AI memory
   - Primitive version of this with Options -> General -> Your Description
-- [ ] Games: Play a game while your buddy chats with you
+- [ ] Games: Play a game while your buddy chats with you _In-progress_
 - [ ] Buddy Encounters: Randomly-generated Buddies will show up, giving you the choice to Save or Ignore them.
   - The feature might be designed to emulate a friend-matching service.
 
@@ -54,7 +55,7 @@ You're also welcome to join the [Discord server](https://discord.gg/wJ52aASf5b).
 
 ## Future Plans
 
-My overall goal with this is ease and simplicity for the user. While I'm interested in LLMs and imagegen models, I wanted to make an app that's more about creating an interesting experience that's jargon-free (or -minimal) and approachable to those with novice computer skills. There are better and more polished options which are easier to use overall: [Jan](https://jan.ai/) or [LM Studio](https://lmstudio.ai/) are popular & easy interfaces to use chat models, but I wanted the full chat experience, plus making it myself so that I know how it works.
+One of my overall goals with this is ease and simplicity for the user. While I'm interested in LLMs and imagegen models, I wanted to make an app that's more about creating an interesting experience that's jargon-free (or -minimal) and approachable to those with novice computer skills. There are better and more polished options which are easier to use overall: [Jan](https://jan.ai/) or [LM Studio](https://lmstudio.ai/) are popular & easy interfaces to use chat models, but I wanted the full chat experience, plus making it myself so that I know how it works.
 
 Aside from overall cleaning up the project and improving the look of it, I have some ideas for larger features to improve quality or increase immersion:
 

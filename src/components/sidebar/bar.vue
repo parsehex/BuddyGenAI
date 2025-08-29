@@ -34,11 +34,11 @@ const route = useRoute();
 
 const aiStatus = useAIStatus();
 const glowColor = computed(() => {
-	if (aiStatus.overallStatus.value === 'green') {
+	if (aiStatus.overallStatus === 'green') {
 		return '0 0 10px #22c55e';
-	} else if (aiStatus.overallStatus.value === 'yellow') {
+	} else if (aiStatus.overallStatus === 'yellow') {
 		return '0 0 10px #eab308';
-	} else if (aiStatus.overallStatus.value === 'red') {
+	} else if (aiStatus.overallStatus === 'red') {
 		return '0 0 10px #ef4444';
 	}
 	return 'none';

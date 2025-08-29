@@ -238,7 +238,7 @@ const doTTS = async () => {
 							backgroundColor: isUser ? textToHslColor(userName, 60, 80) : '',
 						}">
 							<AvatarImage v-if="isUser && store.settings.user_image" :src="store.settings.user_image" />
-							<AvatarImage v-if="!isUser" src="/assets/logo.png" />
+							<img v-if="!isUser" src="/assets/logo.png" />
 							<AvatarFallback v-else>{{ msgInitials }}</AvatarFallback>
 						</Avatar> {{ isUser ? userName : 'Assistant' }} <Button v-if="(!isUser && ttsEnabled) || hasTTS"
 							@click="doTTS" :variant="hasTTS ? 'secondary' : 'ghost'" size="sm" class="ml-2" :disabled="ttsLoading">

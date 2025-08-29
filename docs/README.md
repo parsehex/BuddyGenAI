@@ -5,7 +5,8 @@ This is the documentation for buddyGenAI, an app meant to turn AI into a compani
 ## Pages
 
 - Web version
-  - _Coming soon_
+  - Getting Started: _Coming soon_
+  - [App Options](./options.md)
 - Electron/Desktop version (**legacy, not updated**)
   - [Getting Started](./getting-started.md)
   - [Getting Models](./getting-models.md)

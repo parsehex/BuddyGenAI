@@ -23,6 +23,6 @@ async function startOAuthFlow() {
 </script>
 <template>
 	<button type="button" class="bg-gray-200 px-2 py-3 rounded-sm text-gray-800 flex items-center"
-		@click="startOAuthFlow"> Connect <img src="/assets/openrouter-logo.svg" class="h-10" />
+		@click="startOAuthFlow"> Connect to <img src="/assets/openrouter-logo.svg" class="h-10" />
 	</button>
 </template>
