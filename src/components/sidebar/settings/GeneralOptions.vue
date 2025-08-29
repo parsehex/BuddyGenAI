@@ -89,13 +89,14 @@ const updateDescriptionBuddies = async () => {
 			<Textarea v-model="userDescription" @blur="updateDescription()" id="user-description"
 				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" />
 		</OptionSection>
-		<OptionSection label="Show description to Assistant" labelName="show-desc-assistant" orientation="horizontal">
+		<!-- TODO disabled, switch to Yes/No radio buttons (like in image options) -->
+		<!-- <OptionSection label="Show description to Assistant" labelName="show-desc-assistant" orientation="horizontal">
 			<Switch v-model:checked="userDescriptionAssistant" @update:checked="updateDescriptionAssistant"
 				id="show-desc-assistant" />
 		</OptionSection>
 		<OptionSection label="Show description to Buddies" labelName="show-desc-buddies" orientation="horizontal">
 			<Switch v-model:checked="userDescriptionBuddies" @update:checked="updateDescriptionBuddies"
 				id="show-desc-buddies" />
-		</OptionSection>
+		</OptionSection> -->
 	</div>
 </template>
