@@ -6,10 +6,11 @@ This is the first installment of me documenting how this project is structured a
 >
 > I haven't actively worked with this codebase in a while, so I'm partially writing this to strengthen my own understanding of things.
 
-## Other Pages
+## Pages
 
 - [Database Info](./database-info.md)
 - [Unifying buddyGenAI Versions](./unifying-versions.md)
+- [Common Areas to Tweak](./common-areas-to-tweak.md)
 - Feature Notes
   - [Delayed Messages from Buddies](./features/delayed-messages.md)
   - [Proper JSON Mode](./features/json-mode.md)
