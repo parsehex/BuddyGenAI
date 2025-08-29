@@ -58,6 +58,18 @@ const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
 	return appStore.buddies.find(buddy => buddy.id === currentGame.value?.selectedBuddyId);
 });
 
+function scrollToBottom() {
+	nextTick(() => {
+		const viewport = document.body.querySelector('div#scrollArea div[data-reka-scroll-area-viewport]') as HTMLDivElement | null;
+		console.log(viewport);
+		if (!viewport) return;
+		const top = viewport.scrollHeight
+		viewport.scrollTo({
+			top,
+			behavior: 'smooth'
+		});
+	})
+}
 
 const takeTurn = async () => {
 	if (!currentGame.value || !selectedBuddy.value || !selectedBuddy.value.description) {
@@ -72,12 +84,7 @@ const takeTurn = async () => {
 	game.gameLog.push({ type: 'user', content: action });
 	userActionInput.value = '';
 	game.isLoading = true;
-	nextTick(() => {
-		const gameLog = document.getElementById('game-log');
-		if (gameLog) {
-			gameLog.scrollTop = gameLog.scrollHeight;
-		}
-	});
+	scrollToBottom();
 
 	// GM turn after user action
 	const gmTurnPrompt = generateGmTurnPrompt(
@@ -110,6 +117,7 @@ const takeTurn = async () => {
 	} else {
 		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
 	}
+	scrollToBottom();
 
 	// Buddy turn
 	const buddyTurnPrompt = generateBuddyTurnPrompt(
@@ -133,6 +141,7 @@ const takeTurn = async () => {
 	} else {
 		game.gameLog.push({ type: 'buddy', content: '(Failed to generate response)' });
 	}
+	scrollToBottom();
 
 	// GM turn after buddy action
 	const gmTurnPromptAfterBuddy = generateGmTurnPrompt(
@@ -168,6 +177,7 @@ const takeTurn = async () => {
 
 	game.isLoading = false;
 	gameStore.updateGame(game);
+	scrollToBottom();
 };
 
 // TODO need to:
@@ -227,19 +237,17 @@ const takeTurn = async () => {
 				<h2 class="text-xl font-semibold">{{ currentGame.name }}</h2>
 			</CardHeader>
 			<CardContent class="flex-1 overflow-hidden p-0">
-				<ScrollArea class="h-full p-4">
-					<div id="game-log" class="space-y-4">
-						<div v-for="(entry, index) in currentGame.gameLog" :key="index"
-							:class="{ 'text-right': entry.type === 'user', 'text-left': entry.type !== 'user' }">
-							<div class="inline-block p-3 rounded-lg max-w-[70%] break-words" :class="{
-								'bg-blue-500 text-white': entry.type === 'user',
-								'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
-								'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
-							}">
-								<span v-if="entry.type === 'user'" class="font-semibold">{{ appStore.settings.user_name }}: </span>
-								<span v-else-if="entry.type === 'buddy'" class="font-semibold">{{ selectedBuddy?.name }}: </span>
-								<span v-html="entry.content"></span>
-							</div>
+				<ScrollArea class="h-full p-4" id="scrollArea">
+					<div v-for="(entry, index) in currentGame.gameLog" :key="index"
+						:class="{ 'my-2': true, 'text-right': entry.type === 'user', 'text-left': entry.type !== 'user' }">
+						<div class="inline-block p-3 rounded-lg max-w-[70%] break-words" :class="{
+							'bg-blue-500 text-white': entry.type === 'user',
+							'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
+							'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
+						}">
+							<span v-if="entry.type === 'user'" class="font-semibold">{{ appStore.settings.user_name }}: </span>
+							<span v-else-if="entry.type === 'buddy'" class="font-semibold">{{ selectedBuddy?.name }}: </span>
+							<span v-html="entry.content"></span>
 						</div>
 					</div>
 				</ScrollArea>
