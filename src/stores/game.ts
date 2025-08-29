@@ -17,7 +17,7 @@ export interface Game {
 export interface GameLogEntry {
 	type: 'user' | 'buddy' | 'gm';
 	content: string;
-	choices?: string[]; // Optional choices for GM turns
+	choices?: string[];
 }
 
 export const useGameStore = defineStore('game', () => {
