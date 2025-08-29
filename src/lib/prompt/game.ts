@@ -11,16 +11,16 @@ export function generateGmIntroPrompt(
 		{
 			role: 'system',
 			content: `You are the Game Master (GM) of a text adventure game. Your goal is to create an engaging and interactive story based on the user's premise.
-The game has two players: user/${userName} and ${buddyName}.
+The game has two players: user (goes by ${userName}) and ${buddyName}.
 ${buddyName}'s description: ${buddyDescription}
-You will describe the initial scene, involving both the user and ${buddyName}, and offer them choices or ask for their first actions.
+You will describe the initial scene, involving both the user and ${buddyName}.
 The game is turn-based. The user and ${buddyName} will take turns acting.
-Start by describing the initial scene and offering the user and ${buddyName} some choices or asking for their first actions.
+Start by describing the initial scene and involving ${userName} and ${buddyName}.
 Keep your responses concise and focused on moving the story forward.
+Always narrate in the 3rd person, referring to characters by name.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
-Always provide choices or ask for the next actions at the end of your turn.
-Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of strings).
-Example: {"narrative": "You are in a dark forest. What do you do?", "choices": ["Go left", "Go right", "Go straight"]}
+Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
+Format: {"narrative": "John is in a dark forest.", "choices": ["Go left", "Go right", "Go straight"]}
 `,
 		},
 		{
@@ -34,24 +34,27 @@ export function generateGmTurnPrompt(
 	userName: string,
 	buddyName: string,
 	buddyDescription: string,
-	gameLog: GameLogEntry[],
-	lastPlayerAction: string // This could be user or buddy action
+	gameLog: GameLogEntry[]
 ): Message[] {
+	const lastTurn = gameLog.findLast((v) => v.type !== 'gm');
+	if (!lastTurn) throw new Error();
+	const lastPlayer = lastTurn.type as 'user' | 'buddy';
+	const lastPlayerName = lastPlayer === 'buddy' ? buddyName : userName;
+	const nextPlayer = lastPlayer === 'buddy' ? 'user' : 'buddy';
+	const nextPlayerName = nextPlayer === 'buddy' ? buddyName : userName;
 	const messages: Message[] = [
 		{
 			role: 'system',
 			content: `You are the Game Master (GM) of a text adventure game. Your goal is to continue the engaging and interactive story.
-The game has two players: user/${userName} and ${buddyName}.
+The game has two players: user (goes by ${userName}) and ${buddyName}.
 ${buddyName}'s description: ${buddyDescription}
-You will describe what happens next based on the last player's action (either the user or ${buddyName}).
-If the last action was by the user, you will offer new choices or ask for ${buddyName}'s next action.
-If the last action was by ${buddyName}, you will offer new choices or ask for ${userName}'s next action.
-The game is turn-based.
-Keep your responses concise and focused on moving the story forward.
+You will describe what happens next based on the last player's action (${lastPlayerName}).
+You will describe how ${lastPlayerName}'s action played out, leading up to ${nextPlayerName}'s turn.
+Keep your responses reasonably concise and focused on moving the story forward.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
-Always provide choices or ask for the next actions at the end of your turn.
-Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of strings).
-Example: {"narrative": "You are in a dark forest. What do you do?", "choices": ["Go left", "Go right", "Go straight"]}
+Always narrate in the 3rd person, referring to characters by name.
+Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
+Format: {"narrative": "John is in a dark forest.", "choices": ["Go left", "Go right", "Go straight"]}
 `,
 		},
 		...(gameLog.map((entry) => {
@@ -64,10 +67,6 @@ Example: {"narrative": "You are in a dark forest. What do you do?", "choices": [
 				return { role: 'assistant', content: entry.content };
 			}
 		}) as Message[]),
-		{
-			role: 'user',
-			content: lastPlayerAction,
-		},
 	];
 	return messages;
 }
@@ -76,8 +75,7 @@ export function generateBuddyTurnPrompt(
 	userName: string,
 	buddyName: string,
 	buddyDescription: string,
-	gameLog: GameLogEntry[],
-	gmNarrative: string
+	gameLog: GameLogEntry[]
 ): Message[] {
 	const messages: Message[] = [
 		{
@@ -90,20 +88,25 @@ Keep your responses concise and focused on moving the story forward.
 Do not make up GM actions.
 Always provide your chosen action or custom action at the end of your turn.`,
 		},
-		...(gameLog.map((entry) => {
+		...(gameLog.map((entry, i, arr) => {
 			if (entry.type === 'user') {
 				return { role: 'user', content: `${userName}: ${entry.content}` };
 			} else if (entry.type === 'buddy') {
-				return { role: 'assistant', content: `${buddyName}: ${entry.content}` }; // Buddy's previous action is an assistant message to the GM
+				return { role: 'assistant', content: `${buddyName}: ${entry.content}` };
 			} else {
 				// GM turn
-				return { role: 'assistant', content: entry.content };
+				const isLast = i === arr.length - 1;
+				const choicesStr = `\nChoices for ${buddyName}:\n- ${entry.choices?.join(
+					'\n- '
+				)}`;
+				return {
+					role: 'assistant',
+					content: `${entry.content}${
+						isLast && entry.choices?.length ? choicesStr : ''
+					}`,
+				};
 			}
 		}) as Message[]),
-		{
-			role: 'assistant', // The GM's last turn is the assistant's message to the buddy
-			content: gmNarrative,
-		},
 	];
 	return messages;
 }
