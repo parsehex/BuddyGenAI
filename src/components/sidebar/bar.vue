@@ -5,12 +5,13 @@ import router from '@/lib/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/stores/main';
+import { useGameStore } from '@/stores/game';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './settings/SettingsPanel.vue';
+import GameCreationForm from './GameCreationForm.vue';
 import ColorMode from './ColorMode.vue';
 import { useToast } from '../ui/toast';
-import Button from '../ui/button/Button.vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import AIProviderStatus from './AIProviderStatus.vue';
@@ -22,11 +23,13 @@ import {
 } from '@/components/ui/tooltip'
 import useMobile from '@/src/composables/useMobile';
 import { useAIStatus } from '@/src/composables/ai/useAIStatus';
+import { Gamepad2 } from 'lucide-vue-next';
 
 const device = useMobile();
 const { toast } = useToast();
 
 const store = useAppStore();
+const gameStore = useGameStore();
 const route = useRoute();
 
 const aiStatus = useAIStatus();
@@ -53,7 +56,8 @@ watch(
 		} else {
 			modelValue.value = 'chat';
 		}
-	}
+	},
+	{ immediate: true }
 );
 
 const selectedBuddy = ref('');
@@ -125,6 +129,9 @@ watch(
 			</Tooltip>
 			<TabsTrigger value="chat">Chat</TabsTrigger>
 			<TabsTrigger value="buddy">Buddy</TabsTrigger>
+			<TabsTrigger v-if="store.settings.games_tab" value="game">
+				<Gamepad2 class="h-6 w-6" />
+			</TabsTrigger>
 			<TabsTrigger value="settings">Options</TabsTrigger>
 			<!-- <RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink> -->
 			<ColorMode />
@@ -148,6 +155,22 @@ watch(
 			</TabsContent>
 			<TabsContent value="settings">
 				<SettingsPanel />
+			</TabsContent>
+			<TabsContent value="game">
+				<div class="flex flex-col gap-2 p-2">
+					<GameCreationForm />
+					<h2 class="text-xl font-semibold mt-4 mb-2">Active Games</h2>
+					<ScrollArea class="h-[calc(100vh-200px)]">
+						<div v-if="gameStore.games.length === 0" class="text-gray-500 dark:text-gray-400"> No active games yet.
+							Start a new one! </div>
+						<div v-else class="space-y-2">
+							<RouterLink v-for="game in gameStore.games" :key="game.id" :to="`/game/${game.id}`"
+								class="block p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+								:class="{ 'bg-blue-100 dark:bg-blue-900': game.id === (route.params as any).id }"> {{ game.name }}
+							</RouterLink>
+						</div>
+					</ScrollArea>
+				</div>
 			</TabsContent>
 		</div>
 	</Tabs>

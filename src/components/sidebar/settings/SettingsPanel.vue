@@ -8,19 +8,21 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@vueuse/core';
-
-import { Settings, Cloud, MessageSquare, Image, Volume2, Menu, CircleHelp } from 'lucide-vue-next';
-
+import { Settings, Cloud, MessageSquare, Image, Volume2, Menu, CircleHelp, FlaskConical, Bug } from 'lucide-vue-next';
 import GeneralOptions from './GeneralOptions.vue';
 import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
 import AIProviderOptions from './AIProviderOptions/Main.vue';
+import LogDashboard from '@/src/components/LogDashboard.vue';
 import { isFeatureAvailable } from '@/src/lib/ai/support';
 import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
 import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 import { Separator } from '../../ui/separator';
 import VoiceOptions from './VoiceOptions.vue';
+import OptionSection from './OptionSection.vue';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import useElectron from '@/src/composables/useElectron';
 
 const { openExternalLink } = useElectron();
@@ -41,6 +43,23 @@ const resetApp = async () => {
 	await clearDatabase();
 	window.location.reload();
 }
+
+// const gamesTab = ref(store.settings.games_tab);
+// const updateGamesTab = async () => {
+// 	gamesTab.value = !gamesTab.value;
+// 	store.settings.games_tab = gamesTab.value;
+// 	console.log(store.settings.games_tab);
+// };
+
+const gamesTab = computed({
+	get: () => store.settings.games_tab ? 'true' : 'false',
+	set: (val: string) => {
+		if (val === store.settings.games_tab + '') return;
+		const b = val === 'true';
+		if (b === store.settings.games_tab) return;
+		store.settings.games_tab = b;
+	},
+});
 </script>
 <template>
 	<div class="flex h-screen">
@@ -117,6 +136,30 @@ const resetApp = async () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger as-child>
+						<TabsTrigger value="experimental" as-child
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
+								<FlaskConical class="h-6 w-6" />
+								<div v-if="showLabels" class="text-xs mt-1">Experimental</div>
+							</Button>
+						</TabsTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="right">Experimental Settings</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
+						<TabsTrigger value="logs" as-child
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
+								<Bug class="h-6 w-6" />
+								<div v-if="showLabels" class="text-xs mt-1">Logs</div>
+							</Button>
+						</TabsTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="right">Application Logs</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
 						<Button variant="ghost" :class="`mt-2 py-4 flex flex-col min-h-[50px]`"
 							@click="openExternalLink('https://docs.buddygenai.com')">
 							<CircleHelp class="h-6 w-6" />
@@ -147,6 +190,23 @@ const resetApp = async () => {
 					<TabsContent v-if="(ttsProvider && ttsProvider !== '0') || (sttProvider && sttProvider !== '0')"
 						value="voice">
 						<VoiceOptions />
+					</TabsContent>
+					<TabsContent value="experimental">
+						<OptionSection label="Enable Game Tab">
+							<RadioGroup :default-value="gamesTab" v-model="gamesTab" class="flex flex-row">
+								<div class="flex items-center space-x-2">
+									<RadioGroupItem id="yes" value="true">Yes</RadioGroupItem>
+									<Label for="yes" class="block">Yes</Label>
+								</div>
+								<div class="flex items-center space-x-2">
+									<RadioGroupItem id="no" value="false">No</RadioGroupItem>
+									<Label for="no" class="block">No</Label>
+								</div>
+							</RadioGroup>
+						</OptionSection>
+					</TabsContent>
+					<TabsContent value="logs">
+						<LogDashboard />
 					</TabsContent>
 				</div>
 				<Separator />

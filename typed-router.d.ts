@@ -26,6 +26,7 @@ declare module 'vue-router/auto-routes' {
     '/chat/[id]': RouteRecordInfo<'/chat/[id]', '/chat/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/create-buddy': RouteRecordInfo<'/create-buddy', '/create-buddy', Record<never, never>, Record<never, never>>,
     '/credits': RouteRecordInfo<'/credits', '/credits', Record<never, never>, Record<never, never>>,
+    '/game/[id]': RouteRecordInfo<'/game/[id]', '/game/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 
   /**
@@ -69,6 +70,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/credits.vue': {
       routes: '/credits'
+      views: never
+    }
+    'src/pages/game/[id].vue': {
+      routes: '/game/[id]'
       views: never
     }
   }

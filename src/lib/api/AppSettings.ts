@@ -38,6 +38,7 @@ export const AppSettingsDefaults: Settings = {
 	auto_start_server: false,
 	skip_start_dialog: false,
 	skip_setup: false,
+	games_tab: false,
 };
 
 export type AnyPossibleProvider = 'koboldcpp' | 'openrouter' | 'webllm' | '0';
@@ -91,6 +92,7 @@ export interface Settings {
 	auto_start_server: boolean;
 	skip_start_dialog: boolean;
 	skip_setup: boolean;
+	games_tab: boolean;
 	[key: string]: DBVal;
 }
 
