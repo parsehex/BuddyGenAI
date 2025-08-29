@@ -1,4 +1,4 @@
-import{d as c,ak as x,an as g,I as _,s as b,bA as y,ao as w,c as m,p,w as f,ah as h,b as t,aj as V,bu as C,ai as P,aF as N,e as q,a1 as R,b5 as $}from"./index-B9vGYrDj.js";const i=100,[E,I]=w("ProgressRoot"),d=e=>typeof e=="number";function M(e,a){return y(e)||d(e)&&!Number.isNaN(e)&&e<=a&&e>=0?e:(console.error(`Invalid prop \`value\` of value \`${e}\` supplied to \`ProgressRoot\`. The \`value\` prop must be:
+import{d as c,ak as x,an as g,I as _,s as b,bA as y,ao as w,c as m,p,w as f,ah as h,b as t,aj as V,bu as C,ai as P,aF as N,e as q,a1 as R,b5 as $}from"./index-D_j0OkJ4.js";const i=100,[E,I]=w("ProgressRoot"),d=e=>typeof e=="number";function M(e,a){return y(e)||d(e)&&!Number.isNaN(e)&&e<=a&&e>=0?e:(console.error(`Invalid prop \`value\` of value \`${e}\` supplied to \`ProgressRoot\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${i} if no \`max\` prop is set)
   - \`null\`  or \`undefined\` if the progress is indeterminate.
