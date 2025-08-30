@@ -21,7 +21,7 @@ First, you'll need to [Sign Up](https://platform.openai.com/signup) or [Log In](
 
 Now go to the [API Keys](https://platform.openai.com/account/api-keys) page and click "Create new secret key". Give it a name if you want to and click "Create secret key". Now click Copy
 
-![BuddyGen AI setup 2](./img/v2/setup%20-%20external%20add%20key.png)
+![BuddyGenAI setup 2](./img/v2/setup%20-%20external%20add%20key.png)
 
 ## Local Models Setup
 
@@ -60,7 +60,7 @@ Now that you have the models downloaded, you'll need to move them to the correct
 
 Open buddyGenAI and click "Local Models" on the setup screen, then follow this gif:
 
-![BuddyGen AI setup 1](./img/v2/buddyGenAI%20-%20Local%20Model%20Setup.gif)
+![BuddyGenAI setup 1](./img/v2/BuddyGenAI%20-%20Local%20Model%20Setup.gif)
 
 - Click on Open Folder
 - Go to Downloads (or wherever you saved the models)
@@ -74,13 +74,13 @@ Open buddyGenAI and click "Local Models" on the setup screen, then follow this g
 
 Now you're ready to fill in your name and create your first Buddy:
 
-![BuddyGen AI setup 3](./img/v2/setup%20-%20step%202%20with%20name.png)
+![BuddyGenAI setup 3](./img/v2/setup%20-%20step%202%20with%20name.png)
 
 Fill in a description you like, or click the purple Magic button to use AI to generate suggestions for your Buddy:
 
 > Note: Magic buttons are not very fleshed out yet.
 
-![BuddyGen AI setup 4](./img/v2/setup%20-%20description%20magic%20button.png)
+![BuddyGenAI setup 4](./img/v2/setup%20-%20description%20magic%20button.png)
 
 Click `Create Buddy` when you're satisfied.
 
@@ -90,15 +90,15 @@ Now you can describe your Buddy's appearance.
 
 There's a Magic button to generate suggestions for your Buddy's appearance as well:
 
-![BuddyGen AI setup 6](./img/v2/setup%20-%20img%20keywords%20magic%20button.png)
+![BuddyGenAI setup 6](./img/v2/setup%20-%20img%20keywords%20magic%20button.png)
 
 Click "Accept & Make Picture" and wait for the picture to be generated. You can click "Make Profile Picture" until you find one you like and then click "Save":
 
-![BuddyGen AI setup 7](./img/v2/setup%20-%20make%20pic.png)
+![BuddyGenAI setup 7](./img/v2/setup%20-%20make%20pic.png)
 
 Start talking with your Buddy:
 
-![BuddyGen AI setup 8](./img/v2/chat.png)
+![BuddyGenAI setup 8](./img/v2/chat.png)
 
 ---
 
@@ -108,10 +108,10 @@ If you've followed the instructions so far then you'll need to do one more thing
 
 Assuming you chose one of the Llama 3 models above, then go to the Settings tab:
 
-![BuddyGen AI settings](./img/v2/sidebar%20-%20settings.png)
+![BuddyGenAI settings](./img/v2/sidebar%20-%20settings.png)
 
 Change "Number of GPU Layers" to 35.
 
 Now either restart the app or go to the Chat tab, click on the (green) "Chat Online" to restart the chat manually:
 
-![BuddyGen AI chat server](./img/v2/gpu%20restart%20chat.png)
+![BuddyGenAI chat server](./img/v2/gpu%20restart%20chat.png)
