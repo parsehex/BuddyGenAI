@@ -96,7 +96,7 @@ const generateFirstTurn = async (game: Game) => {
 	}
 
 	game.isLoading = true;
-	loadingStatus.value = 'Generating first turn...';
+	loadingStatus.value = 'Loading first turn...';
 	gameStore.updateGame(game); // Update to show loading state
 
 	game.gameLog.push({
@@ -152,10 +152,34 @@ const takeTurn = async () => {
 	game.gameLog.push({ type: 'user', content: action });
 	userActionInput.value = '';
 	game.isLoading = true;
-	loadingStatus.value = 'Generating GM response...';
+	loadingStatus.value = `${selectedBuddy.value.name} is thinking...`;
 	scrollToBottom();
 
-	// GM turn after user action
+	// Buddy turn
+	const buddyTurnPrompt = generateBuddyTurnPrompt(
+		appStore.settings.user_name,
+		selectedBuddy.value.name,
+		selectedBuddy.value.description,
+		game.gameLog
+	);
+
+	const buddyResponse = await chat({
+		messages: buddyTurnPrompt,
+		max_tokens: 500,
+	});
+	log.log({ _: { messages: buddyTurnPrompt, action, buddyResponse } }, 'After user action - generate buddy turn')
+
+	let buddyAction = '';
+	if (buddyResponse) {
+		buddyAction = buddyResponse.replace(selectedBuddy.value.name + ':', '').trim();
+		game.gameLog.push({ type: 'buddy', content: buddyResponse });
+	} else {
+		game.gameLog.push({ type: 'buddy', content: '(Failed to generate response)' });
+	}
+	loadingStatus.value = 'Loading next turn...';
+	scrollToBottom();
+
+	// GM turn after buddy action
 	const gmTurnPrompt = generateGmTurnPrompt(
 		appStore.settings.user_name,
 		selectedBuddy.value.name,
@@ -168,7 +192,7 @@ const takeTurn = async () => {
 		max_tokens: 500,
 		json: true,
 	});
-	log.log({ _: { messages: gmTurnPrompt, action, gmResponse } }, 'After user action - generate buddy turn')
+	log.log({ _: { messages: gmTurnPrompt, buddyAction, gmResponse } }, 'Get next turn')
 
 	let gmNarrative = '';
 	let gmChoices: string[] | undefined;
@@ -185,63 +209,6 @@ const takeTurn = async () => {
 	} else {
 		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
 	}
-	loadingStatus.value = 'Generating Buddy response...';
-	scrollToBottom();
-
-	// Buddy turn
-	const buddyTurnPrompt = generateBuddyTurnPrompt(
-		appStore.settings.user_name,
-		selectedBuddy.value.name,
-		selectedBuddy.value.description,
-		game.gameLog
-	);
-
-	const buddyResponse = await chat({
-		messages: buddyTurnPrompt,
-		max_tokens: 500,
-	});
-	log.log({ _: { messages: buddyTurnPrompt, gmNarrative, buddyResponse } }, 'Get buddy response')
-
-	let buddyAction = '';
-	if (buddyResponse) {
-		buddyAction = buddyResponse;
-		game.gameLog.push({ type: 'buddy', content: buddyResponse });
-	} else {
-		game.gameLog.push({ type: 'buddy', content: '(Failed to generate response)' });
-	}
-	loadingStatus.value = 'Generating next GM turn...';
-	scrollToBottom();
-
-	// GM turn after buddy action
-	const gmTurnPromptAfterBuddy = generateGmTurnPrompt(
-		appStore.settings.user_name,
-		selectedBuddy.value.name,
-		selectedBuddy.value.description,
-		game.gameLog
-	);
-
-	const gmResponseAfterBuddy = await chat({
-		messages: gmTurnPromptAfterBuddy,
-		max_tokens: 500,
-		json: true,
-	});
-	log.log({ _: { messages: gmTurnPromptAfterBuddy, buddyAction, gmResponseAfterBuddy } }, 'Get next turn')
-
-	let gmChoicesAfterBuddy: string[] | undefined;
-	if (gmResponseAfterBuddy) {
-		let gmNarrativeAfterBuddy = '';
-		try {
-			const parsedGmResponse = JSON.parse(attemptToFixJson(gmResponseAfterBuddy));
-			gmNarrativeAfterBuddy = parsedGmResponse.narrative || gmResponseAfterBuddy;
-			gmChoicesAfterBuddy = parsedGmResponse.choices || undefined;
-		} catch (e) {
-			log.error('Failed to parse GM response after buddy as JSON:', e);
-			gmNarrativeAfterBuddy = gmResponseAfterBuddy;
-		}
-		game.gameLog.push({ type: 'gm', content: gmNarrativeAfterBuddy, choices: gmChoicesAfterBuddy });
-	} else {
-		game.gameLog.push({ type: 'gm', content: '(Failed to generate response after buddy)' });
-	}
 
 	game.isLoading = false;
 	loadingStatus.value = '';
@@ -250,41 +217,39 @@ const takeTurn = async () => {
 };
 
 // TODO need to:
-// - setup sidebar (games list) component
-//   - component is basically what we have on this page - the game stuff
-//   - can see active game & make new one
-// - the game page might as well be this page (rename/move to make use of id param)
-//   selectedBuddy will definitely be defined in this design
 // ideas
 // - allow text or microphone input to describe your action
 //     what's a good max for either? 50 chars / 10s ?
 // 50ch = _123456789_123456789_123456789_123456789_123456789
 // TODO implement :max-seconds in RecordAudio.vue
 //
-//
-// game plays like a text adventure that you can play with an llm
-// with some modifications to fit it for our model
-//   system message has instructions how the response should be made
-//     1) when generating a turn, we make a narrative description + choices
-//     2) when getting buddy's turn, we instruct to roleplay as the buddy and react to a turn + make a choice / custom action -> use result to run #1
-//
 // when generating, we'll want to check how many tokens we're using
 // if we're using too many tokens, summarize some # of middle turns to compress
 
 
 // after trying a new version, here are some thoughts:
-// - for the lines "{name} action: {x}" I feel like we should do what we can to make the line look more natural
 // - we'll want to set a TTS voice for narration
-// - should show buddy avatar somewhere
-// - rather than getting these full-inline responses, use & prompt for json mode
-// - obviously need to break out and show choices as buttons
-// - i'd like to start using useLogger for this too
+// - use (& prompt for) json mode
 
 // later note:
 // we'll want to generate an image for game turns, but don't want to hold up gameplay for it, so
 //   - I want to allow going to a next turn without the image being done generating
 //   - this means we'll need a queue of images to generate
 //   - we'll want UI that's friendly to this async style when considering how to view past history
+//   - same for tts i guess
+
+// new notes:
+// - how about we change up the pacing:
+//     instead of: user choice/action -> gm -> buddy action -> gm -> loop
+//     do: user choice/action -> buddy action -> gm -> loop
+//       buddy doesn't need to pick from choices + it can react to the same thing user did
+
+// new take:
+// what if the user and buddy can chat back and forth multiple times with each other (e.g. to decide on a plan) before the GM makes a turn
+// i think we'd want to move to a model of having flags whether the user and the buddy have each chosen actions
+//   gm doesn't run until both === true
+// we wouldn't pass messages to the gm
+// likely summarize blocks of consecutive or long messages to feed back as context (UI still shows full though)
 </script>
 <template>
 	<div class="p-2">
