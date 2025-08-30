@@ -95,7 +95,7 @@ const buddyKeywordsArr = computed({
 const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
 const availVoices = ref(['']);
 onMounted(async () => {
-	availVoices.value = [...ttsAI.availVoices.value];
+	availVoices.value = [...ttsAI.availVoices];
 	if (!props.initialBuddy?.id) return;
 	allProfilePics.value = await api.buddy.profilePic.getAll(props.initialBuddy?.id);
 });

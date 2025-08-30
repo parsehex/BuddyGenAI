@@ -20,7 +20,7 @@ const store = useAppStore();
 const ttsAI = useTTSAI();
 const ttsProvider = computed(() => store.settings.selected_provider_tts);
 const sttProvider = computed(() => store.settings.selected_provider_stt);
-const voices = ref(ttsAI.availVoices.value);
+const voices = ref(ttsAI.availVoices);
 
 const autoReadChat = computed({
 	get: () => store.settings.auto_read_chat ? 'true' : 'false',
@@ -53,7 +53,7 @@ const autoSendSTT = computed({
 			<div class="flex gap-4">
 				<Label for="default_voice"> Default Voice </Label>
 				<Select :default-value="store.settings.selected_model_tts" @update:model-value="updateTTSVoice"
-					@update:open="voices = ttsAI.availVoices.value" id="default_voice">
+					@update:open="voices = ttsAI.availVoices" id="default_voice">
 					<SelectTrigger :title="store.settings.selected_model_tts">
 						<SelectValue placeholder="Select a TTS voice" />
 					</SelectTrigger>

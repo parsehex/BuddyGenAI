@@ -86,8 +86,7 @@ const createBuddy = async () => {
 					<SelectContent>
 						<SelectGroup>
 							<SelectLabel>Voices</SelectLabel>
-							<SelectItem v-for="voice in ttsAI.availVoices.value" :key="voice" :value="voice"> {{ voice }}
-							</SelectItem>
+							<SelectItem v-for="voice in ttsAI.availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
 						</SelectGroup>
 					</SelectContent>
 				</Select>
