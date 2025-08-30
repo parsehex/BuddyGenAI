@@ -82,8 +82,6 @@ const updateDescriptionBuddies = async () => {
 		<OptionSection label="Your Name" labelName="name" orientation="vertical">
 			<Input v-model="userName" @blur="updateName()" id="name"
 				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
-			<Input v-model="userName" @blur="updateName()" id="name"
-				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
 		</OptionSection>
 		<OptionSection label="Profile Image" labelName="profile-image" orientation="vertical">
 			<div class="flex items-center space-x-2">
