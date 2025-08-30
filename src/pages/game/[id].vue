@@ -45,15 +45,29 @@ const reloadLastTurnAction = () => {
 	}
 };
 
-const ttsLoading = ref(false);
-const doTTS = async (message: GameLogEntry) => {
-	if (ttsLoading.value) return;
-	if (!ttsEnabled.value) {
-		log.warn('TTS is disabled, cannot play audio');
+const ttsQueue = ref<GameLogEntry[]>([]);
+const ttsGenerating = ref(false);
+const ttsLoading = computed(() => ttsGenerating.value || ttsQueue.value.length > 0);
+
+const processTTSQueue = async () => {
+	if (ttsGenerating.value || ttsQueue.value.length === 0) {
 		return;
 	}
 
-	ttsLoading.value = true;
+	ttsGenerating.value = true;
+	const message = ttsQueue.value.shift(); // Get the first message from the queue
+
+	if (!message) {
+		ttsGenerating.value = false;
+		return;
+	}
+
+	if (!ttsEnabled.value) {
+		log.warn('TTS is disabled, cannot play audio');
+		ttsGenerating.value = false;
+		return;
+	}
+
 	let audioUrl = message.tts;
 
 	if (!audioUrl) {
@@ -67,14 +81,14 @@ const doTTS = async (message: GameLogEntry) => {
 
 		if (!voice) {
 			log.warn('No TTS voice selected for message type:', message.type);
-			ttsLoading.value = false;
+			ttsGenerating.value = false;
 			return;
 		}
 
 		const ttsData = await ttsAI.makeTTS({ text, voice });
 		if (!ttsData) {
 			log.error('TTS failed to generate for message:', message.content);
-			ttsLoading.value = false;
+			ttsGenerating.value = false;
 			return;
 		}
 		audioUrl = ttsData;
@@ -82,7 +96,21 @@ const doTTS = async (message: GameLogEntry) => {
 	}
 
 	playAudio(audioUrl);
-	ttsLoading.value = false;
+	ttsGenerating.value = false;
+
+	// Process the next item in the queue
+	if (ttsQueue.value.length > 0) {
+		processTTSQueue();
+	}
+};
+
+const doTTS = async (message: GameLogEntry) => {
+	if (!ttsEnabled.value) {
+		log.warn('TTS is disabled, cannot play audio');
+		return;
+	}
+	ttsQueue.value.push(message);
+	processTTSQueue();
 };
 
 const gameId = computed(() => (route.params as any).id as string);
@@ -224,6 +252,7 @@ const takeTurn = async () => {
 
 	const buddyResponse = await chat({
 		messages: buddyTurnPrompt,
+		temperature: 0.15,
 		max_tokens: 500,
 	});
 	log.log({ _: { messages: buddyTurnPrompt, action, buddyResponse } }, 'After user action - generate buddy turn')
@@ -346,8 +375,8 @@ const takeTurn = async () => {
 								<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
 							</Avatar>
 							<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
-							<Button v-if="entry.type === 'buddy' || entry.type === 'gm'" variant="ghost" size="icon"
-								:disabled="ttsLoading || !ttsEnabled" @click="doTTS(entry)" class="ml-2">
+							<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')" variant="ghost" size="icon"
+								:disabled="ttsLoading" @click="doTTS(entry)" class="ml-2">
 								<Volume2 class="h-4 w-4" />
 							</Button>
 						</div>
