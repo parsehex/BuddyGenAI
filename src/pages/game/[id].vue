@@ -330,8 +330,8 @@ const takeTurn = async () => {
 						<CollapsibleContent>
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
 								<Button v-for="(choice, index) in lastGmChoices" :key="index" @click="selectChoice(choice)"
-									:disabled="currentGame.isLoading" class="w-full justify-start"> {{ String.fromCharCode(65 + index) }}.
-									{{ choice }} </Button>
+									:disabled="currentGame.isLoading" class="w-full whitespace-break-spaces text-left justify-start"> {{
+										String.fromCharCode(65 + index) }}. {{ choice }} </Button>
 							</div>
 						</CollapsibleContent>
 						<CollapsibleTrigger as-child>
