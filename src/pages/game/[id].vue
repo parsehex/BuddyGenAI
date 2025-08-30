@@ -19,8 +19,9 @@ import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useLogger } from '@/src/composables/useLogger';
 import BuddyAvatar from '@/src/components/BuddyAvatar.vue';
 import Spinner from '@/src/components/Spinner.vue';
-import { attemptToFixJson } from '@/src/lib/utils';
+import { attemptToFixJson, textToHslColor } from '@/src/lib/utils';
 import { Input } from '@/src/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 
 const log = useLogger('pages/game');
 const appStore = useAppStore();
@@ -49,6 +50,17 @@ watch(currentGame, async (newGame) => {
 	}
 }, { immediate: true });
 
+const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
+	if (!currentGame.value) return undefined;
+	return appStore.buddies.find(buddy => buddy.id === currentGame.value?.selectedBuddyId);
+});
+const userName = computed(() => {
+	return appStore.settings.user_name;
+});
+const userInitials = computed(() => {
+	return userName.value[0];
+});
+
 const userActionInput = ref('');
 const loadingStatus = ref('');
 const showChoices = ref(true);
@@ -63,10 +75,7 @@ const selectChoice = (choice: string) => {
 	takeTurn();
 };
 
-const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
-	if (!currentGame.value) return undefined;
-	return appStore.buddies.find(buddy => buddy.id === currentGame.value?.selectedBuddyId);
-});
+
 
 function scrollToBottom() {
 	nextTick(() => {
@@ -290,15 +299,20 @@ const takeTurn = async () => {
 			<CardContent class="flex-1 overflow-hidden p-0">
 				<ScrollArea class="h-full p-2 pb-0" id="scrollArea">
 					<div v-for="(entry, index) in currentGame.gameLog" :key="index"
-						:class="{ 'my-2': true, 'text-right': entry.type === 'user', 'text-left': entry.type !== 'user' }">
-						<div class="inline-block p-3 rounded-lg max-w-[70%] break-words" :class="{
+						:class="{ 'my-2': true, 'text-right': entry.type !== 'gm', 'text-left': entry.type === 'gm' }">
+						<div class="inline-flex items-center p-3 rounded-lg max-w-[70%] break-words" :class="{
 							'bg-blue-500 text-white': entry.type === 'user',
 							'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
 							'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
 						}">
-							<span v-if="entry.type === 'user'" class="font-semibold">{{ appStore.settings.user_name }}: </span>
-							<span v-else-if="entry.type === 'buddy'" class="font-semibold">{{ selectedBuddy?.name }}: </span>
-							<span v-html="entry.content"></span>
+							<BuddyAvatar v-if="entry.type === 'buddy'" :buddy="selectedBuddy" />
+							<Avatar v-if="entry.type === 'user'" class="text-md font-bold mr-2" :style="{
+								backgroundColor: textToHslColor(userName, 60, 80),
+							}">
+								<AvatarImage v-if="appStore.settings.user_image" :src="appStore.settings.user_image" />
+								<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
+							</Avatar>
+							<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
 						</div>
 					</div>
 				</ScrollArea>

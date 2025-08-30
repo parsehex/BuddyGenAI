@@ -20,6 +20,7 @@ Keep your responses concise and focused on moving the story forward.
 Always narrate in the 3rd person, referring to characters by name.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
 Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
+Choices must always be written in 1st person.
 Format: {"narrative": "John is in a dark forest.", "choices": ["Go left", "Go right", "Go straight"]}
 `,
 		},
@@ -54,6 +55,7 @@ Keep your responses reasonably concise and focused on moving the story forward.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
 Always narrate in the 3rd person, referring to characters by name.
 Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
+Choices must always be written in 1st person.
 Format: {"narrative": "John is in a dark forest.", "choices": ["Go left", "Go right", "Go straight"]}
 `,
 		},
@@ -85,8 +87,7 @@ Your description: ${buddyDescription}
 The Game Master (GM) just described the scene and offered choices.
 You need to react to the GM's narrative and choose an action or make a custom action.
 Keep your responses concise and focused on moving the story forward.
-Do not make up GM actions.
-Always provide your chosen action or custom action at the end of your turn.`,
+Simply provide your chosen action or custom action.`,
 		},
 		...(gameLog.map((entry, i, arr) => {
 			if (entry.type === 'user') {

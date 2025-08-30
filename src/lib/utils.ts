@@ -112,6 +112,14 @@ export function attemptToFixJson(
 		return '';
 	}
 
+	// Replace smart quotes and other common problematic characters
+	json = json
+		.replace(/[“”]/g, '"') // Replace smart double quotes with straight double quotes
+		.replace(/[‘’]/g, "'") // Replace smart single quotes with straight single quotes
+		.replace(/—/g, '--') // Replace em dash with double hyphen
+		.replace(/–/g, '-') // Replace en dash with hyphen
+		.replace(/\u2026/g, '...'); // Replace ellipsis with three dots
+
 	let openBracket = '{';
 	let closeBracket = '}';
 	if (type === 'array') {
