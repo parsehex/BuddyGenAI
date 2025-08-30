@@ -16,7 +16,7 @@ ${buddyName}'s description: ${buddyDescription}
 You will describe the initial scene, involving both the user and ${buddyName}.
 The game is turn-based. The user and ${buddyName} will take turns acting.
 Start by describing the initial scene and involving ${userName} and ${buddyName}.
-Keep your responses concise and focused on moving the story forward.
+Keep your response concise and focused on moving the story forward.
 Always narrate in the 3rd person, referring to characters by name.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
 Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
@@ -49,9 +49,9 @@ export function generateGmTurnPrompt(
 			content: `You are the Game Master (GM) of a text adventure game. Your goal is to continue the engaging and interactive story.
 The game has two players: user (goes by ${userName}) and ${buddyName}.
 ${buddyName}'s description: ${buddyDescription}
-You will describe what happens next based on the last player's action (${lastPlayerName}).
-You will describe how ${lastPlayerName}'s action played out, leading up to ${nextPlayerName}'s turn.
-Keep your responses reasonably concise and focused on moving the story forward.
+
+You will describe how ${lastPlayerName}'s action played out, leading up to the next (${nextPlayerName}'s) turn.
+Keep your response reasonably concise and focused on moving the story forward.
 Do not make up user or ${buddyName}'s actions. Wait for their input.
 Always narrate in the 3rd person, referring to characters by name.
 Your response MUST be a JSON object with two fields: "narrative" (string) and "choices" (array of at least 3 strings).
@@ -86,7 +86,7 @@ export function generateBuddyTurnPrompt(
 Your description: ${buddyDescription}
 The Game Master (GM) just described the scene and offered choices.
 You need to react to the GM's narrative and choose an action or make a custom action.
-Keep your responses concise and focused on moving the story forward.
+Keep your response concise and focused on moving the story forward.
 Simply provide your chosen action or custom action.`,
 		},
 		...(gameLog.map((entry, i, arr) => {

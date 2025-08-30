@@ -45,6 +45,9 @@ watch(gameId, (newGameId) => {
 }, { immediate: true });
 
 watch(currentGame, async (newGame) => {
+	try {
+		if (!generateFirstTurn) return; // potential access before init
+	} catch (e) { }
 	if (newGame && !newGame.gameStarted && !newGame.isLoading) {
 		await generateFirstTurn(newGame);
 	}
@@ -74,8 +77,6 @@ const selectChoice = (choice: string) => {
 	userActionInput.value = choice;
 	takeTurn();
 };
-
-
 
 function scrollToBottom() {
 	nextTick(() => {
