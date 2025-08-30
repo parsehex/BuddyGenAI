@@ -22,12 +22,22 @@ import Spinner from '@/src/components/Spinner.vue';
 import { attemptToFixJson, textToHslColor } from '@/src/lib/utils';
 import { Input } from '@/src/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
+import { RefreshCcwDot, Send } from 'lucide-vue-next';
 
 const log = useLogger('pages/game');
 const appStore = useAppStore();
 const gameStore = useGameStore();
 const route = useRoute();
 const { chat } = useChatAI();
+
+const reloadLastTurnAction = () => {
+	if (!currentGame.value) return;
+	const lastUserTurnContent = gameStore.reloadLastTurn(currentGame.value.id);
+	if (lastUserTurnContent) {
+		userActionInput.value = lastUserTurnContent;
+		takeTurn();
+	}
+};
 
 const gameId = computed(() => (route.params as any).id as string);
 const currentGame = ref<Game | undefined>(undefined);
@@ -307,9 +317,14 @@ const takeTurn = async () => {
 					<div class="flex w-full items-center space-x-2">
 						<Input id="user-action" v-model="userActionInput" placeholder="What do you do next?"
 							@keyup.enter.prevent="takeTurn" :disabled="currentGame.isLoading" class="flex-1" />
-						<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim()">
-							<span>Go</span>
-						</Button>
+						<div class="flex flex-col text-center justify-center">
+							<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim()">
+								<Send />
+							</Button>
+							<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading" variant="outline">
+								<RefreshCcwDot />
+							</Button>
+						</div>
 					</div>
 				</div>
 			</CardFooter>

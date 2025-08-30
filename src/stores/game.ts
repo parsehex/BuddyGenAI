@@ -54,11 +54,36 @@ export const useGameStore = defineStore('game', () => {
 		}
 	};
 
+	// TODO canReload
+	const reloadLastTurn = (gameId: string): string | undefined => {
+		const game = games.value.find((g) => g.id === gameId);
+		if (!game) {
+			console.warn(`Game with ID ${gameId} not found.`);
+			return undefined;
+		}
+
+		let lastUserTurnIndex = -1;
+		for (let i = game.gameLog.length - 1; i >= 0; i--) {
+			if (game.gameLog[i].type === 'user') {
+				lastUserTurnIndex = i;
+				break;
+			}
+		}
+
+		if (lastUserTurnIndex !== -1) {
+			const lastUserTurnContent = game.gameLog[lastUserTurnIndex].content;
+			game.gameLog.splice(lastUserTurnIndex); // Remove from last user turn onwards
+			return lastUserTurnContent;
+		}
+		return undefined;
+	};
+
 	return {
 		games,
 		activeGameId,
 		createGame,
 		findGameById,
 		updateGame,
+		reloadLastTurn,
 	};
 });
