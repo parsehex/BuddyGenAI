@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useSTTAI } from '../../composables/ai/useSTTAI';
 import { blobToBase64, popError } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { Mic, MicOff, X } from 'lucide-vue-next';
+import { useAppStore } from '@/src/stores/main';
 
 const emit = defineEmits(['start', 'stop', 'loading', 'error']);
+const props = withDefaults(defineProps<{
+	maxSeconds?: number;
+}>(), {
+	maxSeconds: 0,
+});
 
+const appStore = useAppStore();
 const sttAI = useSTTAI();
 
 let mediaRecorder: MediaRecorder | null = null;
 let currentStream: MediaStream | null = null;
+let recordingTimeout: ReturnType<typeof setTimeout> | null = null;
+
 const recording = ref(false);
 const isLoading = ref(false);
+
+const autoSendSTT = computed(() => appStore.settings.auto_send_stt);
 
 onMounted(async () => {
 	try {
@@ -63,6 +74,7 @@ const toggleRecording = async () => {
 		recording.value = false;
 		mediaRecorder?.stop();
 		currentStream?.getTracks().forEach(t => t.stop());
+		if (recordingTimeout) clearTimeout(recordingTimeout);
 		return;
 	}
 
@@ -83,6 +95,13 @@ const toggleRecording = async () => {
 		mediaRecorder?.start();
 		emit('start');
 		recording.value = true;
+
+		if (props.maxSeconds > 0) {
+			recordingTimeout = setTimeout(() => {
+				toggleRecording(); // Automatically stop recording
+			}, props.maxSeconds * 1000);
+		}
+
 	} catch (err: any) {
 		console.log(err);
 		popError(err, 'Transcription Error');
@@ -97,11 +116,14 @@ const cancel = () => {
 		console.error('Error stopping transcription', err);
 	}
 	isLoading.value = false;
+	if (recordingTimeout) clearTimeout(recordingTimeout);
 };
+
+defineExpose({ toggleRecording });
 </script>
 <template>
 	<Button v-if="sttAI.isAvailable" type="button" size="sm" @click="isLoading ? cancel() : toggleRecording()"
-		:title="isLoading ? 'Cancel transcription' : recording ? 'Stop recording' : 'Start recording audio'"
+		:title="isLoading ? 'Cancel transcription' : recording ? 'Stop recording' : `Start recording audio${autoSendSTT ? ' (auto-send)' : ''}`"
 		:variant="isLoading || recording ? 'destructive' : 'default'">
 		<X v-if="isLoading" />
 		<Mic v-else-if="!recording" />

@@ -26,6 +26,7 @@ import { RefreshCcwDot, Send, Volume2 } from 'lucide-vue-next';
 import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { playAudio } from '@/src/lib/utils';
+import RecordAudio from '@/src/components/chat/RecordAudio.vue';
 
 const log = useLogger('pages/game');
 const appStore = useAppStore();
@@ -33,6 +34,8 @@ const gameStore = useGameStore();
 const route = useRoute();
 const { chat } = useChatAI();
 const ttsAI = useTTSAI();
+
+const recordAudioRef = ref<InstanceType<typeof RecordAudio> | null>(null);
 
 const ttsEnabled = computed(() => ttsAI.isEnabled && ttsAI.isAvailable);
 
@@ -231,13 +234,15 @@ const takeTurn = async () => {
 		log.error('takeTurn: No current game or selected buddy description.');
 		return;
 	}
-	if (!userActionInput.value.trim()) return;
+	if (!userActionInput.value.trim() && !isRecordingAudio.value) return;
 
 	const game = currentGame.value;
 	const action = userActionInput.value;
 
-	game.gameLog.push({ type: 'user', content: action });
-	userActionInput.value = '';
+	if (action.trim()) {
+		game.gameLog.push({ type: 'user', content: action });
+		userActionInput.value = '';
+	}
 	game.isLoading = true;
 	loadingStatus.value = `${selectedBuddy.value.name} is thinking...`;
 	scrollToBottom();
@@ -312,12 +317,35 @@ const takeTurn = async () => {
 	scrollToBottom();
 };
 
-// TODO need to:
+const isRecordingAudio = ref(false);
+const handleAudioStart = () => {
+	isRecordingAudio.value = true;
+	currentGame.value!.isLoading = true;
+	loadingStatus.value = 'Listening...';
+};
+const handleAudioStop = (text: string) => {
+	isRecordingAudio.value = false;
+	userActionInput.value = text;
+	currentGame.value!.isLoading = false;
+	loadingStatus.value = '';
+	if (appStore.settings.auto_send_stt) {
+		takeTurn();
+	}
+};
+const handleAudioLoading = () => {
+	currentGame.value!.isLoading = true;
+	loadingStatus.value = 'Transcribing...';
+};
+const handleAudioError = () => {
+	isRecordingAudio.value = false;
+	currentGame.value!.isLoading = false;
+	loadingStatus.value = '';
+};
+
 // ideas
 // - allow text or microphone input to describe your action
 //     what's a good max for either? 50 chars / 10s ?
 // 50ch = _123456789_123456789_123456789_123456789_123456789
-// TODO implement :max-seconds in RecordAudio.vue
 //
 // when generating, we'll want to check how many tokens we're using
 // if we're using too many tokens, summarize some # of middle turns to compress
@@ -388,6 +416,9 @@ const takeTurn = async () => {
 					class="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10">
 					<Spinner />
 					<span>{{ loadingStatus }}</span>
+					<Button v-if="isRecordingAudio" @click="recordAudioRef?.toggleRecording()" variant="destructive" class="mt-4">
+						<X class="mr-2" /> Stop Recording
+					</Button>
 				</div>
 				<div class="flex flex-col w-full space-y-2"
 					:class="{ 'opacity-50 pointer-events-none': currentGame.isLoading }">
@@ -405,13 +436,18 @@ const takeTurn = async () => {
 						</CollapsibleTrigger>
 					</Collapsible>
 					<div class="flex w-full items-center space-x-2">
+						<RecordAudio ref="recordAudioRef" :max-seconds="10" @start="handleAudioStart" @stop="handleAudioStop"
+							@loading="handleAudioLoading" @error="handleAudioError"
+							:disabled="currentGame.isLoading || isRecordingAudio" />
 						<Input id="user-action" v-model="userActionInput" placeholder="What do you do next?"
-							@keyup.enter.prevent="takeTurn" :disabled="currentGame.isLoading" class="flex-1" />
+							@keyup.enter.prevent="takeTurn" :disabled="currentGame.isLoading || isRecordingAudio" class="flex-1" />
 						<div class="flex flex-col text-center justify-center">
-							<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim()">
+							<Button @click="takeTurn"
+								:disabled="currentGame.isLoading || !userActionInput.trim() || isRecordingAudio">
 								<Send />
 							</Button>
-							<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading" variant="outline">
+							<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading || isRecordingAudio"
+								variant="outline">
 								<RefreshCcwDot />
 							</Button>
 						</div>
