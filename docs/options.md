@@ -2,6 +2,7 @@
 
 ## General
 
+- **Tab Icons**: Whether to display icons for the sidebar tabs. Disable to show text labels instead.
 - **Your Name**: This will show up in-chat and control how your buddies refer to you.
 - **Profile Image**: Set a profile image for yourself to show in chat messages.
 - **Your Description**: Info about you/the user, which will be provided for extra context when chatting with buddies or the Assistant.
@@ -30,10 +31,7 @@ Providers that are selected above will display below in order to configure them.
 
 - **Stream AI Responses**: Control whether messages are typed out as it's received. When disabled, Assistant/Buddy messages will show `{Name} is typing...` until the entire message is received.
 
-## Image
-
-- Enable Chat Images (experimental): Feature to allow Assistant/Buddies to generate + send an image as part of a message.
-  - This isn't implemented well & makes performance pretty bad. **I don't recommend using it** (all the time at least) **yet**.
+<!-- ## Image -->
 
 ## Voice
 
@@ -45,3 +43,9 @@ Providers that are selected above will display below in order to configure them.
 ### Transcription
 
 - Auto-Send after recording
+
+## Experimental
+
+- **Enable Game Tab**: When enabled, a new tab will show up in the sidebar, allowing you to use a new games feature.
+- **Enable Chat Images**: Feature to allow Assistant/Buddies to generate + send an image as part of a message.
+  - This isn't implemented well & makes performance pretty bad. **I don't recommend using it** (all the time at least) **yet**.

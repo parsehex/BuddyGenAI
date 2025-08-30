@@ -24,6 +24,7 @@ import OptionSection from './OptionSection.vue';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import useElectron from '@/src/composables/useElectron';
+import ExperimentalOptions from './ExperimentalOptions.vue';
 
 const { openExternalLink } = useElectron();
 const store = useAppStore();
@@ -43,23 +44,6 @@ const resetApp = async () => {
 	await clearDatabase();
 	window.location.reload();
 }
-
-// const gamesTab = ref(store.settings.games_tab);
-// const updateGamesTab = async () => {
-// 	gamesTab.value = !gamesTab.value;
-// 	store.settings.games_tab = gamesTab.value;
-// 	console.log(store.settings.games_tab);
-// };
-
-const gamesTab = computed({
-	get: () => store.settings.games_tab ? 'true' : 'false',
-	set: (val: string) => {
-		if (val === store.settings.games_tab + '') return;
-		const b = val === 'true';
-		if (b === store.settings.games_tab) return;
-		store.settings.games_tab = b;
-	},
-});
 </script>
 <template>
 	<div class="flex h-screen">
@@ -110,7 +94,7 @@ const gamesTab = computed({
 					</TooltipTrigger>
 					<TooltipContent side="right">Chat Settings</TooltipContent>
 				</Tooltip>
-				<Tooltip v-if="imageProvider && imageProvider !== '0'">
+				<!-- <Tooltip v-if="imageProvider && imageProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="image-ai" as-child
 							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
@@ -121,7 +105,7 @@ const gamesTab = computed({
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Image Settings</TooltipContent>
-				</Tooltip>
+				</Tooltip> -->
 				<Tooltip v-if="ttsProvider && ttsProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="voice" as-child
@@ -184,26 +168,15 @@ const gamesTab = computed({
 					<TabsContent v-if="chatProvider && chatProvider !== '0'" value="chat-ai">
 						<ChatAIOptions />
 					</TabsContent>
-					<TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
+					<!-- <TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
 						<ImageAIOptions />
-					</TabsContent>
+					</TabsContent> -->
 					<TabsContent v-if="(ttsProvider && ttsProvider !== '0') || (sttProvider && sttProvider !== '0')"
 						value="voice">
 						<VoiceOptions />
 					</TabsContent>
 					<TabsContent value="experimental">
-						<OptionSection label="Enable Game Tab">
-							<RadioGroup :default-value="gamesTab" v-model="gamesTab" class="flex flex-row">
-								<div class="flex items-center space-x-2">
-									<RadioGroupItem id="yes" value="true">Yes</RadioGroupItem>
-									<Label for="yes" class="block">Yes</Label>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroupItem id="no" value="false">No</RadioGroupItem>
-									<Label for="no" class="block">No</Label>
-								</div>
-							</RadioGroup>
-						</OptionSection>
+						<ExperimentalOptions />
 					</TabsContent>
 					<TabsContent value="logs">
 						<LogDashboard />
