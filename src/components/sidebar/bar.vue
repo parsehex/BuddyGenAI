@@ -23,10 +23,14 @@ import {
 } from '@/components/ui/tooltip'
 import useMobile from '@/src/composables/useMobile';
 import { useAIStatus } from '@/src/composables/ai/useAIStatus';
-import { Gamepad2 } from 'lucide-vue-next';
+import { Gamepad2, MessageSquare, Users, Settings } from 'lucide-vue-next';
+import { useLocalStorage } from '@vueuse/core';
 
 const device = useMobile();
 const { toast } = useToast();
+
+const useIcons = useLocalStorage('useIconsForTabs', 'true');
+const useIconsForTabs = computed(() => useIcons.value === 'true');
 
 const store = useAppStore();
 const gameStore = useGameStore();
@@ -127,13 +131,30 @@ watch(
 				</TooltipTrigger>
 				<TooltipContent> Go to home page </TooltipContent>
 			</Tooltip>
-			<TabsTrigger value="chat">Chat</TabsTrigger>
-			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger v-if="store.settings.games_tab" value="game">
-				<Gamepad2 class="h-6 w-6" />
+			<TabsTrigger value="chat">
+				<template v-if="useIconsForTabs">
+					<MessageSquare title="Chat" class="h-6 w-6" />
+				</template>
+				<template v-else> Chat </template>
 			</TabsTrigger>
-			<TabsTrigger value="settings">Options</TabsTrigger>
-			<!-- <RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink> -->
+			<TabsTrigger value="buddy">
+				<template v-if="useIconsForTabs">
+					<Users title="Buddies" class="h-6 w-6" />
+				</template>
+				<template v-else> Buddy </template>
+			</TabsTrigger>
+			<TabsTrigger v-if="store.settings.games_tab" value="game">
+				<template v-if="useIconsForTabs">
+					<Gamepad2 title="Games" class="h-6 w-6" />
+				</template>
+				<template v-else> Game </template>
+			</TabsTrigger>
+			<TabsTrigger value="settings">
+				<template v-if="useIconsForTabs">
+					<Settings title="Options" class="h-6 w-6" />
+				</template>
+				<template v-else> Options </template>
+			</TabsTrigger>
 			<ColorMode />
 		</TabsList>
 		<div class="h-screen">

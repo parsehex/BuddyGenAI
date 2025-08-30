@@ -9,10 +9,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useAppStore } from '@/src/stores/main';
 import OptionSection from './OptionSection.vue';
+import { useLocalStorage } from '@vueuse/core';
 
 const store = useAppStore();
 
 const userName = ref(store.settings.user_name);
+const useIconsForTabs = useLocalStorage('useIconsForTabs', 'true');
+
+const updateUseIconsForTabs = () => {
+	console.log(useIconsForTabs.value === 'true');
+	useIconsForTabs.value = useIconsForTabs.value === 'true' ? 'false' : 'true';
+};
+
 const userImage = ref(store.settings.user_image);
 const userImageFile = ref<File | null>(null);
 const userDescription = ref(store.settings.user_description);
@@ -67,7 +75,13 @@ const updateDescriptionBuddies = async () => {
 </script>
 <template>
 	<div>
+		<OptionSection label="Tab Icons" labelName="use-icons-for-tabs" orientation="horizontal">
+			<Switch :modelValue="useIconsForTabs === 'true'" @update:modelValue="updateUseIconsForTabs"
+				id="use-icons-for-tabs" />
+		</OptionSection>
 		<OptionSection label="Your Name" labelName="name" orientation="vertical">
+			<Input v-model="userName" @blur="updateName()" id="name"
+				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
 			<Input v-model="userName" @blur="updateName()" id="name"
 				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />
 		</OptionSection>
