@@ -17,6 +17,14 @@ const router = useRouter();
 const selectedBuddyId = ref('');
 const premiseDescription = ref('');
 
+const truncatedPremise = computed(() => {
+	const maxLength = 50;
+	if (premiseDescription.value.length > maxLength) {
+		return premiseDescription.value.substring(0, maxLength) + '...';
+	}
+	return premiseDescription.value;
+});
+
 const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
 	return appStore.buddies.find(buddy => buddy.id === selectedBuddyId.value);
 });
@@ -28,7 +36,7 @@ const startGame = async () => {
 	}
 
 	const newGame = gameStore.createGame(
-		`Game with ${selectedBuddy.value.name}`,
+		`${selectedBuddy.value.name} / ${truncatedPremise.value}`,
 		selectedBuddyId.value,
 		premiseDescription.value
 	);
