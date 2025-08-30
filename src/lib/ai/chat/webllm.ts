@@ -1,20 +1,29 @@
-import * as webllm from '@mlc-ai/web-llm';
+import type {
+	MLCEngineInterface,
+	InitProgressReport,
+	AppConfig,
+} from '@mlc-ai/web-llm';
 import { AppSettings, type LLMProvider } from '../../api/AppSettings';
 import type { ChatRequest, ModelObject } from './types';
 import { isAsyncIterable } from '../../utils';
 
-let engine: webllm.MLCEngineInterface;
+let engine: MLCEngineInterface;
+let prebuiltAppConfig: AppConfig;
 
 export async function loadModel(
 	modelName = '',
-	initCb?: (report: webllm.InitProgressReport) => void
+	initProgressCallback?: (report: InitProgressReport) => void
 ) {
 	const provider = AppSettings.get('selected_provider_chat') as LLMProvider;
 	if (provider !== 'webllm') return;
+
+	const webllm = await import('@mlc-ai/web-llm');
+	prebuiltAppConfig = webllm.prebuiltAppConfig;
 	modelName = modelName || (AppSettings.get('selected_model_chat') as string);
 	if (!modelName) throw new Error('Did not find selected chat model');
+
 	engine = await webllm.CreateMLCEngine(modelName, {
-		initProgressCallback: initCb,
+		initProgressCallback,
 	});
 	return engine;
 }
@@ -72,8 +81,8 @@ export function stop() {
 }
 
 export async function getModels() {
-	const prebuiltConfig = webllm.prebuiltAppConfig;
-	return prebuiltConfig.model_list.map((v) => ({
+	if (!prebuiltAppConfig) return [];
+	return prebuiltAppConfig.model_list.map((v) => ({
 		model_id: v.model_id,
 		model_url: v.model,
 	})) as ModelObject[];
