@@ -64,10 +64,38 @@ export function isDevMode() {
 	);
 }
 
+const playbackQueue: string[] = [];
+let isPlaying = false;
+
 export function playAudio(url: string) {
-	const audio = new Audio(url);
-	audio.playbackRate = 1.05;
-	audio.play();
+	playbackQueue.push(url);
+	processQueue();
+}
+
+async function processQueue() {
+	if (isPlaying || playbackQueue.length === 0) {
+		return;
+	}
+
+	isPlaying = true;
+	const url = playbackQueue.shift(); // Get the next audio from the queue
+
+	if (url) {
+		const audio = new Audio(url);
+		audio.playbackRate = 1.05;
+		audio.onended = () => {
+			isPlaying = false;
+			processQueue(); // Play the next audio when the current one ends
+		};
+		audio.onerror = (e) => {
+			console.error('Audio playback error:', e);
+			isPlaying = false;
+			processQueue(); // Continue to the next audio even if there's an error
+		};
+		audio.play();
+	} else {
+		isPlaying = false;
+	}
 }
 
 export function blobToArrayBuffer(blob: Blob): Promise<Buffer> {

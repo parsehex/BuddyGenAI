@@ -2,7 +2,7 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router/auto';
 import { useAppStore } from '@/stores/main';
-import { useGameStore, type Game } from '@/stores/game';
+import { useGameStore, type Game, type GameLogEntry } from '@/stores/game';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -22,13 +22,19 @@ import Spinner from '@/src/components/Spinner.vue';
 import { attemptToFixJson, textToHslColor } from '@/src/lib/utils';
 import { Input } from '@/src/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
-import { RefreshCcwDot, Send } from 'lucide-vue-next';
+import { RefreshCcwDot, Send, Volume2 } from 'lucide-vue-next';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
+import { cleanTextForTTS } from '@/src/lib/ai/utils';
+import { playAudio } from '@/src/lib/utils';
 
 const log = useLogger('pages/game');
 const appStore = useAppStore();
 const gameStore = useGameStore();
 const route = useRoute();
 const { chat } = useChatAI();
+const ttsAI = useTTSAI();
+
+const ttsEnabled = computed(() => ttsAI.isEnabled && ttsAI.isAvailable);
 
 const reloadLastTurnAction = () => {
 	if (!currentGame.value) return;
@@ -37,6 +43,46 @@ const reloadLastTurnAction = () => {
 		userActionInput.value = lastUserTurnContent;
 		takeTurn();
 	}
+};
+
+const ttsLoading = ref(false);
+const doTTS = async (message: GameLogEntry) => {
+	if (ttsLoading.value) return;
+	if (!ttsEnabled.value) {
+		log.warn('TTS is disabled, cannot play audio');
+		return;
+	}
+
+	ttsLoading.value = true;
+	let audioUrl = message.tts;
+
+	if (!audioUrl) {
+		const text = cleanTextForTTS(message.content);
+		let voice = '';
+		if (message.type === 'buddy' && selectedBuddy.value?.tts_voice) {
+			voice = selectedBuddy.value.tts_voice;
+		} else if (message.type === 'gm') {
+			voice = appStore.settings.selected_model_tts;
+		}
+
+		if (!voice) {
+			log.warn('No TTS voice selected for message type:', message.type);
+			ttsLoading.value = false;
+			return;
+		}
+
+		const ttsData = await ttsAI.makeTTS({ text, voice });
+		if (!ttsData) {
+			log.error('TTS failed to generate for message:', message.content);
+			ttsLoading.value = false;
+			return;
+		}
+		audioUrl = ttsData;
+		message.tts = ttsData; // Store the generated TTS URL
+	}
+
+	playAudio(audioUrl);
+	ttsLoading.value = false;
 };
 
 const gameId = computed(() => (route.params as any).id as string);
@@ -56,11 +102,11 @@ watch(gameId, (newGameId) => {
 
 watch(currentGame, async (newGame) => {
 	try {
-		if (!generateFirstTurn) return; // potential access before init
+		// potential access before init
+		if (newGame && !newGame.gameStarted && !newGame.isLoading) {
+			await generateFirstTurn(newGame);
+		}
 	} catch (e) { }
-	if (newGame && !newGame.gameStarted && !newGame.isLoading) {
-		await generateFirstTurn(newGame);
-	}
 }, { immediate: true });
 
 const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
@@ -139,6 +185,9 @@ const generateFirstTurn = async (game: Game) => {
 			gmNarrative = gmResponse;
 		}
 		game.gameLog.push({ type: 'gm', content: gmNarrative, choices: gmChoices });
+		if (appStore.settings.auto_read_chat) {
+			doTTS(game.gameLog[game.gameLog.length - 1]);
+		}
 	} else {
 		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
 	}
@@ -182,7 +231,11 @@ const takeTurn = async () => {
 	let buddyAction = '';
 	if (buddyResponse) {
 		buddyAction = buddyResponse.replace(selectedBuddy.value.name + ':', '').trim();
-		game.gameLog.push({ type: 'buddy', content: buddyResponse });
+		const buddyMessage = { type: 'buddy', content: buddyResponse } as GameLogEntry;
+		game.gameLog.push(buddyMessage);
+		if (appStore.settings.auto_read_chat) {
+			doTTS(buddyMessage);
+		}
 	} else {
 		game.gameLog.push({ type: 'buddy', content: '(Failed to generate response)' });
 	}
@@ -215,7 +268,11 @@ const takeTurn = async () => {
 			log.error('Failed to parse GM response as JSON:', e);
 			gmNarrative = gmResponse;
 		}
-		game.gameLog.push({ type: 'gm', content: gmNarrative, choices: gmChoices });
+		const gmMessage = { type: 'gm', content: gmNarrative, choices: gmChoices } as GameLogEntry;
+		game.gameLog.push(gmMessage);
+		if (appStore.settings.auto_read_chat) {
+			doTTS(gmMessage);
+		}
 	} else {
 		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
 	}
@@ -289,6 +346,10 @@ const takeTurn = async () => {
 								<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
 							</Avatar>
 							<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
+							<Button v-if="entry.type === 'buddy' || entry.type === 'gm'" variant="ghost" size="icon"
+								:disabled="ttsLoading || !ttsEnabled" @click="doTTS(entry)" class="ml-2">
+								<Volume2 class="h-4 w-4" />
+							</Button>
 						</div>
 					</div>
 				</ScrollArea>

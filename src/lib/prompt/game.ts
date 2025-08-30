@@ -82,7 +82,7 @@ Your description: ${buddyDescription}
 ${userName} just took an action, and you're now taking an action yourself. Describe your action in the first person, or use quotes to designate speech if you want to talk.
 Important: Your response should be realistic and relevant to what ${buddyName} can do.
 Keep your response concise and focused on moving the story forward.
-Respond without further prose.`,
+Respond with your answer only, no further prose.`,
 		},
 		...(gameLog.map((entry) => {
 			if (entry.type === 'user') {

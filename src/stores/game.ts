@@ -18,6 +18,7 @@ export interface GameLogEntry {
 	type: 'user' | 'buddy' | 'gm';
 	content: string;
 	choices?: string[];
+	tts?: string;
 }
 
 export const useGameStore = defineStore('game', () => {
