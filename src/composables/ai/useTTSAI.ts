@@ -49,15 +49,12 @@ export const useTTSAI = defineStore('ai/tts', () => {
 		const store = useAppStore();
 		const autoRead = store.settings.auto_read_chat;
 
+		if (!autoRead) return;
+
 		const audio = await makeTTS({ text, voice });
 
 		if (!audio) {
 			console.error('Did not receive any TTS audio');
-			return;
-		}
-
-		if (!autoRead) {
-			console.log('Auto-read TTS not enabled');
 			return;
 		}
 
