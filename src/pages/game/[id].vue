@@ -27,6 +27,7 @@ import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { playAudio } from '@/src/lib/utils';
 import RecordAudio from '@/src/components/chat/RecordAudio.vue';
+import GameLogEntryEl from '@/src/components/game/GameLogEntry.vue';
 
 const log = useLogger('pages/game');
 const appStore = useAppStore();
@@ -160,6 +161,13 @@ const lastGmChoices = computed<string[] | undefined>(() => {
 	return lastGmEntry?.choices;
 });
 
+const handleGameLogEntryEdit = (index: number, newContent: string) => {
+	if (!currentGame.value) return;
+	currentGame.value.gameLog[index].content = newContent;
+	currentGame.value.gameLog[index].tts = undefined; // Clear TTS on edit
+	gameStore.updateGame(currentGame.value);
+};
+
 const selectChoice = (choice: string) => {
 	userActionInput.value = choice;
 	takeTurn();
@@ -188,7 +196,7 @@ const generateFirstTurn = async (game: Game) => {
 
 	game.gameLog.push({
 		type: 'gm',
-		content: `Game started with ${selectedBuddy.value.name} and premise: "${game.premiseDescription}"`,
+		content: `The game is starting -- Players: ${userName.value} & ${selectedBuddy.value.name}, Premise: "${game.premiseDescription}"`,
 	});
 
 	const gmIntroPrompt = generateGmIntroPrompt(
@@ -202,6 +210,7 @@ const generateFirstTurn = async (game: Game) => {
 		messages: gmIntroPrompt,
 		max_tokens: 500,
 		temperature: 0.35,
+		json: true,
 	});
 	log.log({ _: { messages: gmIntroPrompt, premise: game.premiseDescription, gmResponse } }, 'Creating game')
 
@@ -209,7 +218,8 @@ const generateFirstTurn = async (game: Game) => {
 	let gmChoices: string[] | undefined;
 	if (gmResponse) {
 		try {
-			const parsedGmResponse = JSON.parse(attemptToFixJson(gmResponse));
+			let parsedGmResponse = JSON.parse(attemptToFixJson(gmResponse));
+			if (Array.isArray(parsedGmResponse)) parsedGmResponse = parsedGmResponse[0];
 			gmNarrative = parsedGmResponse.narrative || gmResponse;
 			gmChoices = parsedGmResponse.choices || undefined;
 		} catch (e) {
@@ -296,7 +306,8 @@ const takeTurn = async () => {
 	let gmChoices: string[] | undefined;
 	if (gmResponse) {
 		try {
-			const parsedGmResponse = JSON.parse(attemptToFixJson(gmResponse));
+			let parsedGmResponse = JSON.parse(attemptToFixJson(gmResponse));
+			if (Array.isArray(parsedGmResponse)) parsedGmResponse = parsedGmResponse[0];
 			gmNarrative = parsedGmResponse.narrative || gmResponse;
 			gmChoices = parsedGmResponse.choices || undefined;
 		} catch (e) {
@@ -368,27 +379,9 @@ const handleAudioError = () => {
 		</CardHeader>
 		<CardContent class="flex-1 overflow-hidden p-0">
 			<ScrollArea class="h-full p-2 pb-0" id="scrollArea">
-				<div v-for="(entry, index) in currentGame.gameLog" :key="index"
-					:class="{ 'my-2': true, 'text-right': entry.type !== 'gm', 'text-left': entry.type === 'gm' }">
-					<div class="inline-flex items-center p-3 rounded-lg max-w-[70%] break-words" :class="{
-						'bg-blue-500 text-white': entry.type === 'user',
-						'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
-						'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
-					}">
-						<BuddyAvatar v-if="entry.type === 'buddy'" :buddy="selectedBuddy" />
-						<Avatar v-if="entry.type === 'user'" class="text-md font-bold mr-2" :style="{
-							backgroundColor: textToHslColor(userName, 60, 80),
-						}">
-							<AvatarImage v-if="appStore.settings.user_image" :src="appStore.settings.user_image" />
-							<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
-						</Avatar>
-						<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
-						<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')" variant="ghost" size="icon"
-							:disabled="ttsLoading" @click="doTTS(entry)" class="ml-2">
-							<Volume2 class="h-4 w-4" />
-						</Button>
-					</div>
-				</div>
+				<GameLogEntryEl v-for="(entry, index) in currentGame.gameLog" :key="index" :entry="entry" :index="index"
+					:selectedBuddy="selectedBuddy" :userName="userName" :userInitials="userInitials" :ttsEnabled="ttsEnabled"
+					:ttsLoading="ttsLoading" :doTTS="doTTS" @edit="handleGameLogEntryEdit" />
 			</ScrollArea>
 		</CardContent>
 		<CardFooter class="p-4 border-t relative">

@@ -87,7 +87,7 @@ export function generateBuddyTurnPrompt(
 Description of ${buddyName}, which you should faithfully follow: ${buddyDescription}
 
 ${userName} just took an action (described below), and you're now taking your own action (_as ${buddyName}_). Describe your action in the first person, and/or use quotes to designate speech if you want to talk.
-Important: Your response should be realistic and relevant to what ${buddyName} can do.
+Important: Your response should be realistic and relevant to what ${buddyName} can and wants to do -- it doesn't need to follow with what ${userName} just did.
 Keep your response concise and focused on moving the story forward.
 Respond with your answer only, no further prose.`,
 		},
