@@ -42,6 +42,7 @@
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.79",
     "@vueuse/core": "^13.7.0",
+    "@vueuse/rxjs": "^13.8.0",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

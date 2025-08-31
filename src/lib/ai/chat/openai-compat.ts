@@ -1,4 +1,3 @@
-import * as webllm from '@mlc-ai/web-llm';
 import { AppSettings, type LLMProvider } from '../../api/AppSettings';
 import type { ChatRequest, ModelObject } from './types';
 import urls from '../../api/urls';

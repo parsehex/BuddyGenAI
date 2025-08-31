@@ -5,12 +5,13 @@ import router from '@/lib/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/stores/main';
+import { useGameStore } from '@/stores/game';
 import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './settings/SettingsPanel.vue';
-import ColorMode from './ColorMode.vue';
+import GameCreationForm from './GameCreationForm.vue';
+import GameList from './GameList.vue';
 import { useToast } from '../ui/toast';
-import Button from '../ui/button/Button.vue';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import AIProviderStatus from './AIProviderStatus.vue';
@@ -22,11 +23,17 @@ import {
 } from '@/components/ui/tooltip'
 import useMobile from '@/src/composables/useMobile';
 import { useAIStatus } from '@/src/composables/ai/useAIStatus';
+import { Gamepad2, MessageSquare, Users, Settings } from 'lucide-vue-next';
+import { useLocalStorage } from '@vueuse/core';
 
 const device = useMobile();
 const { toast } = useToast();
 
+const useIcons = useLocalStorage('useIconsForTabs', 'true');
+const useIconsForTabs = computed(() => useIcons.value === 'true');
+
 const store = useAppStore();
+const gameStore = useGameStore();
 const route = useRoute();
 
 const aiStatus = useAIStatus();
@@ -53,7 +60,8 @@ watch(
 		} else {
 			modelValue.value = 'chat';
 		}
-	}
+	},
+	{ immediate: true }
 );
 
 const selectedBuddy = ref('');
@@ -123,11 +131,30 @@ watch(
 				</TooltipTrigger>
 				<TooltipContent> Go to home page </TooltipContent>
 			</Tooltip>
-			<TabsTrigger value="chat">Chat</TabsTrigger>
-			<TabsTrigger value="buddy">Buddy</TabsTrigger>
-			<TabsTrigger value="settings">Options</TabsTrigger>
-			<!-- <RouterLink class="mx-1 font-bold" to="/credits">About</RouterLink> -->
-			<ColorMode />
+			<TabsTrigger value="chat">
+				<template v-if="useIconsForTabs">
+					<MessageSquare title="Chat" class="h-6 w-6" />
+				</template>
+				<template v-else> Chat </template>
+			</TabsTrigger>
+			<TabsTrigger value="buddy">
+				<template v-if="useIconsForTabs">
+					<Users title="Buddies" class="h-6 w-6" />
+				</template>
+				<template v-else> Buddy </template>
+			</TabsTrigger>
+			<TabsTrigger value="game">
+				<template v-if="useIconsForTabs">
+					<Gamepad2 title="Games" class="h-6 w-6" />
+				</template>
+				<template v-else> Games </template>
+			</TabsTrigger>
+			<TabsTrigger value="settings">
+				<template v-if="useIconsForTabs">
+					<Settings title="Options" class="h-6 w-6" />
+				</template>
+				<template v-else> Options </template>
+			</TabsTrigger>
 		</TabsList>
 		<div class="h-screen">
 			<TabsContent value="chat">
@@ -148,6 +175,15 @@ watch(
 			</TabsContent>
 			<TabsContent value="settings">
 				<SettingsPanel />
+			</TabsContent>
+			<TabsContent value="game">
+				<div class="flex flex-col gap-2">
+					<h2 class="ml-2 text-xl font-semibold">Active Games</h2>
+					<ScrollArea class="h-[calc(100vh-375px)]">
+						<GameList />
+					</ScrollArea>
+					<GameCreationForm />
+				</div>
 			</TabsContent>
 		</div>
 	</Tabs>

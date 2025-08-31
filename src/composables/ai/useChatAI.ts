@@ -48,9 +48,20 @@ export const useChatAI = defineStore('ai/chat', () => {
 	watch(() => provider.value, updateModels);
 
 	async function chat(req: ChatRequest) {
+		let response: string | undefined;
 		if (provider.value === 'koboldcpp' || provider.value === 'openrouter')
-			return openaiCompat.chat(req);
-		if (provider.value === 'webllm') return webllm.chat(req);
+			response = await openaiCompat.chat(req);
+		if (provider.value === 'webllm') response = await webllm.chat(req);
+
+		// replace weird characters with common ones, hopefully to help avoid weird LLM output
+		if (response)
+			return response
+				.replace(/[“”]/g, '"') // Replace smart double quotes with straight double quotes
+				.replace(/[‘’]/g, "'") // Replace smart single quotes with straight single quotes
+				.replace(/—/g, '--') // Replace em dash with double hyphen
+				.replace(/–/g, '-') // Replace en dash with hyphen
+				.replace(/\u2026/g, '...')
+				.trim();
 
 		toast({
 			variant: 'destructive',

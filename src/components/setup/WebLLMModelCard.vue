@@ -3,10 +3,10 @@ import { ref, onMounted } from 'vue';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import * as webllm from "@mlc-ai/web-llm";
 import { useAppStore } from '@/src/stores/main';
 import { getModels, loadModel } from '@/src/lib/ai/chat/webllm';
 import { AppSettings } from '@/src/lib/api/AppSettings';
+import type { InitProgressReport } from '@mlc-ai/web-llm';
 
 const emits = defineEmits(['completed']);
 const store = useAppStore()
@@ -36,7 +36,7 @@ async function load() {
 	}
 
 	initProgress.value = 'Loading model...';
-	const initProgressCallback = (report: webllm.InitProgressReport) => {
+	const initProgressCallback = (report: InitProgressReport) => {
 		initProgress.value = report.text;
 	};
 

@@ -8,20 +8,23 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@vueuse/core';
-
-import { Settings, Cloud, MessageSquare, Image, Volume2, Menu, CircleHelp } from 'lucide-vue-next';
-
+import { Settings, Cloud, MessageSquare, Image, Volume2, Menu, CircleHelp, FlaskConical, Bug } from 'lucide-vue-next';
 import GeneralOptions from './GeneralOptions.vue';
 import ChatAIOptions from './ChatAIOptions.vue';
 import ImageAIOptions from './ImageAIOptions.vue';
 import AIProviderOptions from './AIProviderOptions/Main.vue';
+import LogDashboard from '@/src/components/LogDashboard.vue';
 import { isFeatureAvailable } from '@/src/lib/ai/support';
 import ExportDatabaseButton from '../../ExportDatabaseButton.vue';
 import ImportDatabaseButton from '../../ImportDatabaseButton.vue';
 import { clearDatabase, db, tableNames } from '@/src/lib/db/schema';
 import { Separator } from '../../ui/separator';
 import VoiceOptions from './VoiceOptions.vue';
+import OptionSection from './OptionSection.vue';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import useElectron from '@/src/composables/useElectron';
+import ExperimentalOptions from './ExperimentalOptions.vue';
 
 const { openExternalLink } = useElectron();
 const store = useAppStore();
@@ -91,7 +94,7 @@ const resetApp = async () => {
 					</TooltipTrigger>
 					<TooltipContent side="right">Chat Settings</TooltipContent>
 				</Tooltip>
-				<Tooltip v-if="imageProvider && imageProvider !== '0'">
+				<!-- <Tooltip v-if="imageProvider && imageProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="image-ai" as-child
 							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
@@ -102,7 +105,7 @@ const resetApp = async () => {
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Image Settings</TooltipContent>
-				</Tooltip>
+				</Tooltip> -->
 				<Tooltip v-if="ttsProvider && ttsProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="voice" as-child
@@ -114,6 +117,30 @@ const resetApp = async () => {
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Voice Settings</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
+						<TabsTrigger value="experimental" as-child
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
+								<FlaskConical class="h-6 w-6" />
+								<div v-if="showLabels" class="text-xs mt-1">Experimental</div>
+							</Button>
+						</TabsTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="right">Experimental Settings</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
+						<TabsTrigger value="logs" as-child
+							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
+							<Button variant="ghost" class="py-2">
+								<Bug class="h-6 w-6" />
+								<div v-if="showLabels" class="text-xs mt-1">Logs</div>
+							</Button>
+						</TabsTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="right">Application Logs</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger as-child>
@@ -141,12 +168,18 @@ const resetApp = async () => {
 					<TabsContent v-if="chatProvider && chatProvider !== '0'" value="chat-ai">
 						<ChatAIOptions />
 					</TabsContent>
-					<TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
+					<!-- <TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
 						<ImageAIOptions />
-					</TabsContent>
+					</TabsContent> -->
 					<TabsContent v-if="(ttsProvider && ttsProvider !== '0') || (sttProvider && sttProvider !== '0')"
 						value="voice">
 						<VoiceOptions />
+					</TabsContent>
+					<TabsContent value="experimental">
+						<ExperimentalOptions />
+					</TabsContent>
+					<TabsContent value="logs">
+						<LogDashboard />
 					</TabsContent>
 				</div>
 				<Separator />
