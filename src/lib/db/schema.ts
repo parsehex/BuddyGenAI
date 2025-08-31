@@ -68,6 +68,27 @@ export interface LogEntry {
 	metadata?: string; // Storing JSON string
 }
 
+export interface Game {
+	id: string;
+	created: Date;
+	updated?: Date;
+	name: string;
+	selected_buddy_id: string;
+	premise_description: string;
+	game_started: boolean;
+}
+
+export interface GameLogEntry {
+	id: string;
+	game_id: string;
+	entry_index: number;
+	created: Date;
+	type: 'user' | 'buddy' | 'gm';
+	content: string;
+	choices?: string; // Storing JSON string
+	tts?: string;
+}
+
 import Dexie from 'dexie';
 
 export const tableNames = [
@@ -79,6 +100,8 @@ export const tableNames = [
 	'images',
 	'audio',
 	'logs',
+	'game',
+	'game_log_entry',
 ];
 
 class AppDatabase extends Dexie {
@@ -90,12 +113,14 @@ class AppDatabase extends Dexie {
 	images!: Dexie.Table<Image, string>;
 	audio!: Dexie.Table<Audio, string>;
 	logs!: Dexie.Table<LogEntry, string>;
+	game!: Dexie.Table<Game, string>;
+	game_log_entry!: Dexie.Table<GameLogEntry, string>;
 
 	constructor() {
 		// NOTE don't change name casing here, will clear DB
 		super('BuddyGenAI-DB');
 
-		this.version(2).stores({
+		this.version(3).stores({
 			persona: 'id, created, updated, current_version_id',
 			chat_thread: 'id, created, persona_id, name, current_persona_version_id',
 			chat_message: 'id, created, updated, thread_id, thread_index',
@@ -105,6 +130,8 @@ class AppDatabase extends Dexie {
 			images: 'id, timestamp',
 			audio: 'id, timestamp',
 			logs: 'id, timestamp, level, module',
+			game: 'id, created, updated, selected_buddy_id',
+			game_log_entry: 'id, [game_id+entry_index], game_id, created',
 		});
 
 		// @ts-ignore
@@ -148,6 +175,18 @@ class AppDatabase extends Dexie {
 		// @ts-ignore
 		this.logs.hook('creating', (primKey: string, obj: LogEntry) => {
 			obj.timestamp = obj.timestamp || new Date();
+			return obj;
+		});
+
+		// @ts-ignore
+		this.game.hook('creating', (primKey: string, obj: Game) => {
+			obj.created = obj.created || new Date();
+			return obj;
+		});
+
+		// @ts-ignore
+		this.game_log_entry.hook('creating', (primKey: string, obj: GameLogEntry) => {
+			obj.created = obj.created || new Date();
 			return obj;
 		});
 	}

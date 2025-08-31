@@ -35,7 +35,7 @@ const startGame = async () => {
 		return;
 	}
 
-	const newGame = gameStore.createGame(
+	const newGame = await gameStore.createGame(
 		`${selectedBuddy.value.name} / ${truncatedPremise.value}`,
 		selectedBuddyId.value,
 		premiseDescription.value

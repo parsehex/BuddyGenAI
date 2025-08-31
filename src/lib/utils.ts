@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export function clone<T>(data: T): T {
+	return JSON.parse(JSON.stringify(data));
+}
+
 export function valueUpdate(updaterOrValue: any, ref: any) {
 	ref.value =
 		typeof updaterOrValue === 'function'
@@ -68,6 +72,8 @@ const playbackQueue: string[] = [];
 let isPlaying = false;
 
 export function playAudio(url: string) {
+	// @ts-ignore
+	if (url instanceof Blob) url = URL.createObjectURL(url);
 	playbackQueue.push(url);
 	processQueue();
 }

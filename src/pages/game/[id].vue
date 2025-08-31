@@ -19,7 +19,7 @@ import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { useLogger } from '@/src/composables/useLogger';
 import BuddyAvatar from '@/src/components/BuddyAvatar.vue';
 import Spinner from '@/src/components/Spinner.vue';
-import { attemptToFixJson, textToHslColor } from '@/src/lib/utils';
+import { attemptToFixJson, clone, textToHslColor } from '@/src/lib/utils';
 import { Input } from '@/src/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { RefreshCcwDot, Send, Volume2, X } from 'lucide-vue-next';
@@ -40,11 +40,11 @@ const recordAudioRef = ref<InstanceType<typeof RecordAudio> | null>(null);
 
 const ttsEnabled = computed(() => ttsAI.isEnabled && ttsAI.isAvailable);
 
-const reloadLastTurnAction = () => {
-	if (!currentGame.value) return;
-	const lastUserTurnContent = gameStore.reloadLastTurn(currentGame.value.id);
+const reloadLastTurnAction = async () => {
+	if (!gameStore.runtimeGame) return;
+	const lastUserTurnContent = await gameStore.reloadLastTurn(gameStore.runtimeGame.id);
 	if (lastUserTurnContent) {
-		userActionInput.value = lastUserTurnContent;
+		gameStore.userActionInput = lastUserTurnContent;
 		takeTurn();
 	}
 };
@@ -96,7 +96,8 @@ const processTTSQueue = async () => {
 			return;
 		}
 		audioUrl = ttsData;
-		message.tts = ttsData; // Store the generated TTS URL
+		message.tts = ttsData;
+		await gameStore.updateGameLogEntry(message.entry_index, message.content, ttsData);
 	}
 
 	playAudio(audioUrl);
@@ -118,16 +119,16 @@ const doTTS = async (message: GameLogEntry) => {
 };
 
 const gameId = computed(() => (route.params as any).id as string);
-const currentGame = ref<Game | undefined>(undefined);
+const currentGame = computed(() => gameStore.runtimeGame);
 
-watch(gameId, (newGameId) => {
+watch(gameId, async (newGameId) => {
 	if (newGameId) {
-		currentGame.value = gameStore.findGameById(newGameId);
-		if (currentGame.value) {
+		await gameStore.findGameById(newGameId);
+		if (gameStore.runtimeGame) {
 			gameStore.activeGameId = newGameId;
 		}
 	} else {
-		currentGame.value = undefined;
+		gameStore.runtimeGame = undefined;
 		gameStore.activeGameId = null;
 	}
 }, { immediate: true });
@@ -135,7 +136,7 @@ watch(gameId, (newGameId) => {
 watch(currentGame, async (newGame) => {
 	try {
 		// potential access before init
-		if (newGame && !newGame.gameStarted && !newGame.isLoading) {
+		if (newGame && !newGame.game_started && !gameStore.isLoading) {
 			await generateFirstTurn(newGame);
 		}
 	} catch (e) { }
@@ -143,7 +144,7 @@ watch(currentGame, async (newGame) => {
 
 const selectedBuddy = computed<BuddyVersionMerged | undefined>(() => {
 	if (!currentGame.value) return undefined;
-	return appStore.buddies.find(buddy => buddy.id === currentGame.value?.selectedBuddyId);
+	return appStore.buddies.find(buddy => buddy.id === currentGame.value?.selected_buddy_id);
 });
 const userName = computed(() => {
 	return appStore.settings.user_name;
@@ -152,24 +153,21 @@ const userInitials = computed(() => {
 	return userName.value[0];
 });
 
-const userActionInput = ref('');
 const loadingStatus = ref('');
 const showChoices = ref(true);
 
 const lastGmChoices = computed<string[] | undefined>(() => {
-	const lastGmEntry = currentGame.value?.gameLog.findLast((entry) => entry.type === 'gm');
-	return lastGmEntry?.choices;
+	const lastGmEntry = gameStore.runtimeGameLog.findLast((entry) => entry.type === 'gm');
+	return lastGmEntry?.choices ? JSON.parse(lastGmEntry.choices) : undefined;
 });
 
-const handleGameLogEntryEdit = (index: number, newContent: string) => {
+const handleGameLogEntryEdit = async (index: number, newContent: string) => {
 	if (!currentGame.value) return;
-	currentGame.value.gameLog[index].content = newContent;
-	currentGame.value.gameLog[index].tts = undefined; // Clear TTS on edit
-	gameStore.updateGame(currentGame.value);
+	await gameStore.updateGameLogEntry(index, newContent, undefined); // Clear TTS on edit
 };
 
 const selectChoice = (choice: string) => {
-	userActionInput.value = choice;
+	gameStore.userActionInput = choice;
 	takeTurn();
 };
 
@@ -185,25 +183,25 @@ function scrollToBottom() {
 }
 
 const generateFirstTurn = async (game: Game) => {
-	if (!selectedBuddy.value || !selectedBuddy.value.description || !game.premiseDescription) {
+	if (!selectedBuddy.value || !selectedBuddy.value.description || !game.premise_description) {
 		log.error('generateFirstTurn: Missing selected buddy, description, or premise.');
 		return;
 	}
 
-	game.isLoading = true;
+	gameStore.isLoading = true;
 	loadingStatus.value = 'Loading first turn...';
-	gameStore.updateGame(game); // Update to show loading state
+	await gameStore.updateGame(game); // Update to show loading state
 
-	game.gameLog.push({
+	await gameStore.addGameLogEntry({
 		type: 'gm',
-		content: `The game is starting -- Players: ${userName.value} & ${selectedBuddy.value.name}, Premise: "${game.premiseDescription}"`,
+		content: `The game is starting -- Players: ${userName.value} & ${selectedBuddy.value.name}, Premise: "${game.premise_description}"`,
 	});
 
 	const gmIntroPrompt = generateGmIntroPrompt(
 		appStore.settings.user_name,
 		selectedBuddy.value.name,
 		selectedBuddy.value.description,
-		game.premiseDescription
+		game.premise_description
 	);
 
 	const gmResponse = await chat({
@@ -212,7 +210,7 @@ const generateFirstTurn = async (game: Game) => {
 		temperature: 0.35,
 		json: true,
 	});
-	log.log({ _: { messages: gmIntroPrompt, premise: game.premiseDescription, gmResponse } }, 'Creating game')
+	log.log({ _: { messages: gmIntroPrompt, premise: game.premise_description, gmResponse } }, 'Creating game')
 
 	let gmNarrative = '';
 	let gmChoices: string[] | undefined;
@@ -226,17 +224,17 @@ const generateFirstTurn = async (game: Game) => {
 			log.error('Failed to parse GM response as JSON:', e, gmResponse);
 			gmNarrative = gmResponse;
 		}
-		game.gameLog.push({ type: 'gm', content: gmNarrative, choices: gmChoices });
+		await gameStore.addGameLogEntry({ type: 'gm', content: gmNarrative, choices: gmChoices ? JSON.stringify(gmChoices) : undefined });
 		if (appStore.settings.auto_read_chat) {
-			doTTS(game.gameLog[game.gameLog.length - 1]);
+			doTTS(gameStore.runtimeGameLog[gameStore.runtimeGameLog.length - 1]);
 		}
 	} else {
-		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
+		await gameStore.addGameLogEntry({ type: 'gm', content: '(Failed to generate response)' });
 	}
-	game.gameStarted = true;
-	game.isLoading = false;
+	game.game_started = true;
+	gameStore.isLoading = false;
 	loadingStatus.value = '';
-	gameStore.updateGame(game); // Update the game in the store
+	await gameStore.updateGame(game); // Update the game in the store
 	scrollToBottom();
 };
 
@@ -245,16 +243,16 @@ const takeTurn = async () => {
 		log.error('takeTurn: No current game or selected buddy description.');
 		return;
 	}
-	if (!userActionInput.value.trim() && !isRecordingAudio.value) return;
+	if (!gameStore.userActionInput.trim() && !isRecordingAudio.value) return;
 
 	const game = currentGame.value;
-	const action = userActionInput.value;
+	const action = gameStore.userActionInput;
 
 	if (action.trim()) {
-		game.gameLog.push({ type: 'user', content: action });
-		userActionInput.value = '';
+		await gameStore.addGameLogEntry({ type: 'user', content: action });
+		gameStore.userActionInput = '';
 	}
-	game.isLoading = true;
+	gameStore.isLoading = true;
 	loadingStatus.value = `${selectedBuddy.value.name} is thinking...`;
 	scrollToBottom();
 
@@ -263,7 +261,7 @@ const takeTurn = async () => {
 		appStore.settings.user_name,
 		selectedBuddy.value.name,
 		selectedBuddy.value.description,
-		game.gameLog
+		gameStore.runtimeGameLog
 	);
 
 	let buddyResponse = await chat({
@@ -276,12 +274,12 @@ const takeTurn = async () => {
 	if (buddyResponse) {
 		buddyResponse = buddyResponse.replace(selectedBuddy.value.name + ':', '').trim();
 		const buddyMessage = { type: 'buddy', content: buddyResponse } as GameLogEntry;
-		game.gameLog.push(buddyMessage);
+		await gameStore.addGameLogEntry(buddyMessage);
 		if (appStore.settings.auto_read_chat) {
-			doTTS(buddyMessage);
+			doTTS(gameStore.runtimeGameLog[gameStore.runtimeGameLog.length - 1]);
 		}
 	} else {
-		game.gameLog.push({ type: 'buddy', content: '(Failed to generate response)' });
+		await gameStore.addGameLogEntry({ type: 'buddy', content: '(Failed to generate response)' });
 	}
 	loadingStatus.value = 'Loading next turn...';
 	scrollToBottom();
@@ -291,7 +289,7 @@ const takeTurn = async () => {
 		appStore.settings.user_name,
 		selectedBuddy.value.name,
 		selectedBuddy.value.description,
-		game.gameLog
+		gameStore.runtimeGameLog
 	);
 
 	const gmResponse = await chat({
@@ -314,43 +312,43 @@ const takeTurn = async () => {
 			log.error('Failed to parse GM response as JSON:', e);
 			gmNarrative = gmResponse;
 		}
-		const gmMessage = { type: 'gm', content: gmNarrative, choices: gmChoices } as GameLogEntry;
-		game.gameLog.push(gmMessage);
+		const gmMessage = { type: 'gm', content: gmNarrative, choices: gmChoices ? JSON.stringify(gmChoices) : undefined } as GameLogEntry;
+		await gameStore.addGameLogEntry(gmMessage);
 		if (appStore.settings.auto_read_chat) {
-			doTTS(gmMessage);
+			doTTS(gameStore.runtimeGameLog[gameStore.runtimeGameLog.length - 1]);
 		}
 	} else {
-		game.gameLog.push({ type: 'gm', content: '(Failed to generate response)' });
+		await gameStore.addGameLogEntry({ type: 'gm', content: '(Failed to generate response)' });
 	}
 
-	game.isLoading = false;
+	gameStore.isLoading = false;
 	loadingStatus.value = '';
-	gameStore.updateGame(game);
+	await gameStore.updateGame(game);
 	scrollToBottom();
 };
 
 const isRecordingAudio = ref(false);
 const handleAudioStart = () => {
 	isRecordingAudio.value = true;
-	currentGame.value!.isLoading = true;
+	gameStore.isLoading = true;
 	loadingStatus.value = 'Listening...';
 };
 const handleAudioStop = (text: string) => {
 	isRecordingAudio.value = false;
-	userActionInput.value = text;
-	currentGame.value!.isLoading = false;
+	gameStore.userActionInput = text;
+	gameStore.isLoading = false;
 	loadingStatus.value = '';
 	if (appStore.settings.auto_send_stt) {
 		takeTurn();
 	}
 };
 const handleAudioLoading = () => {
-	currentGame.value!.isLoading = true;
+	gameStore.isLoading = true;
 	loadingStatus.value = 'Transcribing...';
 };
 const handleAudioError = () => {
 	isRecordingAudio.value = false;
-	currentGame.value!.isLoading = false;
+	gameStore.isLoading = false;
 	loadingStatus.value = '';
 };
 
@@ -379,13 +377,14 @@ const handleAudioError = () => {
 		</CardHeader>
 		<CardContent class="flex-1 overflow-hidden p-0">
 			<ScrollArea class="h-full p-2 pb-0" id="scrollArea">
-				<GameLogEntryEl v-for="(entry, index) in currentGame.gameLog" :key="index" :entry="entry" :index="index"
-					:selectedBuddy="selectedBuddy" :userName="userName" :userInitials="userInitials" :ttsEnabled="ttsEnabled"
-					:ttsLoading="ttsLoading" :doTTS="doTTS" @edit="handleGameLogEntryEdit" />
+				<GameLogEntryEl v-for="(entry, index) in gameStore.runtimeGameLog" :key="entry.id" :entry="entry" :index="index"
+					:selectedBuddy="selectedBuddy" :userName="userName" :userInitials="userInitials"
+					:ttsEnabled="ttsAI.isAvailable || !!entry.tts" :ttsLoading="ttsLoading" :doTTS="doTTS"
+					@edit="handleGameLogEntryEdit" />
 			</ScrollArea>
 		</CardContent>
 		<CardFooter class="p-4 border-t relative">
-			<div v-if="currentGame.isLoading"
+			<div v-if="gameStore.isLoading"
 				class="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10">
 				<Spinner />
 				<span>{{ loadingStatus }}</span>
@@ -393,12 +392,12 @@ const handleAudioError = () => {
 					<X class="mr-2" /> Stop Recording
 				</Button>
 			</div>
-			<div class="flex flex-col w-full space-y-2" :class="{ 'opacity-50 pointer-events-none': currentGame.isLoading }">
+			<div class="flex flex-col w-full space-y-2" :class="{ 'opacity-50 pointer-events-none': gameStore.isLoading }">
 				<Collapsible v-if="lastGmChoices && lastGmChoices.length > 0" v-model:open="showChoices">
 					<CollapsibleContent>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
 							<Button v-for="(choice, index) in lastGmChoices" :key="index" @click="selectChoice(choice)"
-								:disabled="currentGame.isLoading" class="w-full whitespace-break-spaces text-left justify-start"> {{
+								:disabled="gameStore.isLoading" class="w-full whitespace-break-spaces text-left justify-start"> {{
 									String.fromCharCode(65 + index) }}. {{ choice }} </Button>
 						</div>
 					</CollapsibleContent>
@@ -409,16 +408,18 @@ const handleAudioError = () => {
 				<div class="flex w-full items-center space-x-2">
 					<RecordAudio ref="recordAudioRef" :max-seconds="10" @start="handleAudioStart" @stop="handleAudioStop"
 						@loading="handleAudioLoading" @error="handleAudioError"
-						:disabled="currentGame.isLoading || isRecordingAudio" />
-					<Input id="user-action" v-model="userActionInput" placeholder="What do you do next?"
-						@keyup.enter.prevent="takeTurn" maxlength="100" :disabled="currentGame.isLoading || isRecordingAudio"
+						:disabled="gameStore.isLoading || isRecordingAudio" />
+					<Input id="user-action" v-model="gameStore.userActionInput" placeholder="What do you do next?"
+						@keyup.enter.prevent="takeTurn" maxlength="100" :disabled="gameStore.isLoading || isRecordingAudio"
 						class="flex-1" />
 					<div class="flex flex-col text-center justify-center">
-						<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim() || isRecordingAudio">
+						<Button @click="takeTurn"
+							:disabled="gameStore.isLoading || !gameStore.userActionInput.trim() || isRecordingAudio">
 							<Send />
 						</Button>
 						<Button @click="reloadLastTurnAction"
-							:disabled="currentGame.isLoading || isRecordingAudio || currentGame.gameLog.length < 3" variant="outline">
+							:disabled="gameStore.isLoading || isRecordingAudio || gameStore.runtimeGameLog.length < 3"
+							variant="outline">
 							<RefreshCcwDot />
 						</Button>
 					</div>
