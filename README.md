@@ -22,7 +22,8 @@ I hope others find this project interesting and/or enjoyable as well.
   - Hear buddies with text-to-speech 🔊
   - Speak messages to buddies with speech-to-text
   - Buddies can send images in chat 🖼️ (experimental, off by default)
-- Can also use [OpenRouter](https://openrouter.ai/) or [WebLLM](https://webllm.mlc.ai/) (Chrome/Edge only) for chat
+- Games: Go on a text adventure with your buddy
+- You can also use [OpenRouter](https://openrouter.ai/) or [WebLLM](https://webllm.mlc.ai/) (Chrome/Edge only) for chat
 - Completely offline and private: besides your AI provider, app data isn't sent anywhere
 
 ## Roadmap
@@ -40,10 +41,11 @@ These aren't necessarily confirmed, and completed lines aren't necessarily stabl
   - [ ] TTS
     - [ ] Planned: [kokoro-js](https://www.npmjs.com/package/kokoro-js)
   - [ ] Transcription
+- [ ] Games: Play a game while your buddy chats with you
+  - _Work in progress_
 - [ ] Install the app as a PWA
 - [ ] Buddy/AI memory
   - Primitive version of this with Options -> General -> Your Description
-- [ ] Games: Play a game while your buddy chats with you _In-progress_
 - [ ] Buddy Encounters: Randomly-generated Buddies will show up, giving you the choice to Save or Ignore them.
   - The feature might be designed to emulate a friend-matching service.
 
@@ -62,7 +64,6 @@ Aside from overall cleaning up the project and improving the look of it, I have 
 (all of these would be optional and/or able to be disabled in settings)
 
 - Topics: A form of RAG that I want to implement. This would allow buddies to learn things about you and recall it across chats.
-- Games: Text adventure games involving your buddy sounds fun to me and I have some ideas that I think would make for an interesting experience.
 - More variety to chats:
   - Delays in responses: Buddies would (occasionally) take longer to respond to messages based on the chat's context or random events.
   - Buddies go Idle: Sometimes, a buddy might "go away" and not respond to messages for a while.

@@ -3,6 +3,7 @@
 ## General
 
 - **Tab Icons**: Whether to display icons for the sidebar tabs. Disable to show text labels instead.
+- **Color Mode**: Whether to use **Light** or **Dark** mode, or use the **System-preferred** mode.
 - **Your Name**: This will show up in-chat and control how your buddies refer to you.
 - **Profile Image**: Set a profile image for yourself to show in chat messages.
 - **Your Description**: Info about you/the user, which will be provided for extra context when chatting with buddies or the Assistant.
@@ -38,14 +39,14 @@ Providers that are selected above will display below in order to configure them.
 ### Text-to-Speech
 
 - Default Voice
-- Auto-Read Chat
+- Auto-Read Chat: Once messages are received, automatically generate & play them with TTS.
 
 ### Transcription
 
-- Auto-Send after recording
+- Auto-Send after recording: Whether to automatically send your input after recording + transcription is finished.
 
 ## Experimental
 
-- **Enable Game Tab**: When enabled, a new tab will show up in the sidebar, allowing you to use a new games feature.
-- **Enable Chat Images**: Feature to allow Assistant/Buddies to generate + send an image as part of a message.
-  - This isn't implemented well & makes performance pretty bad. **I don't recommend using it** (all the time at least) **yet**.
+- **Enable Chat Images**: Feature to allow Assistant/Buddies to generate + send an image as part of a message. Generated images are at 512x768 resolution instead of the square 512px profile pictures.
+  - When enabled, you'll see' **Chat Image Quality** which changes how many steps are used to generate images.
+  - This isn't implemented well & makes performance pretty bad. **I don't recommend using this feature** (all the time at least) **yet**.
