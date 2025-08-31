@@ -22,7 +22,7 @@ import Spinner from '@/src/components/Spinner.vue';
 import { attemptToFixJson, textToHslColor } from '@/src/lib/utils';
 import { Input } from '@/src/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
-import { RefreshCcwDot, Send, Volume2 } from 'lucide-vue-next';
+import { RefreshCcwDot, Send, Volume2, X } from 'lucide-vue-next';
 import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { playAudio } from '@/src/lib/utils';
@@ -201,6 +201,7 @@ const generateFirstTurn = async (game: Game) => {
 	const gmResponse = await chat({
 		messages: gmIntroPrompt,
 		max_tokens: 500,
+		temperature: 0.35,
 	});
 	log.log({ _: { messages: gmIntroPrompt, premise: game.premiseDescription, gmResponse } }, 'Creating game')
 
@@ -255,16 +256,15 @@ const takeTurn = async () => {
 		game.gameLog
 	);
 
-	const buddyResponse = await chat({
+	let buddyResponse = await chat({
 		messages: buddyTurnPrompt,
 		temperature: 0.15,
 		max_tokens: 500,
 	});
 	log.log({ _: { messages: buddyTurnPrompt, action, buddyResponse } }, 'After user action - generate buddy turn')
 
-	let buddyAction = '';
 	if (buddyResponse) {
-		buddyAction = buddyResponse.replace(selectedBuddy.value.name + ':', '').trim();
+		buddyResponse = buddyResponse.replace(selectedBuddy.value.name + ':', '').trim();
 		const buddyMessage = { type: 'buddy', content: buddyResponse } as GameLogEntry;
 		game.gameLog.push(buddyMessage);
 		if (appStore.settings.auto_read_chat) {
@@ -286,10 +286,11 @@ const takeTurn = async () => {
 
 	const gmResponse = await chat({
 		messages: gmTurnPrompt,
+		temperature: 0.15,
 		max_tokens: 500,
 		json: true,
 	});
-	log.log({ _: { messages: gmTurnPrompt, buddyAction, gmResponse } }, 'Get next turn')
+	log.log({ _: { messages: gmTurnPrompt, gmResponse } }, 'Get next turn')
 
 	let gmNarrative = '';
 	let gmChoices: string[] | undefined;
@@ -342,31 +343,12 @@ const handleAudioError = () => {
 	loadingStatus.value = '';
 };
 
-// ideas
-// - allow text or microphone input to describe your action
-//     what's a good max for either? 50 chars / 10s ?
-// 50ch = _123456789_123456789_123456789_123456789_123456789
-//
-// when generating, we'll want to check how many tokens we're using
-// if we're using too many tokens, summarize some # of middle turns to compress
-
-
-// after trying a new version, here are some thoughts:
-// - we'll want to set a TTS voice for narration
-// - use (& prompt for) json mode
-
-// later note:
+// (sooner than) later note:
 // we'll want to generate an image for game turns, but don't want to hold up gameplay for it, so
 //   - I want to allow going to a next turn without the image being done generating
 //   - this means we'll need a queue of images to generate
 //   - we'll want UI that's friendly to this async style when considering how to view past history
 //   - same for tts i guess
-
-// new notes:
-// - how about we change up the pacing:
-//     instead of: user choice/action -> gm -> buddy action -> gm -> loop
-//     do: user choice/action -> buddy action -> gm -> loop
-//       buddy doesn't need to pick from choices + it can react to the same thing user did
 
 // new take:
 // what if the user and buddy can chat back and forth multiple times with each other (e.g. to decide on a plan) before the GM makes a turn
@@ -376,84 +358,79 @@ const handleAudioError = () => {
 // likely summarize blocks of consecutive or long messages to feed back as context (UI still shows full though)
 </script>
 <template>
-	<div class="p-2">
-		<Card v-if="!currentGame">
-			<CardContent class="text-center text-gray-500 dark:text-gray-400"> Game not found. Please select a game from the
-				sidebar or start a new one. </CardContent>
-		</Card>
-		<Card v-else-if="selectedBuddy" class="flex flex-col h-[calc(100vh-1rem)]">
-			<CardHeader class="flex flex-row items-center space-x-4 pb-0">
-				<BuddyAvatar :buddy="selectedBuddy" />
-				<h2 class="text-xl font-semibold">{{ currentGame.name }}</h2>
-			</CardHeader>
-			<CardContent class="flex-1 overflow-hidden p-0">
-				<ScrollArea class="h-full p-2 pb-0" id="scrollArea">
-					<div v-for="(entry, index) in currentGame.gameLog" :key="index"
-						:class="{ 'my-2': true, 'text-right': entry.type !== 'gm', 'text-left': entry.type === 'gm' }">
-						<div class="inline-flex items-center p-3 rounded-lg max-w-[70%] break-words" :class="{
-							'bg-blue-500 text-white': entry.type === 'user',
-							'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
-							'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
+	<Card v-if="!currentGame" class="m-2">
+		<CardContent class="text-center text-gray-500 dark:text-gray-400"> Game not found. Please select a game from the
+			sidebar or start a new one. </CardContent>
+	</Card>
+	<Card v-else-if="selectedBuddy" class="border-0 flex flex-col h-[calc(100vh-1rem)]">
+		<CardHeader class="flex flex-row items-center space-x-4 pb-0">
+			<h2 class="text-xl font-semibold">{{ currentGame.name }}</h2>
+		</CardHeader>
+		<CardContent class="flex-1 overflow-hidden p-0">
+			<ScrollArea class="h-full p-2 pb-0" id="scrollArea">
+				<div v-for="(entry, index) in currentGame.gameLog" :key="index"
+					:class="{ 'my-2': true, 'text-right': entry.type !== 'gm', 'text-left': entry.type === 'gm' }">
+					<div class="inline-flex items-center p-3 rounded-lg max-w-[70%] break-words" :class="{
+						'bg-blue-500 text-white': entry.type === 'user',
+						'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100': entry.type === 'gm',
+						'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100': entry.type === 'buddy'
+					}">
+						<BuddyAvatar v-if="entry.type === 'buddy'" :buddy="selectedBuddy" />
+						<Avatar v-if="entry.type === 'user'" class="text-md font-bold mr-2" :style="{
+							backgroundColor: textToHslColor(userName, 60, 80),
 						}">
-							<BuddyAvatar v-if="entry.type === 'buddy'" :buddy="selectedBuddy" />
-							<Avatar v-if="entry.type === 'user'" class="text-md font-bold mr-2" :style="{
-								backgroundColor: textToHslColor(userName, 60, 80),
-							}">
-								<AvatarImage v-if="appStore.settings.user_image" :src="appStore.settings.user_image" />
-								<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
-							</Avatar>
-							<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
-							<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')" variant="ghost" size="icon"
-								:disabled="ttsLoading" @click="doTTS(entry)" class="ml-2">
-								<Volume2 class="h-4 w-4" />
-							</Button>
-						</div>
-					</div>
-				</ScrollArea>
-			</CardContent>
-			<CardFooter class="p-4 border-t relative">
-				<div v-if="currentGame.isLoading"
-					class="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10">
-					<Spinner />
-					<span>{{ loadingStatus }}</span>
-					<Button v-if="isRecordingAudio" @click="recordAudioRef?.toggleRecording()" variant="destructive" class="mt-4">
-						<X class="mr-2" /> Stop Recording
-					</Button>
-				</div>
-				<div class="flex flex-col w-full space-y-2"
-					:class="{ 'opacity-50 pointer-events-none': currentGame.isLoading }">
-					<Collapsible v-if="lastGmChoices && lastGmChoices.length > 0" v-model:open="showChoices">
-						<CollapsibleContent>
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-								<Button v-for="(choice, index) in lastGmChoices" :key="index" @click="selectChoice(choice)"
-									:disabled="currentGame.isLoading" class="w-full whitespace-break-spaces text-left justify-start"> {{
-										String.fromCharCode(65 + index) }}. {{ choice }} </Button>
-							</div>
-						</CollapsibleContent>
-						<CollapsibleTrigger as-child>
-							<Button variant="outline" class="w-full h-8 text-sm"> {{ showChoices ? 'Hide' : 'Show' }} Choices
-							</Button>
-						</CollapsibleTrigger>
-					</Collapsible>
-					<div class="flex w-full items-center space-x-2">
-						<RecordAudio ref="recordAudioRef" :max-seconds="10" @start="handleAudioStart" @stop="handleAudioStop"
-							@loading="handleAudioLoading" @error="handleAudioError"
-							:disabled="currentGame.isLoading || isRecordingAudio" />
-						<Input id="user-action" v-model="userActionInput" placeholder="What do you do next?"
-							@keyup.enter.prevent="takeTurn" :disabled="currentGame.isLoading || isRecordingAudio" class="flex-1" />
-						<div class="flex flex-col text-center justify-center">
-							<Button @click="takeTurn"
-								:disabled="currentGame.isLoading || !userActionInput.trim() || isRecordingAudio">
-								<Send />
-							</Button>
-							<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading || isRecordingAudio"
-								variant="outline">
-								<RefreshCcwDot />
-							</Button>
-						</div>
+							<AvatarImage v-if="appStore.settings.user_image" :src="appStore.settings.user_image" />
+							<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
+						</Avatar>
+						<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
+						<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')" variant="ghost" size="icon"
+							:disabled="ttsLoading" @click="doTTS(entry)" class="ml-2">
+							<Volume2 class="h-4 w-4" />
+						</Button>
 					</div>
 				</div>
-			</CardFooter>
-		</Card>
-	</div>
+			</ScrollArea>
+		</CardContent>
+		<CardFooter class="p-4 border-t relative">
+			<div v-if="currentGame.isLoading"
+				class="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10">
+				<Spinner />
+				<span>{{ loadingStatus }}</span>
+				<Button v-if="isRecordingAudio" @click="recordAudioRef?.toggleRecording()" variant="destructive" class="mt-4">
+					<X class="mr-2" /> Stop Recording
+				</Button>
+			</div>
+			<div class="flex flex-col w-full space-y-2" :class="{ 'opacity-50 pointer-events-none': currentGame.isLoading }">
+				<Collapsible v-if="lastGmChoices && lastGmChoices.length > 0" v-model:open="showChoices">
+					<CollapsibleContent>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+							<Button v-for="(choice, index) in lastGmChoices" :key="index" @click="selectChoice(choice)"
+								:disabled="currentGame.isLoading" class="w-full whitespace-break-spaces text-left justify-start"> {{
+									String.fromCharCode(65 + index) }}. {{ choice }} </Button>
+						</div>
+					</CollapsibleContent>
+					<CollapsibleTrigger as-child>
+						<Button variant="outline" class="w-full h-8 text-sm"> {{ showChoices ? 'Hide' : 'Show' }} Choices </Button>
+					</CollapsibleTrigger>
+				</Collapsible>
+				<div class="flex w-full items-center space-x-2">
+					<RecordAudio ref="recordAudioRef" :max-seconds="10" @start="handleAudioStart" @stop="handleAudioStop"
+						@loading="handleAudioLoading" @error="handleAudioError"
+						:disabled="currentGame.isLoading || isRecordingAudio" />
+					<Input id="user-action" v-model="userActionInput" placeholder="What do you do next?"
+						@keyup.enter.prevent="takeTurn" maxlength="100" :disabled="currentGame.isLoading || isRecordingAudio"
+						class="flex-1" />
+					<div class="flex flex-col text-center justify-center">
+						<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim() || isRecordingAudio">
+							<Send />
+						</Button>
+						<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading || isRecordingAudio"
+							variant="outline">
+							<RefreshCcwDot />
+						</Button>
+					</div>
+				</div>
+			</div>
+		</CardFooter>
+	</Card>
 </template>
