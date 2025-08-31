@@ -424,8 +424,8 @@ const handleAudioError = () => {
 						<Button @click="takeTurn" :disabled="currentGame.isLoading || !userActionInput.trim() || isRecordingAudio">
 							<Send />
 						</Button>
-						<Button @click="reloadLastTurnAction" :disabled="currentGame.isLoading || isRecordingAudio"
-							variant="outline">
+						<Button @click="reloadLastTurnAction"
+							:disabled="currentGame.isLoading || isRecordingAudio || currentGame.gameLog.length < 3" variant="outline">
 							<RefreshCcwDot />
 						</Button>
 					</div>
