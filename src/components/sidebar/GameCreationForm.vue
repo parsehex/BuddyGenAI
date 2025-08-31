@@ -47,7 +47,7 @@ const startGame = async () => {
 </script>
 <template>
 	<div class="p-4 space-y-4">
-		<h2 class="text-xl font-semibold">Start a New Game</h2>
+		<h2 class="text-xl font-semibold">New Game</h2>
 		<div>
 			<label for="buddy-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select a
 				Buddy</label>

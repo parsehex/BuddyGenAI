@@ -10,6 +10,7 @@ import ThreadsList from './ThreadsList.vue';
 import BuddyList from './BuddyList.vue';
 import SettingsPanel from './settings/SettingsPanel.vue';
 import GameCreationForm from './GameCreationForm.vue';
+import GameList from './GameList.vue';
 import ColorMode from './ColorMode.vue';
 import { useToast } from '../ui/toast';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
@@ -181,14 +182,7 @@ watch(
 				<div class="flex flex-col gap-2 p-2">
 					<h2 class="text-xl font-semibold">Active Games</h2>
 					<ScrollArea class="h-[calc(100vh-400px)]">
-						<div v-if="gameStore.games?.length === 0" class="text-gray-500 dark:text-gray-400"> No active games yet.
-							Start a new one! </div>
-						<div v-else class="space-y-2">
-							<RouterLink v-for="game in gameStore.games" :key="game.id" :to="`/game/${game.id}`"
-								class="block p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-								:class="{ 'bg-blue-100 dark:bg-blue-900': game.id === (route.params as any).id }"> {{ game.name }}
-							</RouterLink>
-						</div>
+						<GameList />
 					</ScrollArea>
 					<GameCreationForm />
 				</div>

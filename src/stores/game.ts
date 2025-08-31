@@ -11,7 +11,8 @@ export { type Game, type GameLogEntry };
 export const useGameStore = defineStore('game', () => {
 	const games = useObservable<Game[]>(
 		// @ts-ignore
-		liveQuery(async () => await db.game.toArray())
+		liveQuery(async () => await db.game.toArray()),
+		{ initialValue: [] }
 	);
 	const activeGameId = ref<string | null>(null);
 
@@ -125,6 +126,14 @@ export const useGameStore = defineStore('game', () => {
 		return undefined;
 	};
 
+	const removeGame = async (id: string) => {
+		await db.game.delete(id);
+	};
+
+	const getGames = (): Game[] => {
+		return games.value || [];
+	};
+
 	return {
 		games,
 		activeGameId,
@@ -139,5 +148,7 @@ export const useGameStore = defineStore('game', () => {
 		addGameLogEntry,
 		updateGameLogEntry,
 		reloadLastTurn,
+		removeGame,
+		getGames,
 	};
 });
