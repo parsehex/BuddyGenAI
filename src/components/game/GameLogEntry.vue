@@ -95,7 +95,7 @@ const hasTTS = computed(() => {
 						<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
 						<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')"
 							:variant="hasTTS ? 'secondary' : 'ghost'" size="icon" :disabled="ttsLoading" @click="doTTS(entry)"
-							class="ml-2">
+							class="ml-2 min-w-9">
 							<Volume2 class="h-4 w-4" />
 						</Button>
 					</div>

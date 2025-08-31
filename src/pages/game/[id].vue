@@ -371,7 +371,7 @@ const handleAudioError = () => {
 		<CardContent class="text-center text-gray-500 dark:text-gray-400"> Game not found. Please select a game from the
 			sidebar or start a new one. </CardContent>
 	</Card>
-	<Card v-else-if="selectedBuddy" class="border-0 flex flex-col h-[calc(100vh-1rem)]">
+	<Card v-else-if="selectedBuddy" class="border-0 flex flex-col h-[100vh]">
 		<CardHeader class="flex flex-row items-center space-x-4 pb-0">
 			<h2 class="text-xl font-semibold">{{ currentGame.name }}</h2>
 		</CardHeader>
@@ -383,7 +383,7 @@ const handleAudioError = () => {
 					@edit="handleGameLogEntryEdit" />
 			</ScrollArea>
 		</CardContent>
-		<CardFooter class="p-4 border-t relative">
+		<CardFooter class="p-2 border-t relative">
 			<div v-if="gameStore.isLoading"
 				class="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10">
 				<Spinner />
