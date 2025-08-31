@@ -30,31 +30,9 @@ const chatImageEnabledChat = computed({
 		store.settings.chat_image_enabled = b;
 	},
 });
-
-const gamesTab = computed({
-	get: () => store.settings.games_tab ? 'true' : 'false',
-	set: (val: string) => {
-		if (val === store.settings.games_tab + '') return;
-		const b = val === 'true';
-		if (b === store.settings.games_tab) return;
-		store.settings.games_tab = b;
-	},
-});
 </script>
 <template>
 	<div>
-		<OptionSection label="Enable Game Tab">
-			<RadioGroup :default-value="gamesTab" v-model="gamesTab" class="flex flex-row">
-				<div class="flex items-center space-x-2">
-					<RadioGroupItem id="yes" value="true">Yes</RadioGroupItem>
-					<Label for="yes" class="block">Yes</Label>
-				</div>
-				<div class="flex items-center space-x-2">
-					<RadioGroupItem id="no" value="false">No</RadioGroupItem>
-					<Label for="no" class="block">No</Label>
-				</div>
-			</RadioGroup>
-		</OptionSection>
 		<OptionSection label="Enable Chat Images" labelName="chat_images_enable">
 			<RadioGroup :default-value="chatImageEnabledChat" v-model="chatImageEnabledChat" id="chat_images_enable"
 				class="flex flex-row">

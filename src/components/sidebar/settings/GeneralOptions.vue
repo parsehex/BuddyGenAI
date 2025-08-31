@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { useAppStore } from '@/src/stores/main';
 import OptionSection from './OptionSection.vue';
 import { useLocalStorage } from '@vueuse/core';
+import ColorMode from '../ColorMode.vue';
+import { Separator } from '../../ui/separator';
 
 const store = useAppStore();
 
@@ -79,6 +81,10 @@ const updateDescriptionBuddies = async () => {
 			<Switch :modelValue="useIconsForTabs === 'true'" @update:modelValue="updateUseIconsForTabs"
 				id="use-icons-for-tabs" />
 		</OptionSection>
+		<OptionSection label="Color Mode">
+			<ColorMode />
+		</OptionSection>
+		<Separator />
 		<OptionSection label="Your Name" labelName="name" orientation="vertical">
 			<Input v-model="userName" @blur="updateName()" id="name"
 				class="border border-gray-300 dark:border-gray-700 rounded-md p-2" type="text" />

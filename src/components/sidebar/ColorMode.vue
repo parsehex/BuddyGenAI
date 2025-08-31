@@ -9,16 +9,14 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const mode = useColorMode();
+const mode = useColorMode({ emitAuto: true });
 </script>
-
 <template>
 	<DropdownMenu>
 		<DropdownMenuTrigger as-child>
 			<Button variant="outline" size="xs" class="ml-1 p-2 py-4">
 				<Sun v-if="mode === 'light'" />
-				<Moon v-else />
-				<span class="sr-only">Toggle theme</span>
+				<Moon v-if="mode === 'dark'" />{{ mode }} <span class="sr-only">Choose theme</span>
 			</Button>
 		</DropdownMenuTrigger>
 		<DropdownMenuContent align="end">

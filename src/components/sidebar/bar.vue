@@ -11,7 +11,6 @@ import BuddyList from './BuddyList.vue';
 import SettingsPanel from './settings/SettingsPanel.vue';
 import GameCreationForm from './GameCreationForm.vue';
 import GameList from './GameList.vue';
-import ColorMode from './ColorMode.vue';
 import { useToast } from '../ui/toast';
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
@@ -144,11 +143,11 @@ watch(
 				</template>
 				<template v-else> Buddy </template>
 			</TabsTrigger>
-			<TabsTrigger v-if="store.settings.games_tab" value="game">
+			<TabsTrigger value="game">
 				<template v-if="useIconsForTabs">
 					<Gamepad2 title="Games" class="h-6 w-6" />
 				</template>
-				<template v-else> Game </template>
+				<template v-else> Games </template>
 			</TabsTrigger>
 			<TabsTrigger value="settings">
 				<template v-if="useIconsForTabs">
@@ -156,7 +155,6 @@ watch(
 				</template>
 				<template v-else> Options </template>
 			</TabsTrigger>
-			<ColorMode />
 		</TabsList>
 		<div class="h-screen">
 			<TabsContent value="chat">
@@ -179,9 +177,9 @@ watch(
 				<SettingsPanel />
 			</TabsContent>
 			<TabsContent value="game">
-				<div class="flex flex-col gap-2 p-2">
-					<h2 class="text-xl font-semibold">Active Games</h2>
-					<ScrollArea class="h-[calc(100vh-400px)]">
+				<div class="flex flex-col gap-2">
+					<h2 class="ml-2 text-xl font-semibold">Active Games</h2>
+					<ScrollArea class="h-[calc(100vh-375px)]">
 						<GameList />
 					</ScrollArea>
 					<GameCreationForm />
