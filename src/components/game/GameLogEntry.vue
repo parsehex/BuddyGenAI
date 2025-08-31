@@ -70,6 +70,10 @@ const doCopyMessage = () => {
 	navigator.clipboard.writeText(props.entry.content);
 };
 
+const hasTTS = computed(() => {
+	return !!props.entry.tts;
+});
+
 </script>
 <template>
 	<Dialog :modal="true" :open="isEditingModalOpen" @update:open="isEditingModalOpen = $event">
@@ -89,8 +93,9 @@ const doCopyMessage = () => {
 							<AvatarFallback v-else>{{ userInitials }}</AvatarFallback>
 						</Avatar>
 						<span :class="{ 'ml-2': entry.type !== 'gm' }" v-html="entry.content"></span>
-						<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')" variant="ghost" size="icon"
-							:disabled="ttsLoading" @click="doTTS(entry)" class="ml-2">
+						<Button v-if="ttsEnabled && (entry.type === 'buddy' || entry.type === 'gm')"
+							:variant="hasTTS ? 'secondary' : 'ghost'" size="icon" :disabled="ttsLoading" @click="doTTS(entry)"
+							class="ml-2">
 							<Volume2 class="h-4 w-4" />
 						</Button>
 					</div>
