@@ -179,9 +179,8 @@ watch(
 			</TabsContent>
 			<TabsContent value="game">
 				<div class="flex flex-col gap-2 p-2">
-					<GameCreationForm />
-					<h2 class="text-xl font-semibold mt-4 mb-2">Active Games</h2>
-					<ScrollArea class="h-[calc(100vh-200px)]">
+					<h2 class="text-xl font-semibold">Active Games</h2>
+					<ScrollArea class="h-[calc(100vh-400px)]">
 						<div v-if="gameStore.games.length === 0" class="text-gray-500 dark:text-gray-400"> No active games yet.
 							Start a new one! </div>
 						<div v-else class="space-y-2">
@@ -191,6 +190,7 @@ watch(
 							</RouterLink>
 						</div>
 					</ScrollArea>
+					<GameCreationForm />
 				</div>
 			</TabsContent>
 		</div>
