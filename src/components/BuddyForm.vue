@@ -93,9 +93,7 @@ const buddyKeywordsArr = computed({
 });
 
 const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
-const availVoices = ref(['']);
 onMounted(async () => {
-	availVoices.value = [...ttsAI.availVoices];
 	if (!props.initialBuddy?.id) return;
 	allProfilePics.value = await api.buddy.profilePic.getAll(props.initialBuddy?.id);
 });
@@ -269,7 +267,7 @@ const appearanceTitle = computed(() => `Customize ${buddyName.value || 'your bud
 </script>
 <template>
 	<ScrollArea class="h-screen pb-6">
-		<Card class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 mt-2">
+		<Card class="whitespace-pre-wrap w-full md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg p-2 pt-2 m-0">
 			<CardContent class="flex flex-col items-center">
 				<!-- Basic Info Section -->
 				<Card class="mt-2 p-2 w-full">
@@ -292,7 +290,8 @@ const appearanceTitle = computed(() => `Customize ${buddyName.value || 'your bud
 								<SelectContent>
 									<SelectGroup>
 										<SelectLabel>Voices</SelectLabel>
-										<SelectItem v-for="voice in availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
+										<SelectItem v-for="voice in ttsAI.availVoices" :key="voice" :value="voice"> {{ voice }}
+										</SelectItem>
 									</SelectGroup>
 								</SelectContent>
 							</Select>
