@@ -9,19 +9,9 @@ import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import { api } from '@/lib/api';
 import BuddyTagsInput from '../BuddyTagsInput.vue';
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectGroup,
-	SelectLabel,
-	SelectItem,
-} from '@/components/ui/select';
-import { useTTSAI } from '@/src/composables/ai/useTTSAI';
+import TTSVoiceSelect from '@/src/components/TTSVoiceSelect.vue';
 
 const store = useAppStore();
-const ttsAI = useTTSAI();
 const { toast } = useToast();
 
 const buddyName = ref('');
@@ -30,7 +20,6 @@ const buddyKeywords = ref('friendly, talkative');
 const isSaving = ref(false);
 
 const buddyVoice = ref('');
-const ttsEnabled = computed(() => store.settings.selected_provider_tts === 'koboldcpp');
 
 const buddyKeywordsArr = computed({
 	get: () => buddyKeywords.value.split(',').map((s) => s.trim()),
@@ -79,17 +68,8 @@ const createBuddy = async () => {
 					you. </p>
 				<BuddyTagsInput type="create" :buddyName="buddyName" :buddyKeywords="buddyKeywords" :updateBuddyKeywords="(keywords) => (buddyKeywords = keywords.join(', '))
 					" />
-				<Select v-if="ttsEnabled" v-model="buddyVoice" id="buddy-voice">
-					<SelectTrigger :title="buddyVoice">
-						<SelectValue :placeholder="`Select a TTS voice for ${buddyName}`" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Voices</SelectLabel>
-							<SelectItem v-for="voice in ttsAI.availVoices" :key="voice" :value="voice"> {{ voice }} </SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+				<TTSVoiceSelect v-model="buddyVoice" :buddyName="buddyName" label="Buddy Voice"
+					:placeholder="`Select a TTS voice for ${buddyName}`" />
 				<div>
 					<Button @click="createBuddy()" class="mt-4 p-2 rounded"> Create Buddy </Button>
 					<Spinner v-if="isSaving" />

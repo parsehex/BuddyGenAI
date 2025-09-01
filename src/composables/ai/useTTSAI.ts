@@ -45,6 +45,7 @@ export const useTTSAI = defineStore('ai/tts', () => {
 		});
 	}
 
+	/** Generate TTS and if Auto-Send is on then automatically play the audio. */
 	async function makeAndReadTTS(text: string, voice: string) {
 		const store = useAppStore();
 		const autoRead = store.settings.auto_read_chat;

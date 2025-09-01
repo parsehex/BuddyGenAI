@@ -9,15 +9,7 @@ import Spinner from '@/components/Spinner.vue';
 import { useAppStore } from '@/stores/main';
 import { api } from '@/lib/api';
 import BuddyTagsInput from './BuddyTagsInput.vue';
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectGroup,
-	SelectLabel,
-	SelectItem,
-} from '@/components/ui/select';
+import TTSVoiceSelect from '@/src/components/TTSVoiceSelect.vue';
 import BuddyAvatar from './BuddyAvatar.vue';
 import BuddyAppearanceOptions from './BuddyAppearanceOptions.vue';
 import { Progress } from '@/components/ui/progress';
@@ -31,7 +23,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Separator } from './ui/separator';
-import { useTTSAI } from '../composables/ai/useTTSAI';
+import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 
 const props = defineProps({
 	initialBuddy: {
@@ -282,19 +274,8 @@ const appearanceTitle = computed(() => `Customize ${buddyName.value || 'your bud
 								with you. </p>
 							<BuddyTagsInput type="create" :buddyName="buddyName" :buddyKeywords="buddyKeywords"
 								:updateBuddyKeywords="(keywords: any) => (buddyKeywords = keywords.join(', '))" />
-							<!-- TODO voice selector component with preview -->
-							<Select v-if="ttsEnabled" v-model="buddyVoice" id="buddy-voice">
-								<SelectTrigger :title="buddyVoice">
-									<SelectValue :placeholder="`Select a TTS voice for ${buddyName}`" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Voices</SelectLabel>
-										<SelectItem v-for="voice in ttsAI.availVoices" :key="voice" :value="voice"> {{ voice }}
-										</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
+							<TTSVoiceSelect v-model="buddyVoice" :buddyName="buddyName" label="Buddy Voice"
+								:placeholder="`Select a TTS voice for ${buddyName}`" />
 						</div>
 					</CardContent>
 				</Card>
