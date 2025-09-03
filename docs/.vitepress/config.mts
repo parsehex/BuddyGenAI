@@ -5,6 +5,8 @@ export default defineConfig({
 	title: 'buddyGenAI Docs',
 	description: '',
 	themeConfig: {
+		logo: '/logo.png',
+
 		// https://vitepress.dev/reference/default-theme-config
 		nav: [{ text: 'Home', link: '/' }],
 
