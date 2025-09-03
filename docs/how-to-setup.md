@@ -1,6 +1,6 @@
 # How to setup for the first time
 
-> [!WARNING] This page isn't updated and is for an early version of buddyGenAI. See [here](./getting-started.md) for current instructions and links.
+> [!WARNING] This page isn't updated and is for an early version of buddyGenAI. See [this page](./getting-started.md) for more recent instructions and links.
 
 ## Troubleshooting
 

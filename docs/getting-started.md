@@ -24,7 +24,7 @@ First, your machine should have the following requirements:
 
 1. Download and install the latest version of buddyGenAI from the [releases page](https://github.com/parsehex/buddyGenAI/releases).
 
-2. Choose and download the AI models you want to use -- you can use [this page](https://github.com/parsehex/buddyGenAI/blob/main/docs/getting-models.md) for model recommendations and download links.
+2. Choose and download the AI models you want to use -- you can use [this page](./getting-models.md) for model recommendations and download links.
 
 3. Open buddyGenAI and click the button to Import Models and select the model files you downloaded. Once done, click Continue and wait for the chat model to load before you see the next page.
 

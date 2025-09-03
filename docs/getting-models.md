@@ -1,6 +1,8 @@
 # Get Models for buddyGenAI
 
-[View the current version of this page](https://github.com/parsehex/buddyGenAI/blob/main/docs/getting-models.md)
+> [!CAUTION] Written for Legacy Version
+>
+> This page is not actively maintained -- it was originally written for the Electron version which isn't currently being updated.
 
 buddyGenAI uses AI models to chat, generate text, images, TTS and Speech-to-Text. TTS and Speech-to-Text are optional, but you're required to provide a chat and an image model.
 
