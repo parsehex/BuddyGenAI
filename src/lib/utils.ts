@@ -186,7 +186,7 @@ export function attemptToFixJson(
 
 	if (firstIsOpeningBracket && !hasClosingBracket) {
 		json += closeBracket;
-		console.log('fixed json: added closing bracket');
+		// console.log('fixed json: added closing bracket');
 	}
 
 	if (!firstIsOpeningBracket && hasBothBrackets) {
@@ -196,7 +196,7 @@ export function attemptToFixJson(
 
 		const lastBracketIndex = json.lastIndexOf(closeBracket);
 		json = json.slice(0, lastBracketIndex + 1);
-		console.log('fixed json: truncated outside of brackets');
+		// console.log('fixed json: truncated outside of brackets');
 	}
 
 	if (type === 'array') {
@@ -209,7 +209,7 @@ export function attemptToFixJson(
 			// shouldn't happen right? unless empty object in array?
 			json = json.replace(/{/g, '');
 			json = json.replace(/}/g, '');
-			console.log('fixed array json: removed curly brackets');
+			// console.log('fixed array json: removed curly brackets');
 		}
 
 		// trim array of strings
