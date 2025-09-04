@@ -26,7 +26,7 @@ import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import useElectron from '@/composables/useElectron';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/stores/main';
-import { popError, textToHslColor } from '@/src/lib/utils';
+import { copyTextToClipboard, popError, textToHslColor } from '@/src/lib/utils';
 import MessageImage from './MessageImage.vue';
 import { isDevMode, playAudio } from '@/lib/utils';
 import { Volume2 } from 'lucide-vue-next';
@@ -39,7 +39,7 @@ import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 
 const { toast } = useToast();
 
-const { copyToClipboard, dbRun } = useElectron();
+const { dbRun } = useElectron();
 const store = useAppStore();
 const ttsAI = useTTSAI();
 const chatStreaming = computed(() => store.settings.chat_streaming);
@@ -132,8 +132,8 @@ const doDelete = async () => {
 	emit('delete', message.value.id);
 };
 const doCopyMessage = () => {
-	if (!message.value.content || !copyToClipboard) return;
-	copyToClipboard(message.value.content);
+	if (!message.value.content) return;
+	copyTextToClipboard(message.value.content);
 };
 const doClearThread = async () => {
 	if (!threadId) return;
@@ -176,7 +176,7 @@ const doTTS = async () => {
 	ttsLoading.value = true;
 	if (!hasTTS.value) {
 		if (!ttsEnabled.value) {
-			return popError('Please set a Text-to-Speech voice in the settings', 'TTS is disabled');
+			return popError('Please set a Text-to-Speech provider in Options -> Providers', 'TTS is disabled');
 		}
 		const text = cleanTextForTTS(message.value.content);
 

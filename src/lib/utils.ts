@@ -238,3 +238,11 @@ export function isAsyncIterable(input: any) {
 	}
 	return typeof input[Symbol.asyncIterator] === 'function';
 }
+
+export function copyTextToClipboard(text: string) {
+	try {
+		navigator.clipboard.writeText(text);
+	} catch (err) {
+		console.error('Failed to copy text: ', err);
+	}
+}
