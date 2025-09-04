@@ -362,16 +362,13 @@ const handleReloading = async (ttsToSave: string, imgToSave: string) => {
 /** Conditionally genertate chat thread title after sending first message. */
 const condWriteThreadTitle = async () => {
 	if (messages.value.length > 3) return; // 3 incl. system message
-	console.log('title do');
 
 	// TODO sometimes the output is like { "description": "something" } which might be cut off
 	// TODO use fix JSON function (is it generic? pass in options to fix?)
 	//   an option like "pickFirstString" shouold work here, where an object is expected to just have one value
 	//   or a separate function specifically for one-value objects (could have a "expectedKey" option)
 
-	console.time('completion');
 	const [msg1, msg2, msg3] = messages.value;
-	isLoading.value = true;
 	let value = await complete(titleFromMessages(msg1, msg2, msg3), {
 		body: { max_tokens: 20, temperature: 0.01 },
 	}, true);
@@ -387,13 +384,9 @@ const condWriteThreadTitle = async () => {
 		if (value[0] === '"' && value[value.length - 1] === '"') {
 			value = value.slice(1, -1);
 		}
-		console.debug('Thread title parsed value', value);
 		await api.thread.updateOne(threadId.value, { name: value });
 		await updateThreads();
-		console.timeEnd('completion');
 	}
-
-	isLoading.value = false;
 };
 
 watch(
