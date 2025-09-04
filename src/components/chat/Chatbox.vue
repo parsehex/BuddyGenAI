@@ -137,7 +137,8 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
 		initialMessages: await initialMessages.value,
 		body: apiPartialBody.value,
-		onFinish: async () => {
+		partialJsonKey: 'message',
+		onFinish: async (msgs, response) => {
 			// so what all happens here?
 			// - conditionally send an image (if enabled and not deemed explicit)
 			// - reload if we're reloading
@@ -182,36 +183,14 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 
 			const chatImageEnabled = store.settings.chat_image_enabled;
 			let cmdObj = {} as any;
-			let cmd = '';
-			// if chat images are enabled, decided whether to send one
-			if (chatImageEnabled) {
-				cmd = (await complete(shouldSendImg(user, assistantName), {
-					body: {
-						max_tokens: 512,
-						temperature: 0.01,
-						messages: messages.value
-							.slice()
-							.map(
-								(m) =>
-								({
-									role: m.role,
-									content: m.content,
-								} as ChatMessage)
-							)
-							.slice(-6),
-					},
-				}, true)) as string;
-
-				try {
-					cmdObj = JSON.parse(cmd);
-					if (Array.isArray(cmdObj)) cmdObj = cmdObj[0];
-				} catch (e) { }
-				console.log('cmd', cmdObj);
-			}
+			try {
+				cmdObj = JSON.parse(response);
+				if (Array.isArray(cmdObj)) cmdObj = cmdObj[0];
+			} catch (e) { }
 
 			let imgToSave = '';
 
-			if (chatImageEnabled && cmdObj.do_send) {
+			if (chatImageEnabled && cmdObj.send_image) {
 				let buddyAppearance = '';
 				let gender = '';
 				const genderPrompt = genderFromName(
@@ -252,7 +231,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 					}
 				}
 
-				if (cmdObj.description && cmdObj.do_send) {
+				if (cmdObj.description && cmdObj.send_image) {
 					const lastMessage = JSON.parse(
 						JSON.stringify(messages.value[messages.value.length - 1])
 					);

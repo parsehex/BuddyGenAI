@@ -49,4 +49,3 @@ Providers that are selected above will display below in order to configure them.
 
 - **Enable Chat Images**: Feature to allow Assistant/Buddies to generate + send an image as part of a message. Generated images are at 512x768 resolution instead of the square 512px profile pictures.
   - When enabled, you'll see' **Chat Image Quality** which changes how many steps are used to generate images.
-  - This isn't implemented well & makes performance pretty bad. **I don't recommend using this feature** (all the time at least) **yet**.

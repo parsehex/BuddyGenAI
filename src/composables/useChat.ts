@@ -5,11 +5,19 @@ import { AppSettings } from '@/lib/api/AppSettings';
 import { useAppStore } from '../stores/main';
 import { useChatAI, type ChatRequest } from './ai/useChatAI';
 import { popError } from '../lib/utils';
+import { parse } from 'partial-json';
 
 interface UseChatOptions {
 	initialMessages?: ChatMessage[];
+	/**
+	 * If set, then:
+	 * 1) Sets `json: true` for the LLM requests
+	 * 2) On each returned chunk, parses the message as partial json and set the message value to the value of `partialJsonKey`
+	 * You should still prompt model to return JSON in expected format. The `onFinish` callback will return the full json response.
+	 */
+	partialJsonKey?: string;
 	body?: Record<string, unknown>;
-	onFinish?: (messages: ChatMessage[]) => void;
+	onFinish?: (messages: ChatMessage[], response: string) => void;
 	onError?: (error: Error) => void;
 }
 
@@ -75,16 +83,44 @@ export default function useChat(options: UseChatOptions) {
 		messages.value.push(msg.value);
 
 		const stream = store.settings.chat_streaming;
+		const json = !!options.partialJsonKey;
 		const req: ChatRequest = {
 			...options.body,
 			messages: messagesToSend,
 			stream,
+			json,
 			stream_callback: (s: string) => {
-				msg.value.content = s;
+				if (!options.partialJsonKey) {
+					msg.value.content = s;
+					return;
+				}
+				let parsed = parse(s);
+				if (!parsed) return;
+				if (Array.isArray(parsed) && parsed.length > 0) parsed = parsed[0];
+				msg.value.content = parsed[options.partialJsonKey];
 			},
 		};
+		let wholeResponse = ';';
+		let formatPrompt = `\n\nRespond with valid JSON containing the key "message" with a string value containing the response.`;
+
+		const chatImages = AppSettings.get('chat_image_enabled') as string | number;
+		const chatImagesEnabled =
+			chatImages && chatImages !== '0.0' && chatImages !== '0' && chatImages !== 0;
+		if (chatImagesEnabled) {
+			formatPrompt += `\nAlso include a key "send_image" with a boolean value indicating whether the AI decides to send an image to the user based on the chat's current context.`;
+		}
+		req.messages[0].content += formatPrompt;
 		try {
-			const response = await chatAI.chat(req);
+			let response = await chatAI.chat(req);
+			wholeResponse = response as string;
+			try {
+				if (options.partialJsonKey && response) {
+					let data = JSON.parse(response);
+					// @ts-ignore
+					if (Array.isArray(data) && data.length > 0) data = data[0];
+					response = data[options.partialJsonKey];
+				}
+			} catch (e) {}
 			msg.value.content = response || '';
 		} catch (err: any) {
 			if (err.name === 'CanceledError' || err.name === 'AbortError') {
@@ -94,7 +130,7 @@ export default function useChat(options: UseChatOptions) {
 			console.error('Request failed:', err);
 		}
 		if (options.onFinish) {
-			options.onFinish(messages.value);
+			options.onFinish(messages.value, wholeResponse);
 		}
 		isLoading.value = false;
 	}

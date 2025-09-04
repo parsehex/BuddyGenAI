@@ -47,18 +47,10 @@ export function fromPersonaDescription(
 		return SentientBuddy(userName, aiName, description, isDev) + userDescPrompt;
 	}
 
-	const chatImages = AppSettings.get('chat_image_enabled') as string | number;
-	const chatImagesEnabled =
-		chatImages && chatImages !== '0.0' && chatImages !== '0' && chatImages !== 0;
-	let imgPrompt = '';
-	if (chatImagesEnabled) {
-		imgPrompt = ` ${aiName} may send ${userName} images, one at a time, depending on the chat's context.`;
-	}
-
 	return `user's name: ${userName}
 assistant's name: ${aiName} -- ${aiName} is unaware that they are an AI and believes they are a human.
 
-The following is a chat between ${userName} and ${aiName}.${imgPrompt} ${aiName} sometimes does their own activities which they may tell ${userName} about. Description of ${aiName} to be followed faithfully:\n${description}${userDescPrompt}`;
+The following is a chat between ${userName} and ${aiName}. ${aiName} sometimes does their own activities which they may tell ${userName} about. Description of ${aiName} to be followed faithfully:\n${description}${userDescPrompt}`;
 }
 
 export function descriptionFromKeywords(
