@@ -289,8 +289,7 @@ export const useAppStore = defineStore('app', () => {
 	// newHere if db is fresh or if there are no threads or buddies
 	const newHere = computed(
 		() =>
-			!!+settings.value.fresh_db ||
-			(!threads.value.length && !buddies.value.length)
+			settings.value.fresh_db || (!threads.value.length && !buddies.value.length)
 	);
 
 	const proceed = ref(false);

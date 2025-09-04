@@ -31,7 +31,7 @@ export const AppSettingsDefaults: Settings = {
 	chat_image_enabled: false,
 	chat_image_quality: 'medium',
 	external_api_key: '',
-	fresh_db: false,
+	fresh_db: true,
 	n_gpu_layers: 99,
 	auto_send_stt: false,
 	auto_read_chat: false,

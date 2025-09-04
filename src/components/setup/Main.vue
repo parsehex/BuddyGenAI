@@ -41,6 +41,7 @@ const handleStepComplete = (step: SetupStep, data?: any) => {
       newBuddy.value = data;
       break;
     case 'appearance':
+      store.settings.fresh_db = false;
       break;
   }
 };
