@@ -14,7 +14,7 @@ Context:
 \`${msg3.role}\`: ${msg3.content}\n
 \`\`\`
 
-Respond with the title, without further prose or any formatting.`;
+Respond with a valid JSON object containing the "title" key.`;
 	return prompt;
 }
 

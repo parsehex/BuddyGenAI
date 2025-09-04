@@ -26,5 +26,7 @@ export async function complete(
 		messages: options.body.messages as ChatMessage[],
 		json,
 	});
-	return res as string;
+	if (typeof res === 'undefined')
+		throw new Error('Received undefined response from chat AI');
+	return res;
 }

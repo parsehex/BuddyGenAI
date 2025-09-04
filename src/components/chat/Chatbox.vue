@@ -30,7 +30,7 @@ import {
 	shouldSendImg,
 } from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { delay } from '@/src/lib/utils';
+import { attemptToFixJson, clone, delay } from '@/src/lib/utils';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
 import { MODEL_NAME } from '@/lib/constants';
@@ -130,19 +130,8 @@ const reloadingId = ref('');
 const isRecording = ref(false);
 
 // TODO if first time, generate first message to user
-// TODO figure out solution to stream completion response
-
-// await initialMessages.value;
-
-// console.log('initial messages', await initialMessages.value);
 
 const userName = computed(() => store.settings.user_name);
-
-// what does useChat do (that we use it for)?
-// - handles messages array
-//   - updates the `content` of the latest message to stream completion response
-// - manages the `isLoading` state
-// - handles reloading
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
@@ -150,7 +139,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 		body: apiPartialBody.value,
 		onFinish: async () => {
 			// so what all happens here?
-			// - do auto read if enabled
 			// - conditionally send an image (if enabled and not deemed explicit)
 			// - reload if we're reloading
 			// - save the messages
@@ -373,7 +361,8 @@ const handleReloading = async (ttsToSave: string, imgToSave: string) => {
 
 /** Conditionally genertate chat thread title after sending first message. */
 const condWriteThreadTitle = async () => {
-	if (messages.value.length !== 3) return; // 3 incl. system message
+	if (messages.value.length > 3) return; // 3 incl. system message
+	console.log('title do');
 
 	// TODO sometimes the output is like { "description": "something" } which might be cut off
 	// TODO use fix JSON function (is it generic? pass in options to fix?)
@@ -385,14 +374,15 @@ const condWriteThreadTitle = async () => {
 	isLoading.value = true;
 	let value = await complete(titleFromMessages(msg1, msg2, msg3), {
 		body: { max_tokens: 20, temperature: 0.01 },
-	});
-	console.debug('Thread title completion', value);
+	}, true);
+	value = attemptToFixJson(value);
 
 	if (value) {
-		// TODO improve this (llm response parsing)
-		if (value.startsWith('Title: ')) {
-			value = value.slice(7);
-		}
+		try {
+			const data = JSON.parse(value);
+			value = data.title;
+		} catch (e) { }
+		if (value.startsWith('Title: ')) value = value.slice(7);
 		value = value.trim();
 		if (value[0] === '"' && value[value.length - 1] === '"') {
 			value = value.slice(1, -1);
