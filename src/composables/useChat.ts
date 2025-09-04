@@ -8,6 +8,7 @@ import { popError } from '../lib/utils';
 import { parse } from 'partial-json';
 
 interface UseChatOptions {
+	aiName: string;
 	initialMessages?: ChatMessage[];
 	/**
 	 * If set, then:
@@ -107,7 +108,7 @@ export default function useChat(options: UseChatOptions) {
 		const chatImagesEnabled =
 			chatImages && chatImages !== '0.0' && chatImages !== '0' && chatImages !== 0;
 		if (chatImagesEnabled) {
-			formatPrompt += `\nAlso include a key "send_image" with a boolean value indicating whether the AI decides to send an image to the user based on the chat's current context.`;
+			formatPrompt += `\nAlso include a key "send_image" with a boolean value indicating whether ${options.aiName} decides to send an image to the user based on the chat's current context.`;
 		}
 		req.messages[0].content += formatPrompt;
 		try {

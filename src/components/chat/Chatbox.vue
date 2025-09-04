@@ -129,12 +129,19 @@ const msgsToSave = [] as Message[];
 const reloadingId = ref('');
 const isRecording = ref(false);
 
+const thread = ref({} as ChatThread);
+const selectedBuddyId = ref(thread.value?.persona_id || '');
+const currentBuddy = computed(() =>
+	buddies.value.find((p) => p.id === selectedBuddyId.value) as BuddyVersionMerged
+);
+
 // TODO if first time, generate first message to user
 
 const userName = computed(() => store.settings.user_name);
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
+		aiName: currentBuddy.value?.name || 'Assistant',
 		initialMessages: await initialMessages.value,
 		body: apiPartialBody.value,
 		partialJsonKey: 'message',
@@ -491,12 +498,10 @@ const updateSysMessage = async () => {
 };
 
 const refreshed = ref(false);
-const thread = ref({} as ChatThread);
 const threadMode = ref('custom' as 'custom' | 'persona');
 
 const buddyModeUseCurrent = ref(false);
 
-const selectedBuddyId = ref(thread.value?.persona_id || '');
 const handleBuddyChange = async () => {
 	// TODO add a confirmation dialog if there are messages already
 	if (!threadId) return;
@@ -514,9 +519,7 @@ const handleBuddyChange = async () => {
 	await refreshMessages();
 	await refreshBuddies();
 };
-const currentBuddy = computed(() =>
-	buddies.value.find((p) => p.id === selectedBuddyId.value) as BuddyVersionMerged
-);
+
 watch(selectedBuddyId, handleBuddyChange);
 
 await refreshBuddies();
