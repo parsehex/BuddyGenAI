@@ -4,6 +4,7 @@ import type { DeleteResponse } from '@/lib/api/types-api';
 
 const { dbRun, dbGet } = useElectron();
 
+/** Delete all messages except the system message */
 export default async function removeAll(
 	threadId: string
 ): Promise<DeleteResponse> {
@@ -15,7 +16,15 @@ export default async function removeAll(
 		throw new Error('Thread not found');
 	}
 
-	const sqlMessages = del('chat_message', { thread_id: threadId });
-	await dbRun(sqlMessages[0], sqlMessages[1]);
+	const uSqlMessages = del('chat_message', {
+		thread_id: threadId,
+		role: 'user',
+	});
+	await dbRun(uSqlMessages[0], uSqlMessages[1]);
+	const aSqlMessages = del('chat_message', {
+		thread_id: threadId,
+		role: 'assistant',
+	});
+	await dbRun(aSqlMessages[0], aSqlMessages[1]);
 	return { success: true };
 }
