@@ -21,7 +21,7 @@ const classStr = computed(() => {
 });
 
 onMounted(async () => {
-	src.value = await getImage(src.value);
+	if (src.value) src.value = await getImage(src.value);
 })
 </script>
 <template>

@@ -13,7 +13,7 @@ defineProps<{
 <template>
 	<div class="flex items-center justify-between py-4 border-b-2 border-gray-100 dark:border-gray-700">
 		<h2 class="text-2xl font-bold"> {{ threadTitle }} </h2>
-		<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.image }))" />
+		<ThreadImages v-if="threadImages.length > 0" :images="threadImages.map((m: any) => ({ url: m.url }))" />
 		<BuddyCard v-if="threadMode === 'persona' && threadBuddy" :buddy="threadBuddy" />
 	</div>
 </template>
