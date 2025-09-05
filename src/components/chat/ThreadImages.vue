@@ -6,8 +6,13 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ImageWithPreview from '../ImageWithPreview.vue';
-import { onMounted } from 'vue';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { delay } from '@/src/lib/utils';
+import { Image } from 'lucide-vue-next';
 
 const props = defineProps<{
 	images: { url: string }[];
@@ -71,39 +76,29 @@ const scrollRight = async () => {
 	});
 };
 </script>
-
 <template>
 	<Popover @update:open="scrollRight">
-		<PopoverTrigger as-child>
-			<div
-				class="flex items-center bg-primary-foreground rounded-lg justify-center cursor-pointer"
-			>
-				<span class="p-2 select-none"> Images in this Chat </span>
-			</div>
+		<PopoverTrigger>
+			<Tooltip>
+				<TooltipTrigger as-child>
+					<Button variant="ghost" size="sm" class="p-2">
+						<Image />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent> All images in this chat </TooltipContent>
+			</Tooltip>
 		</PopoverTrigger>
-		<PopoverContent
-			class="min-w-[40vw] bg-primary-foreground"
-			:hide-when-detached="true"
-			side="bottom"
-		>
+		<PopoverContent class="min-w-[40vw] bg-primary-foreground" :hide-when-detached="true" side="bottom">
 			<!-- TODO download zip -->
 			<!-- TODO image controls -->
-			<ScrollArea
-				id="scrollArea"
-				@mousedown="mouseDown"
-				@mouseleave="leave"
-				@mouseup="up"
-				@mousemove="move"
-				@wheel="wheel"
-			>
+			<ScrollArea id="scrollArea" @mousedown="mouseDown" @mouseleave="leave" @mouseup="up" @mousemove="move"
+				@wheel="wheel">
 				<div class="flex flex-row">
 					<div v-for="image in props.images" :key="image.url" class="p-1">
 						<ImageWithPreview :img-url="image.url" class="min-w-[200px]" />
 					</div>
 				</div>
-				<p v-if="!props.images.length" class="p-2 select-none">
-					No images in this chat.
-				</p>
+				<p v-if="!props.images.length" class="p-2 select-none"> No images in this chat. </p>
 			</ScrollArea>
 		</PopoverContent>
 	</Popover>

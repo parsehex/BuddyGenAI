@@ -18,7 +18,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/components/ui/tooltip';
 import { Volume2, MoreHorizontal, Image, Copy } from 'lucide-vue-next';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import MessageImage from './MessageImage.vue';
