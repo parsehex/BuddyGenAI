@@ -57,6 +57,7 @@ const ttsAI = useTTSAI();
 const userName = computed(() => store.settings.user_name);
 const userImage = computed(() => store.settings.user_image);
 const chatStreaming = computed(() => store.settings.chat_streaming);
+const chatImagesEnabled = computed(() => store.settings.chat_image_enabled);
 
 const aiName = computed(() => {
 	if (props.threadMode === 'persona') return props.currentBuddy?.name || 'Assistant'
@@ -181,9 +182,9 @@ const doTTS = async () => {
 				<!-- add audio speed control -->
 			</div>
 			<div class="ml-auto mr-1">
-				<Tooltip v-if="canGenerate">
+				<Tooltip v-if="!isUser && chatImagesEnabled">
 					<TooltipTrigger as-child>
-						<Button variant="ghost" size="sm" @click="emit('generate')">
+						<Button variant="ghost" size="sm" @click="emit('generate')" :disabled="!canGenerate">
 							<Image />
 						</Button>
 					</TooltipTrigger>

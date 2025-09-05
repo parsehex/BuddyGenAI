@@ -77,8 +77,7 @@ const canGenerateImage = computed(() => {
 	if (!isAssistant.value) return false;
 	if (!store.settings.chat_image_enabled) return false;
 	if (!imgAI.isAvailable) return false;
-	if (isLoading.value) return false;
-	if (message.value.image) return false; // Already has an image
+	if (isLoading.value || message.value.image === 'loading') return false;
 	return true;
 });
 
