@@ -328,14 +328,12 @@ watch(
 );
 
 const threadImages = computed(() =>
-	// @ts-ignore
-	messages.value.filter((m) => m.image && m.role === 'assistant')
+	messages.value.filter((m) => m.role === 'assistant' && m.image && m.image !== 'loading')
 );
 
 const uiMessages = computed(() =>
 	messages.value.filter((m) => m.role !== 'system')
 );
-
 
 async function refreshMessages() {
 	const newMessages = await api.message.getAll(threadId.value);
