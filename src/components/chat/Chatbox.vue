@@ -130,10 +130,22 @@ const reloadingId = ref('');
 const isRecording = ref(false);
 
 const thread = ref({} as ChatThread);
+try {
+	await updateThread();
+} catch (e) {
+	await router.push('/');
+}
 const selectedBuddyId = ref(thread.value?.persona_id || '');
 const currentBuddy = computed(() =>
 	buddies.value.find((p) => p.id === selectedBuddyId.value) as BuddyVersionMerged
 );
+const aiName = currentBuddy.value?.name || 'Assistant';
+
+async function updateThread() {
+	const newThread = await api.thread.getOne(threadId.value);
+	thread.value = newThread;
+	return newThread;
+}
 
 // TODO if first time, generate first message to user
 
@@ -141,10 +153,10 @@ const userName = computed(() => store.settings.user_name);
 
 const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 	useChat({
-		aiName: currentBuddy.value?.name || 'Assistant',
+		aiName,
 		initialMessages: await initialMessages.value,
 		body: apiPartialBody.value,
-		partialJsonKey: 'message',
+		// partialJsonKey: 'message',
 		onFinish: async (msgs, response) => {
 			// so what all happens here?
 			// - conditionally send an image (if enabled and not deemed explicit)
@@ -345,31 +357,35 @@ const handleReloading = async (ttsToSave: string, imgToSave: string) => {
 	await condWriteThreadTitle();
 };
 
+const extractTitle = (val: string) => {
+	if (!val) return '';
+	try {
+		let data = JSON.parse(val);
+		if (Array.isArray(data)) {
+			if (typeof data[0] === 'string') return data[0];
+			else data = data[0];
+		}
+		val = data.title;
+	} catch (e) { }
+	// cleanup val some
+	if (val.startsWith('Title: ')) val = val.slice(7);
+	val = val.trim();
+	if (val[0] === '"' && val[val.length - 1] === '"') {
+		val = val.slice(1, -1);
+	}
+	return val;
+};
+
 /** Conditionally genertate chat thread title after sending first message. */
 const condWriteThreadTitle = async () => {
 	if (messages.value.length > 3) return; // 3 incl. system message
-
-	// TODO sometimes the output is like { "description": "something" } which might be cut off
-	// TODO use fix JSON function (is it generic? pass in options to fix?)
-	//   an option like "pickFirstString" shouold work here, where an object is expected to just have one value
-	//   or a separate function specifically for one-value objects (could have a "expectedKey" option)
 
 	const [msg1, msg2, msg3] = messages.value;
 	let value = await complete(titleFromMessages(msg1, msg2, msg3), {
 		body: { max_tokens: 20, temperature: 0.01 },
 	}, true);
-	value = attemptToFixJson(value);
-
+	value = extractTitle(value);
 	if (value) {
-		try {
-			const data = JSON.parse(value);
-			value = data.title;
-		} catch (e) { }
-		if (value.startsWith('Title: ')) value = value.slice(7);
-		value = value.trim();
-		if (value[0] === '"' && value[value.length - 1] === '"') {
-			value = value.slice(1, -1);
-		}
 		await api.thread.updateOne(threadId.value, { name: value });
 		await updateThreads();
 	}
@@ -417,11 +433,7 @@ const uiMessages = computed(() =>
 	messages.value.filter((m) => m.role !== 'system')
 );
 
-async function updateThread() {
-	const newThread = await api.thread.getOne(threadId.value);
-	thread.value = newThread;
-	return newThread;
-}
+
 async function refreshMessages() {
 	const newMessages = await api.message.getAll(threadId.value);
 	setMessages(newMessages);
@@ -524,22 +536,15 @@ watch(selectedBuddyId, handleBuddyChange);
 
 await refreshBuddies();
 
-let t: ChatThread | undefined;
-try {
-	t = await updateThread();
-	// console.log('thread', t);
-} catch (e) {
-	await router.push('/');
-}
 refreshed.value = true;
-threadMode.value = t?.mode || 'custom';
+threadMode.value = thread.value?.mode || 'custom';
 
-if (threadMode.value === 'persona' && t?.persona_mode_use_current) {
+if (threadMode.value === 'persona' && thread.value?.persona_mode_use_current) {
 	buddyModeUseCurrent.value = true;
 }
 
 refreshed.value = true;
-selectedBuddyId.value = t?.persona_id || '';
+selectedBuddyId.value = thread.value?.persona_id || '';
 await refreshMessages();
 
 const canSend = computed(() => {

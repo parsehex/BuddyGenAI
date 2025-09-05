@@ -102,15 +102,16 @@ export default function useChat(options: UseChatOptions) {
 			},
 		};
 		let wholeResponse = ';';
-		let formatPrompt = `\n\nRespond with valid JSON containing the key "message" with a string value containing the response.`;
+		let formatPrompt = `\n\nRespond with valid JSON containing the key "message" with a string value containing the response`;
 
 		const chatImages = AppSettings.get('chat_image_enabled') as string | number;
 		const chatImagesEnabled =
 			chatImages && chatImages !== '0.0' && chatImages !== '0' && chatImages !== 0;
 		if (chatImagesEnabled) {
-			formatPrompt += `\nAlso include a key "send_image" with a boolean value indicating whether ${options.aiName} decides to send an image to the user based on the chat's current context.`;
+			formatPrompt += ` and an optional key "send_image" with a boolean value indicating whether ${options.aiName} decides to send an image to the user based contextually on the current chat`;
 		}
-		req.messages[0].content += formatPrompt;
+		formatPrompt += '.';
+		if (options.partialJsonKey) req.messages[0].content += formatPrompt;
 		try {
 			let response = await chatAI.chat(req);
 			wholeResponse = response as string;

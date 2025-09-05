@@ -10,7 +10,7 @@ export function imgDescriptionFromChat(
 	aiName: string,
 	appearance?: string
 ) {
-	let prompt = `The following is a chat between ${userName} and ${aiName} -- user is ${userName} & ${aiName}. Given the most recent message and the surrounding context, the assistant's task is to write the description of a single image involving ${aiName} to send to ${userName}.`;
+	let prompt = `The following is a chat between ${userName} and ${aiName} -- user is ${userName} & ${aiName}. Given the most recent message and any surrounding context, assistant's task is to write the description of a single image involving ${aiName} to send to ${userName}, paying most attention to the most recent user and assistant messages.`;
 	if (appearance) {
 		prompt += `\nDescription of ${aiName} (retain these details):\n${appearance}`;
 	}
