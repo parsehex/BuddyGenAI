@@ -75,6 +75,7 @@ const handleCancel = () => {
 
 const canGenerateImage = computed(() => {
 	if (!isAssistant.value) return false;
+	if (!store.settings.chat_image_enabled) return false;
 	if (!imgAI.isAvailable) return false;
 	if (isLoading.value) return false;
 	if (message.value.image) return false; // Already has an image
@@ -107,12 +108,10 @@ const doGenerateImage = async () => {
 					@delete="doDelete" @edit="triggerEdit" @generate="doGenerateImage" />
 			</ContextMenuTrigger>
 			<ContextMenuContent>
-				<ContextMenuItem @click="doCopyMessage">Copy</ContextMenuItem>
 				<DialogTrigger asChild>
 					<ContextMenuItem @click="triggerEdit" v-if="isUser || threadMode === 'custom'"> Edit </ContextMenuItem>
 				</DialogTrigger>
 				<ContextMenuItem @click="doDelete">Delete</ContextMenuItem>
-				<ContextMenuItem @click="doGenerateImage" v-if="canGenerateImage">Request Image</ContextMenuItem>
 				<!-- TODO confirm (reuse same dialog) -->
 				<ContextMenuSeparator v-if="isDevMode()" />
 				<ContextMenuItem v-if="isDevMode()" @click="doClearThread"> Delete All Messages </ContextMenuItem>

@@ -11,7 +11,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Volume2, MoreHorizontal } from 'lucide-vue-next';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Volume2, MoreHorizontal, Image, Copy } from 'lucide-vue-next';
 import BuddyAvatar from '@/components/BuddyAvatar.vue';
 import MessageImage from './MessageImage.vue';
 import type { BuddyVersionMerged, ChatMessage } from '@/src/lib/api/types-db';
@@ -172,23 +177,40 @@ const doTTS = async () => {
 				</Button>
 				<!-- add audio speed control -->
 			</div>
-			<DropdownMenu>
-				<DropdownMenuTrigger as-child>
-					<Button variant="ghost" size="sm" class="ml-auto">
-						<MoreHorizontal />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuItem @click="emit('copy')">Copy</DropdownMenuItem>
-					<DialogTrigger asChild>
-						<DropdownMenuItem @click="emit('edit')" v-if="isUser"> Edit </DropdownMenuItem>
-					</DialogTrigger>
-					<DropdownMenuItem @click="emit('delete')">Delete</DropdownMenuItem>
-					<DropdownMenuItem v-if="canGenerate" @click="emit('generate')">Request Image</DropdownMenuItem>
-					<DropdownMenuSeparator v-if="isDevMode()" />
-					<DropdownMenuItem v-if="isDevMode()" @click="emit('clear')"> Delete All Messages </DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<div class="ml-auto mr-1">
+				<Tooltip v-if="canGenerate">
+					<TooltipTrigger as-child>
+						<Button variant="ghost" size="sm" @click="emit('generate')">
+							<Image />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent> Request Image </TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger as-child>
+						<Button variant="ghost" size="sm" @click="emit('copy')">
+							<Copy />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent> Copy Message </TooltipContent>
+				</Tooltip>
+				<DropdownMenu>
+					<DropdownMenuTrigger as-child>
+						<Button variant="ghost" size="sm" class="ml-auto">
+							<MoreHorizontal />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						<DialogTrigger asChild>
+							<DropdownMenuItem @click="emit('edit')" v-if="isUser"> Edit </DropdownMenuItem>
+						</DialogTrigger>
+						<DropdownMenuItem @click="emit('delete')">Delete</DropdownMenuItem>
+						<DropdownMenuItem v-if="canGenerate" @click="emit('generate')">Request Image</DropdownMenuItem>
+						<DropdownMenuSeparator v-if="isDevMode()" />
+						<DropdownMenuItem v-if="isDevMode()" @click="emit('clear')"> Delete All Messages </DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
 		</CardHeader>
 		<CardContent class="p-3 pl-6 pt-0 flex items-center justify-between gap-2">
 			<div class="grow">
