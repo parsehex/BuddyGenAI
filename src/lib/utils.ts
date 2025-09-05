@@ -240,6 +240,7 @@ export function isAsyncIterable(input: any) {
 }
 
 export function copyTextToClipboard(text: string) {
+	if (!text) return;
 	try {
 		navigator.clipboard.writeText(text);
 	} catch (err) {

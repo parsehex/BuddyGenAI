@@ -452,7 +452,8 @@ await refreshMessages();
 
 const canSend = computed(() => {
 	if (!isFeatureAvailable('chat')) return false;
-	return !!input.value && !!isRecording.value;
+	if (isRecording.value) return false;
+	return !!input.value;
 });
 
 const canReload = computed(() => {
@@ -626,12 +627,12 @@ const handleGenerateImage = async (messageId: string) => {
 						class="p-2 rounded shadow-sm text-lg resize-none flex-1 h-full min-h-0 border border-gray-300 dark:border-gray-700"
 						tabindex="1" v-model="input" placeholder="Say something..." @keydown.enter="doSubmitOrStop" autofocus />
 					<div class="flex flex-col items-center gap-1">
-						<Button type="button" size="sm" @click="doSubmitOrStop" :disabled="!canSend && !isLoading"
+						<Button type="button" size="sm" @click="doSubmitOrStop" :disabled="!canSend || isLoading"
 							:variant="isLoading ? 'destructive' : 'default'">
 							<Send v-if="!isLoading" />
 							<Square v-else />
 						</Button>
-						<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload"
+						<Button v-if="messages.length" type="button" class="w-full" size="sm" :disabled="!canReload || isLoading"
 							@click="doReload" title="Re-submit your last message to get a new response">
 							<RefreshCcwDot />
 						</Button>
