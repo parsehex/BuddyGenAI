@@ -36,12 +36,14 @@ import { insert } from '@/src/lib/sql';
 import { v4 } from 'uuid';
 import { getAudio } from '@/src/lib/api/audio';
 import { useTTSAI } from '@/src/composables/ai/useTTSAI';
+import { useImgAI } from '@/src/composables/ai/useImgAI';
 
 const { toast } = useToast();
 
 const { dbRun } = useElectron();
 const store = useAppStore();
 const ttsAI = useTTSAI();
+const imgAI = useImgAI();
 const chatStreaming = computed(() => store.settings.chat_streaming);
 
 const props = defineProps<{
@@ -57,9 +59,11 @@ const emit = defineEmits<{
 	(e: 'edit', id: string): void;
 	(e: 'delete', id: string): void;
 	(e: 'clearThread'): void;
+	(e: 'generateImage', messageId: string): void;
 }>();
 
 const isUser = computed(() => message.value.role === 'user');
+const isAssistant = computed(() => message.value.role === 'assistant');
 
 const aiName = computed(() => {
 	if (props.threadMode === 'persona') return props.currentBuddy?.name || 'Assistant'
@@ -91,11 +95,13 @@ const imgValue = ref(message.value.image || '');
 watch(
 	() => message.value,
 	async (newVal) => {
+		console.log(newVal.image);
 		// @ts-ignore
 		if (!newVal.image) return;
 		// @ts-ignore
 		imgValue.value = newVal.image;
-	}
+	},
+	{ deep: true }
 );
 
 const editingMessageTitle = ref('');
@@ -205,6 +211,18 @@ const doTTS = async () => {
 	playAudio(await tts.value);
 	ttsLoading.value = false;
 };
+
+const canGenerateImage = computed(() => {
+	if (!isAssistant.value) return false;
+	if (!imgAI.isAvailable) return false;
+	if (message.value.image) return false; // Already has an image
+	return true;
+});
+
+const doGenerateImage = async () => {
+	if (!canGenerateImage.value) return;
+	emit('generateImage', message.value.id);
+};
 </script>
 <template>
 	<Dialog :modal="true" :open="modalOpen" @update:open="modalOpen = $event">
@@ -261,6 +279,7 @@ const doTTS = async () => {
 					<ContextMenuItem @click="triggerEdit" v-if="isUser || threadMode === 'custom'"> Edit </ContextMenuItem>
 				</DialogTrigger>
 				<ContextMenuItem @click="doDelete">Delete</ContextMenuItem>
+				<ContextMenuItem @click="doGenerateImage" v-if="canGenerateImage">Request Image</ContextMenuItem>
 				<!-- TODO confirm (reuse same dialog) -->
 				<ContextMenuSeparator v-if="isDevMode()" />
 				<ContextMenuItem v-if="isDevMode()" @click="doClearThread"> Delete All Messages </ContextMenuItem>

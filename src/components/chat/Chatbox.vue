@@ -22,15 +22,9 @@ import type { ChatThread, ChatMessage, BuddyVersionMerged } from '@/lib/api/type
 import { api } from '@/lib/api';
 import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
-import { genderFromName, negPromptFromName } from '@/lib/prompt/sd';
 import Message from './ChatMessage.vue';
-import {
-	imgDescriptionFromChat,
-	imgPromptFromDescription,
-	shouldSendImg,
-} from '@/src/lib/prompt/img/chat';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { attemptToFixJson, clone, delay } from '@/src/lib/utils';
+import { attemptToFixJson, clone, delay, popError } from '@/src/lib/utils';
 import useElectron from '@/src/composables/useElectron';
 import useChat from '@/src/composables/useChat';
 import { MODEL_NAME } from '@/lib/constants';
@@ -39,11 +33,16 @@ import useMobile from '@/src/composables/useMobile';
 import { v4 } from 'uuid';
 import { insert } from '@/src/lib/sql';
 import { isFeatureAvailable } from '@/lib/ai/support';
-import { useImgAI } from '@/src/composables/ai/useImgAI';
 import RecordAudio from './RecordAudio.vue';
 import ChatDisclaimer from './ChatDisclaimer.vue';
 import ChatHeader from './ChatHeader.vue';
 import { useTTSAI } from '@/src/composables/ai/useTTSAI';
+import { useImgAI } from '@/src/composables/ai/useImgAI';
+import { genderFromName, negPromptFromName } from '@/lib/prompt/sd';
+import {
+	imgDescriptionFromChat,
+	imgPromptFromDescription,
+} from '@/src/lib/prompt/img/chat';
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -53,8 +52,8 @@ import {
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
 const store = useAppStore();
-const imgAI = useImgAI();
 const ttsAI = useTTSAI();
+const imgAI = useImgAI();
 const device = useMobile();
 const { buddies, threads } = storeToRefs(store);
 const { pathJoin, dbRun } = useElectron();
@@ -193,105 +192,9 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				setMessages(newMessages);
 			}
 
-			// begin image sending
-			const assistantName =
-				threadMode.value === 'persona'
-					? currentBuddy.value?.name || ''
-					: 'Assistant';
-			const user = userName.value;
-
-			const chatImageEnabled = store.settings.chat_image_enabled;
-			let cmdObj = {} as any;
-			try {
-				cmdObj = JSON.parse(response);
-				if (Array.isArray(cmdObj)) cmdObj = cmdObj[0];
-			} catch (e) { }
-
-			let imgToSave = '';
-
-			if (chatImageEnabled && cmdObj.send_image) {
-				let buddyAppearance = '';
-				let gender = '';
-				const genderPrompt = genderFromName(
-					currentBuddy.value?.name || '',
-					currentBuddy.value?.profile_pic_prompt || ''
-				);
-				const completion = await complete(genderPrompt);
-				if (completion) {
-					gender = completion.toLowerCase();
-					buddyAppearance += gender + ', ';
-				}
-
-				if (currentBuddy.value?.profile_pic_prompt) {
-					buddyAppearance += currentBuddy.value.profile_pic_prompt;
-				}
-				const imgDescPrompt = imgDescriptionFromChat(
-					user,
-					currentBuddy.value?.name || 'AI Assistant',
-					buddyAppearance
-				);
-				console.log('imgDescPrompt', imgDescPrompt);
-				const img = await complete(imgDescPrompt, {
-					body: {
-						max_tokens: 100,
-						temperature: 0.1,
-						messages: messages.value.slice(-6),
-					},
-				}, true);
-				console.log('img description', img);
-				if (img) {
-					try {
-						let o = JSON.parse(img);
-						if (Array.isArray(o)) o = o[0];
-						cmdObj.description = o.description;
-					} catch (e) {
-						console.log('error parsing img description', e);
-						cmdObj.description = img;
-					}
-				}
-
-				if (cmdObj.description && cmdObj.send_image) {
-					const lastMessage = JSON.parse(
-						JSON.stringify(messages.value[messages.value.length - 1])
-					);
-					lastMessage.image = 'loading';
-					const newMessages = [...messages.value].map((m) =>
-						JSON.parse(JSON.stringify(m))
-					);
-					newMessages[messages.value.length - 1] = lastMessage;
-					setMessages(newMessages);
-
-					let p = (await complete(imgPromptFromDescription(cmdObj.description), {
-						body: { max_tokens: 125, temperature: 0.1 },
-					}, true)) as string;
-					console.log('img prompt', p);
-					if (p) {
-						p = JSON.parse(p);
-						if (Array.isArray(p)) p = p[0];
-						const imgId = v4();
-						const filename = imgId;
-						const chosen_quality = store.settings.chat_image_quality;
-						let steps = 16;
-						if (chosen_quality === 'medium') steps = 24;
-						else if (chosen_quality === 'high') steps = 32;
-
-						const imgData = await imgAI.makeImage({
-							posPrompt: p,
-							negPrompt: negPromptFromName(currentBuddy.value?.name || '', gender),
-							size: 768,
-							steps
-						});
-
-						const sqlImgAdd = insert('images', { id: filename, data: imgData });
-						await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
-						imgToSave = filename;
-					}
-				}
-			}
-
 			// if we're reloading, only update the last message with the assistant's response
 			if (reloadingId.value) {
-				await handleReloading(ttsDataToSave, imgToSave);
+				await handleReloading(ttsDataToSave, '');
 				return;
 			}
 
@@ -299,7 +202,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 				const msg = {
 					role: 'assistant',
 					content: lastMessage.content.trim(),
-					image: imgToSave,
+					image: '',
 					tts: ttsDataToSave,
 				};
 				msgsToSave.push(msg as any);
@@ -564,6 +467,121 @@ const canReload = computed(() => {
 //     would it be lazy? sure, but i think it would be cool & possibly helpful
 //     maybe we could figure out nice UI to just pull this out as a component (called something like AppAssistantChat)
 //   this idea is akin to the Setup Chat idea i started on before
+
+const handleGenerateImage = async (messageId: string) => {
+	const messageToUpdate = messages.value.find((m) => m.id === messageId);
+	if (!messageToUpdate) return;
+
+	// Set loading state for the image
+	messageToUpdate.image = 'loading';
+	setMessages([...messages.value]); // Update messages to show loading state
+
+	try {
+		const assistantName =
+			threadMode.value === 'persona'
+				? currentBuddy.value?.name || ''
+				: 'Assistant';
+		const user = store.settings.user_name;
+
+		let buddyAppearance = '';
+		let gender = '';
+		const genderPrompt = genderFromName(
+			currentBuddy.value?.name || '',
+			currentBuddy.value?.profile_pic_prompt || ''
+		);
+		const completion = await complete(genderPrompt);
+		if (completion) {
+			gender = completion.toLowerCase();
+			buddyAppearance += gender + ', ';
+		}
+
+		if (currentBuddy.value?.profile_pic_prompt) {
+			buddyAppearance += currentBuddy.value.profile_pic_prompt;
+		}
+		const imgDescPrompt = imgDescriptionFromChat(
+			user,
+			assistantName,
+			buddyAppearance
+		);
+		console.log('imgDescPrompt', imgDescPrompt);
+		const imgDescription = await complete(imgDescPrompt, {
+			body: {
+				max_tokens: 100,
+				temperature: 0.1,
+				messages: messages.value.slice(-6),
+			},
+		}, true);
+		console.log('img description', imgDescription);
+
+		let cmdObjDescription = imgDescription;
+		if (imgDescription) {
+			try {
+				let o = JSON.parse(imgDescription);
+				if (Array.isArray(o)) o = o[0];
+				cmdObjDescription = o.description;
+			} catch (e) {
+				console.log('error parsing img description', e);
+				cmdObjDescription = imgDescription;
+			}
+		}
+
+		if (!cmdObjDescription) {
+			popError('Failed to generate image description.');
+			messageToUpdate.image = ''; // Clear loading state
+			setMessages([...messages.value]);
+			return;
+		}
+
+		let p = (await complete(imgPromptFromDescription(cmdObjDescription), {
+			body: { max_tokens: 125, temperature: 0.1 },
+		}, true)) as string;
+		console.log('img prompt', p);
+
+		if (!p) {
+			popError('Failed to generate image prompt.');
+			messageToUpdate.image = ''; // Clear loading state
+			setMessages([...messages.value]);
+			return;
+		}
+
+		p = JSON.parse(p);
+		if (Array.isArray(p)) p = p[0];
+		const imgId = v4();
+		const filename = imgId;
+		const chosen_quality = store.settings.chat_image_quality;
+		let steps = 16;
+		if (chosen_quality === 'medium') steps = 24;
+		else if (chosen_quality === 'high') steps = 32;
+
+		const imgData = await imgAI.makeImage({
+			posPrompt: p,
+			negPrompt: negPromptFromName(currentBuddy.value?.name || '', gender),
+			size: 768,
+			steps
+		});
+
+		if (!imgData) {
+			popError('Failed to generate image.');
+			messageToUpdate.image = ''; // Clear loading state
+			setMessages([...messages.value]);
+			return;
+		}
+
+		const sqlImgAdd = insert('images', { id: filename, data: imgData });
+		await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
+
+		await api.message.updateOne(messageToUpdate.id, undefined, filename, undefined);
+		await refreshMessages(); // Refresh messages to update the UI with the new image
+	} catch (error: any) {
+		console.error('Error generating image:', error);
+		popError(error.message || 'An unknown error occurred during image generation.');
+		const originalMessage = messages.value.find((m) => m.id === messageId);
+		if (originalMessage) {
+			originalMessage.image = ''; // Clear loading state on error
+			setMessages([...messages.value]);
+		}
+	}
+};
 </script>
 <template>
 	<div class="flex flex-col px-4 mx-auto stretch w-full h-screen" v-if="threadId !== ''">
@@ -592,7 +610,8 @@ const canReload = computed(() => {
 					<div class="flex flex-col gap-1 my-1" id="chatbox">
 						<Message v-for="(m, i) in uiMessages" :key="m.id" :thread-id="threadId" :thread-mode="threadMode"
 							:current-buddy="currentBuddy" :message="m" @edit="refreshMessages" @delete="refreshMessages"
-							@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1" />
+							@clearThread="refreshMessages" :is-loading="isLoading && i === uiMessages.length - 1"
+							@generateImage="handleGenerateImage" />
 					</div>
 				</ScrollArea>
 			</ResizablePanel>
