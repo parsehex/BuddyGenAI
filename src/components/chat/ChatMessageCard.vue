@@ -12,6 +12,9 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
