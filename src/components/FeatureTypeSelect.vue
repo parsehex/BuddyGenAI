@@ -45,6 +45,7 @@ function getProviderLabel(provider: AnyPossibleProvider) {
 		case 'koboldcpp': return 'KoboldCpp';
 		case 'openrouter': return 'OpenRouter';
 		case 'ollama': return 'Ollama';
+		case 'swarmui': return 'SwarmUI';
 		case 'webllm': return 'WebLLM';
 		case '0': return 'Disabled';
 		default: return '';
@@ -63,6 +64,7 @@ const groupedProviders = computed(() => {
 		switch (p) {
 			case 'koboldcpp':
 			case 'ollama':
+			case 'swarmui':
 				groups.Local.push(p);
 				break;
 			case 'webllm':

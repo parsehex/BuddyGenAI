@@ -94,7 +94,7 @@ const resetApp = async () => {
 					</TooltipTrigger>
 					<TooltipContent side="right">Chat Settings</TooltipContent>
 				</Tooltip>
-				<!-- <Tooltip v-if="imageProvider && imageProvider !== '0'">
+				<Tooltip v-if="imageProvider && imageProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="image-ai" as-child
 							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
@@ -105,7 +105,7 @@ const resetApp = async () => {
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Image Settings</TooltipContent>
-				</Tooltip> -->
+				</Tooltip>
 				<Tooltip v-if="ttsProvider && ttsProvider !== '0'">
 					<TooltipTrigger as-child>
 						<TabsTrigger value="voice" as-child
@@ -118,7 +118,7 @@ const resetApp = async () => {
 					</TooltipTrigger>
 					<TooltipContent side="right">Voice Settings</TooltipContent>
 				</Tooltip>
-				<Tooltip>
+				<!-- <Tooltip>
 					<TooltipTrigger as-child>
 						<TabsTrigger value="experimental" as-child
 							:class="['flex flex-col items-center justify-center p-0 h-auto w-auto', showLabels ? 'min-w-[80px]' : 'min-w-[50px]']">
@@ -129,7 +129,7 @@ const resetApp = async () => {
 						</TabsTrigger>
 					</TooltipTrigger>
 					<TooltipContent side="right">Experimental Settings</TooltipContent>
-				</Tooltip>
+				</Tooltip> -->
 				<Tooltip>
 					<TooltipTrigger as-child>
 						<TabsTrigger value="logs" as-child
@@ -168,16 +168,16 @@ const resetApp = async () => {
 					<TabsContent v-if="chatProvider && chatProvider !== '0'" value="chat-ai">
 						<ChatAIOptions />
 					</TabsContent>
-					<!-- <TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
+					<TabsContent v-if="imageProvider && imageProvider !== '0'" value="image-ai">
 						<ImageAIOptions />
-					</TabsContent> -->
+					</TabsContent>
 					<TabsContent v-if="(ttsProvider && ttsProvider !== '0') || (sttProvider && sttProvider !== '0')"
 						value="voice">
 						<VoiceOptions />
 					</TabsContent>
-					<TabsContent value="experimental">
+					<!-- <TabsContent value="experimental">
 						<ExperimentalOptions />
-					</TabsContent>
+					</TabsContent> -->
 					<TabsContent value="logs">
 						<LogDashboard />
 					</TabsContent>

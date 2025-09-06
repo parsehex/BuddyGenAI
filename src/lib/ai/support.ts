@@ -39,7 +39,10 @@ const featureRequirements: Record<FeatureType, FeatureRequirements> = {
 				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
 				return !!settings.koboldcpp_host && lastKoboldVersion.txt2img !== false;
 			}
-			return false; // koboldcpp only
+			if (settings.selected_provider_image === 'swarmui') {
+				return !!settings.swarmui_host;
+			}
+			return false;
 		},
 	},
 	tts: {

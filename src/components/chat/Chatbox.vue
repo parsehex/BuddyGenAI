@@ -534,6 +534,7 @@ const handleGenerateImage = async (messageId: string) => {
 		let p = (await complete(imgPromptFromDescription(cmdObjDescription), {
 			body: { max_tokens: 125, temperature: 0.1 },
 		})) as string;
+		p = p.replace(/"/g, '');
 		console.log('img prompt', p);
 
 		if (!p) {
