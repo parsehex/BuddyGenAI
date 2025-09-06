@@ -47,5 +47,10 @@ Providers that are selected above will display below in order to configure them.
 
 ## Experimental
 
-- **Enable Chat Images**: Feature to allow Assistant/Buddies to generate + send an image as part of a message. Generated images are at 512x768 resolution instead of the square 512px profile pictures.
-  - When enabled, you'll see' **Chat Image Quality** which changes how many steps are used to generate images.
+- **Enable Chat Images**: Feature to allow generating an image for any AI message. Generated images are at 512x768 resolution instead of the square 512px used for profile pictures. When enabled:
+  - You'll see an extra option **Chat Image Quality** which changes how many steps are used to generate images.
+    - `low` = 16 steps
+    - `medium` = 24 steps
+    - `high` = 32 steps
+  - You'll now have an image button available on buddy and assistant messages, which will begin loading an image once clicked.
+  - This feature is _experimental_ still because the resulting prompt/image is generally not the most contextually sensible.
