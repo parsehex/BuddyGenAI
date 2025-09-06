@@ -20,6 +20,11 @@ const featureRequirements: Record<FeatureType, FeatureRequirements> = {
 				const lastKoboldVersion = useAppStore().lastKoboldVersionResult;
 				return !!settings.koboldcpp_host && lastKoboldVersion.llm !== false;
 			}
+			if (settings.selected_provider_chat === 'ollama') {
+				const lastVersion = useAppStore().lastOllamaVersionResult;
+				if (!settings.ollama_host || !lastVersion) return false;
+				return true;
+			}
 			if (settings.selected_provider_chat === 'webllm') {
 				return !!settings.selected_model_chat;
 			}
@@ -67,16 +72,16 @@ export function isFeatureAvailable(feature: FeatureType): boolean {
 
 	const store = useAppStore();
 
+	// If there's a custom validation function, use it
+	if (requirements.validateFn) {
+		return requirements.validateFn(store.settings);
+	}
+
 	// Check if all required settings have non-empty values
 	const hasRequiredSettings = requirements.requiredSettings.every((key) => {
 		const value = AppSettings.get(key as string);
 		return value !== undefined && value !== '' && value !== '0';
 	});
-
-	// If there's a custom validation function, use it
-	if (requirements.validateFn) {
-		return requirements.validateFn(store.settings);
-	}
 
 	return hasRequiredSettings;
 }

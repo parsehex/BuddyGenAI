@@ -14,6 +14,7 @@ export const AppSettingsDefaults: Settings = {
 	user_description_assistant: true,
 	user_description_buddies: true,
 	openrouter_api_key: '',
+	ollama_host: '',
 	koboldcpp_host: '',
 	local_model_directory: '',
 	selected_provider_chat: '0',
@@ -40,10 +41,21 @@ export const AppSettingsDefaults: Settings = {
 	skip_setup: false,
 };
 
-export type AnyPossibleProvider = 'koboldcpp' | 'openrouter' | 'webllm' | '0';
-export type LLMProvider = 'koboldcpp' | 'openrouter' | 'webllm' | '0';
+export type AnyPossibleProvider =
+	| 'koboldcpp'
+	| 'ollama'
+	| 'openrouter'
+	| 'webllm'
+	| '0';
+export type LLMProvider =
+	| 'koboldcpp'
+	| 'ollama'
+	| 'openrouter'
+	| 'webllm'
+	| '0';
 export const LLMProviders: LLMProvider[] = [
 	'koboldcpp',
+	'ollama',
 	'openrouter',
 	'webllm',
 	'0',
@@ -67,6 +79,7 @@ export interface Settings {
 	user_description_assistant: boolean;
 	user_description_buddies: boolean;
 	openrouter_api_key: string;
+	ollama_host: string;
 	koboldcpp_host: string;
 	local_model_directory: string;
 	selected_provider_chat: LLMProvider;

@@ -54,6 +54,7 @@
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "lucide-vue-next": "^0.365.0",
+    "ollama": "^0.5.17",
     "partial-json": "^0.1.7",
     "pinia": "^3.0.3",
     "reka-ui": "^2.4.1",

@@ -5,6 +5,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import ImageWithPreview from '../ImageWithPreview.vue';
 import {
 	Tooltip,

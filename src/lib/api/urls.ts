@@ -12,6 +12,17 @@ const other = {
 		}
 		return p;
 	},
+	ollamaUrl: (subPath?: string) => {
+		const store = useAppStore();
+		let p = store.settings.ollama_host || '';
+		if (!p) return '';
+		if (subPath) {
+			subPath = subPath.trim();
+			if (subPath[0] !== '/') subPath = '/' + subPath;
+			p += subPath;
+		}
+		return p;
+	},
 	/** Returns different endpoints depending on settings. */
 	llamacppServerUrl: async () => {
 		const store = useAppStore();

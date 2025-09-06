@@ -456,7 +456,7 @@ const canSend = computed(() => {
 
 const canReload = computed(() => {
 	if (!isFeatureAvailable('chat')) return false;
-	return messages.value.length >= 2 && !isLoading.value && !isRecording.value;
+	return uiMessages.value.length >= 2 && !isLoading.value && !isRecording.value;
 });
 
 // note/idea:
@@ -533,7 +533,7 @@ const handleGenerateImage = async (messageId: string) => {
 
 		let p = (await complete(imgPromptFromDescription(cmdObjDescription), {
 			body: { max_tokens: 125, temperature: 0.1 },
-		}, true)) as string;
+		})) as string;
 		console.log('img prompt', p);
 
 		if (!p) {
@@ -543,8 +543,6 @@ const handleGenerateImage = async (messageId: string) => {
 			return;
 		}
 
-		p = JSON.parse(p);
-		if (Array.isArray(p)) p = p[0];
 		const imgId = v4();
 		const filename = imgId;
 		const chosen_quality = store.settings.chat_image_quality;

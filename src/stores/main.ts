@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed, watch, onBeforeMount } from 'vue';
+import { ref, computed, watch, onBeforeMount, nextTick } from 'vue';
 import type {
 	ChatMessage,
 	MergedChatThread,
@@ -9,6 +9,7 @@ import type {
 import { api } from '@/lib/api';
 import urls from '@/lib/api/urls';
 import { AppSettings, type Settings } from '../lib/api/AppSettings';
+import { delay } from '../lib/utils';
 
 const lastFetchMap: Record<string, number> = {};
 function shouldGet(name: string, interval: number) {
@@ -37,6 +38,9 @@ interface KoboldVersionResult {
 	admin: 0;
 	guidance: boolean;
 }
+interface OllamaVersionResult {
+	version: string;
+}
 
 let firstRun = true;
 export const useAppStore = defineStore('app', () => {
@@ -47,38 +51,24 @@ export const useAppStore = defineStore('app', () => {
 		threadMessages.value.push(...messages);
 	};
 
-	const chatModels = ref([] as string[]);
-	const imageModels = ref([] as string[]);
 	const ttsModels = ref([] as string[]);
 	const whisperModels = ref([] as string[]);
 	const buddies = ref([] as BuddyVersionMerged[]);
 	const settings = ref({} as Settings);
 	const threads = ref([] as MergedChatThread[]);
 	const lastKoboldVersionResult = ref({} as KoboldVersionResult);
-	const lastKoboldModelResult = ref('');
+	const lastOllamaVersionResult = ref({} as OllamaVersionResult);
 
 	onBeforeMount(async () => {
-		const [cM, iM, tM, wM, p, s, t] = await Promise.all([
-			api.model.getAll('chat'),
-			api.model.getAll('image'),
-			api.model.getAll('tts'),
-			api.model.getAll('whisper'),
+		const [b, s, t] = await Promise.all([
 			api.buddy.getAll(),
 			api.setting.getAll(),
 			api.thread.getAll(),
 		]);
 
-		if (cM) {
-			chatModels.value.length = 0;
-			chatModels.value.push(...cM);
-		}
-		if (iM) {
-			imageModels.value.length = 0;
-			imageModels.value.push(...iM);
-		}
-		if (p) {
+		if (b) {
 			buddies.value.length = 0;
-			buddies.value.push(...p);
+			buddies.value.push(...b);
 		}
 		if (s) Object.assign(settings.value, s);
 		if (t) {
@@ -87,26 +77,6 @@ export const useAppStore = defineStore('app', () => {
 		}
 	});
 
-	const updateChatModels = async () => {
-		const res = await api.model.getAll('chat');
-		if (!res) {
-			console.log('no chat models found');
-			return [];
-		}
-		chatModels.value.length = 0;
-		chatModels.value.push(...res);
-		return res;
-	};
-	const updateImageModels = async () => {
-		const res = await api.model.getAll('image');
-		if (!res) {
-			console.log('no image models found');
-			return [];
-		}
-		imageModels.value.length = 0;
-		imageModels.value.push(...res);
-		return res;
-	};
 	const updateTTSModels = async () => {
 		const res = await api.model.getAll('tts');
 		if (!res) {
@@ -127,32 +97,22 @@ export const useAppStore = defineStore('app', () => {
 		whisperModels.value.push(...res);
 		return res;
 	};
-	const updateModels = async (
-		certain?: 'chat' | 'image' | 'tts' | 'whisper'
-	) => {
-		if (certain === 'chat') {
-			const res = await updateChatModels();
-			return { chatModels: res };
-		} else if (certain === 'image') {
-			const res = await updateImageModels();
-			return { imageModels: res };
-		} else if (certain === 'tts') {
+	const updateModels = async (certain?: 'tts' | 'whisper') => {
+		if (certain === 'tts') {
 			const res = await updateTTSModels();
 			return { ttsModels: res };
 		} else if (certain === 'whisper') {
 			const res = await updateWhisperModels();
 			return { whisperModels: res };
 		}
-		const [chat, image, tts, whisper] = await Promise.all([
-			updateChatModels(),
-			updateImageModels(),
+		const [tts, whisper] = await Promise.all([
 			updateTTSModels(),
 			updateWhisperModels(),
 		]);
 
 		return {
-			chatModels: chat,
-			imageModels: image,
+			chatModels: [],
+			imageModels: [],
 			ttsModels: tts,
 			whisperModels: whisper,
 		};
@@ -215,51 +175,41 @@ export const useAppStore = defineStore('app', () => {
 	);
 
 	const chatServerRunning = ref(false);
-	const chatServerStarting = ref(false);
 	const updateChatServerRunning = async () => {
 		try {
-			const res = await fetch(urls.other.koboldUrl('/api/extra/version'));
-			const data = await res.json();
-			if (data.llm) chatServerRunning.value = true;
-			else chatServerRunning.value = false;
-			lastKoboldVersionResult.value = { ...data };
+			const s = settings.value;
+			const usingOllama = s.selected_provider_chat === 'ollama';
+			if (usingOllama) {
+				const res = await fetch(urls.other.ollamaUrl('/api/version'));
+				const data = await res.json();
+				chatServerRunning.value = true;
+				lastOllamaVersionResult.value = { ...data };
+			}
+
+			const usingKobold =
+				s.selected_provider_chat === 'koboldcpp' ||
+				s.selected_provider_image === 'koboldcpp' ||
+				s.selected_provider_tts === 'koboldcpp' ||
+				s.selected_provider_stt === 'koboldcpp';
+			if (usingKobold) {
+				const res = await fetch(urls.other.koboldUrl('/api/extra/version'));
+				const data = await res.json();
+				if (data.llm) chatServerRunning.value = true;
+				else if (s.selected_provider_chat === 'koboldcpp')
+					chatServerRunning.value = false;
+				lastKoboldVersionResult.value = { ...data };
+			}
 		} catch (err: any) {
 			lastKoboldVersionResult.value = {} as any;
 			chatServerRunning.value = false;
 		}
 	};
-	const updateKoboldModel = async () => {
-		try {
-			const res = await fetch(urls.other.koboldUrl('/api/v1/model'));
-			const data = await res.json();
-			lastKoboldModelResult.value = data.result.replace('koboldcpp/', '');
-		} catch (err: any) {
-			lastKoboldModelResult.value = 'N/A';
-		}
-	};
-
-	watch(
-		() => chatServerRunning.value,
-		async () => {
-			if (chatServerStarting.value && chatServerRunning.value) {
-				chatServerStarting.value = false;
-			}
-			updateKoboldModel();
-		}
-	);
-	onBeforeMount(async () => {
-		updateChatServerRunning();
-		updateKoboldModel();
-	});
 
 	const intervalIdKey = 'refreshServerStatusIntervalId';
 	const doRefreshServerStatus = async () => {
 		try {
 			await AppSettings.waitForLoaded();
-			if (chatServerStarting.value) {
-				return;
-			}
-			await updateChatServerRunning();
+			updateChatServerRunning();
 		} catch (error) {
 			console.error('Error refreshing server status:', error);
 			if ((window as any)[intervalIdKey]) {
@@ -274,8 +224,11 @@ export const useAppStore = defineStore('app', () => {
 		(window as any)[intervalIdKey] = null;
 	}
 
-	doRefreshServerStatus();
-	(window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 5000);
+	nextTick(async () => {
+		await delay(250);
+		doRefreshServerStatus();
+	});
+	(window as any)[intervalIdKey] = setInterval(doRefreshServerStatus, 10_000);
 
 	const imgGenerating = ref(false);
 	const updateImgGenerating = (val: boolean) => {
@@ -298,8 +251,6 @@ export const useAppStore = defineStore('app', () => {
 		selectedBuddyId,
 		threadMessages,
 		setThreadMessages,
-		chatModels,
-		imageModels,
 		ttsModels,
 		whisperModels,
 		buddies,
@@ -307,7 +258,7 @@ export const useAppStore = defineStore('app', () => {
 		threads,
 		newHere,
 		lastKoboldVersionResult,
-		lastKoboldModelResult,
+		lastOllamaVersionResult,
 
 		updateModels,
 		updateBuddies,
@@ -319,9 +270,7 @@ export const useAppStore = defineStore('app', () => {
 		proceed,
 
 		chatServerRunning,
-		chatServerStarting,
 		updateChatServerRunning,
-		updateKoboldModel,
 
 		imgGenerating,
 		updateImgGenerating,

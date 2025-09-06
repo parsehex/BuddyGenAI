@@ -1,6 +1,7 @@
 import { useToast } from '@/src/components/ui/toast';
 import {
 	type ChatRequest as TChatRequest,
+	ollama,
 	webllm,
 	openaiCompat,
 	type ModelObject,
@@ -18,6 +19,7 @@ export const useChatAI = defineStore('ai/chat', () => {
 	const providerType = computed(() => {
 		if (provider.value === 'koboldcpp' || provider.value === 'openrouter')
 			return 'openai';
+		if (provider.value === 'ollama') return 'ollama';
 		if (provider.value === 'webllm') return 'webllm';
 		return '';
 	});
@@ -29,6 +31,7 @@ export const useChatAI = defineStore('ai/chat', () => {
 		const lastPing = store.lastKoboldVersionResult;
 		if (provider.value === 'koboldcpp' && (!lastPing || !lastPing.llm))
 			return false;
+		if (provider.value === 'ollama' && !store.settings.ollama_host) return false;
 		if (provider.value === 'openrouter' && !store.settings.openrouter_api_key)
 			return false;
 		if (provider.value === 'webllm' && !store.settings.selected_model_chat)
@@ -39,6 +42,8 @@ export const useChatAI = defineStore('ai/chat', () => {
 	async function updateModels() {
 		if (providerType.value === 'openai')
 			availModels.value = [...(await openaiCompat.getModels())];
+		else if (providerType.value === 'ollama')
+			availModels.value = [...(await ollama.getModels())];
 		else if (providerType.value === 'webllm')
 			availModels.value = [...(await webllm.getModels())];
 		else availModels.value = [];
@@ -51,6 +56,7 @@ export const useChatAI = defineStore('ai/chat', () => {
 		let response: string | undefined;
 		if (provider.value === 'koboldcpp' || provider.value === 'openrouter')
 			response = await openaiCompat.chat(req);
+		if (provider.value === 'ollama') response = await ollama.chat(req);
 		if (provider.value === 'webllm') response = await webllm.chat(req);
 
 		// replace weird characters with common ones, hopefully to help avoid weird LLM output
@@ -73,6 +79,7 @@ export const useChatAI = defineStore('ai/chat', () => {
 	function stop() {
 		if (provider.value === 'koboldcpp' || provider.value === 'openrouter')
 			return openaiCompat.stop();
+		if (provider.value === 'ollama') return ollama.stop();
 		if (provider.value === 'webllm') return webllm.stop();
 		return false;
 	}
@@ -85,6 +92,7 @@ export const useChatAI = defineStore('ai/chat', () => {
 
 		chat,
 		stop,
+		updateModels,
 		// TODO tokens(text)
 	};
 });

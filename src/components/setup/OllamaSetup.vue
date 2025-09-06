@@ -4,40 +4,27 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/main';
 import { AppSettings } from '@/lib/api/AppSettings';
-import { useChatAI } from '@/src/composables/ai/useChatAI';
 
 const emits = defineEmits(['connected', 'offline']);
 
 const store = useAppStore();
-const chatAI = useChatAI();
-const hostInput = ref(store.settings.koboldcpp_host || 'http://localhost:5001');
+const hostInput = ref(store.settings.ollama_host || 'http://localhost:11434');
 const isTestingConnection = ref(false);
 const connectionStatus = ref<'none' | 'testing' | 'success' | 'error'>('none');
 const errorMessage = ref('');
 const features = ref({
   llm: false,
-  txt2img: false,
-  tts: false,
-  transcribe: false,
 });
 const version = ref<string>('');
 
-interface KoboldVersion {
+interface OllamaVersion {
   version: string;
-  llm: boolean;
-  txt2img: boolean;
-  tts: boolean;
-  transcribe: boolean;
 }
 
-// Keep a reference to the current AbortController
 let currentController: AbortController | null = null;
 
 async function testConnection() {
-  // Cancel any ongoing request before starting a new one
-  if (currentController) {
-    currentController.abort();
-  }
+  if (currentController) currentController.abort();
   currentController = new AbortController();
 
   connectionStatus.value = 'testing';
@@ -45,7 +32,7 @@ async function testConnection() {
   errorMessage.value = '';
 
   try {
-    const response = await fetch(`${hostInput.value}/api/extra/version`, {
+    const response = await fetch(`${hostInput.value}/api/version`, {
       signal: currentController.signal,
     });
 
@@ -53,43 +40,25 @@ async function testConnection() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = (await response.json()) as KoboldVersion;
+    const data = (await response.json()) as OllamaVersion;
 
-    // If we reach here, cancel any other ongoing requests
     currentController.abort();
 
-    features.value = {
-      llm: data.llm,
-      txt2img: data.txt2img,
-      tts: data.tts,
-      transcribe: data.transcribe,
-    };
+    features.value = { llm: true };
     version.value = data.version;
 
-    // auto-enable disabled features which koboldcpp has available
-    if (data.llm && !store.settings.selected_provider_chat)
-      store.settings.selected_provider_chat = 'koboldcpp';
-    if (data.txt2img && !store.settings.selected_provider_image)
-      store.settings.selected_provider_image = 'koboldcpp';
-    if (data.tts && !store.settings.selected_provider_tts)
-      store.settings.selected_provider_tts = 'koboldcpp';
-    if (data.transcribe && ~store.settings.selected_provider_stt)
-      store.settings.selected_provider_stt = 'koboldcpp';
-
-    store.settings.koboldcpp_host = hostInput.value;
+    store.settings.selected_provider_chat = 'ollama';
+    store.settings.ollama_host = hostInput.value;
 
     emits('connected');
     connectionStatus.value = 'success';
   } catch (error) {
-    if ((error as any).name === 'AbortError') {
-      // Request was aborted — silently ignore
-      return;
-    }
+    if ((error as any).name === 'AbortError') return;
     connectionStatus.value = 'error';
     errorMessage.value =
       error instanceof Error
         ? error.message
-        : 'Failed to connect to KoboldCpp server';
+        : 'Failed to connect to Ollama server';
     emits('offline');
   } finally {
     isTestingConnection.value = false;
@@ -119,16 +88,13 @@ onUnmounted(() => {
     currentController.abort();
   }
 });
-
-const delimiterCls = `[&>li:not(:first-child)]:before:content-['·'] [&>li:not(:first-child)]:before:mx-2`;
-const itemCls = (active: boolean) => active ? `text-green-600 font-bold` : 'text-gray-400';
 </script>
 <template>
   <div class="space-y-4">
     <div class="space-y-2">
-      <label class="text-sm font-medium">KoboldCpp Host</label>
+      <label class="text-sm font-medium">Ollama Host</label>
       <div class="flex gap-2">
-        <Input v-model="hostInput" placeholder="http://localhost:5001" :class="{
+        <Input v-model="hostInput" placeholder="http://localhost:11434" :class="{
           'border-green-500': connectionStatus === 'success',
           'border-red-500': connectionStatus === 'error'
         }" />
@@ -139,17 +105,14 @@ const itemCls = (active: boolean) => active ? `text-green-600 font-bold` : 'text
     <!-- Status Messages -->
     <div v-if="connectionStatus !== 'none'" class="text-sm">
       <div v-if="connectionStatus === 'testing'" class="text-blue-500"> Testing connection... </div>
-      <div v-if="connectionStatus === 'success'">
-        <div class="font-medium inline-block text-green-400"> Connected successfully! <span
-            class="text-gray-600 ml-2">KoboldCpp v{{ version }}</span>
+      <div v-if="connectionStatus === 'success'" class="text-green-400">
+        <div class="font-medium inline-block"> Connected successfully! <span class="text-gray-600 ml-2">Ollama v{{
+          version }}</span>
         </div>
         <div>
-          <div class="font-medium inline-block text-green-400">Available features:</div>
-          <ul :class="`inline-flex ml-2 ${delimiterCls}`">
-            <li :class="itemCls(features.llm && chatAI.provider === 'koboldcpp')">Chat</li>
-            <li :class="itemCls(features.txt2img)">Images</li>
-            <li :class="itemCls(features.tts)">Speech</li>
-            <li :class="itemCls(features.transcribe)">Voice Input</li>
+          <div class="font-medium inline-block">Available features:</div>
+          <ul class="inline-flex ml-2 text-green-600 font-bold">
+            <li>Chat</li>
           </ul>
         </div>
       </div>
