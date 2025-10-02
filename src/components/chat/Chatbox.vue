@@ -56,7 +56,7 @@ const ttsAI = useTTSAI();
 const imgAI = useImgAI();
 const device = useMobile();
 const { buddies, threads } = storeToRefs(store);
-const { pathJoin, dbRun } = useElectron();
+const { dbRun } = useElectron();
 
 // https://github.com/parsehex/buddyGenAI/issues/2
 // there is a bug where if you unfocus the window while ai is responding,
@@ -162,8 +162,6 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			// - reload if we're reloading
 			// - save the messages
 			// - generate a title if we're at 3 messages (first message pair)
-
-			if (!pathJoin) throw new Error('pathJoin not available');
 
 			// TODO keep isloading on until we finish everything here
 

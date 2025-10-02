@@ -2,27 +2,8 @@ import { db } from '@/lib/db/schema';
 import type { RunOperation, SelectOperation } from '../lib/sql';
 
 export default function useElectron() {
-	const copyToClipboard = (text: string) => {
-		const input = document.createElement('input');
-		input.setAttribute('value', text);
-		document.body.appendChild(input);
-		input.select();
-		document.execCommand('copy');
-		document.body.removeChild(input);
-	};
-
-	const toggleDevTools = () => {
-		console.log('no-op: toggleDevTools');
-	};
-
-	const pickDirectory = async () => {
-		console.log('no-op: pickDirectory');
-	};
-
-	const verifyModelDirectory = async () => {
-		console.log('no-op: verifyModelDirectory');
-		return '';
-	};
+	let isElectron = false;
+	if (import.meta.env.VITE_IS_ELECTRON === 'true') isElectron = true;
 
 	async function dbGet(query: SelectOperation, params: any[]) {
 		const { type, table, conditions } = query;
@@ -77,117 +58,22 @@ export default function useElectron() {
 		}
 	}
 
-	const pathJoin = async (path: string, ...paths: string[]): Promise<string> => {
-		console.log('no-op: pathJoin', path, ...paths);
-		return '';
-	};
-	const pathResolve = async (
-		path: string,
-		...paths: string[]
-	): Promise<string> => {
-		console.log('no-op: pathResolve', path, ...paths);
-		return '';
-	};
-	const dirname = async (path: string): Promise<string> => {
-		console.log('no-op: dirname', path);
-		return '';
-	};
-	const basename = async (path: string): Promise<string> => {
-		console.log('no-op: basename', path);
-		return '';
-	};
-	const fsAccess = async (path: string): Promise<boolean> => {
-		console.log('no-op: fsAccess', path);
-		return false;
-	};
-	const fsUnlink = async (path: string): Promise<boolean> => {
-		console.log('no-op: fsUnlink', path);
-		return false;
-	};
-	const listDirectory = async (directory: string): Promise<string[]> => {
-		console.log('no-op: listDirectory', directory);
-		return [];
-	};
-	const mkdir = async (directory: string): Promise<boolean> => {
-		console.log('no-op: mkdir', directory);
-		return false;
-	};
-	const fileURLToPath = (url: string) => {
-		console.log('no-op: fileURLToPath', url);
-		return '';
-	};
-
-	const getDataPath = async (subPath?: string) => {
-		console.log('no-op: getDataPath', subPath);
-		return '';
-	};
-
 	const openExternalLink = async (url: string) => {
+		if (isElectron) return; // TODO
 		window.open(url, '_blank', 'noopener,noreferrer');
 	};
 
-	const openModelsDirectory = async () => {
-		console.log('no-op: openModelsDirectory');
-	};
-
-	const pickFile = async (fileType?: 'chat' | 'image' | 'tts' | 'stt') => {
-		console.log('no-op: pickFile', fileType);
-		return [];
-	};
-	const pickPackFile = async () => {
-		console.log('no-op: pickPackFile');
-		return [];
-	};
-	const importPack = async (source: string) => {
-		console.log('no-op: importPack', source);
-	};
-	const moveFile = async (source: string, destination: string) => {
-		console.log('no-op: moveFile', source, destination);
-	};
-	const linkFile = async (source: string, destination: string) => {
-		console.log('no-op: linkFile', source, destination);
-	};
-
 	const closeApp = async () => {
+		if (!isElectron) window.location.href = 'https://www.google.com/';
 		console.log('no-op: closeApp');
 	};
 
 	return {
-		copyToClipboard,
-		isElectron: false,
-		toggleDevTools,
-		pickDirectory,
-		pickFile,
-		pickPackFile,
-		importPack,
-		moveFile,
-		linkFile,
-		verifyModelDirectory,
-		pathJoin,
-		pathResolve,
-		dirname,
-		basename,
-		listDirectory,
-		mkdir,
+		isElectron,
 		dbRun,
 		dbGet,
 		dbAll,
-		fsAccess,
-		fsUnlink,
-		fileURLToPath,
-		getDataPath,
 		openExternalLink,
-		openModelsDirectory,
 		closeApp,
 	};
-}
-
-function parseOperation(query: string) {
-	try {
-		// This assumes the second parameter of the returned array from sql functions
-		// contains the operation object
-		return JSON.parse(query);
-	} catch {
-		return null;
-	}
 }

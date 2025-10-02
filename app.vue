@@ -42,7 +42,7 @@ const device = useMobile();
 
 useColorMode();
 
-const { toggleDevTools, closeApp } = useElectron();
+const { closeApp } = useElectron();
 
 // TODO
 // 1 - maybe remove the current dialog
@@ -70,31 +70,6 @@ onMounted(async () => {
 	if (store.settings.skip_start_dialog) enteredApp.value = 1;
 });
 
-(window as any).latestAppKeyDownHandlerId = Math.random();
-const handleAppKeyDown = ((id) => async (e: KeyboardEvent) => {
-	if (!toggleDevTools) return console.error('useElectron not available');
-	if (id !== (window as any).latestAppKeyDownHandlerId) return;
-
-	const key = e.key.toLowerCase();
-
-	const holdingCtrl = e.metaKey || e.ctrlKey;
-	const holdingShift = e.altKey || e.shiftKey;
-
-	if (key === 'r' && holdingCtrl && !holdingShift) {
-		e.preventDefault();
-		window.location.reload();
-	} else if (key === 'i' && holdingCtrl && holdingShift && !isDevMode()) {
-		e.preventDefault();
-		toggleDevTools();
-	}
-})((window as any).latestAppKeyDownHandlerId);
-
-window.addEventListener('keydown', handleAppKeyDown);
-
-const doCloseApp = () => {
-	if (closeApp) closeApp();
-};
-
 const updateSkipDialog = () => {
 	store.settings.skip_start_dialog = true;
 };
@@ -119,7 +94,7 @@ const container = ref<HTMLElement | null>(null);
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel @click="doCloseApp"> No / Exit </AlertDialogCancel>
+						<AlertDialogCancel @click="closeApp"> No / Exit </AlertDialogCancel>
 						<AlertDialogAction @click="
 							() => {
 								enteredApp = 1;

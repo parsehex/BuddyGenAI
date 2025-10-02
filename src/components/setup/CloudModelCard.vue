@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onBeforeMount, onMounted } from 'vue';
-import useElectron from '@/composables/useElectron';
 import { useAppStore } from '@/stores/main';
 import { Card, CardContent } from '@/components/ui/card';
 import {

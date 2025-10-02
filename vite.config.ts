@@ -7,8 +7,11 @@ import autoprefixer from 'autoprefixer';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const isDev = process.env.NODE_ENV === 'development';
+const isElectron = process.env.IS_ELECTRON === 'true';
 
 export default defineConfig({
+	// Electron is served via file:// so use relative base
+	base: isElectron ? './' : '/',
 	css: {
 		postcss: {
 			plugins: [tailwind(), autoprefixer()],

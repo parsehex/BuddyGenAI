@@ -3,7 +3,7 @@ import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import useElectron from '@/composables/useElectron';
 import { v4 } from 'uuid';
 
-const { dbGet, dbRun, fsAccess, pathJoin } = useElectron();
+const { dbGet, dbRun } = useElectron();
 
 /*
 TODO notes about profile pic versioning:

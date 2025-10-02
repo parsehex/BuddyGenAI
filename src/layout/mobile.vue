@@ -1,31 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
-import Toaster from '@/components/ui/toast/Toaster.vue';
+import { ref, watch } from 'vue';
 import { Sidebar } from '@/components/sidebar';
-import {
-	ResizableHandle,
-	ResizablePanel,
-	ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import useElectron from '@/composables/useElectron';
-import { useColorMode } from '@vueuse/core';
-import { delay, isDevMode } from '@/lib/utils';
-import { useAppStore } from '@/stores/main';
-import { Label } from '@/components/ui/label';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { AppSettings } from '@/lib/api/AppSettings';
 import { useRoute } from 'vue-router/auto';
 
 const route = useRoute();
