@@ -1,14 +1,12 @@
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbAll } = useElectron();
+const db = useDB();
 
 export default async function getAll(): Promise<BuddyVersionMerged[]> {
-	if (!dbGet || !dbAll) throw new Error('dbGet or dbAll is not defined');
-
 	const sqlBuddies = select('persona', ['*']);
-	const buddies = await dbAll(sqlBuddies[0], sqlBuddies[1]);
+	const buddies = await db.all(sqlBuddies[0], sqlBuddies[1]);
 
 	if (!buddies?.length) {
 		return [];
@@ -19,7 +17,7 @@ export default async function getAll(): Promise<BuddyVersionMerged[]> {
 			const sqlCurrentVersion = select('persona_version', ['*'], {
 				id: buddy.current_version_id,
 			});
-			const currentVersion = (await dbGet(
+			const currentVersion = (await db.get(
 				sqlCurrentVersion[0],
 				sqlCurrentVersion[1]
 			)) as BuddyVersionMerged;

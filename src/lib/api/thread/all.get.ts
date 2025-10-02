@@ -6,18 +6,16 @@ import type {
 	BuddyVersion,
 } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
-const { dbAll, dbGet } = useElectron();
+const db = useDB();
 
 export default async function getAll(
 	buddy_id?: string
 ): Promise<MergedChatThread[]> {
-	if (!dbAll) throw new Error('dbAll is not defined');
-
 	if (buddy_id) {
 		const sql = select('chat_thread', ['*'], { persona_id: buddy_id });
-		const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
+		const threads = (await db.all(sql[0], sql[1])) as ChatThread[];
 
 		const threadsMessages = await Promise.all(
 			threads.map((thread) => {
@@ -27,12 +25,12 @@ export default async function getAll(
 		);
 
 		const sqlBuddy = select('persona', ['*'], { id: buddy_id });
-		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 
 		const sqlBuddyVersion = select('persona_version', ['*'], {
 			id: buddy.current_version_id,
 		});
-		const buddyVersion = (await dbGet(
+		const buddyVersion = (await db.get(
 			sqlBuddyVersion[0],
 			sqlBuddyVersion[1]
 		)) as BuddyVersion;
@@ -61,7 +59,7 @@ export default async function getAll(
 		return mergedThreads;
 	} else {
 		const sql = select('chat_thread', ['*']);
-		const threads = (await dbAll(sql[0], sql[1])) as ChatThread[];
+		const threads = (await db.all(sql[0], sql[1])) as ChatThread[];
 
 		const threadsMessages = await Promise.all(
 			threads.map((thread) => {

@@ -1,6 +1,5 @@
 import * as prompt from '@/src/lib/prompt/buddy';
 import { AppSettings } from '@/lib/api/AppSettings';
-import useElectron from '@/composables/useElectron';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -8,16 +7,15 @@ import type {
 	BuddyVersion,
 } from '@/lib/api/types-db';
 import { select, update } from '@/lib/sql';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbRun } = useElectron();
+const db = useDB();
 
 export default async function updateSystemMessage(
 	threadId: string
 ): Promise<ChatMessage> {
-	if (!dbGet) throw new Error('dbGet is not defined');
-
 	const sqlThread = select('chat_thread', ['*'], { id: threadId });
-	const thread = (await dbGet(sqlThread[0], sqlThread[1])) as ChatThread;
+	const thread = (await db.get(sqlThread[0], sqlThread[1])) as ChatThread;
 	if (!thread) {
 		throw new Error('Thread not found');
 	}
@@ -29,7 +27,7 @@ export default async function updateSystemMessage(
 	}
 
 	const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
-	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+	const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 	if (!buddy) {
 		throw new Error('Buddy not found');
 	}
@@ -37,7 +35,7 @@ export default async function updateSystemMessage(
 	const sqlBuddyVersion = select('persona_version', ['*'], {
 		id: buddy.current_version_id,
 	});
-	const buddyVersion = (await dbGet(
+	const buddyVersion = (await db.get(
 		sqlBuddyVersion[0],
 		sqlBuddyVersion[1]
 	)) as BuddyVersion;
@@ -57,13 +55,13 @@ export default async function updateSystemMessage(
 		{ content },
 		{ thread_id: thread.id, thread_index: 0 }
 	);
-	await dbRun(sqlFirstMessage[0], sqlFirstMessage[1]);
+	await db.run(sqlFirstMessage[0], sqlFirstMessage[1]);
 
 	const sqlGetFirstMessage = select('chat_message', ['*'], {
 		thread_id: thread.id,
 		thread_index: 0,
 	});
-	const firstMessage = (await dbGet(
+	const firstMessage = (await db.get(
 		sqlGetFirstMessage[0],
 		sqlGetFirstMessage[1]
 	)) as ChatMessage;

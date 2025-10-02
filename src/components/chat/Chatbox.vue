@@ -17,15 +17,13 @@ import {
 	CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useToast } from '@/components/ui/toast';
-import BuddyCard from '@/components/BuddyCard.vue';
 import type { ChatThread, ChatMessage, BuddyVersionMerged } from '@/lib/api/types-db';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/stores/main';
 import router from '@/lib/router';
 import Message from './ChatMessage.vue';
 import { titleFromMessages } from '@/src/lib/prompt/chat';
-import { attemptToFixJson, clone, delay, popError } from '@/src/lib/utils';
-import useElectron from '@/src/composables/useElectron';
+import { delay, popError } from '@/src/lib/utils';
 import useChat from '@/src/composables/useChat';
 import { MODEL_NAME } from '@/lib/constants';
 import { complete } from '@/src/lib/ai/complete';
@@ -48,6 +46,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import useDB from '@/src/composables/useDB';
 
 const { toast } = useToast();
 const { updateBuddies, updateThreads } = useAppStore();
@@ -56,7 +55,7 @@ const ttsAI = useTTSAI();
 const imgAI = useImgAI();
 const device = useMobile();
 const { buddies, threads } = storeToRefs(store);
-const { dbRun } = useElectron();
+const db = useDB();
 
 // https://github.com/parsehex/buddyGenAI/issues/2
 // there is a bug where if you unfocus the window while ai is responding,
@@ -182,7 +181,7 @@ const { messages, input, handleSubmit, setMessages, reload, isLoading, stop } =
 			if (ttsDataToSave) {
 				const id = v4();
 				const sqlAudioAdd = insert('audio', { id, data: ttsDataToSave });
-				await dbRun(sqlAudioAdd[0], sqlAudioAdd[1]);
+				await db.run(sqlAudioAdd[0], sqlAudioAdd[1]);
 				// @ts-ignore
 				lastMessage.tts = id;
 				const newMessages = [...messages.value].map((m) => m);
@@ -564,7 +563,7 @@ const handleGenerateImage = async (messageId: string) => {
 		}
 
 		const sqlImgAdd = insert('images', { id: filename, data: imgData });
-		await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
+		await db.run(sqlImgAdd[0], sqlImgAdd[1]);
 
 		await api.message.updateOne(messageToUpdate.id, undefined, filename, undefined);
 		await refreshMessages(); // Refresh messages to update the UI with the new image

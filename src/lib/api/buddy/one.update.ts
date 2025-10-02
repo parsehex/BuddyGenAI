@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatThread, BuddyVersionMerged } from '@/lib/api/types-db';
 import { insert, select, update } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbAll, dbRun } = useElectron();
+const db = useDB();
 
 interface UpdateBuddyOptions {
 	id: string;
@@ -28,7 +28,6 @@ export default async function updateOne({
 	appearance_options,
 	selected_appearance_options,
 }: UpdateBuddyOptions): Promise<BuddyVersionMerged> {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
 	if (!id) {
 		throw new Error('Buddy ID is required');
 	}
@@ -36,7 +35,7 @@ export default async function updateOne({
 	let returningBuddy: BuddyVersionMerged = null as any;
 
 	const sqlBuddy = select('persona', ['*'], { id });
-	let buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as BuddyVersionMerged;
+	let buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as BuddyVersionMerged;
 	if (!buddy) {
 		throw new Error('Buddy not found');
 	}
@@ -44,7 +43,7 @@ export default async function updateOne({
 	const sqlCurrentVersion = select('persona_version', ['*'], {
 		id: buddy.current_version_id,
 	});
-	const currentVersion = (await dbGet(
+	const currentVersion = (await db.get(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
 	)) as BuddyVersionMerged;
@@ -70,7 +69,7 @@ export default async function updateOne({
 			name: versionName,
 			description: versionDescription,
 		});
-		await dbRun(sqlNewVersion[0], sqlNewVersion[1]);
+		await db.run(sqlNewVersion[0], sqlNewVersion[1]);
 		returningBuddy.version = newVersion;
 		returningBuddy.name = versionName;
 		returningBuddy.description = versionDescription;
@@ -80,15 +79,15 @@ export default async function updateOne({
 			{ current_version_id: newVersionId, updated: new Date().getTime() },
 			{ id }
 		);
-		await dbRun(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
+		await db.run(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
 		const sqlBuddyGet = select('persona', ['*'], { id });
-		buddy = (await dbGet(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
+		buddy = (await db.get(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
 
 		const sqlThreads = select('chat_thread', ['*'], {
 			persona_id: id,
 			persona_mode_use_current: true,
 		});
-		const threads = (await dbAll(sqlThreads[0], sqlThreads[1])) as ChatThread[];
+		const threads = (await db.all(sqlThreads[0], sqlThreads[1])) as ChatThread[];
 		if (threads.length) {
 			const sqlUpdateThreads = threads.map((thread) => {
 				return update(
@@ -97,7 +96,7 @@ export default async function updateOne({
 					{ id: thread.id }
 				);
 			});
-			await Promise.all(sqlUpdateThreads.map((sql) => dbRun(sql[0], sql[1])));
+			await Promise.all(sqlUpdateThreads.map((sql) => db.run(sql[0], sql[1])));
 		}
 	}
 
@@ -117,9 +116,9 @@ export default async function updateOne({
 		return returningBuddy;
 	}
 	const sqlUpdateBuddy = update('persona', dataToUpdate, { id });
-	await dbRun(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
+	await db.run(sqlUpdateBuddy[0], sqlUpdateBuddy[1]);
 	const sqlBuddyGet = select('persona', ['*'], { id });
-	buddy = (await dbGet(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
+	buddy = (await db.get(sqlBuddyGet[0], sqlBuddyGet[1])) as BuddyVersionMerged;
 	if (!returningBuddy) {
 		returningBuddy = { ...buddy };
 		returningBuddy.version = currentVersion.version;

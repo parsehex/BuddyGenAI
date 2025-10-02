@@ -1,9 +1,9 @@
 import { insert, select, update } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
-import useElectron from '@/composables/useElectron';
 import { v4 } from 'uuid';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbRun } = useElectron();
+const db = useDB();
 
 /*
 TODO notes about profile pic versioning:
@@ -23,10 +23,8 @@ export default async function addProfilePic(
 	imgDataB64: string,
 	isManual = false
 ): Promise<AddImageResponse> {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
 	const sqlBuddy = select('persona', ['*'], { id: buddyId });
-	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+	const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 
 	if (!buddy) {
 		throw new Error('Buddy not found');
@@ -35,7 +33,7 @@ export default async function addProfilePic(
 	const sqlCurrentVersion = select('persona_version', ['*'], {
 		id: buddy.current_version_id,
 	});
-	const currentVersion = (await dbGet(
+	const currentVersion = (await db.get(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
 	)) as BuddyVersion;
@@ -46,7 +44,7 @@ export default async function addProfilePic(
 	const filename = imgId;
 
 	const sqlImgAdd = insert('images', { id: filename, data: imgDataB64 });
-	await dbRun(sqlImgAdd[0], sqlImgAdd[1]);
+	await db.run(sqlImgAdd[0], sqlImgAdd[1]);
 
 	const currentPics = buddy.profile_pics || [];
 	currentPics.push(filename);
@@ -54,7 +52,7 @@ export default async function addProfilePic(
 	const data = { profile_pic: filename, profile_pics: currentPics } as any;
 	if (isManual) data.profile_pic_prompt = '';
 	const sqlUpdate = update('persona', data, { id: buddyId });
-	await dbRun(sqlUpdate[0], sqlUpdate[1]);
+	await db.run(sqlUpdate[0], sqlUpdate[1]);
 
 	console.log('added pic', filename);
 	return { output: filename };

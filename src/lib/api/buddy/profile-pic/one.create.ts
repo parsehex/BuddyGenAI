@@ -2,12 +2,12 @@ import { negPromptFromName, posPromptFromName } from '@/lib/prompt/sd';
 import { select } from '@/lib/sql';
 import type { Buddy, BuddyVersion } from '@/lib/api/types-db';
 import { ProfilePicQuality } from '@/lib/api/types-api';
-import useElectron from '@/composables/useElectron';
 import { popError } from '@/src/lib/utils';
 import { isFeatureAvailable } from '@/src/lib/ai/support';
 import { useImgAI } from '@/src/composables/ai/useImgAI';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbRun } = useElectron();
+const db = useDB();
 
 const colors = [
 	'light blue',
@@ -22,15 +22,13 @@ export default async function createProfilePic(
 	quality?: ProfilePicQuality,
 	gender = ''
 ) {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
 	if (!isFeatureAvailable('image')) {
 		popError('External image generation not yet supported, please use KoboldCpp');
 		throw new Error();
 	}
 
 	const sqlBuddy = select('persona', ['*'], { id: buddyId });
-	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+	const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 
 	if (!buddy) {
 		throw new Error('Buddy not found');
@@ -39,7 +37,7 @@ export default async function createProfilePic(
 	const sqlCurrentVersion = select('persona_version', ['*'], {
 		id: buddy.current_version_id,
 	});
-	const currentVersion = (await dbGet(
+	const currentVersion = (await db.get(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
 	)) as BuddyVersion;

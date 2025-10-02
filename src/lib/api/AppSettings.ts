@@ -1,9 +1,9 @@
 import { insert, select, update } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
 import type { DBVal, SQLiteVal } from './types-db';
 import { delay } from '../utils';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbAll, dbRun } = useElectron();
+const db = useDB();
 
 export type AppSettingsKeys = keyof Settings;
 
@@ -149,10 +149,8 @@ class AppSettingsCls {
 	}
 
 	private async loadSettings(): Promise<void> {
-		if (!dbGet) throw new Error('dbGet not available');
-
 		const sqlSettings = select('app_settings', ['*']);
-		const settings = (await dbAll(sqlSettings[0], sqlSettings[1])) as {
+		const settings = (await db.all(sqlSettings[0], sqlSettings[1])) as {
 			name: string;
 			value: string;
 		}[];
@@ -189,15 +187,13 @@ class AppSettingsCls {
 	// expect consumers to call this after setting all
 	// note that the Main store watches store.settings and saves on change
 	public async saveSettings(): Promise<void> {
-		if (!dbRun) throw new Error('dbRun not available');
-
 		const settings = Object.entries(this.settings).map(([name, value]) => ({
 			name,
 			value,
 		}));
 
 		const sqlExistingSettings = select('app_settings', ['*']);
-		const existingSettings = (await dbAll(
+		const existingSettings = (await db.all(
 			sqlExistingSettings[0],
 			sqlExistingSettings[1]
 		)) as {
@@ -208,7 +204,7 @@ class AppSettingsCls {
 		if (!existingSettings) {
 			for (const setting of settings) {
 				const sql = insert('app_settings', setting);
-				await dbRun(sql[0], sql[1]);
+				await db.run(sql[0], sql[1]);
 			}
 			return;
 		}
@@ -231,7 +227,7 @@ class AppSettingsCls {
 		if (newSettings.length) {
 			for (const setting of newSettings) {
 				const sql = insert('app_settings', setting);
-				await dbRun(sql[0], sql[1]);
+				await db.run(sql[0], sql[1]);
 			}
 		}
 		if (updatedSettings.length) {
@@ -241,7 +237,7 @@ class AppSettingsCls {
 					{ value: setting.value },
 					{ name: setting.name }
 				);
-				await dbRun(sql[0], sql[1]);
+				await db.run(sql[0], sql[1]);
 			}
 		}
 	}

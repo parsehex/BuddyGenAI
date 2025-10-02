@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AppSettings } from '@/lib/api/AppSettings';
 import type { ChatThread, Buddy, BuddyVersion } from '@/lib/api/types-db';
-import useElectron from '@/composables/useElectron';
 import * as prompt from '@/src/lib/prompt/buddy';
 import { insert, select } from '@/lib/sql';
 import { defaultAIChatPrompt } from '../../prompt/chat';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbRun } = useElectron();
+const db = useDB();
 
 interface CreateThreadOptions {
 	name: string;
@@ -19,14 +19,15 @@ export default async function createOne({
 	persona_id,
 	mode,
 }: CreateThreadOptions): Promise<ChatThread> {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
 	if (!name) {
 		throw new Error('Name is required');
 	}
 
 	const sqlThread = select('chat_thread', ['id'], { name });
-	const existingThread = (await dbGet(sqlThread[0], sqlThread[1])) as ChatThread;
+	const existingThread = (await db.get(
+		sqlThread[0],
+		sqlThread[1]
+	)) as ChatThread;
 	if (existingThread) {
 		const hasExt = name.match(/ - \d+$/);
 		if (hasExt) {
@@ -44,7 +45,7 @@ export default async function createOne({
 		const sqlBuddy = select('persona', ['current_version_id'], {
 			id: persona_id,
 		});
-		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 		if (!buddy) {
 			throw new Error('Buddy not found');
 		}
@@ -61,9 +62,9 @@ export default async function createOne({
 		mode,
 		persona_mode_use_current: true,
 	});
-	await dbRun(sqlInsert[0], sqlInsert[1]);
+	await db.run(sqlInsert[0], sqlInsert[1]);
 	const sqlThread2 = select('chat_thread', ['*'], { id });
-	const thread = (await dbGet(sqlThread2[0], sqlThread2[1])) as ChatThread;
+	const thread = (await db.get(sqlThread2[0], sqlThread2[1])) as ChatThread;
 	const userName = AppSettings.get('user_name') as string;
 
 	if (mode === 'custom') {
@@ -77,15 +78,15 @@ export default async function createOne({
 			thread_id: thread.id,
 			thread_index: 0,
 		});
-		await dbRun(sqlMessage[0], sqlMessage[1]);
+		await db.run(sqlMessage[0], sqlMessage[1]);
 	} else if (mode === 'persona') {
 		const sqlBuddy = select('persona', ['*'], { id: persona_id });
-		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 		if (buddy) {
 			const sqlBuddyVersion = select('persona_version', ['*'], {
 				id: buddy.current_version_id,
 			});
-			const buddyVersion = (await dbGet(
+			const buddyVersion = (await db.get(
 				sqlBuddyVersion[0],
 				sqlBuddyVersion[1]
 			)) as BuddyVersion;
@@ -106,7 +107,7 @@ export default async function createOne({
 				thread_id: thread.id,
 				thread_index: 0,
 			});
-			await dbRun(sqlMessage[0], sqlMessage[1]);
+			await db.run(sqlMessage[0], sqlMessage[1]);
 		}
 	}
 

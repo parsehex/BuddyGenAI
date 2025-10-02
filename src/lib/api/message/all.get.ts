@@ -1,4 +1,3 @@
-import useElectron from '@/composables/useElectron';
 import type {
 	ChatMessage,
 	ChatThread,
@@ -9,16 +8,15 @@ import { AppSettings } from '@/lib/api/AppSettings';
 import * as prompt from '@/src/lib/prompt/buddy';
 import { select } from '@/lib/sql';
 import { v4 } from 'uuid';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbAll } = useElectron();
+const db = useDB();
 
 // TODO add format=openai option to api?
 
 export default async function getAll(threadId: string): Promise<ChatMessage[]> {
-	if (!dbGet) throw new Error('dbGet is not defined');
-
 	const sqlThread = select('chat_thread', ['*'], { id: threadId });
-	const thread = (await dbGet(sqlThread[0], sqlThread[1])) as ChatThread;
+	const thread = (await db.get(sqlThread[0], sqlThread[1])) as ChatThread;
 	if (!thread) {
 		throw new Error('Thread not found');
 	}
@@ -27,7 +25,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		thread.mode === 'persona' && thread.persona_mode_use_current;
 
 	const sqlMessages = select('chat_message', ['*'], { thread_id: threadId });
-	const messages = (await dbAll(
+	const messages = (await db.all(
 		sqlMessages[0],
 		sqlMessages[1]
 	)) as ChatMessage[];
@@ -35,7 +33,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 
 	if (shouldReplaceSystem && thread.persona_id) {
 		const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
-		const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as Buddy;
+		const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as Buddy;
 		if (!buddy) {
 			throw new Error('Buddy not found');
 		}
@@ -43,7 +41,7 @@ export default async function getAll(threadId: string): Promise<ChatMessage[]> {
 		const sqlBuddyVersion = select('persona_version', ['*'], {
 			id: buddy.current_version_id,
 		});
-		const buddyVersion = (await dbGet(
+		const buddyVersion = (await db.get(
 			sqlBuddyVersion[0],
 			sqlBuddyVersion[1]
 		)) as BuddyVersion;

@@ -30,7 +30,7 @@ import { cleanTextForTTS } from '@/src/lib/ai/utils';
 import { useTTSAI } from '@/src/composables/ai/useTTSAI';
 import { insert } from '@/src/lib/sql';
 import { api } from '@/src/lib/api';
-import useElectron from '@/src/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
 const props = defineProps<{
 	isUser: boolean;
@@ -50,7 +50,7 @@ const emit = defineEmits<{
 	(e: 'generate'): void;
 }>();
 
-const { dbRun } = useElectron();
+const db = useDB();
 const store = useAppStore();
 const ttsAI = useTTSAI();
 
@@ -141,7 +141,7 @@ const doTTS = async () => {
 		const audioBlob = await response.blob();
 
 		const sqlAudioAdd = insert('audio', { id, data: audioBlob });
-		await dbRun(sqlAudioAdd[0], sqlAudioAdd[1]);
+		await db.run(sqlAudioAdd[0], sqlAudioAdd[1]);
 
 		playAudio(ttsData);
 

@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import useElectron from '@/composables/useElectron';
 import { insert, select } from '@/lib/sql';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbAll, dbRun } = useElectron();
+const db = useDB();
 
 interface Message {
 	role: 'user' | 'assistant';
@@ -15,16 +15,14 @@ export default async function createMessage(
 	image?: string,
 	tts?: string
 ) {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
 	const sqlThread = select('chat_thread', ['*'], { id: threadId });
-	const thread = await dbGet(sqlThread[0], sqlThread[1]);
+	const thread = await db.get(sqlThread[0], sqlThread[1]);
 	if (!thread) {
 		throw new Error('Thread not found');
 	}
 
 	const sqlMessages = select('chat_message', ['*'], { thread_id: threadId });
-	const messages = await dbAll(sqlMessages[0], sqlMessages[1]);
+	const messages = await db.all(sqlMessages[0], sqlMessages[1]);
 	messages.sort((a: any, b: any) => a.thread_index - b.thread_index);
 	const lastMessage = messages[messages.length - 1];
 
@@ -40,5 +38,5 @@ export default async function createMessage(
 		thread_id: threadId,
 		thread_index: threadIndex,
 	});
-	return await dbRun(sqlInsert[0], sqlInsert[1]);
+	return await db.run(sqlInsert[0], sqlInsert[1]);
 }

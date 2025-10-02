@@ -1,15 +1,13 @@
 import type { DeleteResponse } from '@/lib/api/types-api';
 import { del, select } from '@/lib/sql';
 import { api } from '@/lib/api';
-import useElectron from '@/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet, dbRun } = useElectron();
+const db = useDB();
 
 export default async function removeOne(id: string): Promise<DeleteResponse> {
-	if (!dbGet || !dbRun) throw new Error('dbGet or dbRun is not defined');
-
 	const sqlBuddy = select('persona', ['*'], { id });
-	const buddy = await dbGet(sqlBuddy[0], sqlBuddy[1]);
+	const buddy = await db.get(sqlBuddy[0], sqlBuddy[1]);
 	if (!buddy) {
 		throw new Error('Buddy not found');
 	}
@@ -18,6 +16,6 @@ export default async function removeOne(id: string): Promise<DeleteResponse> {
 	await api.buddy.version.removeAll(buddy.id);
 
 	const sql = del('persona', { id });
-	await dbRun(sql[0], sql[1]);
+	await db.run(sql[0], sql[1]);
 	return { success: true };
 }

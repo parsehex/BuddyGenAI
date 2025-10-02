@@ -1,14 +1,12 @@
 import type { BuddyVersionMerged } from '@/lib/api/types-db';
 import { select } from '@/lib/sql';
-import useElectron from '@/composables/useElectron';
+import useDB from '@/src/composables/useDB';
 
-const { dbGet } = useElectron();
+const db = useDB();
 
 export default async function getOne(id: string): Promise<BuddyVersionMerged> {
-	if (!dbGet) throw new Error('dbGet is not defined');
-
 	const sqlBuddy = select('persona', ['*'], { id });
-	const buddy = (await dbGet(sqlBuddy[0], sqlBuddy[1])) as BuddyVersionMerged;
+	const buddy = (await db.get(sqlBuddy[0], sqlBuddy[1])) as BuddyVersionMerged;
 	if (!buddy) {
 		throw new Error('Buddy not found');
 	}
@@ -16,7 +14,7 @@ export default async function getOne(id: string): Promise<BuddyVersionMerged> {
 	const sqlCurrentVersion = select('persona_version', ['*'], {
 		id: buddy.current_version_id,
 	});
-	const currentVersion = (await dbGet(
+	const currentVersion = (await db.get(
 		sqlCurrentVersion[0],
 		sqlCurrentVersion[1]
 	)) as BuddyVersionMerged;
