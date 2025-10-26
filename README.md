@@ -1,6 +1,11 @@
-# buddyGenAI (prototype)
+# buddyGenAI
 
-buddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally or from cloud providers (more AI provider support in progress).
+> [!NOTE]
+> **See any potential here? Let me know / Spread the word!**
+>
+> I've been restoring + refurbishing my projects but I need users and feedback. If you have any interest in using this project, please get in touch via the _**Issues**_ tab or one of the links under _**Sponsor this project**_ to the right. [My profile](https://github.com/parsehex) may have updated contact info.
+
+buddyGenAI is an app made to create and interact with virtual buddies, with options to use AI models running locally.
 
 In the app, you name your buddies as well as give them a description to influence how they chat with you. When you're connected to image AI,, you can generate profile pictures for your buddies which display in chat.
 
