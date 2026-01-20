@@ -20,7 +20,7 @@ export default async function getAll(
 		const threadsMessages = await Promise.all(
 			threads.map((thread) => {
 				const sql = select('chat_message', ['*'], { thread_id: thread.id });
-				return dbAll(sql[0], sql[1]) as Promise<ChatMessage[]>;
+				return db.all(sql[0], sql[1]) as Promise<ChatMessage[]>;
 			})
 		);
 
@@ -64,18 +64,18 @@ export default async function getAll(
 		const threadsMessages = await Promise.all(
 			threads.map((thread) => {
 				const sql = select('chat_message', ['*'], { thread_id: thread.id });
-				return dbAll(sql[0], sql[1]) as Promise<ChatMessage[]>;
+				return db.all(sql[0], sql[1]) as Promise<ChatMessage[]>;
 			})
 		);
 
 		const buddies = await Promise.all(
 			threads.map((thread) => {
 				const sqlBuddy = select('persona', ['*'], { id: thread.persona_id });
-				const buddy = dbGet(sqlBuddy[0], sqlBuddy[1]);
+				const buddy = db.get(sqlBuddy[0], sqlBuddy[1]);
 				const sqlBuddyVersion = select('persona_version', ['*'], {
 					id: thread.current_persona_version_id,
 				});
-				const buddyVersion = dbGet(sqlBuddyVersion[0], sqlBuddyVersion[1]);
+				const buddyVersion = db.get(sqlBuddyVersion[0], sqlBuddyVersion[1]);
 				return Promise.all([buddy, buddyVersion]) as Promise<[Buddy, BuddyVersion]>;
 			})
 		);
