@@ -178,10 +178,12 @@ watch(
 			</TabsContent>
 			<TabsContent value="game">
 				<div class="flex flex-col gap-2">
-					<h2 class="ml-2 text-xl font-semibold">Active Games</h2>
-					<ScrollArea class="h-[calc(100vh-375px)]">
-						<GameList />
-					</ScrollArea>
+					<div v-if="gameStore.games?.length">
+						<h2 class="ml-2 text-xl font-semibold">Active Games</h2>
+						<ScrollArea class="h-[calc(100vh-375px)]">
+							<GameList />
+						</ScrollArea>
+					</div>
 					<GameCreationForm />
 				</div>
 			</TabsContent>
