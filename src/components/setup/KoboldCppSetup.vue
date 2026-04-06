@@ -30,7 +30,6 @@ interface KoboldVersion {
   transcribe: boolean;
 }
 
-// Keep a reference to the current AbortController
 let currentController: AbortController | null = null;
 
 async function testConnection() {
@@ -126,6 +125,10 @@ const itemCls = (active: boolean) => active ? `text-green-600 font-bold` : 'text
 <template>
   <div class="space-y-4">
     <div class="space-y-2">
+      <!-- TODO: .kcppt template generator -->
+      <!-- user checks off different features and chooses model(s) or sets custom -->
+      <!-- user downloads the .kcppt and runs with KCPP which downloads the models -->
+      <!-- can remove a lot of the setup info -->
       <label class="text-sm font-medium">KoboldCpp Host</label>
       <div class="flex gap-2">
         <Input v-model="hostInput" placeholder="http://localhost:5001" :class="{

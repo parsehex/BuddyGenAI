@@ -90,6 +90,9 @@ onUnmounted(() => {
 });
 </script>
 <template>
+  <!-- TODO: instructions - must update OLLAMA_HOST -->
+  <!-- mac: launchctl setenv OLLAMA_ORIGINS "https://app.buddygenai.com" -->
+  <!-- then restart ollama -->
   <div class="space-y-4">
     <div class="space-y-2">
       <label class="text-sm font-medium">Ollama Host</label>

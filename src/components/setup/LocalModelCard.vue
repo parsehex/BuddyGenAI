@@ -31,10 +31,6 @@ onMounted(async () => {
 	updateModels();
 });
 
-// TODO would be nice to have a generator or some preset config files
-// 	for kcpp
-// Generator:
-// - User could
 </script>
 <template>
 	<Collapsible :open="isOpen">
@@ -43,6 +39,9 @@ onMounted(async () => {
 				<CardContent class="space-y-3">
 					<KoboldCppSetupInfo />
 					<KoboldCppSetup @connected="koboldConnected = true" @offline="koboldConnected = false" />
+					<!-- TODO: instructions/handling - Using a different PC? -->
+					<!-- how to forward other ip to localhost -->
+					<!-- best support in chrome, asks for permission to talk to LAN -->
 					<Button v-if="koboldConnected" type="button" @click="emits('completed')"> Next </Button>
 				</CardContent>
 			</Card>
